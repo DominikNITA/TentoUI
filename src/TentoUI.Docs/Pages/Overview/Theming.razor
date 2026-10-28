@@ -7,14 +7,50 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Theming &amp; Dark Mode</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Configure custom color palettes, dark mode toggling, and component size defaults using TentoConfigProvider.
+            Configure custom color palettes, dark mode toggling, and component size defaults using TentoConfigProvider and CSS variables.
         </p>
     </div>
 
+    @* Design.md Callout Card *@
+    <div class="p-6 rounded-xl border border-green-200 dark:border-green-900/60 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200">
+                    NEW FEATURE
+                </span>
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Transform Design.md files into Configs</h3>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
+                Have a design system specified in <code class="font-mono">Design.md</code> or YAML? TentoUI can automatically parse and convert it into C# themes, CSS variables, and <code class="font-mono">appsettings.json</code>.
+            </p>
+        </div>
+        <a href="overview/design-converter"
+           class="px-3.5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors">
+            <span>Open Design.md Converter</span>
+            <Icon Name="@IconNames.ArrowRight" Size="13" />
+        </a>
+    </div>
+
+    @* C# API: FromDesignMarkdown *@
     <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
-        <h3 class="text-base font-bold text-slate-900 dark:text-white">Single-File Theme Customization</h3>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Load Theme from Design.md in C#</h3>
         <p class="text-xs text-slate-500 leading-relaxed">
-            Wrap your main layout or page in <code>&lt;TentoConfigProvider&gt;</code> to customize primary colors, border radii, or dark mode:
+            You can load design tokens directly from markdown text at startup in <code class="font-mono">Program.cs</code>:
+        </p>
+        <div class="p-4 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
+            <pre><code>// Read Design.md from your project directory
+var markdown = File.ReadAllText("DESIGN.MD");
+var theme = TentoTheme.FromDesignMarkdown(markdown);
+
+builder.Services.AddTentoUI(theme);</code></pre>
+        </div>
+    </div>
+
+    @* Declarative TentoConfigProvider *@
+    <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Declarative Theme Provider</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">
+            Wrap your main layout or page in <code class="font-mono">&lt;TentoConfigProvider&gt;</code> to customize primary colors, border radii, or dark mode:
         </p>
         <div class="p-4 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
             <pre><code>&lt;TentoConfigProvider Theme="@@_theme"&gt;
@@ -28,7 +64,7 @@
     {
         PrimaryColor = "#1677ff",
         DarkMode = false,
-        BorderRadius = 8
+        BorderRadius = "0.5rem"
     };
 }</code></pre>
         </div>

@@ -1,0 +1,409 @@
+@page "/playground"
+@namespace TentoUI.Docs.Pages
+@inject IJSRuntime JSRuntime
+@inject IMessageService MessageService
+
+<PageTitle>Live Playground Studio - TentoUI</PageTitle>
+
+<div class="max-w-6xl space-y-8">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                    Live Component Sandbox
+                </span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Interactive Code Playground</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+                Experiment with components in real-time, adjust live properties, and copy the generated markup directly into your Blazor project.
+            </p>
+        </div>
+
+        <button type="button"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-primary-600 hover:bg-primary-700 text-white shadow-sm transition-colors"
+                @onclick="CopyCodeAsync">
+            <Icon Name="@IconNames.Copy" Size="14" />
+            <span>Copy Code to Clipboard</span>
+        </button>
+    </div>
+
+    @* Component Selector Strip *@
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800">
+        @foreach (var comp in _supportedComponents)
+        {
+            <button type="button"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors @(_selectedComponent == comp.Id ? "bg-primary-600 text-white shadow-sm" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800")"
+                    @onclick="@(() => SelectComponent(comp.Id))">
+                @comp.Name
+            </button>
+        }
+    </div>
+
+    @* Two-Panel Studio: Left = Preview & Knobs, Right = Live Razor Code *@
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        @* Panel 1: Live Interactive Preview & Knobs *@
+        <div class="space-y-6">
+            <div class="p-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm min-h-[220px] flex items-center justify-center">
+                @if (_selectedComponent == "button")
+                {
+                    <Button Type="_btnType"
+                            Size="_compSize"
+                            Danger="_btnDanger"
+                            Disabled="_btnDisabled"
+                            Loading="_btnLoading"
+                            Block="_btnBlock"
+                            Class="@_customClass"
+                            OnClick="@(() => MessageService.Success("Button clicked!"))">
+                        @_mainText
+                    </Button>
+                }
+                else if (_selectedComponent == "alert")
+                {
+                    <div class="w-full max-w-md">
+                        <Alert Type="_alertType"
+                               Message="@_mainText"
+                               Description="@_subText"
+                               ShowIcon="_alertShowIcon"
+                               Closable="_alertClosable"
+                               Class="@_customClass" />
+                    </div>
+                }
+                else if (_selectedComponent == "card")
+                {
+                    <div class="w-full max-w-sm">
+                        <Card Title="@_mainText"
+                              Bordered="_cardBordered"
+                              Hoverable="_cardHoverable"
+                              Class="@_customClass">
+                            <p class="text-xs text-slate-600 dark:text-slate-400">@_subText</p>
+                            <div class="mt-4 flex justify-end">
+                                <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Action</Button>
+                            </div>
+                        </Card>
+                    </div>
+                }
+                else if (_selectedComponent == "tag")
+                {
+                    <Tag Color="@_tagColor"
+                         Closable="_tagClosable"
+                         Class="@_customClass"
+                         OnClose="@(() => MessageService.Info("Tag dismissed!"))">
+                        @_mainText
+                    </Tag>
+                }
+                else if (_selectedComponent == "input")
+                {
+                    <div class="w-full max-w-xs space-y-2">
+                        <Input Placeholder="@_mainText"
+                               Size="_compSize"
+                               Disabled="_btnDisabled"
+                               AllowClear="true"
+                               Class="@_customClass" />
+                    </div>
+                }
+                else if (_selectedComponent == "switch")
+                {
+                    <div class="flex items-center gap-3">
+                        <Switch Checked="_switchChecked"
+                                CheckedChanged="@((v) => _switchChecked = v)"
+                                Size="_compSize"
+                                Disabled="_btnDisabled"
+                                Class="@_customClass" />
+                        <span class="text-xs text-slate-600 dark:text-slate-400">Status: @(_switchChecked ? "Active" : "Inactive")</span>
+                    </div>
+                }
+                else if (_selectedComponent == "badge")
+                {
+                    <Badge Count="@_badgeCount" OverflowCount="99" Class="@_customClass">
+                        <div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 text-xs">
+                            BOX
+                        </div>
+                    </Badge>
+                }
+            </div>
+
+            @* Live Parameters / Knobs *@
+            <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    Component Parameters
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Primary Text / Title</label>
+                        <input type="text"
+                               class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                               @bind="_mainText"
+                               @bind:event="oninput" />
+                    </div>
+
+                    @if (_selectedComponent == "alert" || _selectedComponent == "card")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description / Content</label>
+                            <input type="text"
+                                   class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                   @bind="_subText"
+                                   @bind:event="oninput" />
+                        </div>
+                    }
+
+                    @if (_selectedComponent == "button")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Button Type</label>
+                            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                    @bind="_btnType">
+                                <option value="@ButtonType.Primary">Primary</option>
+                                <option value="@ButtonType.Default">Default</option>
+                                <option value="@ButtonType.Dashed">Dashed</option>
+                                <option value="@ButtonType.Text">Text</option>
+                                <option value="@ButtonType.Link">Link</option>
+                            </select>
+                        </div>
+                    }
+
+                    @if (_selectedComponent == "alert")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Alert Type</label>
+                            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                    @bind="_alertType">
+                                <option value="@AlertType.Info">Info</option>
+                                <option value="@AlertType.Success">Success</option>
+                                <option value="@AlertType.Warning">Warning</option>
+                                <option value="@AlertType.Error">Error</option>
+                            </select>
+                        </div>
+                    }
+
+                    @if (_selectedComponent == "tag")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tag Color</label>
+                            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                    @bind="_tagColor">
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="gold">Gold</option>
+                                <option value="red">Red</option>
+                                <option value="purple">Purple</option>
+                            </select>
+                        </div>
+                    }
+
+                    @if (_selectedComponent == "badge")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Badge Count</label>
+                            <input type="number"
+                                   class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                   @bind="_badgeCount" />
+                        </div>
+                    }
+
+                    @if (_selectedComponent == "button" || _selectedComponent == "input" || _selectedComponent == "switch")
+                    {
+                        <div>
+                            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size</label>
+                            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200"
+                                    @bind="_compSize">
+                                <option value="@ComponentSize.Small">Small</option>
+                                <option value="@ComponentSize.Middle">Middle</option>
+                                <option value="@ComponentSize.Large">Large</option>
+                            </select>
+                        </div>
+                    }
+
+                    <div>
+                        <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Custom Tailwind Classes</label>
+                        <input type="text"
+                               class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs text-slate-800 dark:text-slate-200 font-mono"
+                               placeholder="e.g. shadow-lg uppercase"
+                               @bind="_customClass"
+                               @bind:event="oninput" />
+                    </div>
+                </div>
+
+                @* Boolean Toggles *@
+                <div class="flex items-center gap-4 flex-wrap pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+                    <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" @bind="_btnDisabled" class="rounded text-primary-600" />
+                        <span>Disabled</span>
+                    </label>
+
+                    @if (_selectedComponent == "button")
+                    {
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_btnDanger" class="rounded text-red-600" />
+                            <span>Danger</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_btnLoading" class="rounded text-primary-600" />
+                            <span>Loading</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_btnBlock" class="rounded text-primary-600" />
+                            <span>Block</span>
+                        </label>
+                    }
+
+                    @if (_selectedComponent == "alert")
+                    {
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_alertShowIcon" class="rounded text-primary-600" />
+                            <span>Show Icon</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_alertClosable" class="rounded text-primary-600" />
+                            <span>Closable</span>
+                        </label>
+                    }
+
+                    @if (_selectedComponent == "card")
+                    {
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_cardBordered" class="rounded text-primary-600" />
+                            <span>Bordered</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                            <input type="checkbox" @bind="_cardHoverable" class="rounded text-primary-600" />
+                            <span>Hoverable</span>
+                        </label>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @* Panel 2: Live Razor Code Output *@
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Live Razor Markup
+                </span>
+                <button type="button"
+                        class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick="CopyCodeAsync">
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy Snippet
+                </button>
+            </div>
+
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed shadow-sm min-h-[380px]">
+                <pre class="whitespace-pre-wrap selection:bg-primary-600"><code>@GetGeneratedMarkup()</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private record ComponentChoice(string Id, string Name);
+
+    private readonly ComponentChoice[] _supportedComponents =
+    [
+        new("button", "Button"),
+        new("alert", "Alert"),
+        new("card", "Card"),
+        new("tag", "Tag"),
+        new("input", "Input"),
+        new("switch", "Switch"),
+        new("badge", "Badge")
+    ];
+
+    private string _selectedComponent = "button";
+    private string _mainText = "Primary Action";
+    private string _subText = "Detailed description explaining this notification or panel.";
+    private string _customClass = "";
+    private ComponentSize _compSize = ComponentSize.Middle;
+
+    // Button states
+    private ButtonType _btnType = ButtonType.Primary;
+    private bool _btnDanger = false;
+    private bool _btnDisabled = false;
+    private bool _btnLoading = false;
+    private bool _btnBlock = false;
+
+    // Alert states
+    private AlertType _alertType = AlertType.Info;
+    private bool _alertShowIcon = true;
+    private bool _alertClosable = true;
+
+    // Card states
+    private bool _cardBordered = true;
+    private bool _cardHoverable = true;
+
+    // Tag states
+    private string _tagColor = "blue";
+    private bool _tagClosable = true;
+
+    // Switch states
+    private bool _switchChecked = true;
+
+    // Badge states
+    private int _badgeCount = 5;
+
+    private void SelectComponent(string id)
+    {
+        _selectedComponent = id;
+        switch (id)
+        {
+            case "button": _mainText = "Confirm Order"; break;
+            case "alert": _mainText = "Deployment Successful"; _subText = "All cluster pods are running smoothly."; break;
+            case "card": _mainText = "Cloud Instance"; _subText = "US-East production compute cluster."; break;
+            case "tag": _mainText = "Featured"; break;
+            case "input": _mainText = "Enter workspace name..."; break;
+            case "switch": _mainText = "Dark Mode"; break;
+            case "badge": _mainText = "Notifications"; break;
+        }
+    }
+
+    private string GetGeneratedMarkup()
+    {
+        var classAttr = string.IsNullOrWhiteSpace(_customClass) ? "" : $" Class=\"{_customClass}\"";
+        return _selectedComponent switch
+        {
+            "button" => $"<Button Type=\"ButtonType.{_btnType}\"\n        Size=\"ComponentSize.{_compSize}\"" +
+                        $"{(_btnDanger ? "\n        Danger=\"true\"" : "")}" +
+                        $"{(_btnDisabled ? "\n        Disabled=\"true\"" : "")}" +
+                        $"{(_btnLoading ? "\n        Loading=\"true\"" : "")}" +
+                        $"{(_btnBlock ? "\n        Block=\"true\"" : "")}" +
+                        $"{classAttr}\n        OnClick=\"@HandleClick\">\n    {_mainText}\n</Button>",
+
+            "alert" => $"<Alert Type=\"AlertType.{_alertType}\"\n       Message=\"{_mainText}\"\n       Description=\"{_subText}\"" +
+                       $"{(_alertShowIcon ? "\n       ShowIcon=\"true\"" : "")}" +
+                       $"{(_alertClosable ? "\n       Closable=\"true\"" : "")}" +
+                       $"{classAttr} />",
+
+            "card" => $"<Card Title=\"{_mainText}\"" +
+                      $"{(_cardBordered ? "\n      Bordered=\"true\"" : "")}" +
+                      $"{(_cardHoverable ? "\n      Hoverable=\"true\"" : "")}" +
+                      $"{classAttr}>\n    <p>{_subText}</p>\n</Card>",
+
+            "tag" => $"<Tag Color=\"{_tagColor}\"" +
+                     $"{(_tagClosable ? "\n     Closable=\"true\"" : "")}" +
+                     $"{classAttr}>\n    {_mainText}\n</Tag>",
+
+            "input" => $"<Input Placeholder=\"{_mainText}\"\n       Size=\"ComponentSize.{_compSize}\"" +
+                       $"{(_btnDisabled ? "\n       Disabled=\"true\"" : "")}\n       AllowClear=\"true\"{classAttr} />",
+
+            "switch" => $"<Switch @bind-Checked=\"@_isActive\"\n        Size=\"ComponentSize.{_compSize}\"" +
+                        $"{(_btnDisabled ? "\n        Disabled=\"true\"" : "")}{classAttr} />",
+
+            "badge" => $"<Badge Count=\"{_badgeCount}\" OverflowCount=\"99\"{classAttr}>\n    <div class=\"w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-xs\">\n        BOX\n    </div>\n</Badge>",
+
+            _ => "<Button>Action</Button>"
+        };
+    }
+
+    private async Task CopyCodeAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", GetGeneratedMarkup().Trim());
+            MessageService.Success("Razor markup copied to clipboard!");
+        }
+        catch
+        {
+            MessageService.Info("Copied!");
+        }
+    }
+}

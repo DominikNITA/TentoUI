@@ -1,0 +1,64 @@
+# TentoUI
+
+> AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS v4 for .NET 10.
+
+## Overview
+- Framework: .NET 10 Blazor (InteractiveServer, InteractiveWebAssembly, InteractiveAuto)
+- Styling: Tailwind CSS v4 CSS-first engine with `@theme` bridge and design tokens
+- Component Catalog: 65+ components (General, Layout, Navigation, Data Entry, Data Display, Feedback)
+
+## Quick Start
+```bash
+dotnet add package TentoUI
+npm install -D tailwindcss @tailwindcss/cli
+```
+
+In `Program.cs`:
+```csharp
+builder.Services.AddTentoUI();
+```
+
+In `_Imports.razor`:
+```razor
+@using TentoUI
+@using TentoUI.Configuration
+```
+
+In `Styles/app.tailwind.css`:
+```css
+@import "tailwindcss";
+@import "../tailwind/tentoui/tentoui.theme.css";
+@source "../tailwind/tentoui/tentoui.classes.txt";
+@source "../Components/**/*.razor";
+@source "../Pages/**/*.razor";
+```
+
+In `<head>`:
+```html
+<link rel="stylesheet" href="_content/TentoUI/tentoui.min.css" />
+<link rel="stylesheet" href="css/tailwind.min.css" />
+<script src="_content/TentoUI/tentoui.js"></script>
+```
+
+In `MainLayout.razor`:
+```razor
+<ModalHost />
+<NotificationHost />
+<MessageHost />
+```
+
+## AI Agent Skills
+Run in your project root:
+```bash
+dotnet msbuild -t:TentoUIInstallSkills
+```
+This unpacks `tentoui-components` and `tentoui-tailwind-setup` skills for AI agents.
+
+## Core Component Types & References
+- Buttons: Button, FloatButton, BackTop
+- Typography: Title, Text, Paragraph, Link
+- Layout: Grid (Row, Col), Layout (Header, Sider, Content, Footer), Space, Divider
+- Navigation: Menu, Dropdown, Tabs, Pagination, Steps, Breadcrumb, Anchor, Affix
+- Data Entry: Input, InputNumber, TextArea, Select, AutoComplete, Checkbox, Radio, Switch, DatePicker, TimePicker, ColorPicker, Slider, Rate, Upload, Transfer, Cascader, TreeSelect, Form
+- Data Display: Table, Card, List, Descriptions, Tree, Collapse, Carousel, Image, Calendar, Badge, Avatar, Tag, Statistic, QRCode, Segmented, Watermark, Empty, Popover, Tooltip
+- Feedback: Modal, Drawer, Alert, Message, Notification, Popconfirm, Progress, Result, Skeleton, Spin, Tour

@@ -13,34 +13,32 @@
     </div>
 
     @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Adjust the knobs below to customize the button dynamically in real-time.</p>
-            </div>
+    <PlaygroundCard Title="Interactive Playground"
+                    Description="Adjust the knobs below to customize the button dynamically in real-time."
+                    Code="@GeneratedButtonCode">
+        <ExtraHeader>
             <div class="text-xs text-slate-400">
                 Clicks registered: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_clickCount</strong>
             </div>
-        </div>
+        </ExtraHeader>
 
-        @* Live Preview Area *@
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[120px] @(_ghost ? "bg-slate-800" : "")">
-            <Button Type="_type"
-                    Size="_size"
-                    Shape="_shape"
-                    Danger="_danger"
-                    Ghost="_ghost"
-                    Loading="_loading"
-                    Disabled="_disabled"
-                    Block="_block"
-                    OnClick="@(() => _clickCount++)">
-                @_buttonText
-            </Button>
-        </div>
+        <ChildContent>
+            <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[120px] @(_ghost ? "bg-slate-800" : "")">
+                <Button Type="_type"
+                        Size="_size"
+                        Shape="_shape"
+                        Danger="_danger"
+                        Ghost="_ghost"
+                        Loading="_loading"
+                        Disabled="_disabled"
+                        Block="_block"
+                        OnClick="@(() => _clickCount++)">
+                    @_buttonText
+                </Button>
+            </div>
+        </ChildContent>
 
-        @* Knobs Control Grid *@
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+        <Controls>
             <div>
                 <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Type Variant</label>
                 <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
@@ -103,8 +101,8 @@
                     <span>Block (Full Width)</span>
                 </label>
             </div>
-        </div>
-    </div>
+        </Controls>
+    </PlaygroundCard>
 
     @* Use Case 1: Types *@
     <DemoCard Title="Button Types" Description="5 basic types: Primary, Default, Dashed, Link, and Text." Code="@_typesCode">
@@ -176,6 +174,13 @@
     private string _buttonText = "Interactive Button";
     private int _clickCount;
     private bool _asyncLoading;
+
+    private string GeneratedButtonCode => $"<Button Type=\"ButtonType.{_type}\"\n        Size=\"ComponentSize.{_size}\"\n        Shape=\"ButtonShape.{_shape}\"" +
+        $"{(_danger ? "\n        Danger=\"true\"" : "")}" +
+        $"{(_ghost ? "\n        Ghost=\"true\"" : "")}" +
+        $"{(_loading ? "\n        Loading=\"true\"" : "")}" +
+        $"{(_disabled ? "\n        Disabled=\"true\"" : "")}" +
+        $"{(_block ? "\n        Block=\"true\"" : "")}>\n    {_buttonText}\n</Button>";
 
     private async Task SimulateAsyncActionAsync()
     {

@@ -1,60 +1,205 @@
 @page "/overview/installation"
 @namespace TentoUI.Docs.Pages.Overview
+@inject IJSRuntime JSRuntime
+@inject IMessageService MessageService
 
-<PageTitle>Installation - TentoUI</PageTitle>
+<PageTitle>Installation &amp; Setup - TentoUI</PageTitle>
 
 <div class="max-w-4xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Installation</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Installation &amp; Setup</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Get started with TentoUI in your .NET 10 Blazor application in under 2 minutes.
+            Complete guide for integrating TentoUI with Tailwind CSS v4 in your .NET 10 Blazor application.
         </p>
     </div>
 
+    @* Alert callout about Tailwind v4 *@
+    <div class="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 text-xs flex gap-3">
+        <Icon Name="@IconNames.AlertTriangle" Size="18" Class="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div class="space-y-1">
+            <span class="font-bold">Important: Tailwind CSS v4 Required</span>
+            <p class="text-amber-800 dark:text-amber-300">
+                TentoUI ships pre-compiled Blazor components using Tailwind CSS utility classes. Because compiled .NET DLLs cannot be scanned by Tailwind, TentoUI automatically syncs its CSS theme bridge and class manifest into your project via MSBuild targets on build. Your project compiles Tailwind directly.
+            </p>
+        </div>
+    </div>
+
     <div class="space-y-6">
+        @* Step 1: NuGet *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">1</span>
-                <span>Install NuGet Package</span>
-            </h3>
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">1</span>
+                    <span>Install NuGet Package</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick='() => CopyTextAsync("dotnet add package TentoUI")'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
             <p class="text-xs text-slate-500">Run the following command in your Blazor project directory:</p>
-            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
                 <code>dotnet add package TentoUI</code>
             </div>
         </div>
 
+        @* Step 2: Program.cs *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">2</span>
-                <span>Register Services in Program.cs</span>
-            </h3>
-            <p class="text-xs text-slate-500">Add the service registration call:</p>
-            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">2</span>
+                    <span>Register Services in Program.cs</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick='() => CopyTextAsync("builder.Services.AddTentoUI();")'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">Registers Modal, Notification, and Message services:</p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
                 <code>builder.Services.AddTentoUI();</code>
             </div>
         </div>
 
+        @* Step 3: _Imports.razor *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">3</span>
-                <span>Add Usings in _Imports.razor</span>
-            </h3>
-            <p class="text-xs text-slate-500">Enable TentoUI components across your application:</p>
-            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">3</span>
+                    <span>Add Global Imports in _Imports.razor</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick="() => CopyTextAsync(_importsCode)">
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
                 <pre><code>@@using TentoUI
 @@using TentoUI.Configuration</code></pre>
             </div>
         </div>
 
+        @* Step 4: Tailwind CSS v4 Setup *@
+        <div class="p-6 rounded-xl border border-primary-200 dark:border-primary-900/60 bg-white dark:bg-slate-900 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center text-xs font-bold">4</span>
+                    <span>Configure Tailwind CSS v4</span>
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                    Required for styling
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                Install the Tailwind CSS v4 CLI in your project root:
+            </p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs space-y-1">
+                <div><code>npm init -y</code></div>
+                <div><code>npm install -D tailwindcss @@tailwindcss/cli</code></div>
+                <div><code>npm pkg set scripts.css:build="tailwindcss -i Styles/app.tailwind.css -o wwwroot/css/tailwind.min.css --minify"</code></div>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 pt-2">
+                Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">Styles/app.tailwind.css</code>:
+            </p>
+            <div class="relative">
+                <button type="button" class="absolute top-2 right-2 text-xs text-primary-400 hover:text-white font-semibold inline-flex items-center gap-1 z-10"
+                        @onclick='() => CopyTextAsync(_tailwindCssCode)'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy CSS
+                </button>
+                <div class="p-3.5 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed">
+                    <pre><code>@_tailwindCssCode</code></pre>
+                </div>
+            </div>
+            <p class="text-[11px] text-slate-400">
+                * Note: When you run <code class="font-mono">dotnet build</code>, TentoUI's MSBuild targets automatically copy <code class="font-mono">tentoui.theme.css</code> and <code class="font-mono">tentoui.classes.txt</code> into your <code class="font-mono">tailwind/tentoui/</code> directory.
+            </p>
+        </div>
+
+        @* Step 5: Static Assets *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
-            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">4</span>
-                <span>Include Static Assets in App.razor or index.html</span>
-            </h3>
-            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
-                <pre><code>&lt;link rel="stylesheet" href="_content/TentoUI/tentoui.min.css" /&gt;
-&lt;script src="_content/TentoUI/tentoui.js"&gt;&lt;/script&gt;</code></pre>
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">5</span>
+                    <span>Include Assets in App.razor or index.html</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick='() => CopyTextAsync(_headAssetsCode)'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">
+                Load the design token variables first, followed by your compiled Tailwind CSS, and TentoUI JavaScript helper:
+            </p>
+            <div class="p-3.5 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed">
+                <pre><code>@_headAssetsCode</code></pre>
+            </div>
+            <p class="text-[11px] text-amber-600 dark:text-amber-400">
+                Caution: If your project was generated from a template containing Bootstrap, remove the Bootstrap CSS link and folder to avoid CSS conflicts.
+            </p>
+        </div>
+
+        @* Step 6: Feedback Providers *@
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">6</span>
+                    <span>Add Feedback Hosts to MainLayout.razor</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                        @onclick='() => CopyTextAsync("<ModalHost />\n<NotificationHost />\n<MessageHost />")'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">
+                To enable modals, notifications, and toast messages anywhere via dependency injection, place these hosts at the bottom of your <code class="font-mono">MainLayout.razor</code>:
+            </p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
+                <pre><code>&lt;ModalHost /&gt;
+&lt;NotificationHost /&gt;
+&lt;MessageHost /&gt;</code></pre>
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    private const string _tailwindCssCode = """
+        @import "tailwindcss";
+        @import "../tailwind/tentoui/tentoui.theme.css";
+
+        /* Scan compiled TentoUI class manifest */
+        @source "../tailwind/tentoui/tentoui.classes.txt";
+
+        /* Scan your application Razor and C# files */
+        @source "../Components/**/*.razor";
+        @source "../Pages/**/*.razor";
+        @source "../**/*.cs";
+        """;
+
+    private const string _importsCode = "@using TentoUI\n@using TentoUI.Configuration";
+
+    private const string _headAssetsCode = """
+        <!-- TentoUI Design Tokens -->
+        <link rel="stylesheet" href="_content/TentoUI/tentoui.min.css" />
+
+        <!-- Compiled Tailwind CSS -->
+        <link rel="stylesheet" href="css/tailwind.min.css" />
+
+        <!-- TentoUI JavaScript Helpers (Modal & Clipboard) -->
+        <script src="_content/TentoUI/tentoui.js"></script>
+        """;
+
+    private async Task CopyTextAsync(string text)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text.Trim());
+            MessageService.Success("Copied to clipboard!");
+        }
+        catch
+        {
+            MessageService.Info("Copied!");
+        }
+    }
+}

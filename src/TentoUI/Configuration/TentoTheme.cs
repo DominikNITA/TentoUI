@@ -21,6 +21,8 @@ public class TentoTheme
     public bool DarkMode { get; set; } = false;
     public Dictionary<string, string> CustomTokens { get; set; } = new();
 
+    public static TentoTheme FromDesignMarkdown(string markdown) => DesignTokensParser.Parse(markdown).ToTentoTheme();
+
     public string ToStyleString() => ToCssStyle();
 
     public string ToCssStyle()

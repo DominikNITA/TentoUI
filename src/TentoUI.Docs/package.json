@@ -1,0 +1,14 @@
+{
+  "name": "tentoui-docs",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tailwind CSS v4 build for TentoUI.Docs",
+  "scripts": {
+    "css:build": "tailwindcss -i Styles/app.tailwind.css -o wwwroot/css/tailwind.min.css --minify",
+    "css:watch": "tailwindcss -i Styles/app.tailwind.css -o wwwroot/css/tailwind.min.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

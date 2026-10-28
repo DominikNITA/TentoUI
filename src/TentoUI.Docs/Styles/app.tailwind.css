@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "../../TentoUI/tailwind/tentoui.theme.css";
+
+@source "../**/*.razor";
+@source "../**/*.cs";
+@source "../**/*.html";
+@source "../../TentoUI/**/*.razor";
+@source "../../TentoUI/**/*.cs";
+@source "../../TentoUI/tailwind/tentoui.classes.txt";

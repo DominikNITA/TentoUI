@@ -2,7 +2,7 @@
  * TentoUI Core Interop Layer
  * Provides focus trapping, scroll locking, and accessible boundary management.
  */
-export const tentoModal = {
+const tentoModal = {
   activeModals: [],
 
   open(container) {
@@ -76,7 +76,7 @@ export const tentoModal = {
   }
 };
 
-export const tentoClipboard = {
+const tentoClipboard = {
   copy(text) {
     if (navigator && navigator.clipboard) {
       return navigator.clipboard.writeText(text);
@@ -84,3 +84,14 @@ export const tentoClipboard = {
     return Promise.resolve();
   }
 };
+
+// Expose to window for standard script tag usage
+if (typeof window !== 'undefined') {
+  window.tentoModal = tentoModal;
+  window.tentoClipboard = tentoClipboard;
+}
+
+// Export for module bundlers / CommonJS if supported
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { tentoModal, tentoClipboard };
+}

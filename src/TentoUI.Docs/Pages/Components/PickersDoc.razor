@@ -1,0 +1,37 @@
+@page "/components/pickers"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Pickers - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Time &amp; Color Picker</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Precise time selectors and hexadecimal/preset color pickers.
+        </p>
+    </div>
+
+    <DemoCard Title="TimePicker" Description="Select hour and minute from interactive scroll columns." Code="@_timeCode">
+        <div class="w-64">
+            <TimePicker @bind-Value="_selectedTime" Placeholder="Select event time" />
+            <p class="text-xs text-slate-400 mt-2">Value: @_selectedTime</p>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="ColorPicker" Description="Color picker with color wheel/swatches and hex input." Code="@_colorCode">
+        <div class="w-64">
+            <ColorPicker @bind-Value="_selectedColor" ShowText="true" />
+            <div class="mt-3 p-3 rounded text-xs text-white font-medium" style="background-color: @_selectedColor;">
+                Selected Preview: @_selectedColor
+            </div>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private TimeOnly? _selectedTime = new(14, 30);
+    private string _selectedColor = "#3b82f6";
+
+    private const string _timeCode = @"<TimePicker @bind-Value=""_selectedTime"" Placeholder=""Select event time"" />";
+    private const string _colorCode = @"<ColorPicker @bind-Value=""_selectedColor"" ShowText=""true"" />";
+}

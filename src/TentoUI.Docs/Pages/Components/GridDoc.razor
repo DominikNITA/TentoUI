@@ -1,0 +1,66 @@
+@page "/components/grid"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Grid &amp; Space - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Grid &amp; Space</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            24-column responsive grid layout based on Flexbox and uniform Spacing containers.
+        </p>
+    </div>
+
+    <DemoCard Title="24-Column Grid" Description="Standard AntDesign 24-column division using Row and Col with gutter spacing." Code="@_gridCode">
+        <Row Gutter="16" Class="w-full">
+            <Col Span="12">
+                <div class="p-3 text-center rounded bg-primary-100 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 font-semibold text-xs">
+                    col-12 (50%)
+                </div>
+            </Col>
+            <Col Span="12">
+                <div class="p-3 text-center rounded bg-primary-200 dark:bg-primary-900/60 text-primary-800 dark:text-primary-200 font-semibold text-xs">
+                    col-12 (50%)
+                </div>
+            </Col>
+        </Row>
+
+        <Row Gutter="16" Class="w-full mt-3">
+            <Col Span="8">
+                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+                    col-8 (33%)
+                </div>
+            </Col>
+            <Col Span="8">
+                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+                    col-8 (33%)
+                </div>
+            </Col>
+            <Col Span="8">
+                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
+                    col-8 (33%)
+                </div>
+            </Col>
+        </Row>
+    </DemoCard>
+
+    <DemoCard Title="Space Container" Description="Set uniform spacing between inline or vertical child components." Code="@_spaceCode">
+        <Space Size="16" Wrap="true">
+            <Button Type="ButtonType.Primary">Button 1</Button>
+            <Button Type="ButtonType.Default">Button 2</Button>
+            <Button Type="ButtonType.Dashed">Button 3</Button>
+        </Space>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _gridCode = @"<Row Gutter=""16"">
+    <Col Span=""12"">col-12</Col>
+    <Col Span=""12"">col-12</Col>
+</Row>";
+
+    private const string _spaceCode = @"<Space Size=""16"" Wrap=""true"">
+    <Button Type=""ButtonType.Primary"">Button 1</Button>
+    <Button Type=""ButtonType.Default"">Button 2</Button>
+</Space>";
+}

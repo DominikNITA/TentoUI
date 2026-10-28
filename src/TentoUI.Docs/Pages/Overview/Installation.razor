@@ -1,0 +1,60 @@
+@page "/overview/installation"
+@namespace TentoUI.Docs.Pages.Overview
+
+<PageTitle>Installation - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Installation</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Get started with TentoUI in your .NET 10 Blazor application in under 2 minutes.
+        </p>
+    </div>
+
+    <div class="space-y-6">
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">1</span>
+                <span>Install NuGet Package</span>
+            </h3>
+            <p class="text-xs text-slate-500">Run the following command in your Blazor project directory:</p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+                <code>dotnet add package TentoUI</code>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">2</span>
+                <span>Register Services in Program.cs</span>
+            </h3>
+            <p class="text-xs text-slate-500">Add the service registration call:</p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+                <code>builder.Services.AddTentoUI();</code>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">3</span>
+                <span>Add Usings in _Imports.razor</span>
+            </h3>
+            <p class="text-xs text-slate-500">Enable TentoUI components across your application:</p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+                <pre><code>@@using TentoUI
+@@using TentoUI.Configuration</code></pre>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs">4</span>
+                <span>Include Static Assets in App.razor or index.html</span>
+            </h3>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs">
+                <pre><code>&lt;link rel="stylesheet" href="_content/TentoUI/tentoui.min.css" /&gt;
+&lt;script src="_content/TentoUI/tentoui.js"&gt;&lt;/script&gt;</code></pre>
+            </div>
+        </div>
+    </div>
+</div>

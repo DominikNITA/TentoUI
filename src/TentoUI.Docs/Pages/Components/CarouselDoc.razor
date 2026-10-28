@@ -1,0 +1,43 @@
+@page "/components/carousel"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Carousel &amp; Image - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Carousel &amp; Image</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Sequential rotating slide presentations and media previews.
+        </p>
+    </div>
+
+    <DemoCard Title="Carousel Slides" Description="Interactive sliding container with dot navigation indicators." Code="@_carouselCode">
+        <div class="max-w-md h-48 rounded-lg overflow-hidden">
+            <Carousel AutoPlay="true" AutoPlaySpeed="4000">
+                <CarouselPanel>
+                    <div class="h-48 flex items-center justify-center bg-indigo-600 text-white font-bold text-lg">
+                        Slide 1: Clean Architecture
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-48 flex items-center justify-center bg-emerald-600 text-white font-bold text-lg">
+                        Slide 2: Tailwind Integration
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-48 flex items-center justify-center bg-amber-600 text-white font-bold text-lg">
+                        Slide 3: Enterprise Quality
+                    </div>
+                </CarouselPanel>
+            </Carousel>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _carouselCode = @"<Carousel AutoPlay=""true"">
+    <CarouselPanel>Slide 1</CarouselPanel>
+    <CarouselPanel>Slide 2</CarouselPanel>
+    <CarouselPanel>Slide 3</CarouselPanel>
+</Carousel>";
+}

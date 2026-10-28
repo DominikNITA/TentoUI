@@ -1,0 +1,116 @@
+@namespace TentoUI.Docs.Layout
+
+<div class="tento-docs-nav w-64 h-full flex flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 select-none">
+    @* Search Filter *@
+    <div class="p-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="relative">
+            <input type="text"
+                   value="@_searchTerm"
+                   placeholder="Search components..."
+                   class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                   @oninput="@(e => _searchTerm = e.Value?.ToString() ?? string.Empty)" />
+            <Icon Name="@IconNames.Search" Size="14" Class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        </div>
+    </div>
+
+    @* Navigation Links *@
+    <div class="flex-1 overflow-y-auto p-3 space-y-6 text-xs">
+        @foreach (var section in FilteredSections)
+        {
+            <div>
+                <span class="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    @section.Title
+                </span>
+                <ul class="mt-1 space-y-0.5">
+                    @foreach (var item in section.Items)
+                    {
+                        <li>
+                            <NavLink href="@item.Href"
+                                     Match="@(item.Href == "" ? NavLinkMatch.All : NavLinkMatch.Prefix)"
+                                     class="flex items-center justify-between px-2.5 py-1.5 rounded-md font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors [&.active]:bg-primary-50 dark:[&.active]:bg-primary-950/40 [&.active]:text-primary-600 dark:[&.active]:text-primary-400 [&.active]:font-semibold">
+                                <span>@item.Label</span>
+                                @if (!string.IsNullOrEmpty(item.Tag))
+                                {
+                                    <span class="px-1.5 py-0.5 text-[10px] rounded font-semibold bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300">
+                                        @item.Tag
+                                    </span>
+                                }
+                            </NavLink>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string _searchTerm = string.Empty;
+
+    public record NavItem(string Label, string Href, string? Tag = null);
+    public record NavSection(string Title, NavItem[] Items);
+
+    private readonly NavSection[] _sections =
+    [
+        new("Overview",
+        [
+            new("Introduction", ""),
+            new("Installation", "overview/installation"),
+            new("Theming & Dark Mode", "overview/theming")
+        ]),
+        new("General",
+        [
+            new("Button & FloatButton", "components/button"),
+            new("Typography", "components/typography"),
+            new("Icon & Divider", "components/icon")
+        ]),
+        new("Layout",
+        [
+            new("Grid & Space", "components/grid"),
+            new("Layout & Sidebar", "components/layout")
+        ]),
+        new("Navigation",
+        [
+            new("Menu & Tabs", "components/menu"),
+            new("Pagination & Steps", "components/pagination"),
+            new("Dropdown & Breadcrumb", "components/dropdown"),
+            new("Anchor & Affix", "components/anchor")
+        ]),
+        new("Data Entry",
+        [
+            new("Form & Validation", "components/form"),
+            new("AutoComplete & Select", "components/autocomplete"),
+            new("Time & Color Picker", "components/pickers"),
+            new("Input, Radio & Checkbox", "components/inputs"),
+            new("Transfer & Cascader", "components/transfer"),
+            new("Upload & Sliders", "components/upload")
+        ]),
+        new("Data Display",
+        [
+            new("Table (Custom Columns)", "components/table", "Popular"),
+            new("Tree & Segmented", "components/tree"),
+            new("Card & Descriptions", "components/card"),
+            new("Calendar & QRCode", "components/media"),
+            new("Timeline & Statistic", "components/data-display"),
+            new("Carousel & Image", "components/carousel")
+        ]),
+        new("Feedback",
+        [
+            new("Notification & Message", "components/notification"),
+            new("Modal & Drawer", "components/modal"),
+            new("Tour & Popconfirm", "components/tour"),
+            new("Progress & Skeleton", "components/feedback")
+        ])
+    ];
+
+    private IEnumerable<NavSection> FilteredSections
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_searchTerm)) return _sections;
+            return _sections
+                .Select(s => new NavSection(s.Title, s.Items.Where(i => i.Label.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray()))
+                .Where(s => s.Items.Length > 0);
+        }
+    }
+}

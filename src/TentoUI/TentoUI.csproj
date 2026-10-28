@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.11" />
   </ItemGroup>
 
   <!-- Tailwind integration assets: theme bridge + class manifest, synced into consumers by build/TentoUI.targets -->

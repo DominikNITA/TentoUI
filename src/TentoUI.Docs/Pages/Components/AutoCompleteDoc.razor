@@ -1,0 +1,38 @@
+@page "/components/autocomplete"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>AutoComplete &amp; Select - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">AutoComplete &amp; Select</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Dynamic input completion and single/multiple option dropdown pickers.
+        </p>
+    </div>
+
+    <DemoCard Title="AutoComplete" Description="Search suggestions rendered as the user types." Code="@_autoCode">
+        <div class="w-72">
+            <AutoComplete @bind-Value="_emailValue"
+                          Placeholder="Enter email address..."
+                          SimpleOptions="@_suggestions" />
+            <p class="text-xs text-slate-400 mt-1.5">Selected: @_emailValue</p>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private string? _emailValue;
+    private readonly string[] _suggestions =
+    [
+        "gmail.com",
+        "outlook.com",
+        "yahoo.com",
+        "icloud.com",
+        "company.org"
+    ];
+
+    private const string _autoCode = @"<AutoComplete @bind-Value=""_emailValue""
+              Placeholder=""Enter email address...""
+              SimpleOptions=""@_suggestions"" />";
+}

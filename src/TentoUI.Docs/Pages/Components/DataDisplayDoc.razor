@@ -1,0 +1,62 @@
+@page "/components/data-display"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Data Display - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Data Display</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Rich display components including Tree, Segmented, Timeline, QRCode, and Statistic.
+        </p>
+    </div>
+
+    <DemoCard Title="Tree View" Description="Hierarchical tree with folder/file icons and checkable nodes." Code="@_treeCode">
+        <div class="w-64 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Tree Data="@_treeData" Checkable="true" ShowSearch="true" />
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Statistic &amp; QRCode" Description="KPI metrics and SVG QR code generator with status." Code="@_statCode">
+        <div class="flex flex-wrap items-center gap-8">
+            <Statistic Title="Total Revenue" Value="248950.50" Precision="2">
+                <Prefix>$</Prefix>
+            </Statistic>
+            <QRCode Value="https://github.com/dominik/TentoUI" Size="120" />
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Timeline" Description="Chronological event flow with colored dots." Code="@_timelineCode">
+        <Timeline>
+            <TimelineItem Color="green" Label="2026-10-28">Released TentoUI v1.0.0</TimelineItem>
+            <TimelineItem Color="blue" Label="2026-10-20">Added 18 AntDesign components</TimelineItem>
+            <TimelineItem Color="gray" Label="2026-10-01">Initial repository setup</TimelineItem>
+        </Timeline>
+    </DemoCard>
+</div>
+
+@code {
+    private readonly TreeDataNode[] _treeData =
+    [
+        new("src", "src",
+        [
+            new("src/Components", "Components",
+            [
+                new("src/Components/Table.razor", "Table.razor", isLeaf: true),
+                new("src/Components/Button.razor", "Button.razor", isLeaf: true)
+            ]),
+            new("src/TentoUI.csproj", "TentoUI.csproj", isLeaf: true)
+        ]),
+        new("README.md", "README.md", isLeaf: true)
+    ];
+
+    private const string _treeCode = @"<Tree Data=""@_treeData"" Checkable=""true"" ShowSearch=""true"" />";
+    private const string _statCode = @"<Statistic Title=""Total Revenue"" Value=""248950.50"" Precision=""2"" Prefix=""$"" />
+<QRCode Value=""https://github.com/dominik/TentoUI"" Size=""120"" />";
+    private const string _timelineCode = @"<Timeline>
+    <TimelineItem Color=""green"" Label=""2026-10-28"">Released TentoUI v1.0.0</TimelineItem>
+    <TimelineItem Color=""blue"" Label=""2026-10-20"">Added 18 AntDesign components</TimelineItem>
+    <TimelineItem Color=""gray"" Label=""2026-10-01"">Initial repository setup</TimelineItem>
+</Timeline>";
+}

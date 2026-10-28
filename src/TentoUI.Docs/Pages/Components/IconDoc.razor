@@ -1,0 +1,70 @@
+@page "/components/icon"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Icon &amp; Divider - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Icon &amp; Divider</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            SVG icons bundled directly in TentoUI with zero external font dependencies, alongside section dividers.
+        </p>
+    </div>
+
+    <DemoCard Title="Standard Icons" Description="Common UI action and status icons via IconNames constants." Code="@_iconsCode">
+        <div class="flex flex-wrap items-center gap-6 text-slate-700 dark:text-slate-300">
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.Check" Size="24" Class="text-emerald-500" />
+                <span class="text-[11px] text-slate-400">Check</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.X" Size="24" Class="text-rose-500" />
+                <span class="text-[11px] text-slate-400">Close</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.Search" Size="24" Class="text-primary-500" />
+                <span class="text-[11px] text-slate-400">Search</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.Settings" Size="24" />
+                <span class="text-[11px] text-slate-400">Settings</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.Filter" Size="24" />
+                <span class="text-[11px] text-slate-400">Filter</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+                <Icon Name="@IconNames.Loader" Spin="true" Size="24" Class="text-primary-500" />
+                <span class="text-[11px] text-slate-400">Spinning</span>
+            </div>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Divider" Description="Horizontal and vertical dividers with optional inner title or content." Code="@_dividerCode">
+        <div class="space-y-4">
+            <p class="text-xs text-slate-500">A paragraph above the line.</p>
+            <Divider>Section Splitter</Divider>
+            <p class="text-xs text-slate-500">A paragraph below the line.</p>
+            <div class="flex items-center text-xs text-slate-600 dark:text-slate-400">
+                <span>Left item</span>
+                <Divider Type="DividerType.Vertical" />
+                <span>Middle item</span>
+                <Divider Type="DividerType.Vertical" />
+                <span>Right item</span>
+            </div>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _iconsCode = @"<Icon Name=""@IconNames.Check"" Size=""24"" Class=""text-emerald-500"" />
+<Icon Name=""@IconNames.Search"" Size=""24"" Class=""text-primary-500"" />
+<Icon Name=""@IconNames.Loading"" Spin=""true"" Size=""24"" />";
+
+    private const string _dividerCode = @"<Divider>Section Splitter</Divider>
+<div class=""flex items-center"">
+    <span>Item 1</span>
+    <Divider Type=""DividerType.Vertical"" />
+    <span>Item 2</span>
+</div>";
+}

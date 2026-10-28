@@ -1,0 +1,58 @@
+@page "/components/notification"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+@inject INotificationService NotificationService
+
+<PageTitle>Notification &amp; Message - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Notification &amp; Message</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Global toast messages and corner slide-in notifications powered by scoped services.
+        </p>
+    </div>
+
+    <DemoCard Title="Message Toasts" Description="Top-centered lightweight feedback messages." Code="@_messageCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Operation completed successfully!"))">
+                Success Toast
+            </Button>
+            <Button Type="ButtonType.Default" OnClick="@(() => MessageService.Info("New update available for your workspace."))">
+                Info Toast
+            </Button>
+            <Button Danger="true" OnClick="@(() => MessageService.Error("Failed to persist changes to the database."))">
+                Error Toast
+            </Button>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Corner Notifications" Description="Detailed slide-in banner notifications with title and body." Code="@_notifCode">
+        <Button Type="ButtonType.Primary" OnClick="@OpenNotification">
+            Open Complex Notification
+        </Button>
+    </DemoCard>
+</div>
+
+@code {
+    private void OpenNotification()
+    {
+        NotificationService.Success(
+            "Deployment Succeeded",
+            "TentoUI documentation was successfully compiled and published to GitHub Pages."
+        );
+    }
+
+    private const string _messageCode = @"@inject IMessageService MessageService
+
+MessageService.Success(""Operation completed successfully!"");
+MessageService.Info(""Update available."");
+MessageService.Error(""Failed to persist changes."");";
+
+    private const string _notifCode = @"@inject INotificationService NotificationService
+
+NotificationService.Success(
+    ""Deployment Succeeded"",
+    ""TentoUI documentation was published to GitHub Pages.""
+);";
+}

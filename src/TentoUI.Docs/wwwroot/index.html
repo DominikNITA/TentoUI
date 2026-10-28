@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TentoUI - Blazor Component Library</title>
+    <base href="/" />
+    
+    <!-- TentoUI Tailwind v4 compiled assets -->
+    <link rel="stylesheet" href="_content/TentoUI/tentoui.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link href="TentoUI.Docs.styles.css" rel="stylesheet" />
+
+    <!-- GitHub Pages Single Page App Redirect Script -->
+    <script type="text/javascript">
+        (function (l) {
+            if (l.search[1] === '/') {
+                var decoded = l.search.slice(1).split('&').map(function (s) {
+                    return s.replace(/~and~/g, '&');
+                }).join('?');
+                window.history.replaceState(null, null,
+                    l.pathname.slice(0, -1) + decoded + l.hash
+                );
+            }
+        }(window.location))
+    </script>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased selection:bg-primary-500 selection:text-white">
+    <div id="app">
+        <div class="fixed inset-0 flex flex-col items-center justify-center gap-3 bg-white dark:bg-slate-900 z-50">
+            <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+            <span class="text-sm font-semibold tracking-wide text-slate-600 dark:text-slate-300">Loading TentoUI Docs...</span>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui" class="hidden fixed bottom-4 right-4 z-50 bg-red-600 text-white px-4 py-2 rounded shadow-lg">
+        An unhandled error has occurred.
+        <a href="" class="underline ml-2">Reload</a>
+    </div>
+
+    <script src="_content/TentoUI/tentoui.js"></script>
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+
+</html>

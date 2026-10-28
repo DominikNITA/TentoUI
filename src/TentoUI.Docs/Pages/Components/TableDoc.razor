@@ -1,0 +1,157 @@
+@page "/components/table"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Table - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Table</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            A flexible, typed table component supporting manual column declarations, custom cell templates, per-column sorting, multi-mode filtering, and built-in pagination.
+        </p>
+    </div>
+
+    @* Demo 1: Full-featured customizable table *@
+    <DemoCard Title="Custom Columns, Sorting, Filtering &amp; Pagination"
+              Description="Define custom column layouts using TableColumn, custom cell markup with avatars, formatted values, dropdown and text filters, and pagination controls."
+              Code="@_customTableCode">
+        <div class="w-full">
+            <Table TItem="EmployeeRecord"
+                   DataSource="@_employees"
+                   @bind-PageIndex="_pageIndex"
+                   @bind-PageSize="_pageSize"
+                   ShowSizeChanger="true"
+                   ShowQuickJumper="true"
+                   Striped="true">
+                
+                @* Custom formatted column with avatar *@
+                <TableColumn TItem="EmployeeRecord"
+                             Title="Member"
+                             Property="@(e => e.Name)"
+                             Sortable="true"
+                             Filterable="true"
+                             FilterPlaceholder="Search name..."
+                             Context="emp">
+                    <div class="flex items-center gap-2.5">
+                        <Avatar Text="@emp.Name[..1]" Size="ComponentSize.Small" />
+                        <div>
+                            <span class="font-semibold text-slate-900 dark:text-white block">@emp.Name</span>
+                            <span class="text-[11px] text-slate-400">ID: #@emp.Id</span>
+                        </div>
+                    </div>
+                </TableColumn>
+
+                @* Select filter column *@
+                <TableColumn TItem="EmployeeRecord"
+                             Title="Department"
+                             Property="@(e => e.Department)"
+                             Sortable="true"
+                             Filterable="true"
+                             FilterMode="ColumnFilterMode.Select"
+                             FilterOptions="@_deptOptions" />
+
+                @* Numeric formatted column with custom filter predicate *@
+                <TableColumn TItem="EmployeeRecord"
+                             Title="Compensation"
+                             Property="@(e => e.Salary)"
+                             Format="C0"
+                             Align="Align.Right"
+                             Sortable="true"
+                             Filterable="true"
+                             FilterPlaceholder="Min salary..."
+                             FilterPredicate="@((emp, q) => decimal.TryParse(q, out var min) && emp.Salary >= min)" />
+
+                @* Custom status tag column *@
+                <TableColumn TItem="EmployeeRecord"
+                             Title="Status"
+                             Property="@(e => e.Active)"
+                             Sortable="true"
+                             Context="emp">
+                    <Tag Color="@(emp.Active ? "success" : "default")">
+                        @(emp.Active ? "Active" : "Archived")
+                    </Tag>
+                </TableColumn>
+            </Table>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private int _pageIndex = 1;
+    private int _pageSize = 5;
+
+    public record EmployeeRecord(int Id, string Name, string Department, decimal Salary, bool Active);
+
+    private readonly ColumnFilterOption[] _deptOptions =
+    [
+        new("Engineering", "Engineering"),
+        new("Product", "Product"),
+        new("Marketing", "Marketing"),
+        new("Sales", "Sales")
+    ];
+
+    private readonly System.Collections.Generic.List<EmployeeRecord> _employees =
+    [
+        new(101, "Alice Johnson", "Engineering", 135000m, true),
+        new(102, "Bob Smith", "Product", 115000m, true),
+        new(103, "Charlie Davis", "Engineering", 145000m, false),
+        new(104, "Diana Prince", "Marketing", 95000m, true),
+        new(105, "Evan Wright", "Engineering", 120000m, true),
+        new(106, "Fiona Green", "Sales", 88000m, true),
+        new(107, "George Clark", "Sales", 92000m, false)
+    ];
+
+    private const string _customTableCode = @"<Table TItem=""EmployeeRecord""
+       DataSource=""@_employees""
+       @bind-PageIndex=""_pageIndex""
+       @bind-PageSize=""_pageSize""
+       ShowSizeChanger=""true""
+       ShowQuickJumper=""true""
+       Striped=""true"">
+
+    <TableColumn TItem=""EmployeeRecord""
+                 Title=""Member""
+                 Property=""@(e => e.Name)""
+                 Sortable=""true""
+                 Filterable=""true""
+                 FilterPlaceholder=""Search name...""
+                 Context=""emp"">
+        <div class=""flex items-center gap-2.5"">
+            <Avatar Text=""@emp.Name[..1]"" Size=""ComponentSize.Small"" />
+            <div>
+                <span class=""font-semibold text-slate-900 dark:text-white block"">@emp.Name</span>
+                <span class=""text-[11px] text-slate-400"">ID: #@emp.Id</span>
+            </div>
+        </div>
+    </TableColumn>
+
+    <TableColumn TItem=""EmployeeRecord""
+                 Title=""Department""
+                 Property=""@(e => e.Department)""
+                 Sortable=""true""
+                 Filterable=""true""
+                 FilterMode=""ColumnFilterMode.Select""
+                 FilterOptions=""@_deptOptions"" />
+
+    <TableColumn TItem=""EmployeeRecord""
+                 Title=""Compensation""
+                 Property=""@(e => e.Salary)""
+                 Format=""C0""
+                 Align=""Align.Right""
+                 Sortable=""true""
+                 Filterable=""true""
+                 FilterPlaceholder=""Min salary...""
+                 FilterPredicate=""@((emp, q) => decimal.TryParse(q, out var min) && emp.Salary >= min)"" />
+
+    <TableColumn TItem=""EmployeeRecord""
+                 Title=""Status""
+                 Property=""@(e => e.Active)""
+                 Sortable=""true""
+                 Context=""emp"">
+        <Tag Color=""@(emp.Active ? TagColor.Success : TagColor.Default)"">
+            @(emp.Active ? ""Active"" : ""Archived"")
+        </Tag>
+    </TableColumn>
+</Table>";
+}

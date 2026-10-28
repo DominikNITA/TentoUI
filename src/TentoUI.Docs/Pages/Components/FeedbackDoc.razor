@@ -1,0 +1,51 @@
+@page "/components/notification"
+@namespace TentoUI.Docs.Pages.Components
+@inject INotificationService NotificationService
+@inject IMessageService MessageService
+
+<PageTitle>Notification &amp; Message - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Notification &amp; Message</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Toast messages and rich corner notifications for application feedback.
+        </p>
+    </div>
+
+    <DemoCard Title="Notification Service" Description="Rich notification cards in corner with titles, descriptions, and auto-dismiss." Code="@_notifCode">
+        <div class="flex flex-wrap items-center gap-2">
+            <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success("Deploy Completed", "Deployment #142 finished successfully."))">
+                Success
+            </Button>
+            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info("Notice", "New system update available."))">
+                Info
+            </Button>
+            <Button Type="ButtonType.Default" Danger="true" OnClick="@(() => NotificationService.Error("Action Failed", "Database connection timed out."))">
+                Error
+            </Button>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Message Toasts" Description="Lightweight feedback prompts centered at top of viewport." Code="@_msgCode">
+        <div class="flex flex-wrap items-center gap-2">
+            <Button OnClick="@(() => MessageService.Success("Profile updated successfully!"))">Success Toast</Button>
+            <Button OnClick="@(() => MessageService.Warning("Please verify your email address."))">Warning Toast</Button>
+            <Button OnClick="@(() => MessageService.Error("Failed to save changes."))">Error Toast</Button>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _notifCode = @"@inject INotificationService NotificationService
+
+NotificationService.Success(""Deploy Completed"", ""Deployment #142 finished successfully."");
+NotificationService.Info(""Notice"", ""New system update available."");
+NotificationService.Error(""Action Failed"", ""Database connection timed out."");";
+
+    private const string _msgCode = @"@inject IMessageService MessageService
+
+MessageService.Success(""Profile updated successfully!"");
+MessageService.Warning(""Please verify your email address."");
+MessageService.Error(""Failed to save changes."");";
+}

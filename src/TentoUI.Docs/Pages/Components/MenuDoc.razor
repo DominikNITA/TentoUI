@@ -1,0 +1,44 @@
+@page "/components/menu"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Menu &amp; Tabs - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Menu &amp; Tabs</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Horizontal or vertical navigation menus with nested submenus and tabbed content views.
+        </p>
+    </div>
+
+    <DemoCard Title="Tabs Navigation" Description="Switch between content panes using active tabs." Code="@_tabsCode">
+        <Tabs DefaultActiveKey="1">
+            <TabPane Key="1" Tab="General Settings">
+                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
+                    Configure general workspace properties and profile data.
+                </div>
+            </TabPane>
+            <TabPane Key="2" Tab="Security &amp; API">
+                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
+                    Manage 2FA authentication, API access tokens, and trusted IPs.
+                </div>
+            </TabPane>
+            <TabPane Key="3" Tab="Billing">
+                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
+                    View active subscription plans, payment methods, and invoices.
+                </div>
+            </TabPane>
+        </Tabs>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _tabsCode = @"<Tabs DefaultActiveKey=""1"">
+    <TabPane Key=""1"" Tab=""General Settings"">
+        Content 1
+    </TabPane>
+    <TabPane Key=""2"" Tab=""Security"">
+        Content 2
+    </TabPane>
+</Tabs>";
+}

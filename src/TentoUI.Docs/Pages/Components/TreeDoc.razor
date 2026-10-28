@@ -1,0 +1,59 @@
+@page "/components/tree"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Tree &amp; Segmented - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tree &amp; Segmented</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Hierarchical tree view structures and segmented toggle switchers.
+        </p>
+    </div>
+
+    <DemoCard Title="Segmented Switch" Description="Linear segmented control for switching views or modes." Code="@_segCode">
+        <div class="space-y-3">
+            <Segmented TValue="string"
+                       @bind-Value="_selectedView"
+                       Options="@_viewOptions" />
+            <p class="text-xs text-slate-500">Active View: <strong class="text-slate-900 dark:text-white">@_selectedView</strong></p>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Checkable Tree" Description="Expandable file/folder tree with checkboxes and search." Code="@_treeCode">
+        <div class="w-72 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Tree Data="@_treeData" Checkable="true" ShowSearch="true" />
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private string _selectedView = "kanban";
+
+    private readonly SegmentedOption<string>[] _viewOptions =
+    [
+        new("kanban", "Kanban Board"),
+        new("list", "List View"),
+        new("gantt", "Timeline Gantt")
+    ];
+
+    private readonly TreeDataNode[] _treeData =
+    [
+        new("src", "src",
+        [
+            new("src/Components", "Components",
+            [
+                new("src/Components/Table.razor", "Table.razor", isLeaf: true),
+                new("src/Components/Button.razor", "Button.razor", isLeaf: true)
+            ]),
+            new("src/TentoUI.csproj", "TentoUI.csproj", isLeaf: true)
+        ]),
+        new("README.md", "README.md", isLeaf: true)
+    ];
+
+    private const string _segCode = @"<Segmented TValue=""string""
+           @bind-Value=""_selectedView""
+           Options=""@_viewOptions"" />";
+
+    private const string _treeCode = @"<Tree Data=""@_treeData"" Checkable=""true"" ShowSearch=""true"" />";
+}

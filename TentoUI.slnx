@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/TentoUI.Docs/TentoUI.Docs.csproj" />
     <Project Path="src/TentoUI/TentoUI.csproj" />
   </Folder>
   <Folder Name="/tests/">

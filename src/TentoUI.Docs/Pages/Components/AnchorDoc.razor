@@ -1,0 +1,45 @@
+@page "/components/anchor"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Anchor &amp; Affix - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Anchor &amp; Affix</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            In-page navigation anchors with ink indicators and sticky viewport pinning.
+        </p>
+    </div>
+
+    <DemoCard Title="Anchor Links" Description="Vertical table of contents navigation with active ink line." Code="@_anchorCode">
+        <div class="w-64 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Anchor @bind-ActiveHref="_activeHref">
+                <AnchorLink Href="#overview" Title="Overview" />
+                <AnchorLink Href="#api-reference" Title="API Reference" />
+                <AnchorLink Href="#examples" Title="Live Examples" />
+            </Anchor>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Affix Pinning" Description="Pin any element or toolbar to the top of the viewport." Code="@_affixCode">
+        <Affix OffsetTop="10">
+            <Button Type="ButtonType.Primary">
+                Affixed Quick Action
+            </Button>
+        </Affix>
+    </DemoCard>
+</div>
+
+@code {
+    private string _activeHref = "#overview";
+
+    private const string _anchorCode = @"<Anchor @bind-ActiveHref=""_activeHref"">
+    <AnchorLink Href=""#overview"" Title=""Overview"" />
+    <AnchorLink Href=""#api-reference"" Title=""API Reference"" />
+    <AnchorLink Href=""#examples"" Title=""Live Examples"" />
+</Anchor>";
+
+    private const string _affixCode = @"<Affix OffsetTop=""10"">
+    <Button Type=""ButtonType.Primary"">Affixed Quick Action</Button>
+</Affix>";
+}

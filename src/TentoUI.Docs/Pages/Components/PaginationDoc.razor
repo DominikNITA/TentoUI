@@ -1,0 +1,58 @@
+@page "/components/pagination"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Pagination &amp; Steps - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Pagination &amp; Steps</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Navigation controls for multi-page datasets and multi-step linear workflows.
+        </p>
+    </div>
+
+    <DemoCard Title="Interactive Steps" Description="Guided multi-step sequence with active status and descriptions." Code="@_stepsCode">
+        <div class="space-y-4">
+            <Steps Current="@_currentStep">
+                <Step Title="Step 1" Description="Account Setup" />
+                <Step Title="Step 2" Description="Profile Verification" />
+                <Step Title="Step 3" Description="Ready to launch" />
+            </Steps>
+
+            <div class="flex items-center gap-2 pt-4">
+                <Button Disabled="@(_currentStep == 0)" OnClick="@(() => _currentStep = Math.Max(0, _currentStep - 1))">
+                    Previous
+                </Button>
+                <Button Type="ButtonType.Primary" Disabled="@(_currentStep == 2)" OnClick="@(() => _currentStep = Math.Min(2, _currentStep + 1))">
+                    Next
+                </Button>
+            </div>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Pagination" Description="Navigate large sets of records with page size changer and jump input." Code="@_paginationCode">
+        <Pagination Total="500"
+                    @bind-Current="_page"
+                    @bind-PageSize="_pageSize"
+                    ShowSizeChanger="true"
+                    ShowQuickJumper="true" />
+    </DemoCard>
+</div>
+
+@code {
+    private int _currentStep = 1;
+    private int _page = 1;
+    private int _pageSize = 10;
+
+    private const string _stepsCode = @"<Steps Current=""@_currentStep"">
+    <Step Title=""Step 1"" Description=""Account Setup"" />
+    <Step Title=""Step 2"" Description=""Profile Verification"" />
+    <Step Title=""Step 3"" Description=""Ready to launch"" />
+</Steps>";
+
+    private const string _paginationCode = @"<Pagination Total=""500""
+            @bind-Current=""_page""
+            @bind-PageSize=""_pageSize""
+            ShowSizeChanger=""true""
+            ShowQuickJumper=""true"" />";
+}

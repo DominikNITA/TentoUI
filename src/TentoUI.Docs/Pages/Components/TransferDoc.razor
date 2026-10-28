@@ -1,0 +1,38 @@
+@page "/components/transfer"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Transfer &amp; Cascader - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Transfer &amp; Cascader</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Double-column list shuttle transfer and multi-level cascader selection.
+        </p>
+    </div>
+
+    <DemoCard Title="Transfer Shuttle" Description="Move items between source and target lists with search filtering." Code="@_transferCode">
+        <Transfer DataSource="@_items"
+                  @bind-TargetKeys="_targetKeys"
+                  Titles="@(new[] { "Available Roles", "Assigned Roles" })"
+                  ShowSearch="true" />
+    </DemoCard>
+</div>
+
+@code {
+    private HashSet<string> _targetKeys = new() { "editor" };
+
+    private readonly TransferItem[] _items =
+    [
+        new("admin", "Administrator", "Full system access"),
+        new("editor", "Content Editor", "Can publish blog posts"),
+        new("moderator", "Community Moderator", "Can flag user content"),
+        new("billing", "Billing Officer", "Manages invoices"),
+        new("developer", "Developer", "Access to API tokens and webhooks")
+    ];
+
+    private const string _transferCode = @"<Transfer DataSource=""@_items""
+          @bind-TargetKeys=""_targetKeys""
+          Titles=""@(new[] { ""Available"", ""Assigned"" })""
+          ShowSearch=""true"" />";
+}

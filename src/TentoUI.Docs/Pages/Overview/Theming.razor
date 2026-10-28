@@ -1,0 +1,36 @@
+@page "/overview/theming"
+@namespace TentoUI.Docs.Pages.Overview
+
+<PageTitle>Theming &amp; Dark Mode - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Theming &amp; Dark Mode</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Configure custom color palettes, dark mode toggling, and component size defaults using TentoConfigProvider.
+        </p>
+    </div>
+
+    <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Single-File Theme Customization</h3>
+        <p class="text-xs text-slate-500 leading-relaxed">
+            Wrap your main layout or page in <code>&lt;TentoConfigProvider&gt;</code> to customize primary colors, border radii, or dark mode:
+        </p>
+        <div class="p-4 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
+            <pre><code>&lt;TentoConfigProvider Theme="@@_theme"&gt;
+    &lt;div class="min-h-screen bg-slate-50 dark:bg-slate-950"&gt;
+        @@Body
+    &lt;/div&gt;
+&lt;/TentoConfigProvider&gt;
+
+@@code {
+    private TentoTheme _theme = new()
+    {
+        PrimaryColor = "#1677ff",
+        DarkMode = false,
+        BorderRadius = 8
+    };
+}</code></pre>
+        </div>
+    </div>
+</div>

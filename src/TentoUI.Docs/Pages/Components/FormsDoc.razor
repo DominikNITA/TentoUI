@@ -1,0 +1,72 @@
+@page "/components/form"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Form - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Form</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Collect, validate, and submit data with full DataAnnotations validation support.
+        </p>
+    </div>
+
+    <DemoCard Title="Basic Form with Validation" Description="Standard vertical form layout with client-side validation." Code="@_formCode">
+        <div class="w-full max-w-md">
+            <Form Model="@_model" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
+                <FormItem Label="Username" Required="true" For="@(() => _model.Username)">
+                    <Input @bind-Value="_model.Username" Placeholder="johndoe" AllowClear="true" />
+                </FormItem>
+
+                <FormItem Label="Email Address" Required="true" For="@(() => _model.Email)">
+                    <Input @bind-Value="_model.Email" Placeholder="john@example.com" />
+                </FormItem>
+
+                <FormItem Label="Age" Required="true" For="@(() => _model.Age)">
+                    <InputNumber @bind-Value="_model.Age" Min="18" Max="99" />
+                </FormItem>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <Button HtmlType="ButtonHtmlType.Submit" Type="ButtonType.Primary">Submit</Button>
+                </div>
+            </Form>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private SampleModel _model = new();
+
+    private void HandleValidSubmit()
+    {
+        MessageService.Success($"Submitted user {_model.Username} ({_model.Email})!");
+    }
+
+    public class SampleModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 3)]
+        public string Username { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Range(18, 99)]
+        public int Age { get; set; } = 25;
+    }
+
+    private const string _formCode = @"<Form Model=""@_model"" OnValidSubmit=""HandleValidSubmit"" Layout=""FormLayout.Vertical"">
+    <FormItem Label=""Username"" Required=""true"" For=""@(() => _model.Username)"">
+        <Input @bind-Value=""_model.Username"" Placeholder=""johndoe"" AllowClear=""true"" />
+    </FormItem>
+    <FormItem Label=""Email Address"" Required=""true"" For=""@(() => _model.Email)"">
+        <Input @bind-Value=""_model.Email"" Placeholder=""john@example.com"" />
+    </FormItem>
+    <FormItem Label=""Age"" Required=""true"" For=""@(() => _model.Age)"">
+        <InputNumber @bind-Value=""_model.Age"" Min=""18"" Max=""99"" />
+    </FormItem>
+    <Button HtmlType=""ButtonHtmlType.Submit"" Type=""ButtonType.Primary"">Submit</Button>
+</Form>";
+}

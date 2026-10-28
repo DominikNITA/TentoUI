@@ -1,0 +1,51 @@
+@page "/components/card"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Card &amp; Descriptions - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Card &amp; Descriptions</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Structured content containers and multi-column metadata description lists.
+        </p>
+    </div>
+
+    <DemoCard Title="Card Container" Description="Bordered content card with title, action slot, and body." Code="@_cardCode">
+        <div class="max-w-md">
+            <Card Title="User Profile">
+                <Extra>
+                    <a href="#" class="text-xs text-primary-500 font-medium hover:underline">Edit</a>
+                </Extra>
+                <ChildContent>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        Senior Software Engineer specializing in Blazor WebAssembly and distributed microservices architecture.
+                    </p>
+                </ChildContent>
+            </Card>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Descriptions List" Description="Display groups of key-value attributes in a grid." Code="@_descCode">
+        <Descriptions Title="Subscription Info" Bordered="true" Column="2">
+            <DescriptionsItem Label="Plan">Enterprise Tier</DescriptionsItem>
+            <DescriptionsItem Label="Status">Active</DescriptionsItem>
+            <DescriptionsItem Label="Billing Cycle">Annual</DescriptionsItem>
+            <DescriptionsItem Label="Renewal Date">2027-10-28</DescriptionsItem>
+        </Descriptions>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _cardCode = @"<Card Title=""User Profile"">
+    <Extra><a href=""#"">Edit</a></Extra>
+    <ChildContent>
+        <p>Profile description...</p>
+    </ChildContent>
+</Card>";
+
+    private const string _descCode = @"<Descriptions Title=""Subscription Info"" Bordered=""true"" Column=""2"">
+    <DescriptionsItem Label=""Plan"">Enterprise Tier</DescriptionsItem>
+    <DescriptionsItem Label=""Status"">Active</DescriptionsItem>
+</Descriptions>";
+}

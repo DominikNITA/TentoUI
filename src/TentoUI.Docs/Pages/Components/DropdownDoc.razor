@@ -1,0 +1,56 @@
+@page "/components/dropdown"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Dropdown &amp; Breadcrumb - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Dropdown &amp; Breadcrumb</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Context menus triggered on click/hover and hierarchical page location breadcrumbs.
+        </p>
+    </div>
+
+    <DemoCard Title="Breadcrumb" Description="Indicate current page location within a navigational hierarchy." Code="@_breadcrumbCode">
+        <Breadcrumb>
+            <BreadcrumbItem Href="#">Home</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Components</BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Breadcrumb</BreadcrumbItem>
+        </Breadcrumb>
+    </DemoCard>
+
+    <DemoCard Title="Dropdown Trigger" Description="Click to reveal a floating action menu." Code="@_dropdownCode">
+        <Dropdown Text="More Actions">
+            <Overlay>
+                <div class="py-1 w-44 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+                    <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        Export as CSV
+                    </button>
+                    <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        Duplicate Record
+                    </button>
+                    <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
+                    <button type="button" class="w-full text-left px-3 py-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40">
+                        Delete Forever
+                    </button>
+                </div>
+            </Overlay>
+        </Dropdown>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _breadcrumbCode = @"<Breadcrumb>
+    <BreadcrumbItem Href=""#"">Home</BreadcrumbItem>
+    <BreadcrumbItem Href=""#"">Components</BreadcrumbItem>
+    <BreadcrumbItem IsLast=""true"">Breadcrumb</BreadcrumbItem>
+</Breadcrumb>";
+
+    private const string _dropdownCode = @"<Dropdown Text=""More Actions"">
+    <Overlay>
+        <div class=""py-1 w-44"">
+            <button class=""px-3 py-1.5"">Export</button>
+        </div>
+    </Overlay>
+</Dropdown>";
+}

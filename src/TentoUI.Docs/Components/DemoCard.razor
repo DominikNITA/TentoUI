@@ -1,0 +1,73 @@
+@namespace TentoUI.Docs.Components
+@inject IJSRuntime JSRuntime
+@inject IMessageService MessageService
+
+<div class="tento-demo-card rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden my-6">
+    <div class="p-6">
+        @if (!string.IsNullOrEmpty(Title))
+        {
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">@Title</h3>
+                @if (!string.IsNullOrEmpty(Description))
+                {
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@Description</p>
+                }
+            </div>
+        }
+
+        <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex flex-wrap items-center gap-4">
+            @ChildContent
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Code))
+    {
+        <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 py-2 flex items-center justify-between text-xs">
+            <span class="text-slate-400 font-mono text-[11px]">Razor</span>
+            <div class="flex items-center gap-2">
+                <button type="button"
+                        class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                        @onclick="CopyCodeAsync">
+                    <Icon Name="@IconNames.Copy" Size="13" />
+                    <span>Copy</span>
+                </button>
+                <button type="button"
+                        class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                        @onclick="@(() => _showCode = !_showCode)">
+                    <Icon Name="@IconNames.Edit2" Size="13" />
+                    <span>@(_showCode ? "Hide Code" : "Show Code")</span>
+                </button>
+            </div>
+        </div>
+
+        @if (_showCode)
+        {
+            <div class="p-4 bg-slate-950 text-slate-200 text-xs font-mono overflow-x-auto border-t border-slate-800 leading-relaxed selection:bg-primary-600">
+                <pre class="whitespace-pre"><code>@Code.Trim()</code></pre>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Code { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _showCode;
+
+    private async Task CopyCodeAsync()
+    {
+        if (string.IsNullOrEmpty(Code)) return;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Code.Trim());
+            MessageService.Success("Code copied to clipboard!");
+        }
+        catch
+        {
+            MessageService.Info("Code copied!");
+        }
+    }
+}

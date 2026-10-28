@@ -1,0 +1,102 @@
+@page "/"
+@namespace TentoUI.Docs.Pages
+@inject IMessageService MessageService
+
+<PageTitle>TentoUI - Modern Blazor Components styled with Tailwind CSS</PageTitle>
+
+<div class="max-w-4xl space-y-12">
+    @* Hero Header *@
+    <div class="space-y-4 pt-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800">
+            <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
+            <span>Production Ready for .NET 10 &amp; Tailwind CSS v4</span>
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+            AntDesign Ergonomics. <br />
+            <span class="bg-gradient-to-r from-primary-600 to-sky-500 bg-clip-text text-transparent">
+                Tailwind CSS Simplicity.
+            </span>
+        </h1>
+
+        <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+            Over 60+ fully accessible (WCAG 2.1 AA) UI components for Blazor. Built with native Tailwind CSS utilities, dark mode support, and clean declarative APIs.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+            <a href="components/table"
+               class="px-5 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm shadow-sm transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98]">
+                Explore Components &rarr;
+            </a>
+            <a href="overview/installation"
+               class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors">
+                Getting Started
+            </a>
+        </div>
+    </div>
+
+    @* Quick Install Card *@
+    <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-mono text-xs">
+        <div class="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+            <span class="text-primary-500 font-bold select-none">&gt;</span>
+            <span>dotnet add package TentoUI</span>
+        </div>
+        <button type="button"
+                class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-sans font-medium text-xs transition-colors"
+                @onclick="CopyInstallCommand">
+            Copy Command
+        </button>
+    </div>
+
+    @* Interactive Quick Playground *@
+    <div class="space-y-4">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Interactive Playground</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            Test a few TentoUI components right now:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Buttons &amp; Rating</h4>
+                <div class="flex flex-wrap items-center gap-2">
+                    <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Primary clicked!"))">Primary</Button>
+                    <Button Type="ButtonType.Default" OnClick="@(() => MessageService.Info("Default clicked"))">Default</Button>
+                    <Button Type="ButtonType.Dashed">Dashed</Button>
+                </div>
+                <div class="pt-2 flex items-center justify-between">
+                    <span class="text-xs text-slate-500">Rating:</span>
+                    <Rate @bind-Value="_rating" />
+                </div>
+            </div>
+
+            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Segmented Control</h4>
+                <Segmented TValue="string"
+                           @bind-Value="_activePill"
+                           Options="@_pillOptions"
+                           Block="true" />
+
+                <div class="pt-1 flex items-center justify-between text-xs text-slate-500">
+                    <span>Active state:</span>
+                    <Tag Color="TagColor.Success">@_activePill</Tag>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int _rating = 4;
+    private string _activePill = "Overview";
+    private readonly SegmentedOption<string>[] _pillOptions =
+    [
+        new("Overview", "Overview", IconNames.Home),
+        new("Analytics", "Analytics", IconNames.Search),
+        new("Settings", "Settings", IconNames.Settings)
+    ];
+
+    private void CopyInstallCommand()
+    {
+        MessageService.Success("Command copied: dotnet add package TentoUI");
+    }
+}

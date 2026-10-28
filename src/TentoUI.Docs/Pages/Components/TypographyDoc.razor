@@ -1,0 +1,55 @@
+@page "/components/typography"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Typography - TentoUI</PageTitle>
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Typography</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Standardized typographic scales, headings, copyable text, and formatted paragraphs.
+        </p>
+    </div>
+
+    <DemoCard Title="Title Headings" Description="Semantic H1 through H5 headings styled according to the active theme." Code="@_titlesCode">
+        <div class="space-y-2">
+            <Title Level="1">h1. Tento Heading Level 1</Title>
+            <Title Level="2">h2. Tento Heading Level 2</Title>
+            <Title Level="3">h3. Tento Heading Level 3</Title>
+            <Title Level="4">h4. Tento Heading Level 4</Title>
+            <Title Level="5">h5. Tento Heading Level 5</Title>
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Text Variants" Description="Support for secondary, success, warning, danger, copyable, and keyboard variants." Code="@_textCode">
+        <div class="flex flex-col gap-2">
+            <Text>Regular Body Text</Text>
+            <Text Type="TypographyType.Secondary">Secondary muted helper text</Text>
+            <Text Type="TypographyType.Success">Success confirmation message</Text>
+            <Text Type="TypographyType.Warning">Warning notice: please verify your credentials</Text>
+            <Text Type="TypographyType.Danger">Critical alert: action cannot be undone</Text>
+            <div class="flex items-center gap-3 pt-2">
+                <Text Strong="true">Bold Emphasis</Text>
+                <Text Code="true">dotnet add package TentoUI</Text>
+                <Text Mark="true">Highlighted</Text>
+            </div>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private const string _titlesCode = @"<Title Level=""1"">h1. Tento Heading Level 1</Title>
+<Title Level=""2"">h2. Tento Heading Level 2</Title>
+<Title Level=""3"">h3. Tento Heading Level 3</Title>
+<Title Level=""4"">h4. Tento Heading Level 4</Title>
+<Title Level=""5"">h5. Tento Heading Level 5</Title>";
+
+    private const string _textCode = @"<Text>Regular Body Text</Text>
+<Text Type=""secondary"">Secondary muted text</Text>
+<Text Type=""success"">Success confirmation</Text>
+<Text Type=""warning"">Warning notice</Text>
+<Text Type=""danger"">Critical alert</Text>
+<Text Strong=""true"">Bold Emphasis</Text>
+<Text Code=""true"">dotnet add package TentoUI</Text>
+<Text Keyboard=""true"">Ctrl + K</Text>";
+}

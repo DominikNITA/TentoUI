@@ -1,0 +1,45 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<a href="@(Disabled ? null : Href)"
+   target="@Target"
+   rel="@(Target == "_blank" || !string.IsNullOrEmpty(Target) ? "noopener noreferrer" : null)"
+   aria-disabled="@(Disabled ? "true" : null)"
+   class="@ComputedClass"
+   style="@Style"
+   @onclick="OnClick"
+   @attributes="AdditionalAttributes">
+    @ChildContent
+</a>
+
+@code {
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public TypographyType Type { get; set; } = TypographyType.Default;
+    [Parameter] public bool Underline { get; set; } = true;
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var typeClass = Type switch
+            {
+                TypographyType.Secondary => "text-slate-500 hover:text-slate-600",
+                TypographyType.Success => "text-emerald-500 hover:text-emerald-600",
+                TypographyType.Warning => "text-amber-500 hover:text-amber-600",
+                TypographyType.Danger => "text-red-500 hover:text-red-600",
+                _ => "text-primary-600 hover:text-primary-700 hover:underline"
+            };
+
+            return new CssBuilder("tento-typography-link cursor-pointer transition-colors")
+                .AddClass(typeClass)
+                .AddClass("underline", Underline && Type != TypographyType.Default)
+                .AddClass("opacity-50 cursor-not-allowed pointer-events-none", Disabled)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

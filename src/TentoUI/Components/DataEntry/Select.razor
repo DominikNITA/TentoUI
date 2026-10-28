@@ -1,0 +1,288 @@
+@namespace TentoUI
+@typeparam TValue
+@typeparam TItem
+@inherits TentoInputBase<TValue>
+
+<div class="tento-select relative w-full"
+     aria-haspopup="listbox"
+     aria-expanded="@(_isOpen ? "true" : "false")"
+     @onkeydown="@HandleKeyDown"
+     style="@Style">
+    
+    <!-- Trigger Button -->
+    <div id="@ElementId"
+         tabindex="@(IsDisabled ? -1 : 0)"
+         role="combobox"
+         aria-expanded="@(_isOpen ? "true" : "false")"
+         aria-haspopup="listbox"
+         aria-controls="@($"{ElementId}-listbox")"
+         aria-label="@Placeholder"
+         aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+         aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+         class="@ComputeTriggerClass()"
+         @onclick="@ToggleOpen">
+        
+        <div class="flex-1 flex flex-wrap items-center gap-1 overflow-hidden">
+            @if (Mode == SelectMode.Multiple && SelectedItems.Any())
+            {
+                @foreach (var item in SelectedItems)
+                {
+                    <span class="tento-tag bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-700">
+                        <span>@GetLabel(item)</span>
+                        @if (!IsDisabled)
+                        {
+                            <button type="button" class="hover:text-red-500 p-0.5 ml-1" @onclick:stopPropagation="true" @onclick="@(() => RemoveItem(item))">
+                                <Icon Name="IconNames.X" Size="10" />
+                            </button>
+                        }
+                    </span>
+                }
+            }
+            else if (Mode == SelectMode.Single && HasSelectedItem)
+            {
+                <span class="truncate text-slate-900 dark:text-slate-100">
+                    @GetLabel(SelectedItem)
+                </span>
+            }
+            else
+            {
+                <span class="text-slate-400 select-none truncate">@Placeholder</span>
+            }
+        </div>
+
+        <div class="flex items-center gap-1 ml-2">
+            @if (AllowClear && HasSelection && !IsDisabled)
+            {
+                <span aria-label="Clear selection"
+                      class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-0.5"
+                      @onclick:stopPropagation="true"
+                      @onclick="@ClearSelection">
+                    &times;
+                </span>
+            }
+            <Icon Name="IconNames.ChevronDown" Size="14" Class="@($"text-slate-400 transition-transform {_arrowTransformClass}")" />
+        </div>
+    </div>
+
+    <!-- Dropdown Listbox -->
+    @if (_isOpen)
+    {
+        <div class="fixed inset-0 z-40" @onclick="@Close"></div>
+        <div id="@($"{ElementId}-listbox")"
+             role="listbox"
+             aria-multiselectable="@(Mode == SelectMode.Multiple ? "true" : "false")"
+             class="absolute left-0 top-full mt-1 w-full z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto py-1">
+            
+            @if (ShowSearch)
+            {
+                <div class="p-2 border-b border-slate-100 dark:border-slate-800">
+                    <input type="text"
+                           class="tento-select-search-input w-full px-2 py-1 text-xs border rounded border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                           placeholder="Search..."
+                           @bind="_searchQuery"
+                           @bind:event="oninput"
+                           @onclick:stopPropagation="true" />
+                </div>
+            }
+
+            @if (!FilteredItems.Any())
+            {
+                <div class="px-3 py-4 text-center text-xs text-slate-400 select-none">
+                    No options found
+                </div>
+            }
+            else
+            {
+                @for (int i = 0; i < FilteredItems.Count; i++)
+                {
+                    var item = FilteredItems[i];
+                    var isSelected = IsItemSelected(item);
+                    var isHighlighted = i == _highlightIndex;
+                    var index = i;
+
+                    <div role="option"
+                         data-value="@GetValue(item)"
+                         aria-selected="@(isSelected ? "true" : "false")"
+                         class="@ComputeOptionClass(isSelected, isHighlighted)"
+                         @onclick="@(() => SelectItem(item))"
+                         @onmouseenter="@(() => _highlightIndex = index)">
+                        <span class="flex-1 truncate">
+                            @if (OptionTemplate != null)
+                            {
+                                @OptionTemplate(item)
+                            }
+                            else
+                            {
+                                @GetLabel(item)
+                            }
+                        </span>
+                        @if (isSelected)
+                        {
+                            <Icon Name="IconNames.Check" Size="14" Class="text-primary-500 ml-2 shrink-0" />
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public SelectMode Mode { get; set; } = SelectMode.Single;
+    [Parameter] public IEnumerable<TItem>? DataSource { get; set; }
+    [Parameter] public Func<TItem, TValue>? ValueProperty { get; set; }
+    [Parameter] public Func<TItem, string>? LabelProperty { get; set; }
+    [Parameter] public RenderFragment<TItem>? OptionTemplate { get; set; }
+    [Parameter] public string? Placeholder { get; set; } = "Select an option";
+    [Parameter] public bool AllowClear { get; set; }
+    [Parameter] public bool ShowSearch { get; set; }
+    [Parameter] public IEnumerable<TValue>? Values { get; set; }
+    [Parameter] public EventCallback<IEnumerable<TValue>> ValuesChanged { get; set; }
+
+    private bool _isOpen;
+    private string _searchQuery = string.Empty;
+    private int _highlightIndex = -1;
+
+    private string _arrowTransformClass => _isOpen ? "transform rotate-180" : "";
+    private bool HasSelection => Mode == SelectMode.Single ? HasSelectedItem : SelectedItems.Count > 0;
+
+    private bool HasSelectedItem => DataSource != null && DataSource.Any(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue));
+    private TItem SelectedItem => DataSource != null ? DataSource.FirstOrDefault(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue))! : default!;
+    private System.Collections.Generic.List<TItem> SelectedItems => DataSource?.Where(x => Values != null && Values.Contains(GetValue(x))).ToList() ?? new System.Collections.Generic.List<TItem>();
+
+    private System.Collections.Generic.List<TItem> FilteredItems
+    {
+        get
+        {
+            if (DataSource == null) return new System.Collections.Generic.List<TItem>();
+            if (string.IsNullOrWhiteSpace(_searchQuery)) return DataSource.ToList();
+            return DataSource.Where(x => GetLabel(x).Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private TValue GetValue(TItem item) => ValueProperty != null ? ValueProperty(item) : (TValue)(object)item!;
+    private string GetLabel(TItem item) => LabelProperty != null ? LabelProperty(item) : item?.ToString() ?? string.Empty;
+
+    private bool IsItemSelected(TItem item)
+    {
+        var val = GetValue(item);
+        if (Mode == SelectMode.Single)
+            return EqualityComparer<TValue>.Default.Equals(val, CurrentValue);
+        return Values != null && Values.Contains(val);
+    }
+
+    private void ToggleOpen()
+    {
+        if (IsDisabled) return;
+        _isOpen = !_isOpen;
+        if (_isOpen)
+        {
+            _searchQuery = string.Empty;
+            _highlightIndex = 0;
+        }
+    }
+
+    private void Close() => _isOpen = false;
+
+    private async Task SelectItem(TItem item)
+    {
+        var val = GetValue(item);
+        if (Mode == SelectMode.Single)
+        {
+            CurrentValue = val;
+            _isOpen = false;
+        }
+        else
+        {
+            var list = (Values?.ToList() ?? new System.Collections.Generic.List<TValue>());
+            if (list.Contains(val))
+                list.Remove(val);
+            else
+                list.Add(val);
+
+            Values = list;
+            if (ValuesChanged.HasDelegate)
+                await ValuesChanged.InvokeAsync(Values);
+        }
+    }
+
+    private async Task RemoveItem(TItem item)
+    {
+        var val = GetValue(item);
+        var list = (Values?.ToList() ?? new System.Collections.Generic.List<TValue>());
+        list.Remove(val);
+        Values = list;
+        if (ValuesChanged.HasDelegate)
+            await ValuesChanged.InvokeAsync(Values);
+    }
+
+    private async Task ClearSelection()
+    {
+        if (Mode == SelectMode.Single)
+        {
+            CurrentValue = default;
+        }
+        else
+        {
+            Values = Enumerable.Empty<TValue>();
+            if (ValuesChanged.HasDelegate)
+                await ValuesChanged.InvokeAsync(Values);
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (IsDisabled) return;
+
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                if (!_isOpen) _isOpen = true;
+                else _highlightIndex = Math.Min(_highlightIndex + 1, FilteredItems.Count - 1);
+                break;
+            case "ArrowUp":
+                if (!_isOpen) _isOpen = true;
+                else _highlightIndex = Math.Max(_highlightIndex - 1, 0);
+                break;
+            case "Enter":
+                if (_isOpen && _highlightIndex >= 0 && _highlightIndex < FilteredItems.Count)
+                {
+                    await SelectItem(FilteredItems[_highlightIndex]);
+                }
+                else if (!_isOpen)
+                {
+                    _isOpen = true;
+                }
+                break;
+            case "Escape":
+                _isOpen = false;
+                break;
+            case "Backspace":
+                if (Mode == SelectMode.Multiple && string.IsNullOrEmpty(_searchQuery) && SelectedItems.Any())
+                {
+                    await RemoveItem(SelectedItems.Last());
+                }
+                break;
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out TValue result, out string validationErrorMessage)
+    {
+        result = default!;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputeTriggerClass() => new CssBuilder("flex items-center justify-between w-full rounded-md border bg-white dark:bg-slate-900 cursor-pointer shadow-sm min-h-[38px] px-3 py-1.5 text-sm transition-all")
+        .AddClass(GetStatusBorderClass())
+        .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
+        .AddClass("ring-2 ring-primary-500/20 border-primary-500", _isOpen)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeOptionClass(bool isSelected, bool isHighlighted) => new CssBuilder("flex items-center justify-between px-3 py-2 text-sm cursor-pointer select-none transition-colors")
+        .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-medium", isSelected)
+        .AddClass("bg-slate-100 dark:bg-slate-800", isHighlighted && !isSelected)
+        .AddClass("text-slate-700 dark:text-slate-200", !isSelected)
+        .Build();
+}

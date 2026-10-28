@@ -1,0 +1,864 @@
+@namespace TentoUI
+@typeparam TItem
+@inherits TentoComponentBase
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @if (Columns != null)
+        {
+            @Columns
+        }
+        else
+        {
+            @ChildContent
+        }
+    </div>
+</CascadingValue>
+
+<div class="@ComputedContainerClass"
+     aria-busy="@(Loading ? "true" : "false")"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+    
+    @if (Loading)
+    {
+        <div class="tento-table-loading-mask absolute inset-0 bg-white/70 dark:bg-slate-900/70 z-20 flex items-center justify-center">
+            <span class="animate-spin inline-flex items-center justify-center">
+                <svg class="w-8 h-8 text-primary-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </span>
+        </div>
+    }
+
+    @if (HeaderToolbar != null)
+    {
+        <div class="tento-table-toolbar px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            @HeaderToolbar
+        </div>
+    }
+
+    @if (ShouldShowTopPagination)
+    {
+        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            @RenderPaginationBar()
+        </div>
+    }
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm text-left">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <tr>
+                    @if (ExpandedRowTemplate != null)
+                    {
+                        <th class="tento-table-expand-col w-10 px-3 py-3 text-center"></th>
+                    }
+
+                    @if (RowSelection != RowSelectionMode.None)
+                    {
+                        <th class="tento-table-selection-col w-12 px-4 py-3 text-center">
+                            @if (RowSelection == RowSelectionMode.Multiple)
+                            {
+                                <input type="checkbox"
+                                       aria-label="Select all rows"
+                                       checked="@IsAllSelected"
+                                       class="rounded border-slate-300 text-primary-500 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                                       @onchange="ToggleSelectAll" />
+                            }
+                        </th>
+                    }
+
+                    @foreach (var col in VisibleColumns)
+                    {
+                        var isSortActive = _sortColumn == col;
+                        var sortDir = isSortActive ? _sortDirection : SortDirection.None;
+                        var ariaSort = sortDir == SortDirection.Asc ? "ascending" : (sortDir == SortDirection.Desc ? "descending" : "none");
+                        var hasActiveFilter = !string.IsNullOrWhiteSpace(GetColumnFilterValue(col));
+
+                        <th scope="col"
+                            class="@ComputeHeaderClass(col)"
+                            style="@ComputeColumnStyle(col)"
+                            aria-sort="@(col.Sortable ? ariaSort : null)"
+                            @onclick="@(() => HandleSortAsync(col))">
+                            
+                            <div class="inline-flex items-center gap-1.5">
+                                @if (col.HeaderTemplate != null)
+                                {
+                                    @col.HeaderTemplate
+                                }
+                                else if (col.TitleTemplate != null)
+                                {
+                                    @col.TitleTemplate
+                                }
+                                else
+                                {
+                                    <span>@col.Title</span>
+                                }
+
+                                @if (col.Sortable)
+                                {
+                                    <span class="inline-flex flex-col text-slate-400"
+                                          data-sort-icon="@(sortDir == SortDirection.Asc ? "asc" : (sortDir == SortDirection.Desc ? "desc" : "none"))">
+                                        @if (sortDir == SortDirection.Asc)
+                                        {
+                                            <span>&#8593;</span>
+                                        }
+                                        else if (sortDir == SortDirection.Desc)
+                                        {
+                                            <span>&#8595;</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="opacity-40">&#8597;</span>
+                                        }
+                                    </span>
+                                }
+
+                                @if (col.Filterable && !ShowFilterRow)
+                                {
+                                    <button type="button"
+                                            class="tento-table-filter-trigger p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 @(hasActiveFilter ? "text-primary-600 dark:text-primary-400" : "text-slate-400")"
+                                            data-filter-active="@(hasActiveFilter ? "true" : "false")"
+                                            aria-label="@($"Toggle filter {col.Title}")"
+                                            @onclick:stopPropagation="true"
+                                            @onclick="@(() => ToggleFilterPopover(col))">
+                                        <Icon Name="@IconNames.Filter" Size="13" />
+                                    </button>
+                                }
+                            </div>
+
+                            @if (col.Filterable && !ShowFilterRow && _openFilterColumn == col)
+                            {
+                                <div class="tento-table-filter-popover mt-2 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-lg normal-case font-normal"
+                                     @onclick:stopPropagation="true">
+                                    @RenderColumnFilterControl(col)
+                                </div>
+                            }
+                        </th>
+                    }
+                </tr>
+
+                @if (ShowFilterRow && VisibleColumns.Any(c => c.Filterable))
+                {
+                    <tr class="tento-table-filter-row bg-slate-50/60 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-700 normal-case font-normal">
+                        @if (ExpandedRowTemplate != null)
+                        {
+                            <td class="px-3 py-2"></td>
+                        }
+
+                        @if (RowSelection != RowSelectionMode.None)
+                        {
+                            <td class="px-4 py-2 text-center">
+                                @if (HasAnyActiveFilter)
+                                {
+                                    <button type="button"
+                                            class="tento-table-clear-all-filters text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                                            aria-label="Clear all filters"
+                                            title="Clear all filters"
+                                            @onclick="ClearAllFiltersAsync">
+                                        Clear
+                                    </button>
+                                }
+                            </td>
+                        }
+
+                        @foreach (var col in VisibleColumns)
+                        {
+                            <td class="tento-table-filter-cell @(Compact ? "px-3 py-1.5" : "px-6 py-2") @(Bordered ? "border-x border-slate-200 dark:border-slate-700 first:border-l-0 last:border-r-0" : "")">
+                                @if (col.Filterable)
+                                {
+                                    @RenderColumnFilterControl(col)
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </thead>
+
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+                @if (!CurrentPageItems.Any())
+                {
+                    <tr>
+                        <td colspan="@TotalRenderedColumns" class="px-6 py-8 text-center text-slate-400">
+                            @if (EmptyTemplate != null)
+                            {
+                                @EmptyTemplate
+                            }
+                            else
+                            {
+                                @EmptyText
+                            }
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    var rowIndex = 1;
+                    @foreach (var item in CurrentPageItems)
+                    {
+                        var isSelected = SelectedRows.Contains(item);
+                        var isExpanded = _expandedRows.Contains(item);
+                        var currentRowNum = rowIndex++;
+
+                        <tr class="@ComputeRowClass(isSelected, currentRowNum)"
+                            @onclick="@(() => HandleRowClickAsync(item))">
+                            @if (ExpandedRowTemplate != null)
+                            {
+                                <td class="tento-table-expand-cell px-3 py-3 text-center" @onclick:stopPropagation="true">
+                                    <button type="button"
+                                            class="tento-table-expand-btn p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                                            aria-expanded="@(isExpanded ? "true" : "false")"
+                                            aria-label="@($"Expand row {currentRowNum}")"
+                                            @onclick="@(() => ToggleExpandRow(item))">
+                                        <Icon Name="@(isExpanded ? IconNames.ChevronDown : IconNames.ChevronRight)" Size="14" />
+                                    </button>
+                                </td>
+                            }
+
+                            @if (RowSelection != RowSelectionMode.None)
+                            {
+                                <td class="tento-table-selection-cell px-4 py-3 text-center" @onclick:stopPropagation="true">
+                                    <input type="@(RowSelection == RowSelectionMode.Multiple ? "checkbox" : "radio")"
+                                           name="@($"table-sel-{ElementId}")"
+                                           aria-label="@($"Select row {currentRowNum}")"
+                                           checked="@isSelected"
+                                           class="rounded border-slate-300 text-primary-500 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                                           @onchange="@(() => ToggleSelectRow(item))" />
+                                </td>
+                            }
+
+                            @foreach (var col in VisibleColumns)
+                            {
+                                <td class="@ComputeCellClass(col)" style="@ComputeColumnStyle(col)">
+                                    @col.RenderCell(item)
+                                </td>
+                            }
+                        </tr>
+
+                        @if (ExpandedRowTemplate != null && isExpanded)
+                        {
+                            <tr class="tento-table-expanded-row bg-slate-50/70 dark:bg-slate-800/40">
+                                <td colspan="@TotalRenderedColumns" class="px-6 py-4">
+                                    @ExpandedRowTemplate(item)
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+
+            @if (VisibleColumns.Any(c => c.FooterTemplate != null))
+            {
+                <tfoot class="bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 font-medium text-slate-700 dark:text-slate-300">
+                    <tr>
+                        @if (ExpandedRowTemplate != null)
+                        {
+                            <td></td>
+                        }
+                        @if (RowSelection != RowSelectionMode.None)
+                        {
+                            <td></td>
+                        }
+                        @foreach (var col in VisibleColumns)
+                        {
+                            <td class="@ComputeCellClass(col)">
+                                @col.FooterTemplate
+                            </td>
+                        }
+                    </tr>
+                </tfoot>
+            }
+        </table>
+    </div>
+
+    @* Pagination Footer *@
+    @if (ShouldShowBottomPagination)
+    {
+        <div class="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            @RenderPaginationBar()
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TItem>? DataSource { get; set; }
+    [Parameter] public RenderFragment? Columns { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderToolbar { get; set; }
+    [Parameter] public RenderFragment<TItem>? ExpandedRowTemplate { get; set; }
+    [Parameter] public RenderFragment? EmptyTemplate { get; set; }
+    [Parameter] public string EmptyText { get; set; } = "No data available";
+
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool Bordered { get; set; }
+    [Parameter] public bool Striped { get; set; }
+    [Parameter] public bool Compact { get; set; }
+    [Parameter] public bool ShowFilterRow { get; set; } = true;
+    [Parameter] public string? SearchText { get; set; }
+
+    // Pagination parameters
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public int[] PageSizeOptions { get; set; } = new[] { 10, 20, 50, 100 };
+    [Parameter] public bool ShowSizeChanger { get; set; }
+    [Parameter] public bool ShowQuickJumper { get; set; }
+    [Parameter] public int PageIndex { get; set; } = 1;
+    [Parameter] public EventCallback<int> PageIndexChanged { get; set; }
+    [Parameter] public bool ShowPagination { get; set; }
+    [Parameter] public PaginationPosition PaginationPosition { get; set; } = PaginationPosition.BottomRight;
+    [Parameter] public int? TotalCount { get; set; }
+    [Parameter] public EventCallback<TableQueryState> OnQueryChange { get; set; }
+
+    // Selection & Row events
+    [Parameter] public RowSelectionMode RowSelection { get; set; } = RowSelectionMode.None;
+    [Parameter] public HashSet<TItem> SelectedRows { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<TItem>> SelectedRowsChanged { get; set; }
+    [Parameter] public EventCallback<TItem> OnRowClick { get; set; }
+
+    private readonly System.Collections.Generic.List<ColumnBase<TItem>> _columns = new();
+    private readonly Dictionary<string, string?> _columnFilters = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<TItem> _expandedRows = new();
+    private ColumnBase<TItem>? _sortColumn;
+    private SortDirection _sortDirection = SortDirection.None;
+    private ColumnBase<TItem>? _openFilterColumn;
+    private bool _defaultSortApplied;
+    private readonly string ElementId = Guid.NewGuid().ToString("N");
+
+    public IReadOnlyList<ColumnBase<TItem>> RegisteredColumns => _columns;
+    private IReadOnlyList<ColumnBase<TItem>> VisibleColumns => _columns.Where(c => c.Visible).ToList();
+    private int TotalRenderedColumns => Math.Max(1, VisibleColumns.Count + (RowSelection != RowSelectionMode.None ? 1 : 0) + (ExpandedRowTemplate != null ? 1 : 0));
+
+    internal void AddColumn(ColumnBase<TItem> column)
+    {
+        if (!_columns.Contains(column))
+        {
+            _columns.Add(column);
+            if (!string.IsNullOrEmpty(column.FilterValue))
+            {
+                _columnFilters[column.EffectiveKey] = column.FilterValue;
+            }
+            if (!_defaultSortApplied && column.Sortable && column.DefaultSortOrder != SortDirection.None)
+            {
+                _sortColumn = column;
+                _sortDirection = column.DefaultSortOrder;
+                _defaultSortApplied = true;
+            }
+            StateHasChanged();
+        }
+    }
+
+    internal void NotifyColumnUpdated(ColumnBase<TItem> column)
+    {
+        if (column.FilterValue != null)
+        {
+            _columnFilters[column.EffectiveKey] = column.FilterValue;
+        }
+        StateHasChanged();
+    }
+
+    internal void RemoveColumn(ColumnBase<TItem> column)
+    {
+        if (_columns.Remove(column))
+        {
+            StateHasChanged();
+        }
+    }
+
+    public string? GetColumnFilterValue(ColumnBase<TItem> col)
+    {
+        if (col.FilterValue != null) return col.FilterValue;
+        return _columnFilters.TryGetValue(col.EffectiveKey, out var val) ? val : null;
+    }
+
+    public bool HasAnyActiveFilter =>
+        !string.IsNullOrWhiteSpace(SearchText) ||
+        VisibleColumns.Any(c => c.Filterable && !string.IsNullOrWhiteSpace(GetColumnFilterValue(c)));
+
+    public async Task SetColumnFilterAsync(ColumnBase<TItem> col, string? filterValue)
+    {
+        _columnFilters[col.EffectiveKey] = filterValue;
+        if (col.FilterValueChanged.HasDelegate)
+        {
+            await col.FilterValueChanged.InvokeAsync(filterValue);
+        }
+
+        PageIndex = 1;
+        if (PageIndexChanged.HasDelegate)
+        {
+            await PageIndexChanged.InvokeAsync(PageIndex);
+        }
+
+        await NotifyQueryChangedAsync();
+        StateHasChanged();
+    }
+
+    public async Task ClearColumnFilterAsync(ColumnBase<TItem> col)
+    {
+        await SetColumnFilterAsync(col, string.Empty);
+    }
+
+    public async Task ClearAllFiltersAsync()
+    {
+        _columnFilters.Clear();
+        foreach (var col in _columns)
+        {
+            if (col.FilterValueChanged.HasDelegate)
+            {
+                await col.FilterValueChanged.InvokeAsync(string.Empty);
+            }
+        }
+
+        PageIndex = 1;
+        if (PageIndexChanged.HasDelegate)
+        {
+            await PageIndexChanged.InvokeAsync(PageIndex);
+        }
+
+        await NotifyQueryChangedAsync();
+        StateHasChanged();
+    }
+
+    private void ToggleFilterPopover(ColumnBase<TItem> col)
+    {
+        _openFilterColumn = _openFilterColumn == col ? null : col;
+    }
+
+    private RenderFragment RenderColumnFilterControl(ColumnBase<TItem> col) => __builder =>
+    {
+        var currentFilter = GetColumnFilterValue(col) ?? string.Empty;
+
+        if (col.FilterTemplate != null)
+        {
+            var ctx = new ColumnFilterContext<TItem>(
+                col,
+                currentFilter,
+                val => SetColumnFilterAsync(col, val),
+                () => ClearColumnFilterAsync(col));
+            @col.FilterTemplate(ctx)
+        }
+        else if (col.FilterMode == ColumnFilterMode.Select || (col.FilterOptions != null && col.FilterOptions.Any()))
+        {
+            <div class="relative flex items-center gap-1">
+                <select class="tento-table-filter-select w-full px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary-500"
+                        aria-label="@($"Filter {col.Title}")"
+                        value="@currentFilter"
+                        @onchange="@(e => SetColumnFilterAsync(col, e.Value?.ToString()))">
+                    <option value="">@(col.FilterPlaceholder ?? "All")</option>
+                    @if (col.FilterOptions != null)
+                    {
+                        @foreach (var opt in col.FilterOptions)
+                        {
+                            <option value="@opt.Value">@opt.Label</option>
+                        }
+                    }
+                </select>
+                @if (!string.IsNullOrEmpty(currentFilter))
+                {
+                    <button type="button"
+                            class="tento-table-filter-clear px-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+                            aria-label="@($"Clear filter {col.Title}")"
+                            @onclick="@(() => ClearColumnFilterAsync(col))">
+                        &times;
+                    </button>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="relative flex items-center gap-1">
+                <input type="text"
+                       class="tento-table-filter-input w-full px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                       aria-label="@($"Filter {col.Title}")"
+                       placeholder="@(col.FilterPlaceholder ?? $"Filter {col.Title}...")"
+                       value="@currentFilter"
+                       @oninput="@(e => SetColumnFilterAsync(col, e.Value?.ToString()))"
+                       @onchange="@(e => SetColumnFilterAsync(col, e.Value?.ToString()))" />
+                @if (!string.IsNullOrEmpty(currentFilter))
+                {
+                    <button type="button"
+                            class="tento-table-filter-clear px-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+                            aria-label="@($"Clear filter {col.Title}")"
+                            @onclick="@(() => ClearColumnFilterAsync(col))">
+                        &times;
+                    </button>
+                }
+            </div>
+        }
+    };
+
+    private IEnumerable<TItem> FilteredItems
+    {
+        get
+        {
+            if (DataSource == null) return Enumerable.Empty<TItem>();
+            IEnumerable<TItem> query = DataSource;
+
+            // Apply per-column filters
+            foreach (var col in VisibleColumns)
+            {
+                if (!col.Filterable) continue;
+                var filterVal = GetColumnFilterValue(col);
+                if (!string.IsNullOrWhiteSpace(filterVal))
+                {
+                    var capturedCol = col;
+                    var capturedVal = filterVal;
+                    query = query.Where(item => capturedCol.MatchesFilter(item, capturedVal));
+                }
+            }
+
+            // Apply optional global search across visible columns
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var globalTerm = SearchText.Trim();
+                var cols = VisibleColumns;
+                if (cols.Count > 0)
+                {
+                    query = query.Where(item => cols.Any(c =>
+                    {
+                        var v = c.GetFilterValue(item)?.ToString();
+                        return !string.IsNullOrEmpty(v) && v.Contains(globalTerm, StringComparison.OrdinalIgnoreCase);
+                    }));
+                }
+            }
+
+            return query;
+        }
+    }
+
+    private IEnumerable<TItem> SortedItems
+    {
+        get
+        {
+            var source = FilteredItems;
+            if (_sortColumn == null || _sortDirection == SortDirection.None)
+                return source;
+
+            if (_sortColumn.CustomSorter != null)
+            {
+                var list = source.ToList();
+                list.Sort(_sortColumn.CustomSorter);
+                if (_sortDirection == SortDirection.Desc)
+                {
+                    list.Reverse();
+                }
+                return list;
+            }
+
+            if (_sortDirection == SortDirection.Asc)
+            {
+                return source.OrderBy(x => _sortColumn.GetSortValue(x));
+            }
+            return source.OrderByDescending(x => _sortColumn.GetSortValue(x));
+        }
+    }
+
+    private int EffectivePageSize => Math.Max(1, PageSize);
+    private int TotalItems => TotalCount ?? FilteredItems.Count();
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)TotalItems / EffectivePageSize));
+    private int PaginationStartItem => TotalItems == 0 ? 0 : (Math.Max(1, PageIndex) - 1) * EffectivePageSize + 1;
+    private int PaginationEndItem => TotalItems == 0 ? 0 : Math.Min(Math.Max(1, PageIndex) * EffectivePageSize, TotalItems);
+
+    private bool HasPaginationVisible => TotalItems > PageSize || ShowPagination || ShowSizeChanger || ShowQuickJumper;
+    private bool ShouldShowTopPagination => HasPaginationVisible &&
+        (PaginationPosition is PaginationPosition.TopRight or PaginationPosition.TopLeft or PaginationPosition.TopCenter or PaginationPosition.Both);
+    private bool ShouldShowBottomPagination => HasPaginationVisible &&
+        (PaginationPosition is PaginationPosition.BottomRight or PaginationPosition.BottomLeft or PaginationPosition.BottomCenter or PaginationPosition.Both);
+
+    private IEnumerable<TItem> CurrentPageItems
+    {
+        get
+        {
+            if (DataSource == null) return Enumerable.Empty<TItem>();
+            if (TotalCount.HasValue && SortedItems.Count() <= EffectivePageSize)
+            {
+                return SortedItems;
+            }
+            return SortedItems.Skip((Math.Max(1, PageIndex) - 1) * EffectivePageSize).Take(EffectivePageSize);
+        }
+    }
+
+    private bool IsAllSelected => CurrentPageItems.Any() && CurrentPageItems.All(i => SelectedRows.Contains(i));
+
+    private RenderFragment RenderPaginationBar() => __builder =>
+    {
+        <span class="text-xs text-slate-500">
+            Showing @PaginationStartItem to @PaginationEndItem of @TotalItems
+        </span>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <nav class="tento-pagination flex items-center space-x-1" aria-label="Pagination">
+                <button type="button"
+                        class="px-2 py-1 text-xs border rounded border-slate-300 dark:border-slate-700 disabled:opacity-40"
+                        aria-label="Previous page"
+                        disabled="@(PageIndex <= 1)"
+                        @onclick="@(() => ChangePage(PageIndex - 1))">
+                    &lt;
+                </button>
+
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    var pageNum = i;
+                    var isCurrent = pageNum == PageIndex;
+
+                    <button type="button"
+                            class="@ComputePageBtnClass(isCurrent)"
+                            aria-current="@(isCurrent ? "page" : null)"
+                            @onclick="@(() => ChangePage(pageNum))">
+                        @pageNum
+                    </button>
+                }
+
+                <button type="button"
+                        class="px-2 py-1 text-xs border rounded border-slate-300 dark:border-slate-700 disabled:opacity-40"
+                        aria-label="Next page"
+                        disabled="@(PageIndex >= TotalPages)"
+                        @onclick="@(() => ChangePage(PageIndex + 1))">
+                    &gt;
+                </button>
+            </nav>
+
+            @if (ShowSizeChanger && PageSizeOptions.Length > 0)
+            {
+                <select class="tento-pagination-size-changer text-xs border rounded px-2 py-1 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary-500"
+                        aria-label="Items per page"
+                        value="@EffectivePageSize"
+                        @onchange="HandlePageSizeChange">
+                    @foreach (var opt in PageSizeOptions)
+                    {
+                        <option value="@opt">@opt / page</option>
+                    }
+                </select>
+            }
+
+            @if (ShowQuickJumper)
+            {
+                <div class="tento-pagination-jumper inline-flex items-center gap-1 text-xs text-slate-500">
+                    <span>Go to</span>
+                    <input type="number"
+                           min="1"
+                           max="@TotalPages"
+                           aria-label="Jump to page"
+                           class="w-14 px-2 py-1 text-xs border rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary-500"
+                           @onchange="HandleQuickJump" />
+                </div>
+            }
+        </div>
+    };
+
+    private async Task ToggleSelectAll(ChangeEventArgs e)
+    {
+        bool selectAll = (bool)(e.Value ?? false);
+        if (selectAll)
+        {
+            foreach (var item in CurrentPageItems)
+            {
+                SelectedRows.Add(item);
+            }
+        }
+        else
+        {
+            foreach (var item in CurrentPageItems)
+            {
+                SelectedRows.Remove(item);
+            }
+        }
+
+        if (SelectedRowsChanged.HasDelegate)
+        {
+            await SelectedRowsChanged.InvokeAsync(SelectedRows);
+        }
+    }
+
+    private async Task ToggleSelectRow(TItem item)
+    {
+        if (RowSelection == RowSelectionMode.Single)
+        {
+            SelectedRows.Clear();
+            SelectedRows.Add(item);
+        }
+        else
+        {
+            if (SelectedRows.Contains(item))
+                SelectedRows.Remove(item);
+            else
+                SelectedRows.Add(item);
+        }
+
+        if (SelectedRowsChanged.HasDelegate)
+        {
+            await SelectedRowsChanged.InvokeAsync(SelectedRows);
+        }
+    }
+
+    private void ToggleExpandRow(TItem item)
+    {
+        if (!_expandedRows.Remove(item))
+        {
+            _expandedRows.Add(item);
+        }
+    }
+
+    private async Task HandleRowClickAsync(TItem item)
+    {
+        if (OnRowClick.HasDelegate)
+        {
+            await OnRowClick.InvokeAsync(item);
+        }
+    }
+
+    private async Task HandleSortAsync(ColumnBase<TItem> col)
+    {
+        if (!col.Sortable) return;
+
+        if (_sortColumn == col)
+        {
+            _sortDirection = _sortDirection switch
+            {
+                SortDirection.None => SortDirection.Asc,
+                SortDirection.Asc => SortDirection.Desc,
+                _ => SortDirection.None
+            };
+            if (_sortDirection == SortDirection.None)
+            {
+                _sortColumn = null;
+            }
+        }
+        else
+        {
+            _sortColumn = col;
+            _sortDirection = SortDirection.Asc;
+        }
+
+        await NotifyQueryChangedAsync();
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        PageIndex = Math.Clamp(newPage, 1, TotalPages);
+        if (PageIndexChanged.HasDelegate)
+        {
+            await PageIndexChanged.InvokeAsync(PageIndex);
+        }
+        await NotifyQueryChangedAsync();
+    }
+
+    private async Task HandlePageSizeChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var newSize) && newSize > 0)
+        {
+            PageSize = newSize;
+            PageIndex = 1;
+            if (PageSizeChanged.HasDelegate)
+            {
+                await PageSizeChanged.InvokeAsync(PageSize);
+            }
+            if (PageIndexChanged.HasDelegate)
+            {
+                await PageIndexChanged.InvokeAsync(PageIndex);
+            }
+            await NotifyQueryChangedAsync();
+        }
+    }
+
+    private async Task HandleQuickJump(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var targetPage))
+        {
+            await ChangePage(targetPage);
+        }
+    }
+
+    private async Task NotifyQueryChangedAsync()
+    {
+        if (OnQueryChange.HasDelegate)
+        {
+            var activeFilters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var col in VisibleColumns.Where(c => c.Filterable))
+            {
+                var val = GetColumnFilterValue(col);
+                if (!string.IsNullOrWhiteSpace(val))
+                {
+                    activeFilters[col.EffectiveKey] = val;
+                }
+            }
+
+            var state = new TableQueryState(
+                PageIndex,
+                EffectivePageSize,
+                _sortColumn?.Title,
+                _sortColumn?.EffectiveKey,
+                _sortDirection,
+                activeFilters);
+
+            await OnQueryChange.InvokeAsync(state);
+        }
+    }
+
+    private string ComputedContainerClass => new CssBuilder("tento-table-container relative overflow-x-auto w-full border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 shadow-sm")
+        .AddClass(Class)
+        .Build();
+
+    private string? ComputeColumnStyle(ColumnBase<TItem> col)
+    {
+        var sb = new StyleBuilder()
+            .AddStyle("width", col.Width, !string.IsNullOrWhiteSpace(col.Width))
+            .AddStyle("min-width", col.MinWidth, !string.IsNullOrWhiteSpace(col.MinWidth))
+            .AddStyle("max-width", col.MaxWidth, !string.IsNullOrWhiteSpace(col.MaxWidth))
+            .Build();
+        return string.IsNullOrWhiteSpace(sb) ? null : sb;
+    }
+
+    private string ComputeHeaderClass(ColumnBase<TItem> col)
+    {
+        var align = col.Align switch
+        {
+            Align.Center => "text-center",
+            Align.Right => "text-right",
+            _ => "text-left"
+        };
+        var cursor = col.Sortable ? "cursor-pointer select-none" : "";
+        var padding = Compact ? "px-3 py-2" : "px-6 py-3";
+        var border = Bordered ? "border-x border-slate-200 dark:border-slate-700 first:border-l-0 last:border-r-0" : "";
+
+        return new CssBuilder($"{padding} {align} {cursor}")
+            .AddClass(border, Bordered)
+            .AddClass(col.HeaderClass)
+            .Build();
+    }
+
+    private string ComputeCellClass(ColumnBase<TItem> col)
+    {
+        var align = col.Align switch
+        {
+            Align.Center => "text-center",
+            Align.Right => "text-right",
+            _ => "text-left"
+        };
+        var padding = Compact ? "px-3 py-2" : "px-6 py-4";
+
+        return new CssBuilder($"{padding} {align}")
+            .AddClass("border-x border-slate-200 dark:border-slate-700 first:border-l-0 last:border-r-0", Bordered)
+            .AddClass("truncate max-w-xs", col.Ellipsis)
+            .AddClass(col.CellClass)
+            .Build();
+    }
+
+    private string ComputeRowClass(bool isSelected, int rowNum)
+    {
+        return new CssBuilder()
+            .AddClass("bg-primary-50/50 dark:bg-primary-950/20", isSelected)
+            .AddClass("bg-slate-50/50 dark:bg-slate-800/30", !isSelected && Striped && rowNum % 2 == 0)
+            .AddClass("hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors", !isSelected)
+            .AddClass("cursor-pointer", OnRowClick.HasDelegate)
+            .Build();
+    }
+
+    private string ComputePageBtnClass(bool isCurrent)
+    {
+        return new CssBuilder("px-2.5 py-1 text-xs border rounded transition-colors")
+            .AddClass("border-primary-500 bg-primary-50 text-primary-600 font-bold dark:bg-primary-950/40 dark:text-primary-400", isCurrent)
+            .AddClass("border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50", !isCurrent)
+            .Build();
+    }
+}

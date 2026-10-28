@@ -1,0 +1,49 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<li class="inline-flex items-center gap-2 @Class" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Href) && !IsLast)
+    {
+        <a href="@Href" class="text-slate-500 hover:text-primary-600 transition-colors inline-flex items-center gap-1.5" @onclick="OnClick">
+            @if (Icon != null)
+            {
+                <span class="inline-flex items-center">@Icon</span>
+            }
+            @ChildContent
+        </a>
+    }
+    else
+    {
+        <span aria-current="page" class="text-slate-900 dark:text-slate-100 font-medium inline-flex items-center gap-1.5">
+            @if (Icon != null)
+            {
+                <span class="inline-flex items-center">@Icon</span>
+            }
+            @ChildContent
+        </span>
+    }
+
+    @if (!IsLast && ParentBreadcrumb != null)
+    {
+        <span class="tento-breadcrumb-separator text-slate-400 select-none" aria-hidden="true">
+            @if (ParentBreadcrumb.SeparatorTemplate != null)
+            {
+                @ParentBreadcrumb.SeparatorTemplate
+            }
+            else
+            {
+                @ParentBreadcrumb.Separator
+            }
+        </span>
+    }
+</li>
+
+@code {
+    [CascadingParameter] private Breadcrumb? ParentBreadcrumb { get; set; }
+
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public bool IsLast { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

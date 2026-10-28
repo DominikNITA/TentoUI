@@ -1,0 +1,63 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<span class="@ComputeBadgeWrapperClass()" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+
+    @if (Dot || IsDot)
+    {
+        <span class="@ComputeDotClass()" aria-label="Status indicator"></span>
+    }
+    else if (Count.HasValue && (Count.Value > 0 || ShowZero))
+    {
+        <sup class="@ComputeCountClass()" aria-label="@($"{Count.Value} notifications")">
+            @(Count.Value > OverflowCount ? $"{OverflowCount}+" : Count.Value.ToString())
+        </sup>
+    }
+</span>
+
+@code {
+    [Parameter] public int? Count { get; set; }
+    [Parameter] public int OverflowCount { get; set; } = 99;
+    [Parameter] public bool Dot { get; set; }
+    [Parameter] public bool IsDot { get; set; }
+    [Parameter] public bool ShowZero { get; set; }
+    [Parameter] public string Status { get; set; } = "Default";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputeBadgeWrapperClass()
+    {
+        return new CssBuilder("tento-badge")
+            .AddClass(ChildContent != null ? "relative inline-block" : "inline-flex items-center")
+            .AddClass(Class)
+            .Build();
+    }
+
+    private string ComputeDotClass()
+    {
+        var dotColor = Status switch
+        {
+            "Success" => "bg-emerald-500",
+            "Error" => "bg-red-500",
+            "Warning" => "bg-amber-500",
+            "Processing" => "bg-blue-500",
+            _ => "bg-slate-400"
+        };
+
+        var posClass = ChildContent != null ? "absolute top-0 right-0 -mt-1 -mr-1" : "";
+
+        return new CssBuilder("tento-badge-dot h-2 w-2 rounded-full")
+            .AddClass(dotColor)
+            .AddClass(posClass)
+            .Build();
+    }
+
+    private string ComputeCountClass()
+    {
+        var posClass = ChildContent != null ? "absolute -top-2 -right-2 transform translate-x-1/2 -translate-y-1/2" : "";
+
+        return new CssBuilder("tento-badge-count rounded-full bg-red-500 text-white text-xs px-1.5 py-0.5 font-medium leading-none")
+            .AddClass(posClass)
+            .Build();
+    }
+}

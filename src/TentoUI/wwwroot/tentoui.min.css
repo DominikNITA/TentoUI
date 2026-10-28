@@ -1,0 +1,122 @@
+/** TentoUI Precompiled Tailwind & CSS Tokens **/
+:root {
+  --tento-bg-app: #f8fafc;
+  --tento-bg-surface: #ffffff;
+  --tento-bg-subtle: #f1f5f9;
+  --tento-bg-muted: #e2e8f0;
+  --tento-bg-elevated: #ffffff;
+
+  --tento-text-base: #0f172a;
+  --tento-text-secondary: #475569;
+  --tento-text-muted: #64748b;
+  --tento-text-subtle: #94a3b8;
+  --tento-text-inverse: #ffffff;
+
+  --tento-border-base: #e2e8f0;
+  --tento-border-subtle: #cbd5e1;
+  --tento-border-focus: #3b82f6;
+
+  --tento-primary-50: #eff6ff;
+  --tento-primary-100: #dbeafe;
+  --tento-primary-200: #bfdbfe;
+  --tento-primary-300: #93c5fd;
+  --tento-primary-400: #60a5fa;
+  --tento-primary-500: #3b82f6;
+  --tento-primary-600: #2563eb;
+  --tento-primary-700: #1d4ed8;
+  --tento-primary-800: #1e40af;
+  --tento-primary-900: #1e3a8a;
+  --tento-primary-950: #172554;
+
+  --tento-success: #10b981;
+  --tento-success-bg: #ecfdf5;
+  --tento-success-border: #a7f3d0;
+
+  --tento-warning: #f59e0b;
+  --tento-warning-bg: #fffbeb;
+  --tento-warning-border: #fde68a;
+
+  --tento-error: #ef4444;
+  --tento-error-bg: #fef2f2;
+  --tento-error-border: #fecaca;
+
+  --tento-info: #0ea5e9;
+  --tento-info-bg: #f0f9ff;
+  --tento-info-border: #bae6fd;
+
+  --tento-radius-sm: 0.25rem;
+  --tento-radius-md: 0.375rem;
+  --tento-radius-lg: 0.5rem;
+  --tento-radius-full: 9999px;
+
+  --tento-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tento-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tento-shadow-dropdown: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  --tento-transition-duration: 150ms;
+  --tento-font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+[data-theme="dark"], .dark {
+  --tento-bg-app: #090d16;
+  --tento-bg-surface: #111827;
+  --tento-bg-subtle: #1f2937;
+  --tento-bg-muted: #374151;
+  --tento-bg-elevated: #1f2937;
+
+  --tento-text-base: #f9fafb;
+  --tento-text-secondary: #cbd5e1;
+  --tento-text-muted: #9ca3af;
+  --tento-text-subtle: #6b7280;
+  --tento-text-inverse: #111827;
+
+  --tento-border-base: #1f2937;
+  --tento-border-subtle: #374151;
+  --tento-border-focus: #60a5fa;
+
+  --tento-primary-50: #172554;
+  --tento-primary-100: #1e3a8a;
+  --tento-primary-200: #1e40af;
+  --tento-primary-300: #1d4ed8;
+  --tento-primary-400: #2563eb;
+  --tento-primary-500: #3b82f6;
+  --tento-primary-600: #60a5fa;
+  --tento-primary-700: #93c5fd;
+  --tento-primary-800: #bfdbfe;
+  --tento-primary-900: #dbeafe;
+  --tento-primary-950: #eff6ff;
+
+  --tento-success-bg: #064e3b;
+  --tento-success-border: #047857;
+
+  --tento-warning-bg: #78350f;
+  --tento-warning-border: #b45309;
+
+  --tento-error-bg: #7f1d1d;
+  --tento-error-border: #b91c1c;
+
+  --tento-info-bg: #0c4a6e;
+  --tento-info-border: #0369a1;
+
+  --tento-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --tento-shadow-dropdown: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+}
+
+/* Animations */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+@keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); } }
+
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-bounce { animation: bounce 1s infinite; }
+
+/* Base & Component Classes */
+.tento-config-provider {
+  color: var(--tento-text-base);
+  background-color: var(--tento-bg-app);
+  font-family: var(--tento-font-family);
+  min-height: 100%;
+}

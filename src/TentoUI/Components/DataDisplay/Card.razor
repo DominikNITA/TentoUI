@@ -1,0 +1,72 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputeCardClass()" style="@Style" @attributes="AdditionalAttributes">
+    @if (Cover != null)
+    {
+        <div class="tento-card-cover overflow-hidden rounded-t-lg">
+            @Cover
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Title) || TitleTemplate != null || Extra != null)
+    {
+        <div class="tento-card-header flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800">
+            <span class="font-semibold text-slate-800 dark:text-slate-100">
+                @if (TitleTemplate != null)
+                {
+                    @TitleTemplate
+                }
+                else
+                {
+                    @Title
+                }
+            </span>
+            @if (Extra != null)
+            {
+                <span class="text-sm">
+                    @Extra
+                </span>
+            }
+        </div>
+    }
+
+    <div class="@ComputeBodyClass()">
+        @ChildContent
+    </div>
+
+    @if (Actions != null)
+    {
+        <div class="tento-card-actions border-t border-slate-200 dark:border-slate-800 flex divide-x divide-slate-200 dark:divide-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+            @Actions
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? TitleTemplate { get; set; }
+    [Parameter] public RenderFragment? Extra { get; set; }
+    [Parameter] public RenderFragment? Cover { get; set; }
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public bool Bordered { get; set; } = true;
+    [Parameter] public bool Hoverable { get; set; }
+    [Parameter] public string? BodyClass { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputeCardClass()
+    {
+        var borderClass = Bordered ? "border border-slate-200 dark:border-slate-800" : "";
+        var hoverClass = Hoverable ? "hover:shadow-lg transition-shadow duration-200 cursor-pointer" : "shadow-sm";
+
+        return new CssBuilder("tento-card rounded-lg bg-white dark:bg-slate-900")
+            .AddClass(borderClass)
+            .AddClass(hoverClass)
+            .AddClass(Class)
+            .Build();
+    }
+
+    private string ComputeBodyClass() => new CssBuilder("tento-card-body p-4 text-slate-700 dark:text-slate-300")
+        .AddClass(BodyClass)
+        .Build();
+}

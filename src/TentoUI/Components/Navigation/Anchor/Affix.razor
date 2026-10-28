@@ -1,0 +1,29 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@ComputedStyle" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public int? OffsetTop { get; set; } = 0;
+    [Parameter] public int? OffsetBottom { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-affix sticky z-30")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedStyle
+    {
+        get
+        {
+            var sb = new StyleBuilder()
+                .AddStyle("top", $"{OffsetTop}px", OffsetTop.HasValue)
+                .AddStyle("bottom", $"{OffsetBottom}px", OffsetBottom.HasValue)
+                .AddStyle(Style)
+                .Build();
+            return sb;
+        }
+    }
+}

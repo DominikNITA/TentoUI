@@ -1,0 +1,149 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+
+<div class="@ComputedClass"
+     role="menuitem"
+     data-key="@Key"
+     tabindex="@(IsSelected ? 0 : -1)"
+     aria-selected="@(IsSelected ? "true" : "false")"
+     aria-disabled="@(Disabled ? "true" : null)"
+     style="@Style"
+     @onclick="HandleClickAsync"
+     @onkeydown="HandleKeyDownAsync"
+     @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Href))
+    {
+        <a href="@(Disabled ? null : Href)" class="flex items-center gap-2 w-full h-full text-inherit">
+            @if (Icon != null)
+            {
+                <span class="inline-flex items-center">@Icon</span>
+            }
+            @if (!(MenuContext?.Collapsed ?? false) || MenuContext?.Mode == MenuMode.Horizontal)
+            {
+                <span class="flex-1 truncate">
+                    @if (ChildContent != null)
+                    {
+                        @ChildContent
+                    }
+                    else
+                    {
+                        @Title
+                    }
+                </span>
+            }
+        </a>
+    }
+    else
+    {
+        <div class="flex items-center gap-2 w-full">
+            @if (Icon != null)
+            {
+                <span class="inline-flex items-center">@Icon</span>
+            }
+            @if (!(MenuContext?.Collapsed ?? false) || MenuContext?.Mode == MenuMode.Horizontal)
+            {
+                <span class="flex-1 truncate">
+                    @if (ChildContent != null)
+                    {
+                        @ChildContent
+                    }
+                    else
+                    {
+                        @Title
+                    }
+                </span>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] private MenuContext? MenuContext { get; set; }
+
+    [Parameter] public string Key { get; set; } = string.Empty;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private bool IsSelected => MenuContext?.IsSelected(Key) ?? false;
+
+    protected override void OnInitialized()
+    {
+        MenuContext?.RegisterItem(Key, Disabled);
+        if (MenuContext != null)
+        {
+            MenuContext.OnStateChange += HandleStateChange;
+        }
+    }
+
+    private void HandleStateChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected override void OnParametersSet()
+    {
+        MenuContext?.UpdateItem(Key, Disabled);
+    }
+
+    private async Task HandleClickAsync(MouseEventArgs e)
+    {
+        if (Disabled) return;
+        MenuContext?.SelectKey(Key);
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (Disabled) return;
+
+        if (e.Key is "Enter" or " ")
+        {
+            await HandleClickAsync(new MouseEventArgs());
+        }
+        else if (e.Key is "ArrowDown" || (MenuContext?.Mode == MenuMode.Horizontal && e.Key is "ArrowRight"))
+        {
+            MenuContext?.SelectNext(Key);
+        }
+        else if (e.Key is "ArrowUp" || (MenuContext?.Mode == MenuMode.Horizontal && e.Key is "ArrowLeft"))
+        {
+            MenuContext?.SelectPrevious(Key);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (MenuContext != null)
+        {
+            MenuContext.OnStateChange -= HandleStateChange;
+        }
+        MenuContext?.UnregisterItem(Key);
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var selectedClass = IsSelected
+                ? "text-primary-600 bg-primary-50 font-medium dark:bg-primary-950/40 dark:text-primary-400"
+                : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800";
+
+            var disabledClass = Disabled
+                ? "opacity-40 cursor-not-allowed pointer-events-none"
+                : "cursor-pointer";
+
+            return new CssBuilder("tento-menu-item px-4 py-2 transition-colors")
+                .AddClass(selectedClass)
+                .AddClass(disabledClass)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

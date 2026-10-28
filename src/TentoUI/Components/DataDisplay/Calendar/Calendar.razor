@@ -1,0 +1,151 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    @* Calendar Header Toolbar *@
+    <div class="tento-calendar-header flex items-center justify-between p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-slate-800 dark:text-white">
+                @CurrentMonthDate.ToString("MMMM yyyy")
+            </span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+            <button type="button"
+                    class="p-1 rounded text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    aria-label="Previous month"
+                    @onclick="PrevMonthAsync">
+                <Icon Name="@IconNames.ChevronLeft" Size="16" />
+            </button>
+            <button type="button"
+                    class="px-2 py-0.5 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-700"
+                    @onclick="GoToTodayAsync">
+                Today
+            </button>
+            <button type="button"
+                    class="p-1 rounded text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    aria-label="Next month"
+                    @onclick="NextMonthAsync">
+                <Icon Name="@IconNames.ChevronRight" Size="16" />
+            </button>
+        </div>
+    </div>
+
+    @* Weekdays Header *@
+    <div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30 text-center text-xs font-medium text-slate-500 dark:text-slate-400 py-2">
+        <span>Mon</span>
+        <span>Tue</span>
+        <span>Wed</span>
+        <span>Thu</span>
+        <span>Fri</span>
+        <span>Sat</span>
+        <span>Sun</span>
+    </div>
+
+    @* Month Grid Cells *@
+    <div class="grid grid-cols-7 divide-x divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+        @foreach (var day in GetCalendarDays())
+        {
+            var isCurrentMonth = day.Month == CurrentMonthDate.Month;
+            var isSelected = day == Value;
+            var isToday = day == DateOnly.FromDateTime(DateTime.Today);
+
+            <div class="@ComputeDayCellClass(isCurrentMonth, isSelected)"
+                 @onclick="@(() => SelectDateAsync(day))">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="@ComputeDayNumberClass(isToday, isSelected)">
+                        @day.Day
+                    </span>
+                </div>
+
+                @if (DateCellTemplate != null)
+                {
+                    <div class="tento-calendar-cell-content min-h-[3rem] overflow-hidden">
+                        @DateCellTemplate(day)
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public DateOnly Value { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Parameter] public EventCallback<DateOnly> ValueChanged { get; set; }
+    [Parameter] public EventCallback<DateOnly> OnSelect { get; set; }
+    [Parameter] public CalendarMode Mode { get; set; } = CalendarMode.Month;
+    [Parameter] public RenderFragment<DateOnly>? DateCellTemplate { get; set; }
+
+    private DateOnly _currentMonth;
+    private DateOnly CurrentMonthDate => _currentMonth == default ? Value : _currentMonth;
+
+    protected override void OnInitialized()
+    {
+        _currentMonth = new DateOnly(Value.Year, Value.Month, 1);
+    }
+
+    private IEnumerable<DateOnly> GetCalendarDays()
+    {
+        var firstDayOfMonth = new DateOnly(CurrentMonthDate.Year, CurrentMonthDate.Month, 1);
+        int dayOfWeekOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7; // Monday = 0
+
+        var startDate = firstDayOfMonth.AddDays(-dayOfWeekOffset);
+        for (int i = 0; i < 42; i++)
+        {
+            yield return startDate.AddDays(i);
+        }
+    }
+
+    private async Task SelectDateAsync(DateOnly date)
+    {
+        Value = date;
+        _currentMonth = new DateOnly(date.Year, date.Month, 1);
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+        if (OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(date);
+        }
+    }
+
+    private Task PrevMonthAsync()
+    {
+        _currentMonth = CurrentMonthDate.AddMonths(-1);
+        return Task.CompletedTask;
+    }
+
+    private Task NextMonthAsync()
+    {
+        _currentMonth = CurrentMonthDate.AddMonths(1);
+        return Task.CompletedTask;
+    }
+
+    private async Task GoToTodayAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        await SelectDateAsync(today);
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-calendar w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden select-none")
+        .AddClass(Class)
+        .Build();
+
+    private static string ComputeDayCellClass(bool isCurrentMonth, bool isSelected)
+    {
+        return new CssBuilder("min-h-[5.5rem] p-1.5 transition-colors cursor-pointer")
+            .AddClass("bg-primary-50/40 dark:bg-primary-950/20 font-medium", isSelected)
+            .AddClass("hover:bg-slate-50 dark:hover:bg-slate-800/60", !isSelected)
+            .AddClass("text-slate-800 dark:text-slate-200", isCurrentMonth)
+            .AddClass("text-slate-300 dark:text-slate-600 bg-slate-50/30 dark:bg-slate-800/20", !isCurrentMonth)
+            .Build();
+    }
+
+    private static string ComputeDayNumberClass(bool isToday, bool isSelected)
+    {
+        return new CssBuilder("w-5 h-5 flex items-center justify-center rounded-full text-xs font-semibold")
+            .AddClass("bg-primary-500 text-white", isToday || isSelected)
+            .Build();
+    }
+}

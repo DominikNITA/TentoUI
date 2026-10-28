@@ -1,0 +1,43 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+
+    <div class="tento-watermark-overlay absolute inset-0 pointer-events-none z-10"
+         style="@ComputeWatermarkStyle()"
+         aria-hidden="true">
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Content { get; set; } = "TentoUI";
+    [Parameter] public int Width { get; set; } = 140;
+    [Parameter] public int Height { get; set; } = 70;
+    [Parameter] public int Rotate { get; set; } = -22;
+    [Parameter] public int FontSize { get; set; } = 14;
+    [Parameter] public string FontColor { get; set; } = "rgba(100, 116, 139, 0.18)";
+    [Parameter] public int GapX { get; set; } = 80;
+    [Parameter] public int GapY { get; set; } = 80;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-watermark relative overflow-hidden")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeWatermarkStyle()
+    {
+        var totalW = Width + GapX;
+        var totalH = Height + GapY;
+        var centerX = totalW / 2;
+        var centerY = totalH / 2;
+
+        var svg = $"<svg xmlns='http://www.w3.org/2000/svg' width='{totalW}' height='{totalH}'>" +
+                  $"<text x='{centerX}' y='{centerY}' fill='{FontColor}' font-size='{FontSize}' font-family='sans-serif' " +
+                  $"text-anchor='middle' dominant-baseline='middle' transform='rotate({Rotate} {centerX} {centerY})'>{Content}</text>" +
+                  $"</svg>";
+
+        var base64Svg = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(svg));
+        return $"background-image: url('data:image/svg+xml;base64,{base64Svg}'); background-repeat: repeat;";
+    }
+}

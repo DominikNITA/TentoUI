@@ -1,0 +1,35 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+        @* Ink line indicator *@
+        <div class="tento-anchor-ink absolute left-0 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700"></div>
+
+        <ul class="space-y-1.5 pl-3">
+            @ChildContent
+        </ul>
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public string? ActiveHref { get; set; }
+    [Parameter] public EventCallback<string> ActiveHrefChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    internal string? CurrentActiveHref => ActiveHref;
+
+    internal async Task SetActiveAsync(string href)
+    {
+        ActiveHref = href;
+        if (ActiveHrefChanged.HasDelegate)
+        {
+            await ActiveHrefChanged.InvokeAsync(href);
+        }
+        StateHasChanged();
+    }
+
+    private string ComputedClass => new CssBuilder("tento-anchor relative text-xs")
+        .AddClass(Class)
+        .Build();
+}

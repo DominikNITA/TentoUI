@@ -1,0 +1,12 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="tento-card-grid p-6 border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow cursor-pointer @Class"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

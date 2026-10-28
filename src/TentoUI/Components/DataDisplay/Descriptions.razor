@@ -1,0 +1,127 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Title) || Extra != null)
+    {
+        <div class="tento-descriptions-header flex items-center justify-between mb-3">
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <h4 class="text-base font-semibold text-slate-900 dark:text-white">@Title</h4>
+            }
+            @if (Extra != null)
+            {
+                <div class="tento-descriptions-extra">@Extra</div>
+            }
+        </div>
+    }
+
+    <dl class="@ComputedGridClass">
+        @foreach (var item in _items)
+        {
+            <div class="@ComputeItemClass(item)" style="@($"grid-column: span {Math.Clamp(item.Span, 1, Math.Max(1, Column))} / span {Math.Clamp(item.Span, 1, Math.Max(1, Column))};")">
+                <dt class="@ComputeLabelClass()">
+                    @if (item.LabelTemplate != null)
+                    {
+                        @item.LabelTemplate
+                    }
+                    else
+                    {
+                        @item.Label
+                    }
+                </dt>
+                <dd class="@ComputeContentClass()">
+                    @item.ChildContent
+                </dd>
+            </div>
+        }
+    </dl>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? Extra { get; set; }
+    [Parameter] public bool Bordered { get; set; }
+    [Parameter] public int Column { get; set; } = 3;
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly System.Collections.Generic.List<DescriptionsItem> _items = new();
+
+    internal void RegisterItem(DescriptionsItem item)
+    {
+        if (!_items.Contains(item))
+        {
+            _items.Add(item);
+            StateHasChanged();
+        }
+    }
+
+    internal void NotifyItemUpdated() => StateHasChanged();
+
+    internal void UnregisterItem(DescriptionsItem item)
+    {
+        if (_items.Remove(item))
+        {
+            StateHasChanged();
+        }
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-descriptions w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedGridClass
+    {
+        get
+        {
+            var cols = Math.Clamp(Column, 1, 6) switch
+            {
+                1 => "grid-cols-1",
+                2 => "grid-cols-1 sm:grid-cols-2",
+                4 => "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
+                _ => "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            };
+
+            return new CssBuilder($"grid {cols}")
+                .AddClass("border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden divide-y sm:divide-y-0 gap-px bg-slate-200 dark:bg-slate-700", Bordered)
+                .AddClass("gap-4", !Bordered)
+                .Build();
+        }
+    }
+
+    private string ComputeItemClass(DescriptionsItem item)
+    {
+        return new CssBuilder("tento-descriptions-item")
+            .AddClass("flex flex-col sm:flex-row bg-white dark:bg-slate-900", Bordered)
+            .AddClass("flex flex-col", !Bordered)
+            .AddClass(item.Class)
+            .Build();
+    }
+
+    private string ComputeLabelClass()
+    {
+        var pad = ResolvedSize(Size) == ComponentSize.Small ? "px-3 py-2 text-xs" : "px-4 py-3 text-xs";
+        if (Bordered)
+        {
+            return $"tento-descriptions-label {pad} font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 sm:w-40 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-700";
+        }
+        return "tento-descriptions-label text-xs font-medium text-slate-500 dark:text-slate-400";
+    }
+
+    private string ComputeContentClass()
+    {
+        var pad = ResolvedSize(Size) == ComponentSize.Small ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm";
+        if (Bordered)
+        {
+            return $"tento-descriptions-content {pad} text-slate-800 dark:text-slate-100 flex-1";
+        }
+        return "tento-descriptions-content mt-1 text-sm text-slate-800 dark:text-slate-100";
+    }
+}

@@ -1,0 +1,24 @@
+@namespace TentoUI
+@implements IDisposable
+
+@code {
+    [CascadingParameter] protected Steps? ParentSteps { get; set; }
+
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? SubTitle { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public RenderFragment? IconTemplate { get; set; }
+    [Parameter] public StepStatus? Status { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentSteps?.RegisterStep(this);
+    }
+
+    public void Dispose()
+    {
+        ParentSteps?.UnregisterStep(this);
+    }
+}

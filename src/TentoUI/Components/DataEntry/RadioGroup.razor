@@ -1,0 +1,57 @@
+@namespace TentoUI
+@typeparam TValue
+@inherits TentoInputBase<TValue>
+
+<div class="@ComputeGroupClass()" role="radiogroup" style="@Style" @attributes="AdditionalAttributes">
+    <CascadingValue Value="@this" IsFixed="true">
+        @if (Options != null)
+        {
+            @foreach (var opt in Options)
+            {
+                var isChecked = EqualityComparer<TValue>.Default.Equals(opt.Value, CurrentValue);
+                var optVal = opt.Value;
+
+                <label class="@($"tento-radio flex items-center space-x-2 {(opt.Disabled || IsDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer")}")">
+                    <input type="radio"
+                           name="@Name"
+                           value="@opt.Value"
+                           checked="@isChecked"
+                           disabled="@(opt.Disabled || IsDisabled)"
+                           @onchange="@(() => SelectValue(optVal))" />
+                    <span>@opt.Label</span>
+                </label>
+            }
+        }
+        else
+        {
+            @ChildContent
+        }
+    </CascadingValue>
+</div>
+
+@code {
+    [Parameter] public string Name { get; set; } = $"radio-group-{Guid.NewGuid():N}";
+    [Parameter] public RadioOptionType OptionType { get; set; } = RadioOptionType.Default;
+    [Parameter] public RadioButtonStyle ButtonStyle { get; set; } = RadioButtonStyle.Outline;
+    [Parameter] public IEnumerable<RadioOptionItem<TValue>>? Options { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    internal async Task SelectValue(TValue value)
+    {
+        if (IsDisabled) return;
+        CurrentValue = value;
+    }
+
+    protected override bool TryParseValueFromString(string? value, out TValue result, out string validationErrorMessage)
+    {
+        result = default!;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputeGroupClass() => OptionType switch
+    {
+        RadioOptionType.Button => "tento-radiogroup inline-flex rounded-md shadow-sm border first:rounded-l-md last:rounded-r-md p-1 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700",
+        _ => "tento-radiogroup inline-flex flex-wrap items-center gap-4 space-y-2"
+    };
+}

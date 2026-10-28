@@ -1,0 +1,54 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="tento-list-item-meta flex items-center space-x-3 @Class" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(AvatarUrl))
+    {
+        <img src="@AvatarUrl" alt="Avatar" class="h-10 w-10 rounded-full shrink-0 object-cover" />
+    }
+    else if (Avatar != null)
+    {
+        <div class="shrink-0">
+            @Avatar
+        </div>
+    }
+
+    <div class="tento-list-item-meta-content flex-1 min-w-0">
+        @if (!string.IsNullOrEmpty(Title) || TitleTemplate != null)
+        {
+            <h4 class="tento-list-item-title font-medium text-slate-900 dark:text-slate-100 truncate">
+                @if (TitleTemplate != null)
+                {
+                    @TitleTemplate
+                }
+                else
+                {
+                    @Title
+                }
+            </h4>
+        }
+
+        @if (!string.IsNullOrEmpty(Description) || DescriptionTemplate != null)
+        {
+            <p class="tento-list-item-desc text-slate-500 dark:text-slate-400 text-sm truncate">
+                @if (DescriptionTemplate != null)
+                {
+                    @DescriptionTemplate
+                }
+                else
+                {
+                    @Description
+                }
+            </p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? AvatarUrl { get; set; }
+    [Parameter] public RenderFragment? Avatar { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? TitleTemplate { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? DescriptionTemplate { get; set; }
+}

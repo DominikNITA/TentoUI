@@ -1,0 +1,20 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<nav class="@ComputedClass" aria-label="Breadcrumb" style="@Style" @attributes="AdditionalAttributes">
+    <ol class="flex items-center space-x-2 text-sm flex-wrap">
+        <CascadingValue Value="this" IsFixed="true">
+            @ChildContent
+        </CascadingValue>
+    </ol>
+</nav>
+
+@code {
+    [Parameter] public string Separator { get; set; } = "/";
+    [Parameter] public RenderFragment? SeparatorTemplate { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-breadcrumb")
+        .AddClass(Class)
+        .Build();
+}

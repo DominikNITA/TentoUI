@@ -1,0 +1,130 @@
+@namespace TentoUI
+@typeparam TValue
+@using System.Globalization
+@inherits TentoInputBase<TValue>
+
+<div class="@ComputedWrapperClass" style="@Style">
+    @if (Prefix != null)
+    {
+        <span class="tento-input-number-prefix pl-3 flex items-center text-slate-400 text-sm select-none">
+            @Prefix
+        </span>
+    }
+
+    <input id="@ElementId"
+           type="number"
+           step="@Step"
+           min="@Min"
+           max="@Max"
+           placeholder="@Placeholder"
+           disabled="@IsDisabled"
+           readonly="@ReadOnly"
+           value="@BindConverter.FormatValue(CurrentValueAsString)"
+           class="@ComputedInputClass"
+           @onchange="HandleInputChange"
+           @attributes="AdditionalAttributes" />
+
+    @if (Controls && !ReadOnly)
+    {
+        <div class="tento-input-number-handlers flex flex-col border-l border-slate-300 dark:border-slate-600 shrink-0">
+            <button type="button"
+                    aria-label="Increase Value"
+                    disabled="@IsDisabled"
+                    class="tento-input-number-up px-2 py-0.5 text-[10px] leading-none text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
+                    @onclick="@(() => StepByAsync(1))">
+                &#9650;
+            </button>
+            <button type="button"
+                    aria-label="Decrease Value"
+                    disabled="@IsDisabled"
+                    class="tento-input-number-down px-2 py-0.5 text-[10px] leading-none border-t border-slate-300 dark:border-slate-600 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40"
+                    @onclick="@(() => StepByAsync(-1))">
+                &#9660;
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public double Step { get; set; } = 1;
+    [Parameter] public double? Min { get; set; }
+    [Parameter] public double? Max { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public bool Controls { get; set; } = true;
+    [Parameter] public RenderFragment? Prefix { get; set; }
+
+    protected override bool TryParseValueFromString(string? value, out TValue result, out string validationErrorMessage)
+    {
+        if (BindConverter.TryConvertTo<TValue>(value, CultureInfo.InvariantCulture, out var parsed) && parsed is not null)
+        {
+            result = ClampIfNeeded(parsed);
+            validationErrorMessage = string.Empty;
+            return true;
+        }
+
+        result = default!;
+        validationErrorMessage = $"The {DisplayName ?? FieldIdentifier.FieldName} field must be a number.";
+        return false;
+    }
+
+    private void HandleInputChange(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
+    private Task StepByAsync(int direction)
+    {
+        if (IsDisabled || ReadOnly) return Task.CompletedTask;
+
+        double current = 0;
+        if (CurrentValue != null && double.TryParse(Convert.ToString(CurrentValue, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+        {
+            current = parsed;
+        }
+
+        double next = current + (direction * Step);
+        if (Min.HasValue && next < Min.Value) next = Min.Value;
+        if (Max.HasValue && next > Max.Value) next = Max.Value;
+
+        CurrentValueAsString = next.ToString(CultureInfo.InvariantCulture);
+        return Task.CompletedTask;
+    }
+
+    private TValue ClampIfNeeded(TValue val)
+    {
+        if (!Min.HasValue && !Max.HasValue) return val;
+        if (double.TryParse(Convert.ToString(val, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var num))
+        {
+            var clamped = num;
+            if (Min.HasValue && clamped < Min.Value) clamped = Min.Value;
+            if (Max.HasValue && clamped > Max.Value) clamped = Max.Value;
+            if (Math.Abs(clamped - num) > double.Epsilon &&
+                BindConverter.TryConvertTo<TValue>(clamped.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out var converted) &&
+                converted is not null)
+            {
+                return converted;
+            }
+        }
+        return val;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-input-number inline-flex items-stretch rounded-md border bg-white dark:bg-slate-900 overflow-hidden transition-colors focus-within:ring-2")
+        .AddClass(GetStatusBorderClass())
+        .AddClass("opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800", IsDisabled)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedInputClass
+    {
+        get
+        {
+            var sizeClass = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "px-2.5 py-1 text-xs",
+                ComponentSize.Large => "px-4 py-2.5 text-base",
+                _ => "px-3 py-1.5 text-sm"
+            };
+            return $"w-full bg-transparent text-slate-900 dark:text-slate-100 focus:outline-none {sizeClass}";
+        }
+    }
+}

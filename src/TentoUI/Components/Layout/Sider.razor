@@ -1,0 +1,89 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+
+<aside class="@ComputedClass"
+       style="@ComputedStyle"
+       aria-expanded="@(Collapsed ? "false" : "true")"
+       @attributes="AdditionalAttributes">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+        @ChildContent
+    </div>
+
+    @if (Collapsible && Trigger == null)
+    {
+        <div class="h-12 flex items-center justify-center cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 transition-colors border-t border-slate-700/50 select-none"
+             @onclick="ToggleCollapse">
+            @if (Collapsed)
+            {
+                <Icon Name="IconNames.ChevronRight" Size="16" />
+            }
+            else
+            {
+                <Icon Name="IconNames.ChevronLeft" Size="16" />
+            }
+        </div>
+    }
+    else if (Collapsible && Trigger != null)
+    {
+        <div @onclick="ToggleCollapse">
+            @Trigger
+        </div>
+    }
+</aside>
+
+@code {
+    [CascadingParameter] private LayoutContext? LayoutContext { get; set; }
+
+    [Parameter] public bool Collapsed { get; set; }
+    [Parameter] public EventCallback<bool> CollapsedChanged { get; set; }
+    [Parameter] public bool Collapsible { get; set; }
+    [Parameter] public object Width { get; set; } = 200;
+    [Parameter] public object CollapsedWidth { get; set; } = 80;
+    [Parameter] public SiderTheme Theme { get; set; } = SiderTheme.Dark;
+    [Parameter] public RenderFragment? Trigger { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        LayoutContext?.RegisterSider();
+    }
+
+    private int NumericWidth => int.TryParse(Width?.ToString()?.Replace("px", ""), out var w) ? w : 200;
+    private int NumericCollapsedWidth => int.TryParse(CollapsedWidth?.ToString()?.Replace("px", ""), out var cw) ? cw : 80;
+    private int CurrentWidth => Collapsed ? NumericCollapsedWidth : NumericWidth;
+
+    private async Task ToggleCollapse()
+    {
+        Collapsed = !Collapsed;
+        if (CollapsedChanged.HasDelegate)
+        {
+            await CollapsedChanged.InvokeAsync(Collapsed);
+        }
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var themeClass = Theme == SiderTheme.Dark
+                ? "bg-slate-900 text-white border-r border-slate-800"
+                : "bg-white text-slate-900 border-r border-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800";
+
+            return new CssBuilder("tento-sider transition-all shrink-0 relative flex flex-col")
+                .AddClass(themeClass)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+
+    private string ComputedStyle => new StyleBuilder()
+        .AddStyle($"width: {CurrentWidth}px")
+        .AddStyle(Style)
+        .Build();
+
+    public void Dispose()
+    {
+        LayoutContext?.UnregisterSider();
+    }
+}

@@ -1,0 +1,62 @@
+@namespace TentoUI
+@inject IMessageService MessageService
+@implements IDisposable
+
+<div class="fixed top-6 left-1/2 -translate-x-1/2 z-[2000] flex flex-col items-center gap-2 pointer-events-none"
+     role="region"
+     aria-label="System notifications"
+     aria-live="polite"
+     aria-atomic="true">
+    @foreach (var msg in MessageService.Messages)
+    {
+        <div class="pointer-events-auto shadow-md rounded-lg py-2.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5 text-sm font-medium text-slate-800 dark:text-slate-100 transition-all duration-300 animate-in fade-in slide-in-from-top-4"
+             id="@($"tento-msg-{msg.Id}")">
+            @switch (msg.Type)
+            {
+                case MessageType.Success:
+                    <Icon Name="IconNames.CheckCircle" Class="text-emerald-500" Size="18" />
+                    break;
+                case MessageType.Warning:
+                    <Icon Name="IconNames.AlertTriangle" Class="text-amber-500" Size="18" />
+                    break;
+                case MessageType.Error:
+                    <Icon Name="IconNames.XCircle" Class="text-rose-500" Size="18" />
+                    break;
+                case MessageType.Loading:
+                    <Icon Name="IconNames.Loader2" Class="text-primary-500 animate-spin" Size="18" />
+                    break;
+                default:
+                    <Icon Name="IconNames.Info" Class="text-sky-500" Size="18" />
+                    break;
+            }
+
+            <div>
+                @if (msg.ContentTemplate != null)
+                {
+                    @msg.ContentTemplate
+                }
+                else
+                {
+                    <span>@msg.Content</span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        MessageService.OnChange += HandleChange;
+    }
+
+    private void HandleChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        MessageService.OnChange -= HandleChange;
+    }
+}

@@ -1,0 +1,22 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+
+@code {
+    [CascadingParameter] protected Descriptions? ParentDescriptions { get; set; }
+
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public RenderFragment? LabelTemplate { get; set; }
+    [Parameter] public int Span { get; set; } = 1;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentDescriptions?.RegisterItem(this);
+    }
+
+    public void Dispose()
+    {
+        ParentDescriptions?.UnregisterItem(this);
+    }
+}

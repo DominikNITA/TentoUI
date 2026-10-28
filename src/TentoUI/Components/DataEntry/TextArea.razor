@@ -1,0 +1,62 @@
+@namespace TentoUI
+@inherits TentoInputBase<string>
+
+<div class="tento-textarea-wrapper relative w-full" style="@Style">
+    <textarea id="@ElementId"
+              rows="@Rows"
+              maxlength="@MaxLength"
+              value="@CurrentValue"
+              @oninput="@HandleInput"
+              @onchange="@HandleChange"
+              placeholder="@Placeholder"
+              disabled="@IsDisabled"
+              readonly="@ReadOnly"
+              class="@ComputeTextAreaClass()"
+              aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+              aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+              @attributes="AdditionalAttributes">@CurrentValue</textarea>
+
+    @if (ShowCount && MaxLength.HasValue)
+    {
+        <div class="flex justify-end mt-1">
+            <span class="tento-textarea-count text-xs text-slate-400">@(CurrentValue?.Length ?? 0) / @MaxLength</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Rows { get; set; } = 4;
+    [Parameter] public int? MaxLength { get; set; }
+    [Parameter] public bool ShowCount { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
+    {
+        result = value ?? string.Empty;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputeTextAreaClass()
+    {
+        var statusBorder = EffectiveStatus == ComponentStatus.Error
+            ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+            : "border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500";
+
+        return new CssBuilder("w-full rounded-md border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 p-3 text-sm focus:outline-none focus:ring-1 transition-all")
+            .AddClass(statusBorder)
+            .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
+            .AddClass(Class)
+            .Build();
+    }
+}

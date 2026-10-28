@@ -1,0 +1,236 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@if (!HideOnSinglePage || TotalPages > 1)
+{
+    <div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+        @if (ShowTotal)
+        {
+            <span class="tento-pagination-total text-xs text-slate-500 dark:text-slate-400">
+                @if (TotalTemplate != null)
+                {
+                    @TotalTemplate(new PaginationRangeContext(StartItem, EndItem, TotalItems))
+                }
+                else
+                {
+                    @($"Showing {StartItem} to {EndItem} of {TotalItems}")
+                }
+            </span>
+        }
+
+        <div class="flex flex-wrap items-center gap-2">
+            <nav class="tento-pagination flex items-center space-x-1" aria-label="Pagination">
+                <button type="button"
+                        class="@ComputeNavBtnClass()"
+                        aria-label="Previous page"
+                        disabled="@(Disabled || EffectivePageIndex <= 1)"
+                        @onclick="@(() => ChangePage(EffectivePageIndex - 1))">
+                    &lt;
+                </button>
+
+                @if (Simple)
+                {
+                    <span class="px-2 py-1 text-xs text-slate-600 dark:text-slate-300" data-pagination-simple="true">
+                        @EffectivePageIndex / @TotalPages
+                    </span>
+                }
+                else
+                {
+                    @foreach (var item in GetVisiblePageNumbers())
+                    {
+                        if (item < 0)
+                        {
+                            <span class="px-1.5 py-1 text-xs text-slate-400 select-none" aria-hidden="true">...</span>
+                        }
+                        else
+                        {
+                            var pageNum = item;
+                            var isCurrent = pageNum == EffectivePageIndex;
+
+                            <button type="button"
+                                    class="@ComputePageBtnClass(isCurrent)"
+                                    aria-current="@(isCurrent ? "page" : null)"
+                                    disabled="@Disabled"
+                                    @onclick="@(() => ChangePage(pageNum))">
+                                @pageNum
+                            </button>
+                        }
+                    }
+                }
+
+                <button type="button"
+                        class="@ComputeNavBtnClass()"
+                        aria-label="Next page"
+                        disabled="@(Disabled || EffectivePageIndex >= TotalPages)"
+                        @onclick="@(() => ChangePage(EffectivePageIndex + 1))">
+                    &gt;
+                </button>
+            </nav>
+
+            @if (ShowSizeChanger && PageSizeOptions.Length > 0)
+            {
+                <select class="tento-pagination-size-changer text-xs border rounded px-2 py-1 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary-500"
+                        aria-label="Items per page"
+                        disabled="@Disabled"
+                        value="@EffectivePageSize"
+                        @onchange="HandlePageSizeChange">
+                    @foreach (var opt in PageSizeOptions)
+                    {
+                        <option value="@opt">@opt / page</option>
+                    }
+                </select>
+            }
+
+            @if (ShowQuickJumper)
+            {
+                <div class="tento-pagination-jumper inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                    <span>Go to</span>
+                    <input type="number"
+                           min="1"
+                           max="@TotalPages"
+                           aria-label="Jump to page"
+                           disabled="@Disabled"
+                           value="@_jumperInput"
+                           class="w-14 px-2 py-1 text-xs border rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:border-primary-500"
+                           @onchange="HandleQuickJump" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int PageIndex { get; set; } = 1;
+    [Parameter] public EventCallback<int> PageIndexChanged { get; set; }
+    [Parameter] public int PageSize { get; set; } = 10;
+    [Parameter] public EventCallback<int> PageSizeChanged { get; set; }
+    [Parameter] public int TotalItems { get; set; }
+    [Parameter] public int[] PageSizeOptions { get; set; } = new[] { 10, 20, 50, 100 };
+    [Parameter] public bool ShowSizeChanger { get; set; }
+    [Parameter] public bool ShowQuickJumper { get; set; }
+    [Parameter] public bool ShowTotal { get; set; } = true;
+    [Parameter] public RenderFragment<PaginationRangeContext>? TotalTemplate { get; set; }
+    [Parameter] public bool Simple { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool HideOnSinglePage { get; set; }
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public EventCallback<(int PageIndex, int PageSize)> OnChange { get; set; }
+
+    private string _jumperInput = string.Empty;
+
+    private int EffectivePageSize => Math.Max(1, PageSize);
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)Math.Max(0, TotalItems) / EffectivePageSize));
+    private int EffectivePageIndex => Math.Clamp(PageIndex, 1, TotalPages);
+    private int StartItem => TotalItems <= 0 ? 0 : (EffectivePageIndex - 1) * EffectivePageSize + 1;
+    private int EndItem => TotalItems <= 0 ? 0 : Math.Min(EffectivePageIndex * EffectivePageSize, TotalItems);
+
+    private IEnumerable<int> GetVisiblePageNumbers()
+    {
+        if (TotalPages <= 7)
+        {
+            for (int i = 1; i <= TotalPages; i++)
+                yield return i;
+            yield break;
+        }
+
+        yield return 1;
+
+        int start = Math.Max(2, EffectivePageIndex - 1);
+        int end = Math.Min(TotalPages - 1, EffectivePageIndex + 1);
+
+        if (EffectivePageIndex <= 3)
+        {
+            start = 2;
+            end = 4;
+        }
+        else if (EffectivePageIndex >= TotalPages - 2)
+        {
+            start = TotalPages - 3;
+            end = TotalPages - 1;
+        }
+
+        if (start > 2)
+            yield return -1; // Left ellipsis
+
+        for (int i = start; i <= end; i++)
+            yield return i;
+
+        if (end < TotalPages - 1)
+            yield return -2; // Right ellipsis
+
+        yield return TotalPages;
+    }
+
+    private async Task ChangePage(int newPage)
+    {
+        if (Disabled) return;
+        var clamped = Math.Clamp(newPage, 1, TotalPages);
+        PageIndex = clamped;
+
+        if (PageIndexChanged.HasDelegate)
+        {
+            await PageIndexChanged.InvokeAsync(PageIndex);
+        }
+
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync((PageIndex, EffectivePageSize));
+        }
+    }
+
+    private async Task HandlePageSizeChange(ChangeEventArgs e)
+    {
+        if (Disabled) return;
+        if (int.TryParse(e.Value?.ToString(), out var newSize) && newSize > 0)
+        {
+            PageSize = newSize;
+            PageIndex = 1;
+
+            if (PageSizeChanged.HasDelegate)
+            {
+                await PageSizeChanged.InvokeAsync(PageSize);
+            }
+
+            if (PageIndexChanged.HasDelegate)
+            {
+                await PageIndexChanged.InvokeAsync(PageIndex);
+            }
+
+            if (OnChange.HasDelegate)
+            {
+                await OnChange.InvokeAsync((PageIndex, PageSize));
+            }
+        }
+    }
+
+    private async Task HandleQuickJump(ChangeEventArgs e)
+    {
+        if (Disabled) return;
+        var raw = e.Value?.ToString();
+        _jumperInput = string.Empty;
+        if (int.TryParse(raw, out var targetPage))
+        {
+            await ChangePage(targetPage);
+        }
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-pagination-wrapper flex flex-wrap items-center justify-between gap-2")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeNavBtnClass()
+    {
+        var sizePadding = ResolvedSize(Size) == ComponentSize.Small ? "px-1.5 py-0.5 text-xs" : "px-2 py-1 text-xs";
+        return $"{sizePadding} border rounded border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 transition-colors";
+    }
+
+    private string ComputePageBtnClass(bool isCurrent)
+    {
+        var sizePadding = ResolvedSize(Size) == ComponentSize.Small ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-xs";
+        return new CssBuilder($"{sizePadding} border rounded transition-colors")
+            .AddClass("border-primary-500 bg-primary-50 text-primary-600 font-bold dark:bg-primary-950/40 dark:text-primary-400", isCurrent)
+            .AddClass("border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800", !isCurrent)
+            .AddClass("opacity-40 cursor-not-allowed", Disabled)
+            .Build();
+    }
+}

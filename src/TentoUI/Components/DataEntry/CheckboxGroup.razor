@@ -1,0 +1,57 @@
+@namespace TentoUI
+@typeparam TValue
+@inherits TentoComponentBase
+
+<div class="tento-checkbox-group flex flex-wrap gap-4" role="group" style="@Style" @attributes="AdditionalAttributes">
+    @if (Options != null)
+    {
+        @foreach (var opt in Options)
+        {
+            var isChecked = Values != null && Values.Contains(opt.Value);
+            var optVal = opt.Value;
+
+            <label class="@($"tento-checkbox flex items-center space-x-2 {(opt.Disabled || Disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer")}")">
+                <input type="checkbox"
+                       name="@Name"
+                       value="@opt.Value"
+                       checked="@isChecked"
+                       disabled="@(opt.Disabled || Disabled)"
+                       aria-checked="@(isChecked ? "true" : "false")"
+                       @onchange="@((ChangeEventArgs e) => HandleOptionChange(optVal, (bool)(e.Value ?? false)))" />
+                <span>@opt.Label</span>
+            </label>
+        }
+    }
+    else
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    [Parameter] public string? Name { get; set; } = $"checkbox-group-{Guid.NewGuid():N}";
+    [Parameter] public IEnumerable<CheckboxOption<TValue>>? Options { get; set; }
+    [Parameter] public IEnumerable<TValue>? Values { get; set; }
+    [Parameter] public EventCallback<IEnumerable<TValue>> ValuesChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task HandleOptionChange(TValue val, bool isChecked)
+    {
+        var list = Values?.ToList() ?? new System.Collections.Generic.List<TValue>();
+        if (isChecked && !list.Contains(val))
+        {
+            list.Add(val);
+        }
+        else if (!isChecked && list.Contains(val))
+        {
+            list.Remove(val);
+        }
+
+        Values = list;
+        if (ValuesChanged.HasDelegate)
+        {
+            await ValuesChanged.InvokeAsync(Values);
+        }
+    }
+}

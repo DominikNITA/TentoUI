@@ -1,0 +1,209 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@_tabsContext" IsFixed="true">
+    <div class="@ComputedContainerClass" style="@Style" @attributes="AdditionalAttributes">
+        @* Hidden slot for TabPanes to register *@
+        <div class="hidden">
+            @ChildContent
+        </div>
+
+        @* Tab Navigation Bar *@
+        <div class="tento-tabs-nav flex space-x-4 @NavTypeClass"
+             role="tablist"
+             aria-orientation="@(Position == TabPosition.Left || Position == TabPosition.Right ? "vertical" : "horizontal")"
+             @onkeydown="HandleKeyDown">
+            
+            @foreach (var pane in _tabsContext.Panes)
+            {
+                var isActive = pane.Key == EffectiveActiveKey;
+                var paneKey = pane.Key;
+
+                <button type="button"
+                        role="tab"
+                        id="@($"tab-{paneKey}")"
+                        aria-controls="@($"pane-{paneKey}")"
+                        aria-selected="@(isActive ? "true" : "false")"
+                        aria-disabled="@(pane.Disabled ? "true" : null)"
+                        tabindex="@(isActive ? 0 : -1)"
+                        disabled="@pane.Disabled"
+                        class="@ComputeTabBtnClass(isActive, pane.Disabled)"
+                        @onclick="@(() => SelectTabAsync(paneKey))">
+                    
+                    @if (pane.Icon != null)
+                    {
+                        <span class="inline-flex items-center mr-1.5">@pane.Icon</span>
+                    }
+
+                    @if (pane.TabTemplate != null)
+                    {
+                        @pane.TabTemplate
+                    }
+                    else
+                    {
+                        <span>@pane.Tab</span>
+                    }
+
+                    @if (Type == TabType.EditableCard && pane.Closable && !pane.Disabled)
+                    {
+                        <span class="ml-2 hover:text-red-500 rounded p-0.5"
+                              @onclick:stopPropagation="true"
+                              @onclick="@(() => RemoveTabAsync(paneKey))">
+                            <Icon Name="IconNames.X" Size="12" />
+                        </span>
+                    }
+                </button>
+            }
+
+            @if (Type == TabType.EditableCard)
+            {
+                <button type="button"
+                        class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border border-dashed border-slate-300 dark:border-slate-700 rounded text-xs self-center"
+                        aria-label="Add tab"
+                        @onclick="AddTabAsync">
+                    <Icon Name="IconNames.Plus" Size="14" />
+                </button>
+            }
+
+            @if (TabBarExtraContent != null)
+            {
+                <div class="ml-auto self-center">
+                    @TabBarExtraContent
+                </div>
+            }
+        </div>
+
+        @* Active Tab Pane Content *@
+        @foreach (var pane in _tabsContext.Panes)
+        {
+            var isActive = pane.Key == EffectiveActiveKey;
+            <div role="tabpanel"
+                 id="@($"pane-{pane.Key}")"
+                 aria-labelledby="@($"tab-{pane.Key}")"
+                 tabindex="0"
+                 class="@($"tento-tabpane p-4 {(isActive ? "block" : "hidden")}")">
+                @if (isActive)
+                {
+                    @pane.Content
+                }
+            </div>
+        }
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public string? ActiveKey { get; set; }
+    [Parameter] public string? DefaultActiveKey { get; set; }
+    [Parameter] public EventCallback<string> ActiveKeyChanged { get; set; }
+    [Parameter] public EventCallback<string> OnChange { get; set; }
+    [Parameter] public EventCallback<TabEditEventArgs> OnEdit { get; set; }
+    [Parameter] public TabType Type { get; set; } = TabType.Line;
+    [Parameter] public TabPosition Position { get; set; } = TabPosition.Top;
+    [Parameter] public RenderFragment? TabBarExtraContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly TabsContext _tabsContext = new();
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(DefaultActiveKey) && string.IsNullOrEmpty(ActiveKey))
+        {
+            _tabsContext.ActiveKey = DefaultActiveKey;
+        }
+
+        _tabsContext.OnStateChange += async () =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(ActiveKey))
+        {
+            _tabsContext.ActiveKey = ActiveKey;
+        }
+    }
+
+    private string? EffectiveActiveKey => !string.IsNullOrEmpty(ActiveKey) ? ActiveKey : _tabsContext.ActiveKey;
+
+    private async Task SelectTabAsync(string key)
+    {
+        _tabsContext.SetActiveKey(key);
+        ActiveKey = key;
+        if (ActiveKeyChanged.HasDelegate)
+        {
+            await ActiveKeyChanged.InvokeAsync(key);
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync(key);
+        }
+    }
+
+    private async Task AddTabAsync()
+    {
+        if (OnEdit.HasDelegate)
+        {
+            await OnEdit.InvokeAsync(new TabEditEventArgs { Action = "add" });
+        }
+    }
+
+    private async Task RemoveTabAsync(string key)
+    {
+        if (OnEdit.HasDelegate)
+        {
+            await OnEdit.InvokeAsync(new TabEditEventArgs { Action = "remove", Key = key });
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        var enabledPanes = _tabsContext.Panes.Where(p => !p.Disabled).ToList();
+        if (!enabledPanes.Any()) return;
+
+        var currentIndex = enabledPanes.FindIndex(p => p.Key == EffectiveActiveKey);
+
+        if (e.Key == "ArrowRight" || e.Key == "ArrowDown")
+        {
+            var nextIndex = (currentIndex + 1) % enabledPanes.Count;
+            await SelectTabAsync(enabledPanes[nextIndex].Key);
+        }
+        else if (e.Key == "ArrowLeft" || e.Key == "ArrowUp")
+        {
+            var prevIndex = (currentIndex - 1 + enabledPanes.Count) % enabledPanes.Count;
+            await SelectTabAsync(enabledPanes[prevIndex].Key);
+        }
+    }
+
+    private string ComputedContainerClass => new CssBuilder("tento-tabs w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string NavTypeClass => Type switch
+    {
+        TabType.Card => "border-b-0 bg-slate-100 dark:bg-slate-800 rounded-t-md p-1",
+        TabType.EditableCard => "border-b-0 bg-slate-100 dark:bg-slate-800 rounded-t-md p-1",
+        _ => "border-b border-slate-200 dark:border-slate-800"
+    };
+
+    private string ComputeTabBtnClass(bool active, bool disabled)
+    {
+        var activeClass = active
+            ? (Type == TabType.Line
+                ? "text-primary-600 border-primary-500 font-medium"
+                : "bg-white dark:bg-slate-900 text-primary-600 font-medium shadow-sm rounded")
+            : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-transparent";
+
+        var disabledClass = disabled
+            ? "cursor-not-allowed opacity-40 pointer-events-none"
+            : "cursor-pointer";
+
+        var baseBorder = Type == TabType.Line ? "border-b-2" : "";
+
+        return new CssBuilder($"tento-tab-btn py-2 px-4 inline-flex items-center text-sm transition-all {baseBorder}")
+            .AddClass(activeClass)
+            .AddClass(disabledClass)
+            .Build();
+    }
+}

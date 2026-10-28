@@ -1,0 +1,73 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public SpaceDirection Direction { get; set; } = SpaceDirection.Horizontal;
+    [Parameter] public object Size { get; set; } = SpaceSize.Middle;
+    [Parameter] public SpaceAlign? Align { get; set; }
+    [Parameter] public bool Wrap { get; set; }
+    [Parameter] public RenderFragment? Split { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var dirClass = Direction == SpaceDirection.Vertical ? "flex-col" : "flex-row";
+
+            var gapClass = "gap-4";
+            if (Size is SpaceSize ss)
+            {
+                gapClass = ss switch
+                {
+                    SpaceSize.Small => "gap-2",
+                    SpaceSize.Large => "gap-6",
+                    _ => "gap-4"
+                };
+            }
+            else if (Size is ComponentSize cs)
+            {
+                gapClass = cs switch
+                {
+                    ComponentSize.Small => "gap-2",
+                    ComponentSize.Large => "gap-6",
+                    _ => "gap-4"
+                };
+            }
+            else if (Size is int pixel)
+            {
+                gapClass = $"gap-[{pixel}px]";
+            }
+            else if (Size is string str)
+            {
+                gapClass = str.ToLowerInvariant() switch
+                {
+                    "small" => "gap-2",
+                    "large" => "gap-6",
+                    _ => "gap-4"
+                };
+            }
+
+            var alignClass = Align switch
+            {
+                SpaceAlign.Start => "items-start",
+                SpaceAlign.End => "items-end",
+                SpaceAlign.Center => "items-center",
+                SpaceAlign.Baseline => "items-baseline",
+                _ => Direction == SpaceDirection.Horizontal ? "items-center" : ""
+            };
+
+            return new CssBuilder("tento-space inline-flex")
+                .AddClass(dirClass)
+                .AddClass(gapClass)
+                .AddClass(alignClass)
+                .AddClass("flex-wrap", Wrap)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

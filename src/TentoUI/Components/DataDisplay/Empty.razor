@@ -1,0 +1,51 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="tento-empty-image mb-3 text-slate-300 dark:text-slate-600 flex items-center justify-center">
+        @if (ImageTemplate != null)
+        {
+            @ImageTemplate
+        }
+        else if (!string.IsNullOrEmpty(ImageUrl))
+        {
+            <img src="@ImageUrl" alt="@Description" class="max-h-24 w-auto object-contain" />
+        }
+        else
+        {
+            <Icon Name="@IconNames.Inbox" Size="44" />
+        }
+    </div>
+
+    @if (DescriptionTemplate != null)
+    {
+        <div class="tento-empty-description text-sm text-slate-500 dark:text-slate-400">
+            @DescriptionTemplate
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Description))
+    {
+        <p class="tento-empty-description text-sm text-slate-500 dark:text-slate-400">
+            @Description
+        </p>
+    }
+
+    @if (ChildContent != null)
+    {
+        <div class="tento-empty-footer mt-4">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Description { get; set; } = "No Data";
+    [Parameter] public RenderFragment? DescriptionTemplate { get; set; }
+    [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public RenderFragment? ImageTemplate { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-empty flex flex-col items-center justify-center py-8 px-4 text-center")
+        .AddClass(Class)
+        .Build();
+}

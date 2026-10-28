@@ -1,0 +1,70 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedPanelClass" style="@Style" @attributes="AdditionalAttributes">
+    <button type="button"
+            class="@ComputedHeaderClass"
+            disabled="@Disabled"
+            aria-expanded="@(IsOpen ? "true" : "false")"
+            @onclick="HandleClickAsync">
+        <div class="inline-flex items-center gap-2 font-medium text-sm text-slate-800 dark:text-slate-100">
+            @if (ShowArrow)
+            {
+                <Icon Name="@(IsOpen ? IconNames.ChevronDown : IconNames.ChevronRight)"
+                      Size="16"
+                      Class="text-slate-400 transition-transform duration-150" />
+            }
+            @if (HeaderTemplate != null)
+            {
+                @HeaderTemplate
+            }
+            else
+            {
+                <span>@Header</span>
+            }
+        </div>
+
+        @if (Extra != null)
+        {
+            <div class="tento-collapse-extra text-xs text-slate-500" @onclick:stopPropagation="true">
+                @Extra
+            </div>
+        }
+    </button>
+
+    @if (IsOpen)
+    {
+        <div class="tento-collapse-content px-4 py-3 text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [CascadingParameter] protected Collapse? ParentCollapse { get; set; }
+
+    [Parameter] public string Key { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string? Header { get; set; }
+    [Parameter] public RenderFragment? HeaderTemplate { get; set; }
+    [Parameter] public RenderFragment? Extra { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ShowArrow { get; set; } = true;
+
+    private bool IsOpen => ParentCollapse?.IsPanelOpen(Key) ?? false;
+
+    private async Task HandleClickAsync()
+    {
+        if (Disabled || ParentCollapse == null) return;
+        await ParentCollapse.TogglePanelAsync(Key);
+    }
+
+    private string ComputedPanelClass => new CssBuilder("tento-collapse-panel")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedHeaderClass => new CssBuilder("tento-collapse-header w-full px-4 py-3 flex items-center justify-between text-left bg-slate-50/70 dark:bg-slate-800/60 hover:bg-slate-100/70 dark:hover:bg-slate-800 transition-colors")
+        .AddClass("opacity-50 cursor-not-allowed", Disabled)
+        .AddClass("cursor-pointer", !Disabled)
+        .Build();
+}

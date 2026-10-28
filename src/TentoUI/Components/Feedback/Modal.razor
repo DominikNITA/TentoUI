@@ -1,0 +1,229 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+
+@if (Visible)
+{
+    <div class="fixed inset-0 z-[1000] overflow-y-auto"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="@_titleId"
+         aria-describedby="@_bodyId"
+         @onkeydown="HandleKeyDown"
+         tabindex="-1"
+         @ref="_modalContainerRef">
+
+        @* Backdrop Mask *@
+        @if (Mask)
+        {
+            <div class="tento-modal-backdrop fixed inset-0 bg-black/50 transition-opacity backdrop-blur-[1px]"
+                 @onclick="HandleMaskClick"
+                 aria-hidden="true"></div>
+        }
+
+        @* Alignment Wrapper *@
+        <div class="@WrapperClass" @onclick="HandleMaskClick">
+            <div class="@DialogClass"
+                 style="@DialogStyle"
+                 @onclick:stopPropagation="true">
+
+                @* Header *@
+                @if (Title != null || TitleTemplate != null || Closable)
+                {
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+                        <div id="@_titleId" class="text-base font-semibold text-slate-900 dark:text-slate-100">
+                            @if (TitleTemplate != null)
+                            {
+                                @TitleTemplate
+                            }
+                            else
+                            {
+                                @Title
+                            }
+                        </div>
+                        @if (Closable)
+                        {
+                            <button type="button"
+                                    class="tento-modal-close text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                                    aria-label="Close dialog"
+                                    data-dismiss-key="Escape"
+                                    @onclick="HandleCancel">
+                                <Icon Name="IconNames.X" Size="18" />
+                            </button>
+                        }
+                    </div>
+                }
+
+                @* Body *@
+                <div id="@_bodyId" class="@BodyComputedClass">
+                    @ChildContent
+                </div>
+
+                @* Footer *@
+                @if (Footer != null)
+                {
+                    <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-lg">
+                        @Footer
+                    </div>
+                }
+                else if (!HideFooter)
+                {
+                    <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-lg">
+                        @if (!string.IsNullOrEmpty(CancelText))
+                        {
+                            <Button Type="ButtonType.Default" OnClick="HandleCancel" Disabled="@ConfirmLoading">
+                                @CancelText
+                            </Button>
+                        }
+                        @if (!string.IsNullOrEmpty(OkText))
+                        {
+                            <Button Type="@OkType" Danger="@Danger" Loading="@ConfirmLoading" OnClick="HandleOk">
+                                @OkText
+                            </Button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private readonly string _titleId = $"tento-modal-title-{Guid.NewGuid():N}";
+    private readonly string _bodyId = $"tento-modal-body-{Guid.NewGuid():N}";
+    private ElementReference _modalContainerRef;
+    private bool _prevVisible;
+    private IJSObjectReference? _module;
+
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? TitleTemplate { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public bool HideFooter { get; set; }
+    [Parameter] public string OkText { get; set; } = "OK";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public ButtonType OkType { get; set; } = ButtonType.Primary;
+    [Parameter] public bool Danger { get; set; }
+    [Parameter] public bool ConfirmLoading { get; set; }
+    [Parameter] public bool Closable { get; set; } = true;
+    [Parameter] public bool Keyboard { get; set; } = true;
+    [Parameter] public bool Mask { get; set; } = true;
+    [Parameter] public bool MaskClosable { get; set; } = true;
+    [Parameter] public bool Centered { get; set; } = true;
+    [Parameter] public string Width { get; set; } = "520px";
+    [Parameter] public int ZIndex { get; set; } = 1000;
+    [Parameter] public EventCallback OnOk { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback AfterClose { get; set; }
+    [Parameter] public string? BodyClass { get; set; }
+
+    private string WrapperClass => new CssBuilder("min-h-full flex p-4 text-center sm:p-0")
+        .AddClass("items-center justify-center", Centered)
+        .AddClass("items-start justify-center pt-24", !Centered)
+        .Build();
+
+    private string DialogClass => new CssBuilder("relative transform overflow-hidden rounded-lg bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full border border-slate-200 dark:border-slate-800")
+        .AddClass(Class)
+        .Build();
+
+    private string DialogStyle => new StyleBuilder()
+        .AddStyle("max-width", Width)
+        .AddStyle("z-index", ZIndex.ToString())
+        .AddStyle(Style)
+        .Build();
+
+    private string BodyComputedClass => new CssBuilder("px-6 py-4 text-sm text-slate-600 dark:text-slate-300")
+        .AddClass(BodyClass)
+        .Build();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Visible && !_prevVisible)
+        {
+            _prevVisible = true;
+            await InitializeFocusTrapAsync();
+        }
+        else if (!Visible && _prevVisible)
+        {
+            _prevVisible = false;
+            await ReleaseFocusTrapAsync();
+            if (AfterClose.HasDelegate)
+            {
+                await AfterClose.InvokeAsync();
+            }
+        }
+    }
+
+    private async Task InitializeFocusTrapAsync()
+    {
+        try
+        {
+            _module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/TentoUI/tentoui.js");
+            await _module.InvokeVoidAsync("tentoModal.open", _modalContainerRef);
+        }
+        catch (Exception) { /* Graceful SSR / test fallback */ }
+    }
+
+    private async Task ReleaseFocusTrapAsync()
+    {
+        try
+        {
+            if (_module != null)
+            {
+                await _module.InvokeVoidAsync("tentoModal.close", _modalContainerRef);
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private async Task HandleMaskClick(MouseEventArgs e)
+    {
+        if (MaskClosable && !ConfirmLoading)
+        {
+            await HandleCancel();
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        if (ConfirmLoading) return;
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+        Visible = false;
+        if (VisibleChanged.HasDelegate)
+        {
+            await VisibleChanged.InvokeAsync(false);
+        }
+    }
+
+    private async Task HandleOk()
+    {
+        if (ConfirmLoading) return;
+        if (OnOk.HasDelegate)
+        {
+            await OnOk.InvokeAsync();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape" && Keyboard && Closable && !ConfirmLoading)
+        {
+            await HandleCancel();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await ReleaseFocusTrapAsync();
+        if (_module != null)
+        {
+            try { await _module.DisposeAsync(); } catch { }
+        }
+    }
+}

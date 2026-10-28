@@ -1,0 +1,100 @@
+@namespace TentoUI
+@inherits TentoInputBase<bool>
+
+<button type="button"
+        role="switch"
+        aria-checked="@(CurrentValue ? "true" : "false")"
+        disabled="@(IsDisabled || Loading)"
+        class="@ComputeSwitchClass()"
+        style="@Style"
+        @onclick="@Toggle"
+        @attributes="AdditionalAttributes">
+    
+    <span class="@ComputeThumbClass()">
+        @if (Loading)
+        {
+            <span class="animate-spin inline-flex items-center justify-center">
+                <svg class="w-3 h-3 text-primary-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </span>
+        }
+    </span>
+
+    @if (CheckedChildren != null || UnCheckedChildren != null)
+    {
+        <span class="flex-1 flex items-center justify-center text-xs font-medium text-white px-1.5 select-none transition-opacity">
+            @if (CurrentValue)
+            {
+                @CheckedChildren
+            }
+            else
+            {
+                @UnCheckedChildren
+            }
+        </span>
+    }
+</button>
+
+@code {
+    [Parameter]
+    public bool Checked
+    {
+        get => CurrentValue;
+        set => CurrentValue = value;
+    }
+    [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public RenderFragment? CheckedChildren { get; set; }
+    [Parameter] public RenderFragment? UnCheckedChildren { get; set; }
+
+    private async Task Toggle()
+    {
+        if (IsDisabled || Loading) return;
+        CurrentValue = !CurrentValue;
+        if (CheckedChanged.HasDelegate)
+        {
+            await CheckedChanged.InvokeAsync(CurrentValue);
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out bool result, out string validationErrorMessage)
+    {
+        result = bool.TryParse(value, out var b) && b;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputeSwitchClass()
+    {
+        var size = ResolvedSize(Size);
+        var isSmall = size == ComponentSize.Small;
+
+        return new CssBuilder("tento-switch relative inline-flex items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/50")
+            .AddClass("h-4 w-7", isSmall)
+            .AddClass("h-6 w-11", !isSmall)
+            .AddClass("bg-primary-500", CurrentValue)
+            .AddClass("bg-slate-300 dark:bg-slate-700", !CurrentValue)
+            .AddClass("opacity-50 cursor-not-allowed", IsDisabled || Loading)
+            .AddClass("cursor-pointer", !IsDisabled && !Loading)
+            .AddClass(Class)
+            .Build();
+    }
+
+    private string ComputeThumbClass()
+    {
+        var size = ResolvedSize(Size);
+        var isSmall = size == ComponentSize.Small;
+
+        var offset = isSmall
+            ? (CurrentValue ? "translate-x-3.5" : "translate-x-0")
+            : (CurrentValue ? "translate-x-5" : "translate-x-0");
+
+        return new CssBuilder("inline-block transform rounded-full bg-white shadow-md transition-transform")
+            .AddClass("h-3 w-3", isSmall)
+            .AddClass("h-5 w-5", !isSmall)
+            .AddClass(offset)
+            .Build();
+    }
+}

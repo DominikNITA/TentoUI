@@ -1,0 +1,89 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div role="radiogroup"
+     aria-label="@(AriaLabel ?? "Rating")"
+     class="@ComputedClass"
+     style="@Style"
+     @onmouseleave="@(() => _hoverValue = null)"
+     @attributes="AdditionalAttributes">
+    @for (int i = 1; i <= Count; i++)
+    {
+        var starIndex = i;
+        var activeVal = _hoverValue ?? Value;
+        var isActive = starIndex <= activeVal;
+        var tooltipText = Tooltips != null && starIndex - 1 < Tooltips.Count ? Tooltips[starIndex - 1] : $"Rate {starIndex}";
+
+        <button type="button"
+                role="radio"
+                aria-checked="@(starIndex == Value ? "true" : "false")"
+                aria-label="@tooltipText"
+                title="@tooltipText"
+                disabled="@(Disabled || ReadOnly)"
+                data-star-index="@starIndex"
+                class="@ComputeStarBtnClass(isActive)"
+                @onmouseenter="@(() => HandleHover(starIndex))"
+                @onclick="@(() => SelectStarAsync(starIndex))">
+            @if (Character != null)
+            {
+                @Character
+            }
+            else
+            {
+                <Icon Name="@IconNames.Star" Size="20" />
+            }
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+    [Parameter] public EventCallback<int> OnChange { get; set; }
+    [Parameter] public int Count { get; set; } = 5;
+    [Parameter] public bool AllowClear { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public IReadOnlyList<string>? Tooltips { get; set; }
+    [Parameter] public RenderFragment? Character { get; set; }
+
+    private int? _hoverValue;
+
+    private void HandleHover(int index)
+    {
+        if (Disabled || ReadOnly) return;
+        _hoverValue = index;
+    }
+
+    private async Task SelectStarAsync(int index)
+    {
+        if (Disabled || ReadOnly) return;
+        var next = (AllowClear && Value == index) ? 0 : index;
+        Value = next;
+
+        if (ValueChanged.HasDelegate)
+        {
+            await ValueChanged.InvokeAsync(Value);
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync(Value);
+        }
+    }
+
+    private string ComputedClass => new CssBuilder("tento-rate inline-flex items-center gap-1")
+        .AddClass("opacity-50", Disabled)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeStarBtnClass(bool isActive)
+    {
+        return new CssBuilder("tento-rate-star p-0.5 transition-transform focus:outline-none")
+            .AddClass("text-amber-400 scale-105", isActive)
+            .AddClass("text-slate-300 dark:text-slate-600", !isActive)
+            .AddClass("cursor-pointer hover:scale-110", !Disabled && !ReadOnly)
+            .AddClass("cursor-default", Disabled || ReadOnly)
+            .Build();
+    }
+}

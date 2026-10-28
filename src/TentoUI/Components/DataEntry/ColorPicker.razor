@@ -1,0 +1,124 @@
+@namespace TentoUI
+@inherits TentoInputBase<string>
+
+<div class="@ComputedWrapperClass" style="@Style">
+    <button type="button"
+            class="@ComputedTriggerClass"
+            disabled="@IsDisabled"
+            aria-label="Pick color"
+            @onclick="TogglePopupAsync">
+        <span class="w-5 h-5 rounded border border-black/10 dark:border-white/10 shrink-0 shadow-inner"
+              style="@($"background-color: {CurrentHex};")"></span>
+        @if (ShowText)
+        {
+            <span class="text-xs font-mono text-slate-700 dark:text-slate-300">@CurrentHex</span>
+        }
+    </button>
+
+    @if (_isOpen && !IsDisabled && !ReadOnly)
+    {
+        <div class="tento-colorpicker-popup absolute z-50 mt-1 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl w-56 text-xs"
+             @onclick:stopPropagation="true">
+            
+            <div class="flex items-center gap-2 mb-3">
+                <input type="color"
+                       value="@CurrentHex"
+                       class="w-8 h-8 rounded border-0 cursor-pointer bg-transparent p-0"
+                       @onchange="HandleNativeColorChange" />
+                <input type="text"
+                       value="@CurrentHex"
+                       class="flex-1 px-2 py-1 text-xs font-mono border rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100"
+                       @onchange="HandleTextInputChange" />
+            </div>
+
+            @if (Presets != null && Presets.Any())
+            {
+                <div class="mb-2">
+                    <span class="text-[10px] text-slate-400 font-medium block mb-1">Presets</span>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach (var color in Presets)
+                        {
+                            var c = color;
+                            <button type="button"
+                                    class="w-5 h-5 rounded border border-black/10 dark:border-white/10 hover:scale-110 transition-transform"
+                                    style="@($"background-color: {c};")"
+                                    title="@c"
+                                    aria-label="@($"Select color {c}")"
+                                    @onclick="@(() => SelectColorAsync(c))">
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                <button type="button"
+                        class="px-2.5 py-1 text-xs rounded bg-primary-500 text-white font-medium hover:bg-primary-600"
+                        @onclick="@(() => _isOpen = false)">
+                    Done
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public bool ShowText { get; set; } = true;
+    [Parameter] public IEnumerable<string>? Presets { get; set; } = new[]
+    {
+        "#1677ff", "#52c41a", "#faad14", "#ff4d4f", "#722ed1", "#13c2c2", "#2f54eb", "#000000"
+    };
+
+    private bool _isOpen;
+
+    private string CurrentHex => !string.IsNullOrEmpty(Value) ? Value : "#1677ff";
+
+    protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
+    {
+        result = value ?? "#1677ff";
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private void TogglePopupAsync()
+    {
+        if (IsDisabled || ReadOnly) return;
+        _isOpen = !_isOpen;
+    }
+
+    private async Task SelectColorAsync(string color)
+    {
+        CurrentValueAsString = color;
+    }
+
+    private void HandleNativeColorChange(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString() ?? "#1677ff";
+    }
+
+    private void HandleTextInputChange(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString() ?? "#1677ff";
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-colorpicker relative inline-block")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedTriggerClass
+    {
+        get
+        {
+            var sizePadding = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "px-2 py-1",
+                ComponentSize.Large => "px-3.5 py-2",
+                _ => "px-2.5 py-1.5"
+            };
+
+            return new CssBuilder($"inline-flex items-center gap-2 rounded-md border bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 hover:border-primary-500 transition-colors cursor-pointer {sizePadding}")
+                .AddClass("opacity-50 cursor-not-allowed", IsDisabled)
+                .Build();
+        }
+    }
+}

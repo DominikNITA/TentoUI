@@ -1,0 +1,63 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@switch (ClampedLevel)
+{
+    case 1:
+        <h1 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h1>
+        break;
+    case 2:
+        <h2 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h2>
+        break;
+    case 3:
+        <h3 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h3>
+        break;
+    case 4:
+        <h4 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h4>
+        break;
+    case 5:
+        <h5 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h5>
+        break;
+    default:
+        <h6 class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">@ChildContent</h6>
+        break;
+}
+
+@code {
+    [Parameter] public int Level { get; set; } = 1;
+    [Parameter] public TypographyType Type { get; set; } = TypographyType.Default;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private int ClampedLevel => Math.Clamp(Level, 1, 6);
+
+    private string ComputedClass
+    {
+        get
+        {
+            var sizeClass = ClampedLevel switch
+            {
+                1 => "text-4xl",
+                2 => "text-3xl",
+                3 => "text-2xl",
+                4 => "text-xl",
+                5 => "text-lg",
+                _ => "text-base"
+            };
+
+            var typeClass = Type switch
+            {
+                TypographyType.Secondary => "text-slate-500",
+                TypographyType.Success => "text-emerald-500",
+                TypographyType.Warning => "text-amber-500",
+                TypographyType.Danger => "text-red-500",
+                _ => "text-slate-900 dark:text-slate-50"
+            };
+
+            return new CssBuilder("tento-typography-title font-semibold tracking-tight")
+                .AddClass(sizeClass)
+                .AddClass(typeClass)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

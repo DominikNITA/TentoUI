@@ -1,0 +1,14 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-float-button-group fixed bottom-8 right-8 z-40 flex flex-col gap-3 items-center")
+        .AddClass(Class)
+        .Build();
+}

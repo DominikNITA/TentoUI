@@ -1,0 +1,38 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+
+<CascadingValue Value="@_layoutContext" IsFixed="true">
+    <section class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+        @ChildContent
+    </section>
+</CascadingValue>
+
+@code {
+    [Parameter] public bool HasSider { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly LayoutContext _layoutContext = new();
+
+    protected override void OnInitialized()
+    {
+        _layoutContext.OnChange += HandleLayoutChange;
+    }
+
+    private void HandleLayoutChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private bool EffectiveHasSider => HasSider || _layoutContext.HasSider;
+
+    private string ComputedClass => new CssBuilder("tento-layout flex min-h-screen w-full")
+        .AddClass(EffectiveHasSider ? "flex-row" : "flex-col")
+        .AddClass(Class)
+        .Build();
+
+    public void Dispose()
+    {
+        _layoutContext.OnChange -= HandleLayoutChange;
+    }
+}

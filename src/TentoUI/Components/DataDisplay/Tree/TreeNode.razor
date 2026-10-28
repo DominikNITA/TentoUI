@@ -1,0 +1,92 @@
+@namespace TentoUI
+@implements IDisposable
+
+<li class="tento-tree-node select-none" data-tree-key="@Key">
+    <div class="@ComputeNodeRowClass()" style="@($"padding-left: {Level * 18 + 4}px;")">
+        @if (ChildContent != null && !IsLeaf)
+        {
+            <button type="button"
+                    class="p-0.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    aria-label="@(_isExpanded ? "Collapse" : "Expand")"
+                    @onclick="ToggleExpandAsync">
+                <Icon Name="@(_isExpanded ? IconNames.ChevronDown : IconNames.ChevronRight)" Size="14" />
+            </button>
+        }
+        else
+        {
+            <span class="w-4.5 inline-block"></span>
+        }
+
+        @if (ParentTree?.Checkable == true)
+        {
+            <input type="checkbox"
+                   checked="@_isChecked"
+                   disabled="@Disabled"
+                   class="w-3.5 h-3.5 rounded border-slate-300 text-primary-500 focus:ring-primary-500 cursor-pointer mx-1"
+                   @onchange="ToggleCheckAsync" />
+        }
+
+        <span class="truncate flex-1 py-0.5 cursor-pointer"
+              @onclick="SelectAsync">
+            @Title
+        </span>
+    </div>
+
+    @if (ChildContent != null && _isExpanded)
+    {
+        <ul>
+            <CascadingValue Value="@this" IsFixed="true">
+                @ChildContent
+            </CascadingValue>
+        </ul>
+    }
+</li>
+
+@code {
+    [CascadingParameter] protected Tree? ParentTree { get; set; }
+    [CascadingParameter] protected TreeNode? ParentNode { get; set; }
+
+    [Parameter] public string Key { get; set; } = Guid.NewGuid().ToString("N");
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool IsLeaf { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private int Level => (ParentNode?.Level ?? -1) + 1;
+    private bool _isExpanded => ParentTree?.ExpandedKeys.Contains(Key) ?? false;
+    private bool _isChecked => ParentTree?.CheckedKeys.Contains(Key) ?? false;
+    private bool _isSelected => ParentTree?.SelectedKey == Key;
+
+    private async Task ToggleExpandAsync()
+    {
+        if (ParentTree != null)
+        {
+            await ParentTree.ToggleExpandAsync(Key);
+        }
+    }
+
+    private async Task ToggleCheckAsync(ChangeEventArgs e)
+    {
+        if (ParentTree != null)
+        {
+            await ParentTree.ToggleCheckAsync(Key, (bool)(e.Value ?? false));
+        }
+    }
+
+    private async Task SelectAsync()
+    {
+        if (Disabled || ParentTree == null) return;
+        await ParentTree.SelectNodeAsync(Key, Disabled);
+    }
+
+    private string ComputeNodeRowClass()
+    {
+        return new CssBuilder("flex items-center gap-1 py-1 px-1.5 rounded transition-colors")
+            .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-medium", _isSelected)
+            .AddClass("hover:bg-slate-100 dark:hover:bg-slate-800", !_isSelected && !Disabled)
+            .AddClass("opacity-40 cursor-not-allowed", Disabled)
+            .Build();
+    }
+
+    public void Dispose() { }
+}

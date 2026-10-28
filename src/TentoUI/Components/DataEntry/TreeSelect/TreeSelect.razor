@@ -1,0 +1,117 @@
+@namespace TentoUI
+@inherits TentoInputBase<string?>
+
+<div class="@ComputedWrapperClass" style="@Style">
+    <div class="relative w-full">
+        <input id="@ElementId"
+               type="text"
+               readonly
+               disabled="@IsDisabled"
+               placeholder="@Placeholder"
+               value="@SelectedTitle"
+               class="@ComputedInputClass"
+               @onclick="TogglePopupAsync"
+               @attributes="AdditionalAttributes" />
+
+        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            @if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
+            {
+                <button type="button"
+                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        aria-label="Clear selection"
+                        @onclick:stopPropagation="true"
+                        @onclick="ClearAsync">
+                    <Icon Name="@IconNames.X" Size="14" />
+                </button>
+            }
+            <Icon Name="@IconNames.ChevronDown" Size="14" Class="text-slate-400 pointer-events-none" />
+        </div>
+    </div>
+
+    @if (_isOpen && !IsDisabled && !ReadOnly)
+    {
+        <div class="tento-treeselect-popup absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl p-2 text-xs"
+             @onclick:stopPropagation="true">
+            <Tree Data="@TreeData"
+                  SelectedKey="@CurrentValue"
+                  OnSelect="HandleSelectAsync"
+                  ShowSearch="@ShowSearch" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TreeDataNode>? TreeData { get; set; }
+    [Parameter] public string? Placeholder { get; set; } = "Please select";
+    [Parameter] public bool AllowClear { get; set; } = true;
+    [Parameter] public bool ShowSearch { get; set; }
+
+    private bool _isOpen;
+
+    private string? SelectedTitle
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(CurrentValue) || TreeData == null) return null;
+            return FindNodeTitle(TreeData, CurrentValue);
+        }
+    }
+
+    private string? FindNodeTitle(IEnumerable<TreeDataNode> nodes, string key)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.Key == key) return node.Title;
+            var sub = FindNodeTitle(node.Children, key);
+            if (sub != null) return sub;
+        }
+        return null;
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string? result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private void TogglePopupAsync()
+    {
+        if (IsDisabled || ReadOnly) return;
+        _isOpen = !_isOpen;
+    }
+
+    private async Task ClearAsync()
+    {
+        CurrentValue = null;
+        _isOpen = false;
+    }
+
+    private async Task HandleSelectAsync(string key)
+    {
+        CurrentValue = key;
+        _isOpen = false;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-treeselect relative inline-block w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedInputClass
+    {
+        get
+        {
+            var sizePadding = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "px-2.5 py-1 text-xs",
+                ComponentSize.Large => "px-4 py-2 text-base",
+                _ => "px-3 py-1.5 text-sm"
+            };
+
+            return new CssBuilder($"w-full rounded-md border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 cursor-pointer focus:outline-none transition-colors pr-8 {sizePadding}")
+                .AddClass(GetStatusBorderClass())
+                .AddClass("opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800", IsDisabled)
+                .Build();
+        }
+    }
+}

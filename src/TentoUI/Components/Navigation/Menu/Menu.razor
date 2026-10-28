@@ -1,0 +1,83 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@_menuContext" IsFixed="true">
+    <nav class="@ComputedClass"
+         role="menu"
+         data-collapsed="@(Collapsed ? "true" : null)"
+         style="@Style"
+         @attributes="AdditionalAttributes">
+        @ChildContent
+    </nav>
+</CascadingValue>
+
+@code {
+    [Parameter] public MenuMode Mode { get; set; } = MenuMode.Inline;
+    [Parameter] public MenuTheme Theme { get; set; } = MenuTheme.Light;
+    [Parameter] public string? SelectedKey { get; set; }
+    [Parameter] public EventCallback<string> SelectedKeyChanged { get; set; }
+    [Parameter] public System.Collections.Generic.List<string> OpenKeys { get; set; } = new();
+    [Parameter] public EventCallback<System.Collections.Generic.List<string>> OpenKeysChanged { get; set; }
+    [Parameter] public bool Collapsed { get; set; }
+    [Parameter] public EventCallback<MenuSelectEventArgs> OnSelect { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly MenuContext _menuContext = new();
+
+    protected override void OnParametersSet()
+    {
+        _menuContext.Mode = Mode;
+        _menuContext.Theme = Theme;
+        _menuContext.SelectedKey = SelectedKey;
+        _menuContext.OpenKeys = OpenKeys;
+        _menuContext.Collapsed = Collapsed;
+    }
+
+    protected override void OnInitialized()
+    {
+        _menuContext.OnStateChange += async () =>
+        {
+            if (SelectedKey != _menuContext.SelectedKey)
+            {
+                SelectedKey = _menuContext.SelectedKey;
+                if (SelectedKeyChanged.HasDelegate && SelectedKey != null)
+                {
+                    await SelectedKeyChanged.InvokeAsync(SelectedKey);
+                }
+                if (OnSelect.HasDelegate && SelectedKey != null)
+                {
+                    await OnSelect.InvokeAsync(new MenuSelectEventArgs { Key = SelectedKey });
+                }
+            }
+            if (OpenKeysChanged.HasDelegate)
+            {
+                await OpenKeysChanged.InvokeAsync(_menuContext.OpenKeys);
+            }
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var modeClass = Mode switch
+            {
+                MenuMode.Horizontal => "flex flex-row border-b border-slate-200 dark:border-slate-800 w-full",
+                MenuMode.Vertical => "flex flex-col border-r border-slate-200 dark:border-slate-800 w-64",
+                _ => "flex flex-col w-full"
+            };
+
+            var themeClass = Theme == MenuTheme.Dark
+                ? "bg-slate-900 text-slate-200"
+                : "bg-white text-slate-700 dark:bg-slate-900 dark:text-slate-200";
+
+            return new CssBuilder("tento-menu select-none")
+                .AddClass(modeClass)
+                .AddClass(themeClass)
+                .AddClass("w-20", Collapsed)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

@@ -1,0 +1,58 @@
+@namespace TentoUI
+@implements IDisposable
+
+@code {
+    [CascadingParameter] private TabsContext? TabsContext { get; set; }
+
+    [Parameter] public string Key { get; set; } = string.Empty;
+    [Parameter] public string? Tab { get; set; }
+    [Parameter] public RenderFragment? TabTemplate { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Closable { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private TabPaneInfo? _paneInfo;
+
+    protected override void OnInitialized()
+    {
+        _paneInfo = new TabPaneInfo
+        {
+            Key = Key,
+            Tab = Tab,
+            TabTemplate = TabTemplate,
+            Icon = Icon,
+            Disabled = Disabled,
+            Closable = Closable,
+            Content = ChildContent
+        };
+        TabsContext?.RegisterPane(_paneInfo);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_paneInfo == null) return;
+        if (_paneInfo.Key != Key ||
+            _paneInfo.Tab != Tab ||
+            _paneInfo.Disabled != Disabled ||
+            _paneInfo.Closable != Closable ||
+            _paneInfo.TabTemplate != TabTemplate ||
+            _paneInfo.Icon != Icon ||
+            _paneInfo.Content != ChildContent)
+        {
+            _paneInfo.Key = Key;
+            _paneInfo.Tab = Tab;
+            _paneInfo.TabTemplate = TabTemplate;
+            _paneInfo.Icon = Icon;
+            _paneInfo.Disabled = Disabled;
+            _paneInfo.Closable = Closable;
+            _paneInfo.Content = ChildContent;
+            TabsContext?.NotifyPaneUpdated();
+        }
+    }
+
+    public void Dispose()
+    {
+        TabsContext?.UnregisterPane(Key);
+    }
+}

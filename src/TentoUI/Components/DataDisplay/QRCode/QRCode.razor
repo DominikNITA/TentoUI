@@ -1,0 +1,105 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@ComputedWrapperStyle" @attributes="AdditionalAttributes">
+    <div class="relative inline-flex items-center justify-center p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm">
+        <svg class="block"
+             width="@Size"
+             height="@Size"
+             viewBox="0 0 29 29"
+             shape-rendering="crispEdges">
+            <rect width="29" height="29" fill="@BgColor" />
+            
+            @* Finder Patterns: Top-Left, Top-Right, Bottom-Left *@
+            @RenderFinderPattern(2, 2)
+            @RenderFinderPattern(20, 2)
+            @RenderFinderPattern(2, 20)
+
+            @* Data bits generated pseudo-deterministically from Value *@
+            @foreach (var pt in GenerateDataPoints())
+            {
+                <rect x="@pt.X" y="@pt.Y" width="1" height="1" fill="@Color" />
+            }
+        </svg>
+
+        @if (Status != QRCodeStatus.Active)
+        {
+            <div class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 rounded-lg flex flex-col items-center justify-center p-3 text-center z-10">
+                @if (Status == QRCodeStatus.Loading)
+                {
+                    <span class="animate-spin text-primary-500 mb-1">
+                        <Icon Name="@IconNames.Loader2" Size="24" />
+                    </span>
+                    <span class="text-xs text-slate-500">Loading...</span>
+                }
+                else if (Status == QRCodeStatus.Expired)
+                {
+                    <Icon Name="@IconNames.AlertCircle" Size="24" Class="text-amber-500 mb-1" />
+                    <span class="text-xs text-slate-600 dark:text-slate-300 mb-2">QR Code expired</span>
+                    <button type="button"
+                            class="px-2.5 py-1 text-xs rounded bg-primary-500 text-white font-medium hover:bg-primary-600 inline-flex items-center gap-1 shadow-sm"
+                            @onclick="OnRefresh">
+                        <Icon Name="@IconNames.RefreshCw" Size="12" />
+                        <span>Refresh</span>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Value { get; set; } = string.Empty;
+    [Parameter] public int Size { get; set; } = 160;
+    [Parameter] public string Color { get; set; } = "#000000";
+    [Parameter] public string BgColor { get; set; } = "#ffffff";
+    [Parameter] public bool Bordered { get; set; } = true;
+    [Parameter] public QRCodeStatus Status { get; set; } = QRCodeStatus.Active;
+    [Parameter] public EventCallback OnRefresh { get; set; }
+
+    private record Point(int X, int Y);
+
+    private RenderFragment RenderFinderPattern(int x, int y) => __builder =>
+    {
+        // 7x7 outer border
+        <rect x="@x" y="@y" width="7" height="7" fill="@Color" />
+        <rect x="@(x + 1)" y="@(y + 1)" width="5" height="5" fill="@BgColor" />
+        <rect x="@(x + 2)" y="@(y + 2)" width="3" height="3" fill="@Color" />
+    };
+
+    private IEnumerable<Point> GenerateDataPoints()
+    {
+        var hash = Value != null ? (uint)Value.GetHashCode() : 12345u;
+        var rng = new Random((int)hash);
+
+        for (int y = 0; y < 29; y++)
+        {
+            for (int x = 0; x < 29; x++)
+            {
+                // Skip finder patterns + timing
+                if ((x < 9 && y < 9) || (x > 18 && y < 9) || (x < 9 && y > 18))
+                    continue;
+
+                // Timing lines
+                if (x == 6 || y == 6)
+                {
+                    if ((x + y) % 2 == 0) yield return new Point(x, y);
+                    continue;
+                }
+
+                if (rng.Next(100) < 45)
+                {
+                    yield return new Point(x, y);
+                }
+            }
+        }
+    }
+
+    private string ComputedClass => new CssBuilder("tento-qrcode inline-block")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedWrapperStyle => new StyleBuilder()
+        .AddStyle(Style)
+        .Build();
+}

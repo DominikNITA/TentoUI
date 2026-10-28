@@ -1,0 +1,113 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass"
+     style="@Style"
+     @onmouseenter="HandleMouseEnter"
+     @onmouseleave="HandleMouseLeave"
+     @attributes="AdditionalAttributes">
+    
+    <div class="tento-popover-trigger inline-block"
+         @onclick="HandleClickAsync">
+        @ChildContent
+    </div>
+
+    @if (IsOpen)
+    {
+        <div role="dialog"
+             class="@ComputedPopupClass">
+            @if (TitleTemplate != null || !string.IsNullOrEmpty(Title))
+            {
+                <div class="tento-popover-title px-3 py-2 border-b border-slate-200 dark:border-slate-700 font-semibold text-xs text-slate-900 dark:text-white">
+                    @if (TitleTemplate != null)
+                    {
+                        @TitleTemplate
+                    }
+                    else
+                    {
+                        @Title
+                    }
+                </div>
+            }
+            <div class="tento-popover-content px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300">
+                @if (ContentTemplate != null)
+                {
+                    @ContentTemplate
+                }
+                else
+                {
+                    @Content
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? TitleTemplate { get; set; }
+    [Parameter] public string? Content { get; set; }
+    [Parameter] public RenderFragment? ContentTemplate { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public TooltipPlacement Placement { get; set; } = TooltipPlacement.Top;
+    [Parameter] public TooltipTrigger Trigger { get; set; } = TooltipTrigger.Click;
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    private bool _internalOpen;
+    private bool IsOpen => OpenChanged.HasDelegate ? Open : (_internalOpen || Open);
+
+    private async Task SetOpenAsync(bool value)
+    {
+        _internalOpen = value;
+        Open = value;
+        if (OpenChanged.HasDelegate)
+        {
+            await OpenChanged.InvokeAsync(value);
+        }
+    }
+
+    private async Task HandleClickAsync()
+    {
+        if (Trigger == TooltipTrigger.Click)
+        {
+            await SetOpenAsync(!IsOpen);
+        }
+    }
+
+    private async Task HandleMouseEnter()
+    {
+        if (Trigger == TooltipTrigger.Hover)
+        {
+            await SetOpenAsync(true);
+        }
+    }
+
+    private async Task HandleMouseLeave()
+    {
+        if (Trigger == TooltipTrigger.Hover)
+        {
+            await SetOpenAsync(false);
+        }
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-popover relative inline-block")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedPopupClass
+    {
+        get
+        {
+            var pos = Placement switch
+            {
+                TooltipPlacement.Bottom => "top-full left-1/2 -translate-x-1/2 mt-2",
+                TooltipPlacement.Left => "right-full top-1/2 -translate-y-1/2 mr-2",
+                TooltipPlacement.Right => "left-full top-1/2 -translate-y-1/2 ml-2",
+                _ => "bottom-full left-1/2 -translate-x-1/2 mb-2"
+            };
+
+            return $"tento-popover-overlay absolute z-40 min-w-[12rem] rounded-lg shadow-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 {pos}";
+        }
+    }
+}

@@ -1,0 +1,17 @@
+@namespace TentoUI
+@implements IDisposable
+
+@code {
+    [CascadingParameter] protected Carousel? ParentCarousel { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentCarousel?.RegisterPanel(this);
+    }
+
+    public void Dispose()
+    {
+        ParentCarousel?.UnregisterPanel(this);
+    }
+}

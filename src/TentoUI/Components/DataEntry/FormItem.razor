@@ -1,0 +1,229 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+@using System.Linq.Expressions
+
+<div class="@ComputeContainerClass()" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Label) || LabelTemplate != null)
+    {
+        <div class="@ComputeLabelWrapperClass()">
+            <label for="@_context.Id" class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                @if (IsRequired)
+                {
+                    <span class="text-red-500 mr-1" aria-hidden="true">*</span>
+                }
+                @if (LabelTemplate != null)
+                {
+                    @LabelTemplate
+                }
+                else
+                {
+                    @Label
+                }
+            </label>
+        </div>
+    }
+
+    <div class="@ComputeContentWrapperClass()">
+        <CascadingValue Value="@_context">
+            @ChildContent
+        </CascadingValue>
+
+        @if (!string.IsNullOrEmpty(Help))
+        {
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">@Help</p>
+        }
+
+        @if (EffectiveErrors.Any())
+        {
+            <div id="@($"{_context.Id}-error")" role="alert" class="text-red-500 text-sm mt-1">
+                @if (EffectiveErrors.Count() == 1)
+                {
+                    @EffectiveErrors.First()
+                }
+                else
+                {
+                    @foreach (var error in EffectiveErrors)
+                    {
+                        <div>@error</div>
+                    }
+                }
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Extra))
+        {
+            <p class="mt-1 text-xs text-slate-400">@Extra</p>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] public FormContext? FormContext { get; set; }
+    [CascadingParameter] public EditContext? CascadedEditContext { get; set; }
+
+    private EditContext? CurrentEditContext => CascadedEditContext ?? FormContext?.EditContext;
+    private EditContext? _subscribedEditContext;
+
+    [Parameter] public string? FieldId { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public RenderFragment? LabelTemplate { get; set; }
+    [Parameter] public LambdaExpression? For { get; set; }
+    [Parameter] public bool? Required { get; set; }
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public string? Help { get; set; }
+    [Parameter] public string? Extra { get; set; }
+    [Parameter] public ComponentStatus ValidateStatus { get; set; } = ComponentStatus.None;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly FormItemContext _context = new();
+    private readonly System.Collections.Generic.List<string> _errors = new();
+    private FieldIdentifier _fieldIdentifier;
+
+    protected override void OnInitialized()
+    {
+        _context.Id = !string.IsNullOrEmpty(FieldId) ? FieldId : $"tento-item-{Guid.NewGuid():N}";
+        if (!string.IsNullOrEmpty(Error))
+        {
+            _context.ValidateStatus = ComponentStatus.Error;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(FieldId))
+        {
+            _context.Id = FieldId;
+        }
+
+        var editContext = CurrentEditContext;
+        if (editContext != null && For != null)
+        {
+            _fieldIdentifier = CreateFieldIdentifier(For, editContext.Model);
+            if (_subscribedEditContext != editContext)
+            {
+                if (_subscribedEditContext != null)
+                {
+                    _subscribedEditContext.OnValidationStateChanged -= HandleValidationStateChanged;
+                }
+                editContext.OnValidationStateChanged += HandleValidationStateChanged;
+                _subscribedEditContext = editContext;
+            }
+            UpdateValidationMessages();
+        }
+        else
+        {
+            if (_subscribedEditContext != null)
+            {
+                _subscribedEditContext.OnValidationStateChanged -= HandleValidationStateChanged;
+                _subscribedEditContext = null;
+            }
+
+            if (!string.IsNullOrEmpty(Error))
+            {
+                _context.ValidateStatus = ComponentStatus.Error;
+            }
+            else
+            {
+                _context.ValidateStatus = ValidateStatus;
+            }
+        }
+    }
+
+    private static FieldIdentifier CreateFieldIdentifier(LambdaExpression accessor, object? fallbackModel)
+    {
+        var body = accessor.Body;
+        if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+        {
+            body = unary.Operand;
+        }
+        if (body is MemberExpression member)
+        {
+            var fieldName = member.Member.Name;
+            object? model = null;
+            if (member.Expression is ConstantExpression constant)
+            {
+                model = constant.Value;
+            }
+            else if (member.Expression != null)
+            {
+                try
+                {
+                    var getter = Expression.Lambda(member.Expression).Compile();
+                    model = getter.DynamicInvoke();
+                }
+                catch
+                {
+                    model = fallbackModel;
+                }
+            }
+            return new FieldIdentifier(model ?? fallbackModel ?? new object(), fieldName);
+        }
+        return default;
+    }
+
+    private IEnumerable<string> EffectiveErrors
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Error))
+                return new[] { Error };
+            return _errors;
+        }
+    }
+
+    private bool IsRequired => Required ?? CheckIfRequired();
+
+    private bool CheckIfRequired()
+    {
+        if (For == null) return false;
+        var member = (For.Body as MemberExpression ?? (For.Body as UnaryExpression)?.Operand as MemberExpression)?.Member;
+        return member?.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.RequiredAttribute), true).Any() ?? false;
+    }
+
+    private void HandleValidationStateChanged(object? sender, ValidationStateChangedEventArgs e)
+    {
+        UpdateValidationMessages();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateValidationMessages()
+    {
+        _errors.Clear();
+        var editContext = CurrentEditContext;
+        if (editContext != null && _fieldIdentifier.Model != null)
+        {
+            _errors.AddRange(editContext.GetValidationMessages(_fieldIdentifier));
+        }
+        _context.ValidateStatus = _errors.Count > 0 ? ComponentStatus.Error : ValidateStatus;
+    }
+
+    private string ComputeContainerClass() => FormContext?.Layout switch
+    {
+        FormLayout.Horizontal => "tento-form-item col-span-12 sm:flex sm:items-start mb-4",
+        FormLayout.Inline => "tento-form-item flex items-center gap-2",
+        _ => "tento-form-item flex flex-col mb-4"
+    };
+
+    private string ComputeLabelWrapperClass() => FormContext?.Layout switch
+    {
+        FormLayout.Horizontal => FormContext.LabelColClass ?? "w-full sm:w-1/4 sm:text-right pt-2 pr-4",
+        FormLayout.Inline => "whitespace-nowrap",
+        _ => "mb-1.5"
+    };
+
+    private string ComputeContentWrapperClass() => FormContext?.Layout switch
+    {
+        FormLayout.Horizontal => FormContext.WrapperColClass ?? "w-full sm:w-3/4",
+        _ => "w-full"
+    };
+
+    public void Dispose()
+    {
+        if (_subscribedEditContext != null)
+        {
+            _subscribedEditContext.OnValidationStateChanged -= HandleValidationStateChanged;
+            _subscribedEditContext = null;
+        }
+    }
+}

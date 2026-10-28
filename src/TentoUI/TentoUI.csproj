@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TentoUI</RootNamespace>
+    <AssemblyName>TentoUI</AssemblyName>
+    
+    <!-- Razor Settings -->
+    <AddRazorSupportForMvc>false</AddRazorSupportForMvc>
+    
+    <!-- Package Metadata -->
+    <PackageId>TentoUI</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Tento Team</Authors>
+    <Description>AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS for .NET 10.</Description>
+    <PackageTags>blazor;antdesign;tailwind;components;ui;net10</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Tailwind integration assets: theme bridge + class manifest, synced into consumers by build/TentoUI.targets -->
+  <ItemGroup>
+    <None Include="tailwind\**\*" Pack="true" PackagePath="tailwind\" />
+    <None Include="build\TentoUI.targets" Pack="true" PackagePath="build\;buildTransitive\" />
+    <!-- AI agent skills shipped with the package; installed on demand by the TentoUIInstallSkills target -->
+    <None Include="..\Skills\tentoui-components\SKILL.md" Link="skills\tentoui-components\SKILL.md" Pack="true" PackagePath="skills\tentoui-components\" />
+    <None Include="..\Skills\tentoui-tailwind-setup\SKILL.md" Link="skills\tentoui-tailwind-setup\SKILL.md" Pack="true" PackagePath="skills\tentoui-tailwind-setup\" />
+  </ItemGroup>
+
+</Project>

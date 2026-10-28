@@ -1,0 +1,201 @@
+@namespace TentoUI
+@inherits TentoInputBase<TimeOnly?>
+
+<div class="@ComputedWrapperClass" style="@Style">
+    <div class="relative w-full">
+        <input id="@ElementId"
+               type="text"
+               readonly
+               disabled="@IsDisabled"
+               placeholder="@Placeholder"
+               value="@FormattedTime"
+               class="@ComputedInputClass"
+               @onclick="TogglePopupAsync"
+               @attributes="AdditionalAttributes" />
+
+        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+            @if (AllowClear && Value.HasValue && !IsDisabled && !ReadOnly)
+            {
+                <button type="button"
+                        class="pointer-events-auto text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        aria-label="Clear time"
+                        @onclick:stopPropagation="true"
+                        @onclick="ClearAsync">
+                    <Icon Name="@IconNames.X" Size="14" />
+                </button>
+            }
+            <Icon Name="@IconNames.Clock" Size="15" Class="text-slate-400" />
+        </div>
+    </div>
+
+    @if (_isOpen && !IsDisabled && !ReadOnly)
+    {
+        <div class="tento-timepicker-popup absolute z-50 mt-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl p-3 text-xs"
+             @onclick:stopPropagation="true">
+            <div class="flex items-start divide-x divide-slate-100 dark:divide-slate-700 max-h-48 overflow-hidden">
+                @* Hours column *@
+                <div class="flex flex-col overflow-y-auto px-1.5 max-h-44 w-12 text-center">
+                    <span class="text-[10px] text-slate-400 font-semibold mb-1 sticky top-0 bg-white dark:bg-slate-800">H</span>
+                    @for (int h = 0; h < 24; h += HourStep)
+                    {
+                        var hourVal = h;
+                        var isCurrentH = (Value?.Hour ?? 0) == hourVal;
+                        <button type="button"
+                                class="@ComputeColumnItemClass(isCurrentH)"
+                                @onclick="@(() => SelectHourAsync(hourVal))">
+                            @hourVal.ToString("D2")
+                        </button>
+                    }
+                </div>
+
+                @* Minutes column *@
+                <div class="flex flex-col overflow-y-auto px-1.5 max-h-44 w-12 text-center">
+                    <span class="text-[10px] text-slate-400 font-semibold mb-1 sticky top-0 bg-white dark:bg-slate-800">M</span>
+                    @for (int m = 0; m < 60; m += MinuteStep)
+                    {
+                        var minVal = m;
+                        var isCurrentM = (Value?.Minute ?? 0) == minVal;
+                        <button type="button"
+                                class="@ComputeColumnItemClass(isCurrentM)"
+                                @onclick="@(() => SelectMinuteAsync(minVal))">
+                            @minVal.ToString("D2")
+                        </button>
+                    }
+                </div>
+
+                @if (ShowSeconds)
+                {
+                    @* Seconds column *@
+                    <div class="flex flex-col overflow-y-auto px-1.5 max-h-44 w-12 text-center">
+                        <span class="text-[10px] text-slate-400 font-semibold mb-1 sticky top-0 bg-white dark:bg-slate-800">S</span>
+                        @for (int s = 0; s < 60; s += SecondStep)
+                        {
+                            var secVal = s;
+                            var isCurrentS = (Value?.Second ?? 0) == secVal;
+                            <button type="button"
+                                    class="@ComputeColumnItemClass(isCurrentS)"
+                                    @onclick="@(() => SelectSecondAsync(secVal))">
+                                @secVal.ToString("D2")
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                <button type="button"
+                        class="text-[11px] text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
+                        @onclick="SelectNowAsync">
+                    Now
+                </button>
+                <button type="button"
+                        class="px-2 py-0.5 rounded text-[11px] bg-primary-500 text-white font-medium hover:bg-primary-600"
+                        @onclick="@(() => _isOpen = false)">
+                    OK
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Format { get; set; } = "HH:mm";
+    [Parameter] public string? Placeholder { get; set; } = "Select time";
+    [Parameter] public int HourStep { get; set; } = 1;
+    [Parameter] public int MinuteStep { get; set; } = 1;
+    [Parameter] public int SecondStep { get; set; } = 1;
+    [Parameter] public bool ShowSeconds { get; set; }
+    [Parameter] public bool AllowClear { get; set; } = true;
+
+    private bool _isOpen;
+
+    private string FormattedTime => Value?.ToString(Format) ?? string.Empty;
+
+    protected override bool TryParseValueFromString(string? value, out TimeOnly? result, out string validationErrorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            result = null;
+            validationErrorMessage = string.Empty;
+            return true;
+        }
+
+        if (TimeOnly.TryParse(value, out var parsed))
+        {
+            result = parsed;
+            validationErrorMessage = string.Empty;
+            return true;
+        }
+
+        result = null;
+        validationErrorMessage = "Invalid time format.";
+        return false;
+    }
+
+    private void TogglePopupAsync()
+    {
+        if (IsDisabled || ReadOnly) return;
+        _isOpen = !_isOpen;
+    }
+
+    private async Task ClearAsync()
+    {
+        CurrentValue = null;
+        _isOpen = false;
+    }
+
+    private async Task SelectHourAsync(int hour)
+    {
+        var current = Value ?? new TimeOnly(DateTime.Now.Hour, 0, 0);
+        CurrentValue = new TimeOnly(hour, current.Minute, ShowSeconds ? current.Second : 0);
+    }
+
+    private async Task SelectMinuteAsync(int minute)
+    {
+        var current = Value ?? new TimeOnly(DateTime.Now.Hour, 0, 0);
+        CurrentValue = new TimeOnly(current.Hour, minute, ShowSeconds ? current.Second : 0);
+    }
+
+    private async Task SelectSecondAsync(int second)
+    {
+        var current = Value ?? new TimeOnly(DateTime.Now.Hour, 0, 0);
+        CurrentValue = new TimeOnly(current.Hour, current.Minute, second);
+    }
+
+    private async Task SelectNowAsync()
+    {
+        var now = DateTime.Now;
+        CurrentValue = new TimeOnly(now.Hour, now.Minute, ShowSeconds ? now.Second : 0);
+        _isOpen = false;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-timepicker relative inline-block w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedInputClass
+    {
+        get
+        {
+            var sizePadding = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "px-2.5 py-1 text-xs",
+                ComponentSize.Large => "px-4 py-2 text-base",
+                _ => "px-3 py-1.5 text-sm"
+            };
+
+            return new CssBuilder($"w-full rounded-md border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 cursor-pointer focus:outline-none transition-colors pr-8 {sizePadding}")
+                .AddClass(GetStatusBorderClass())
+                .AddClass("opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800", IsDisabled)
+                .Build();
+        }
+    }
+
+    private static string ComputeColumnItemClass(bool isCurrent)
+    {
+        return new CssBuilder("w-full py-1 rounded text-center transition-colors")
+            .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-bold", isCurrent)
+            .AddClass("text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50", !isCurrent)
+            .Build();
+    }
+}

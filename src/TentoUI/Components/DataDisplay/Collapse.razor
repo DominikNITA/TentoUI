@@ -1,0 +1,72 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public bool Accordion { get; set; }
+    [Parameter] public bool Bordered { get; set; } = true;
+    [Parameter] public bool Ghost { get; set; }
+    [Parameter] public IEnumerable<string>? ActiveKeys { get; set; }
+    [Parameter] public EventCallback<System.Collections.Generic.List<string>> ActiveKeysChanged { get; set; }
+    [Parameter] public string? DefaultActiveKey { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly HashSet<string> _openKeys = new(StringComparer.Ordinal);
+    private bool _initialized;
+
+    protected override void OnParametersSet()
+    {
+        if (!_initialized)
+        {
+            _initialized = true;
+            if (!string.IsNullOrEmpty(DefaultActiveKey))
+            {
+                _openKeys.Add(DefaultActiveKey);
+            }
+        }
+
+        if (ActiveKeys != null)
+        {
+            _openKeys.Clear();
+            foreach (var k in ActiveKeys)
+            {
+                _openKeys.Add(k);
+            }
+        }
+    }
+
+    internal bool IsPanelOpen(string key) => _openKeys.Contains(key);
+
+    internal async Task TogglePanelAsync(string key)
+    {
+        if (_openKeys.Contains(key))
+        {
+            _openKeys.Remove(key);
+        }
+        else
+        {
+            if (Accordion)
+            {
+                _openKeys.Clear();
+            }
+            _openKeys.Add(key);
+        }
+
+        if (ActiveKeysChanged.HasDelegate)
+        {
+            await ActiveKeysChanged.InvokeAsync(_openKeys.ToList());
+        }
+        StateHasChanged();
+    }
+
+    private string ComputedClass => new CssBuilder("tento-collapse w-full divide-y divide-slate-200 dark:divide-slate-700 rounded-lg overflow-hidden")
+        .AddClass("border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900", Bordered && !Ghost)
+        .AddClass("bg-transparent border-0", Ghost)
+        .AddClass(Class)
+        .Build();
+}

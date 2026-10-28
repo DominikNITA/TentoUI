@@ -1,0 +1,182 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    @* Source Panel *@
+    @RenderPanel("source", Titles.Length > 0 ? Titles[0] : "Source", SourceItems, _sourceChecked, _sourceSearch, s => _sourceSearch = s)
+
+    @* Shuttle Buttons *@
+    <div class="flex flex-col gap-2 justify-center shrink-0">
+        <button type="button"
+                aria-label="Move right"
+                disabled="@(Disabled || _sourceChecked.Count == 0)"
+                class="px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm text-xs font-bold"
+                @onclick="MoveRightAsync">
+            <Icon Name="@IconNames.ChevronRight" Size="14" />
+        </button>
+        <button type="button"
+                aria-label="Move left"
+                disabled="@(Disabled || _targetChecked.Count == 0)"
+                class="px-2.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm text-xs font-bold"
+                @onclick="MoveLeftAsync">
+            <Icon Name="@IconNames.ChevronLeft" Size="14" />
+        </button>
+    </div>
+
+    @* Target Panel *@
+    @RenderPanel("target", Titles.Length > 1 ? Titles[1] : "Target", TargetItems, _targetChecked, _targetSearch, s => _targetSearch = s)
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TransferItem>? DataSource { get; set; }
+    [Parameter] public HashSet<string> TargetKeys { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<string>> TargetKeysChanged { get; set; }
+    [Parameter] public string[] Titles { get; set; } = new[] { "Source", "Target" };
+    [Parameter] public bool ShowSearch { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback<(HashSet<string> TargetKeys, string Direction, IReadOnlyList<string> MovedKeys)> OnChange { get; set; }
+
+    private readonly HashSet<string> _sourceChecked = new();
+    private readonly HashSet<string> _targetChecked = new();
+    private string _sourceSearch = string.Empty;
+    private string _targetSearch = string.Empty;
+
+    private IEnumerable<TransferItem> AllItems => DataSource ?? Enumerable.Empty<TransferItem>();
+    private IReadOnlyList<TransferItem> SourceItems => AllItems.Where(i => !TargetKeys.Contains(i.Key)).ToList();
+    private IReadOnlyList<TransferItem> TargetItems => AllItems.Where(i => TargetKeys.Contains(i.Key)).ToList();
+
+    private async Task MoveRightAsync()
+    {
+        if (Disabled || _sourceChecked.Count == 0) return;
+        var moved = _sourceChecked.ToList();
+        foreach (var key in moved)
+        {
+            TargetKeys.Add(key);
+        }
+        _sourceChecked.Clear();
+
+        if (TargetKeysChanged.HasDelegate)
+        {
+            await TargetKeysChanged.InvokeAsync(TargetKeys);
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync((TargetKeys, "right", moved));
+        }
+    }
+
+    private async Task MoveLeftAsync()
+    {
+        if (Disabled || _targetChecked.Count == 0) return;
+        var moved = _targetChecked.ToList();
+        foreach (var key in moved)
+        {
+            TargetKeys.Remove(key);
+        }
+        _targetChecked.Clear();
+
+        if (TargetKeysChanged.HasDelegate)
+        {
+            await TargetKeysChanged.InvokeAsync(TargetKeys);
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync((TargetKeys, "left", moved));
+        }
+    }
+
+    private RenderFragment RenderPanel(string panelName, string title, IReadOnlyList<TransferItem> items, HashSet<string> checkedSet, string search, Action<string> setSearch) => __builder =>
+    {
+        var filteredItems = string.IsNullOrWhiteSpace(search)
+            ? items
+            : items.Where(i => i.Title.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        var enabledItems = filteredItems.Where(i => !i.Disabled).ToList();
+        var allChecked = enabledItems.Count > 0 && enabledItems.All(i => checkedSet.Contains(i.Key));
+
+        <div class="tento-transfer-panel w-48 sm:w-56 h-64 flex flex-col rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden text-xs">
+            @* Header *@
+            <div class="px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between">
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox"
+                           disabled="@(Disabled || enabledItems.Count == 0)"
+                           checked="@allChecked"
+                           class="w-3.5 h-3.5 rounded border-slate-300 text-primary-500 focus:ring-primary-500 cursor-pointer"
+                           @onchange="@(e => ToggleSelectAll(enabledItems, checkedSet, (bool)(e.Value ?? false)))" />
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">@title</span>
+                </label>
+                <span class="text-[11px] text-slate-400">@checkedSet.Count/@items.Count</span>
+            </div>
+
+            @* Search *@
+            @if (ShowSearch)
+            {
+                <div class="p-2 border-b border-slate-100 dark:border-slate-800">
+                    <input type="text"
+                           disabled="@Disabled"
+                           value="@search"
+                           placeholder="Search..."
+                           class="w-full px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                           @oninput="@(e => setSearch(e.Value?.ToString() ?? string.Empty))" />
+                </div>
+            }
+
+            @* Body List *@
+            <div class="flex-1 overflow-y-auto p-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+                @if (filteredItems.Count == 0)
+                {
+                    <div class="h-full flex items-center justify-center text-slate-400 text-xs py-8">
+                        No data
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in filteredItems)
+                    {
+                        var isChecked = checkedSet.Contains(item.Key);
+                        var isItemDisabled = Disabled || item.Disabled;
+
+                        <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors @(isItemDisabled ? "opacity-40 cursor-not-allowed" : "")">
+                            <input type="checkbox"
+                                   disabled="@isItemDisabled"
+                                   checked="@isChecked"
+                                   class="w-3.5 h-3.5 rounded border-slate-300 text-primary-500 focus:ring-primary-500 cursor-pointer"
+                                   @onchange="@(e => ToggleItemCheck(item.Key, checkedSet, (bool)(e.Value ?? false)))" />
+                            <span class="truncate text-slate-700 dark:text-slate-200">@item.Title</span>
+                        </label>
+                    }
+                }
+            </div>
+        </div>
+    };
+
+    private static void ToggleSelectAll(IEnumerable<TransferItem> items, HashSet<string> checkedSet, bool isChecked)
+    {
+        if (isChecked)
+        {
+            foreach (var item in items)
+            {
+                checkedSet.Add(item.Key);
+            }
+        }
+        else
+        {
+            foreach (var item in items)
+            {
+                checkedSet.Remove(item.Key);
+            }
+        }
+    }
+
+    private static void ToggleItemCheck(string key, HashSet<string> checkedSet, bool isChecked)
+    {
+        if (isChecked)
+            checkedSet.Add(key);
+        else
+            checkedSet.Remove(key);
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-transfer flex items-center gap-3 select-none")
+        .AddClass(Class)
+        .Build();
+}

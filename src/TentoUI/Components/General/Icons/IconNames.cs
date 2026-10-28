@@ -1,0 +1,54 @@
+namespace TentoUI;
+
+public static class IconNames
+{
+    public const string Check = "check";
+    public const string CheckCircle = "check-circle";
+    public const string CheckCircle2 = "check-circle-2";
+    public const string AlertCircle = "alert-circle";
+    public const string AlertTriangle = "alert-triangle";
+    public const string Info = "info";
+    public const string X = "x";
+    public const string XCircle = "x-circle";
+    public const string Loader = "loader";
+    public const string Loader2 = "loader-2";
+    public const string ChevronDown = "chevron-down";
+    public const string ChevronUp = "chevron-up";
+    public const string ChevronLeft = "chevron-left";
+    public const string ChevronRight = "chevron-right";
+    public const string ArrowLeft = "arrow-left";
+    public const string ArrowRight = "arrow-right";
+    public const string ArrowUp = "arrow-up";
+    public const string ArrowDown = "arrow-down";
+    public const string Plus = "plus";
+    public const string Minus = "minus";
+    public const string Search = "search";
+    public const string Copy = "copy";
+    public const string Edit = "edit";
+    public const string Edit2 = "edit-2";
+    public const string Trash = "trash";
+    public const string Trash2 = "trash-2";
+    public const string ExternalLink = "external-link";
+    public const string Filter = "filter";
+    public const string User = "user";
+    public const string Calendar = "calendar";
+    public const string Clock = "clock";
+    public const string Sun = "sun";
+    public const string Moon = "moon";
+    public const string Menu = "menu";
+    public const string Eye = "eye";
+    public const string EyeOff = "eye-off";
+    public const string RefreshCw = "refresh-cw";
+    public const string HelpCircle = "help-circle";
+    public const string Star = "star";
+    public const string Upload = "upload";
+    public const string Download = "download";
+    public const string Inbox = "inbox";
+    public const string MoreHorizontal = "more-horizontal";
+    public const string MoreVertical = "more-vertical";
+    public const string Settings = "settings";
+    public const string Bell = "bell";
+    public const string Home = "home";
+    public const string File = "file";
+    public const string Folder = "folder";
+}

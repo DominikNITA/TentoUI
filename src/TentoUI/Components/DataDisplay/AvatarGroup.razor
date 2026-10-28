@@ -1,0 +1,14 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-avatar-group inline-flex items-center -space-x-2 *:ring-2 *:ring-white dark:*:ring-slate-900")
+        .AddClass(Class)
+        .Build();
+}

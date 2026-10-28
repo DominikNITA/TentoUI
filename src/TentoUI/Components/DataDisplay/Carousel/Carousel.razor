@@ -1,0 +1,199 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@implements IDisposable
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+<div class="@ComputedClass"
+     style="@Style"
+     @onmouseenter="HandleMouseEnter"
+     @onmouseleave="HandleMouseLeave"
+     @attributes="AdditionalAttributes">
+    
+    <div class="tento-carousel-viewport relative w-full overflow-hidden rounded-lg">
+        @if (_panels.Count > 0)
+        {
+            var activePanel = _panels[EffectiveIndex];
+            <div class="tento-carousel-slide transition-opacity duration-300">
+                @activePanel.ChildContent
+            </div>
+        }
+
+        @if (Arrows && _panels.Count > 1)
+        {
+            <button type="button"
+                    class="tento-carousel-prev absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-opacity"
+                    aria-label="Previous slide"
+                    @onclick="PrevAsync">
+                <Icon Name="@IconNames.ChevronLeft" Size="16" />
+            </button>
+            <button type="button"
+                    class="tento-carousel-next absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-opacity"
+                    aria-label="Next slide"
+                    @onclick="NextAsync">
+                <Icon Name="@IconNames.ChevronRight" Size="16" />
+            </button>
+        }
+
+        @if (Dots && _panels.Count > 1)
+        {
+            <div class="@ComputeDotsClass()">
+                @for (int i = 0; i < _panels.Count; i++)
+                {
+                    var dotIndex = i;
+                    var isActive = dotIndex == EffectiveIndex;
+                    <button type="button"
+                            role="tab"
+                            aria-selected="@(isActive ? "true" : "false")"
+                            aria-label="@($"Go to slide {dotIndex + 1}")"
+                            class="@ComputeDotBtnClass(isActive)"
+                            @onclick="@(() => GoToAsync(dotIndex))">
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int CurrentIndex { get; set; }
+    [Parameter] public EventCallback<int> CurrentIndexChanged { get; set; }
+    [Parameter] public EventCallback<int> AfterChange { get; set; }
+    [Parameter] public bool Autoplay { get; set; }
+    [Parameter] public int AutoplaySpeed { get; set; } = 3000;
+    [Parameter] public bool Dots { get; set; } = true;
+    [Parameter] public bool Arrows { get; set; }
+    [Parameter] public CarouselDotPosition DotPosition { get; set; } = CarouselDotPosition.Bottom;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly System.Collections.Generic.List<CarouselPanel> _panels = new();
+    private CancellationTokenSource? _autoplayCts;
+    private bool _isHovered;
+
+    private int EffectiveIndex => _panels.Count == 0 ? 0 : Math.Clamp(CurrentIndex, 0, _panels.Count - 1);
+
+    internal void RegisterPanel(CarouselPanel panel)
+    {
+        if (!_panels.Contains(panel))
+        {
+            _panels.Add(panel);
+            StateHasChanged();
+            ResetAutoplay();
+        }
+    }
+
+    internal void UnregisterPanel(CarouselPanel panel)
+    {
+        if (_panels.Remove(panel))
+        {
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        ResetAutoplay();
+    }
+
+    private void ResetAutoplay()
+    {
+        _autoplayCts?.Cancel();
+        _autoplayCts?.Dispose();
+        _autoplayCts = null;
+
+        if (Autoplay && !_isHovered)
+        {
+            _autoplayCts = new CancellationTokenSource();
+            _ = RunAutoplayLoopAsync(_autoplayCts.Token);
+        }
+    }
+
+    private async Task RunAutoplayLoopAsync(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                await Task.Delay(Math.Max(500, AutoplaySpeed), token);
+                if (token.IsCancellationRequested || _panels.Count <= 1) break;
+                await InvokeAsync(async () =>
+                {
+                    await NextAsync();
+                    StateHasChanged();
+                });
+            }
+            catch (TaskCanceledException)
+            {
+                break;
+            }
+        }
+    }
+
+    private void HandleMouseEnter()
+    {
+        _isHovered = true;
+        _autoplayCts?.Cancel();
+    }
+
+    private void HandleMouseLeave()
+    {
+        _isHovered = false;
+        ResetAutoplay();
+    }
+
+    public async Task NextAsync()
+    {
+        if (_panels.Count <= 1) return;
+        var next = (EffectiveIndex + 1) % _panels.Count;
+        await GoToAsync(next);
+    }
+
+    public async Task PrevAsync()
+    {
+        if (_panels.Count <= 1) return;
+        var prev = (EffectiveIndex - 1 + _panels.Count) % _panels.Count;
+        await GoToAsync(prev);
+    }
+
+    public async Task GoToAsync(int index)
+    {
+        if (_panels.Count == 0) return;
+        CurrentIndex = Math.Clamp(index, 0, _panels.Count - 1);
+        if (CurrentIndexChanged.HasDelegate)
+        {
+            await CurrentIndexChanged.InvokeAsync(CurrentIndex);
+        }
+        if (AfterChange.HasDelegate)
+        {
+            await AfterChange.InvokeAsync(CurrentIndex);
+        }
+    }
+
+    public void Dispose()
+    {
+        _autoplayCts?.Cancel();
+        _autoplayCts?.Dispose();
+    }
+
+    private string ComputedClass => new CssBuilder("tento-carousel relative w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeDotsClass()
+    {
+        var pos = DotPosition == CarouselDotPosition.Top ? "top-3" : "bottom-3";
+        return $"tento-carousel-dots absolute {pos} left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10";
+    }
+
+    private static string ComputeDotBtnClass(bool isActive)
+    {
+        return new CssBuilder("h-1.5 rounded-full transition-all duration-300 focus:outline-none")
+            .AddClass("w-6 bg-white shadow-sm", isActive)
+            .AddClass("w-2 bg-white/50 hover:bg-white/80", !isActive)
+            .Build();
+    }
+}

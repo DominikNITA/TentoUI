@@ -1,0 +1,102 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="relative group inline-block overflow-hidden rounded">
+        <img src="@(_failed && !string.IsNullOrEmpty(Fallback) ? Fallback : Src)"
+             alt="@(Alt ?? "Image")"
+             style="@ComputeImgStyle()"
+             class="object-cover transition-transform duration-300 group-hover:scale-105"
+             @onerror="@(() => _failed = true)" />
+
+        @if (Preview && !_failed)
+        {
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white text-xs font-medium gap-1.5"
+                 @onclick="@(() => _isPreviewOpen = true)">
+                <Icon Name="@IconNames.Eye" Size="16" />
+                <span>Preview</span>
+            </div>
+        }
+    </div>
+
+    @if (_isPreviewOpen)
+    {
+        <div class="tento-image-preview-root fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Image preview">
+            
+            @* Toolbar *@
+            <div class="absolute top-4 right-4 z-10 flex items-center gap-2 bg-black/60 rounded-full px-3 py-1.5 text-white">
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Zoom in"
+                        @onclick="@(() => _zoom = Math.Min(3.0, _zoom + 0.25))">
+                    <Icon Name="@IconNames.Plus" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Zoom out"
+                        @onclick="@(() => _zoom = Math.Max(0.5, _zoom - 0.25))">
+                    <Icon Name="@IconNames.Minus" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Rotate left"
+                        @onclick="@(() => _rotate = (_rotate - 90) % 360)">
+                    <Icon Name="@IconNames.RefreshCw" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-rose-400 transition-colors ml-2 border-l border-white/20 pl-2"
+                        aria-label="Close preview"
+                        @onclick="ClosePreview">
+                    <Icon Name="@IconNames.X" Size="18" />
+                </button>
+            </div>
+
+            @* Preview Container *@
+            <div class="max-w-[90vw] max-h-[90vh] overflow-hidden flex items-center justify-center select-none"
+                 @onclick="ClosePreview">
+                <img src="@Src"
+                     alt="@(Alt ?? "Preview")"
+                     class="max-w-full max-h-[85vh] object-contain transition-transform duration-200"
+                     style="@($"transform: scale({_zoom}) rotate({_rotate}deg);")"
+                     @onclick:stopPropagation="true" />
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Src { get; set; }
+    [Parameter] public string? Alt { get; set; }
+    [Parameter] public string? Fallback { get; set; }
+    [Parameter] public string? Width { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public bool Preview { get; set; } = true;
+
+    private bool _failed;
+    private bool _isPreviewOpen;
+    private double _zoom = 1.0;
+    private int _rotate = 0;
+
+    private void ClosePreview()
+    {
+        _isPreviewOpen = false;
+        _zoom = 1.0;
+        _rotate = 0;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-image inline-block")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeImgStyle()
+    {
+        var sb = new StyleBuilder()
+            .AddStyle("width", Width, !string.IsNullOrEmpty(Width))
+            .AddStyle("height", Height, !string.IsNullOrEmpty(Height))
+            .Build();
+        return sb;
+    }
+}

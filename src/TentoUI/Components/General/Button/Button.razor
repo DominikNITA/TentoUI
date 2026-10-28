@@ -1,0 +1,149 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@if (!string.IsNullOrWhiteSpace(Href))
+{
+    <a href="@(Disabled || Loading ? null : Href)"
+       target="@Target"
+       role="button"
+       aria-disabled="@(Disabled || Loading ? "true" : "false")"
+       class="@ComputedClass"
+       style="@Style"
+       @onclick="HandleClickAsync"
+       @attributes="AdditionalAttributes">
+        @RenderContent()
+    </a>
+}
+else
+{
+    <button type="@GetHtmlTypeName()"
+            disabled="@(Disabled || Loading)"
+            aria-busy="@(Loading ? "true" : "false")"
+            class="@ComputedClass"
+            style="@Style"
+            @onclick="HandleClickAsync"
+            @attributes="AdditionalAttributes">
+        @RenderContent()
+    </button>
+}
+
+@code {
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Default;
+    [Parameter] public ButtonShape Shape { get; set; } = ButtonShape.Default;
+    [Parameter] public ButtonHtmlType HtmlType { get; set; } = ButtonHtmlType.Button;
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public bool Danger { get; set; }
+    [Parameter] public bool Ghost { get; set; }
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Block { get; set; }
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public string? Target { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public IconPosition IconPosition { get; set; } = IconPosition.Start;
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string GetHtmlTypeName() => HtmlType switch
+    {
+        ButtonHtmlType.Submit => "submit",
+        ButtonHtmlType.Reset => "reset",
+        _ => "button"
+    };
+
+    private async Task HandleClickAsync(MouseEventArgs e)
+    {
+        if (Disabled || Loading) return;
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var size = ResolvedSize(Size);
+
+            var typeClass = Type switch
+            {
+                ButtonType.Primary => Danger
+                    ? "bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500 shadow-sm"
+                    : "bg-primary-500 text-white hover:bg-primary-600 focus-visible:ring-primary-500 shadow-sm",
+                ButtonType.Dashed => Danger
+                    ? "border border-dashed border-red-500 text-red-500 bg-white hover:bg-red-50"
+                    : "border border-dashed border-slate-300 bg-white text-slate-700 hover:border-primary-500 hover:text-primary-500 shadow-sm",
+                ButtonType.Text => Danger
+                    ? "bg-transparent text-red-500 hover:bg-red-50 shadow-none border-transparent"
+                    : "bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 shadow-none border-transparent",
+                ButtonType.Link => Danger
+                    ? "text-red-500 underline bg-transparent border-transparent shadow-none p-0 h-auto"
+                    : "text-primary-500 underline bg-transparent border-transparent shadow-none p-0 h-auto",
+                _ => Danger
+                    ? "border border-red-500 text-red-500 bg-white hover:bg-red-50 shadow-sm"
+                    : "border border-slate-300 bg-white text-slate-700 hover:border-primary-500 hover:text-primary-500 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 shadow-sm"
+            };
+
+            var sizeClass = Type == ButtonType.Link ? "" : size switch
+            {
+                ComponentSize.Small => Shape == ButtonShape.Circle ? "w-7 h-7 text-xs" : "px-2.5 py-1.5 text-xs gap-1.5",
+                ComponentSize.Large => Shape == ButtonShape.Circle ? "w-11 h-11 text-base" : "px-6 py-3 text-base gap-2.5",
+                _ => Shape == ButtonShape.Circle ? "w-9 h-9 text-sm" : "px-4 py-2 text-sm gap-2"
+            };
+
+            var shapeClass = Shape switch
+            {
+                ButtonShape.Circle => "rounded-full flex items-center justify-center p-0",
+                ButtonShape.Round => "rounded-full",
+                _ => "rounded-md"
+            };
+
+            var variantClass = Type switch
+            {
+                ButtonType.Primary => "tento-btn-primary",
+                ButtonType.Dashed => "tento-btn-dashed",
+                ButtonType.Text => "tento-btn-text",
+                ButtonType.Link => "tento-btn-link",
+                _ => "tento-btn-default"
+            };
+
+            return new CssBuilder("tento-btn inline-flex items-center justify-center font-medium select-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2")
+                .AddClass(variantClass)
+                .AddClass(typeClass)
+                .AddClass(sizeClass)
+                .AddClass(shapeClass)
+                .AddClass("w-full", Block)
+                .AddClass("opacity-50 cursor-not-allowed", Disabled || Loading)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+
+    private RenderFragment RenderContent() => __builder =>
+    {
+        if (Loading)
+        {
+            <span class="animate-spin mr-2 inline-flex items-center">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </span>
+        }
+        else if (Icon != null && IconPosition == IconPosition.Start)
+        {
+            <span class="inline-flex items-center mr-1.5">@Icon</span>
+        }
+
+        if (ChildContent != null)
+        {
+            @ChildContent
+        }
+
+        if (!Loading && Icon != null && IconPosition == IconPosition.End)
+        {
+            <span class="inline-flex items-center ml-1.5">@Icon</span>
+        }
+    };
+}

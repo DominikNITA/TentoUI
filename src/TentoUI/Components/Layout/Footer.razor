@@ -1,0 +1,14 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<footer class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</footer>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-footer py-6 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0 text-sm")
+        .AddClass(Class)
+        .Build();
+}

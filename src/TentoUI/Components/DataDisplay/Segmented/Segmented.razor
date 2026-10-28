@@ -1,0 +1,107 @@
+@namespace TentoUI
+@typeparam TValue
+@inherits TentoComponentBase
+
+<div role="radiogroup"
+     aria-label="@(AriaLabel ?? "Segmented control")"
+     class="@ComputedWrapperClass"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+    @if (Options != null)
+    {
+        @foreach (var opt in Options)
+        {
+            var isSelected = EqualityComparer<TValue>.Default.Equals(opt.Value, Value);
+            var isOptDisabled = Disabled || opt.Disabled;
+
+            <button type="button"
+                    role="radio"
+                    aria-checked="@(isSelected ? "true" : "false")"
+                    disabled="@isOptDisabled"
+                    data-value="@opt.Value"
+                    class="@ComputeOptionClass(isSelected, isOptDisabled)"
+                    @onclick="@(() => SelectOptionAsync(opt.Value, isOptDisabled))">
+                @if (OptionTemplate != null)
+                {
+                    @OptionTemplate(opt)
+                }
+                else
+                {
+                    <div class="inline-flex items-center justify-center gap-1.5 min-w-0">
+                        @if (!string.IsNullOrEmpty(opt.Icon))
+                        {
+                            <Icon Name="@opt.Icon" Size="@ComputeIconSize()" />
+                        }
+                        @if (!string.IsNullOrEmpty(opt.Label))
+                        {
+                            <span class="truncate">@opt.Label</span>
+                        }
+                        else
+                        {
+                            <span class="truncate">@opt.Value?.ToString()</span>
+                        }
+                    </div>
+                }
+            </button>
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public EventCallback<TValue> OnChange { get; set; }
+    [Parameter] public IEnumerable<SegmentedOption<TValue>>? Options { get; set; }
+    [Parameter] public RenderFragment<SegmentedOption<TValue>>? OptionTemplate { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Block { get; set; }
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+
+    private async Task SelectOptionAsync(TValue nextValue, bool isOptDisabled)
+    {
+        if (isOptDisabled) return;
+        if (!EqualityComparer<TValue>.Default.Equals(Value, nextValue))
+        {
+            Value = nextValue;
+            if (ValueChanged.HasDelegate)
+            {
+                await ValueChanged.InvokeAsync(Value);
+            }
+            if (OnChange.HasDelegate)
+            {
+                await OnChange.InvokeAsync(Value);
+            }
+        }
+    }
+
+    private int ComputeIconSize() => ResolvedSize(Size) switch
+    {
+        ComponentSize.Small => 13,
+        ComponentSize.Large => 18,
+        _ => 15
+    };
+
+    private string ComputedWrapperClass => new CssBuilder("tento-segmented inline-flex p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 select-none")
+        .AddClass("w-full flex", Block)
+        .AddClass("opacity-50 cursor-not-allowed", Disabled)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeOptionClass(bool isSelected, bool isOptDisabled)
+    {
+        var sizePadding = ResolvedSize(Size) switch
+        {
+            ComponentSize.Small => "px-2 py-0.5 text-xs",
+            ComponentSize.Large => "px-4 py-2 text-base",
+            _ => "px-3 py-1 text-xs"
+        };
+
+        return new CssBuilder($"tento-segmented-item rounded-md font-medium transition-all duration-150 {sizePadding}")
+            .AddClass("flex-1 text-center", Block)
+            .AddClass("bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm font-semibold", isSelected)
+            .AddClass("hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/50", !isSelected && !isOptDisabled)
+            .AddClass("opacity-40 cursor-not-allowed", isOptDisabled)
+            .Build();
+    }
+}

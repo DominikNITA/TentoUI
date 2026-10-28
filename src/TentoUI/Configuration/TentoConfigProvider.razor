@@ -1,0 +1,46 @@
+@namespace TentoUI
+@using TentoUI.Configuration
+@using TentoUI.Extensibility
+
+<CascadingValue Value="@ConfigContext" IsFixed="false">
+    <div class="@ComputedClass"
+         style="@ComputedStyle"
+         data-theme="@(EffectiveDarkMode ? "dark" : "light")"
+         dir="@(Direction == Direction.Rtl ? "rtl" : "ltr")"
+         @attributes="AdditionalAttributes">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public TentoTheme Theme { get; set; } = new();
+    [Parameter] public bool DarkMode { get; set; }
+    [Parameter] public ComponentSize ComponentSize { get; set; } = ComponentSize.Middle;
+    [Parameter] public Direction Direction { get; set; } = Direction.Ltr;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool EffectiveDarkMode => DarkMode || (Theme?.DarkMode ?? false);
+
+    public TentoConfigContext ConfigContext => new(Theme, EffectiveDarkMode, ComponentSize, Direction);
+
+    protected override void OnParametersSet()
+    {
+        if (Theme != null)
+        {
+            Theme.DarkMode = EffectiveDarkMode;
+        }
+    }
+
+    private string ComputedClass => new CssBuilder("tento-config-provider font-sans")
+        .AddClass("dark", EffectiveDarkMode)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedStyle => new StyleBuilder()
+        .AddStyle(Theme.ToCssStyle())
+        .AddStyle(Style)
+        .Build();
+}

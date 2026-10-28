@@ -1,0 +1,166 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+<div class="@ComputedClass" role="list" aria-label="Steps" style="@Style" @attributes="AdditionalAttributes">
+    @for (int i = 0; i < _steps.Count; i++)
+    {
+        var index = i;
+        var step = _steps[index];
+        var resolvedStatus = ResolveStepStatus(index, step);
+        var isLast = index == _steps.Count - 1;
+        var isClickable = OnChange.HasDelegate && !step.Disabled;
+
+        <div role="listitem"
+             aria-current="@(index == Current ? "step" : null)"
+             data-step-status="@resolvedStatus.ToString().ToLowerInvariant()"
+             class="@ComputeStepItemClass(isLast, isClickable, step.Disabled)"
+             @onclick="@(() => HandleStepClickAsync(index, step))">
+            
+            <div class="flex items-start gap-3">
+                <div class="@ComputeIndicatorClass(resolvedStatus)">
+                    @if (step.IconTemplate != null)
+                    {
+                        @step.IconTemplate
+                    }
+                    else if (!string.IsNullOrEmpty(step.Icon))
+                    {
+                        <Icon Name="@step.Icon" Size="@(ResolvedSize(Size) == ComponentSize.Small ? 14 : 16)" />
+                    }
+                    else if (resolvedStatus == StepStatus.Finish)
+                    {
+                        <Icon Name="@IconNames.Check" Size="@(ResolvedSize(Size) == ComponentSize.Small ? 14 : 16)" />
+                    }
+                    else if (resolvedStatus == StepStatus.Error)
+                    {
+                        <Icon Name="@IconNames.X" Size="@(ResolvedSize(Size) == ComponentSize.Small ? 14 : 16)" />
+                    }
+                    else
+                    {
+                        <span>@(index + 1)</span>
+                    }
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="@ComputeTitleClass(resolvedStatus)">@step.Title</span>
+                        @if (!string.IsNullOrEmpty(step.SubTitle))
+                        {
+                            <span class="text-xs text-slate-400 dark:text-slate-500">@step.SubTitle</span>
+                        }
+                    </div>
+                    @if (!string.IsNullOrEmpty(step.Description))
+                    {
+                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">@step.Description</p>
+                    }
+                </div>
+            </div>
+
+            @if (!isLast)
+            {
+                @if (Direction == StepsDirection.Horizontal)
+                {
+                    <div class="flex-1 mx-4 h-0.5 self-center @(resolvedStatus == StepStatus.Finish ? "bg-primary-500" : "bg-slate-200 dark:bg-slate-700")"></div>
+                }
+                else
+                {
+                    <div class="ml-4 my-1 w-0.5 h-6 @(resolvedStatus == StepStatus.Finish ? "bg-primary-500" : "bg-slate-200 dark:bg-slate-700")"></div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Current { get; set; }
+    [Parameter] public EventCallback<int> CurrentChanged { get; set; }
+    [Parameter] public EventCallback<int> OnChange { get; set; }
+    [Parameter] public StepStatus Status { get; set; } = StepStatus.Process;
+    [Parameter] public StepsDirection Direction { get; set; } = StepsDirection.Horizontal;
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly System.Collections.Generic.List<Step> _steps = new();
+
+    internal void RegisterStep(Step step)
+    {
+        if (!_steps.Contains(step))
+        {
+            _steps.Add(step);
+            StateHasChanged();
+        }
+    }
+
+    internal void NotifyStepUpdated() => StateHasChanged();
+
+    internal void UnregisterStep(Step step)
+    {
+        if (_steps.Remove(step))
+        {
+            StateHasChanged();
+        }
+    }
+
+    private StepStatus ResolveStepStatus(int index, Step step)
+    {
+        if (step.Status.HasValue) return step.Status.Value;
+        if (index < Current) return StepStatus.Finish;
+        if (index == Current) return Status;
+        return StepStatus.Wait;
+    }
+
+    private async Task HandleStepClickAsync(int index, Step step)
+    {
+        if (step.Disabled || !OnChange.HasDelegate) return;
+        Current = index;
+        if (CurrentChanged.HasDelegate)
+        {
+            await CurrentChanged.InvokeAsync(Current);
+        }
+        await OnChange.InvokeAsync(index);
+    }
+
+    private string ComputedClass => new CssBuilder("tento-steps flex w-full")
+        .AddClass("flex-row items-center", Direction == StepsDirection.Horizontal)
+        .AddClass("flex-col items-stretch space-y-2", Direction == StepsDirection.Vertical)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeStepItemClass(bool isLast, bool isClickable, bool disabled)
+    {
+        return new CssBuilder("tento-step-item flex")
+            .AddClass("flex-1 items-center", Direction == StepsDirection.Horizontal && !isLast)
+            .AddClass("items-center", Direction == StepsDirection.Horizontal && isLast)
+            .AddClass("flex-col", Direction == StepsDirection.Vertical)
+            .AddClass("cursor-pointer", isClickable)
+            .AddClass("opacity-50 cursor-not-allowed", disabled)
+            .Build();
+    }
+
+    private string ComputeIndicatorClass(StepStatus status)
+    {
+        var dim = ResolvedSize(Size) == ComponentSize.Small ? "w-6 h-6 text-xs" : "w-8 h-8 text-sm";
+        return new CssBuilder($"{dim} rounded-full inline-flex items-center justify-center font-semibold shrink-0 transition-colors border")
+            .AddClass("bg-primary-500 border-primary-500 text-white", status == StepStatus.Process)
+            .AddClass("bg-primary-50 border-primary-500 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400", status == StepStatus.Finish)
+            .AddClass("bg-red-50 border-red-500 text-red-600 dark:bg-red-950/40 dark:text-red-400", status == StepStatus.Error)
+            .AddClass("bg-slate-100 border-slate-300 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400", status == StepStatus.Wait)
+            .Build();
+    }
+
+    private string ComputeTitleClass(StepStatus status)
+    {
+        var textSize = ResolvedSize(Size) == ComponentSize.Small ? "text-xs" : "text-sm";
+        return new CssBuilder($"{textSize} font-medium")
+            .AddClass("text-slate-900 dark:text-white font-semibold", status == StepStatus.Process)
+            .AddClass("text-slate-700 dark:text-slate-200", status == StepStatus.Finish)
+            .AddClass("text-red-600 dark:text-red-400", status == StepStatus.Error)
+            .AddClass("text-slate-400 dark:text-slate-500", status == StepStatus.Wait)
+            .Build();
+    }
+}

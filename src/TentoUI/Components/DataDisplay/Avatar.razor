@@ -1,0 +1,71 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<span class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Src) && !_imageFailed)
+    {
+        <img src="@Src"
+             alt="@(Alt ?? "Avatar")"
+             class="w-full h-full object-cover"
+             @onerror="@(() => _imageFailed = true)" />
+    }
+    else if (!string.IsNullOrEmpty(Icon))
+    {
+        <Icon Name="@Icon" Size="@ComputeIconSize()" />
+    }
+    else if (ChildContent != null)
+    {
+        <span class="tento-avatar-string leading-none">@ChildContent</span>
+    }
+    else if (!string.IsNullOrEmpty(Text))
+    {
+        <span class="tento-avatar-string leading-none">@Text</span>
+    }
+    else
+    {
+        <Icon Name="@IconNames.User" Size="@ComputeIconSize()" />
+    }
+</span>
+
+@code {
+    [Parameter] public AvatarShape Shape { get; set; } = AvatarShape.Circle;
+    [Parameter] public ComponentSize? Size { get; set; }
+    [Parameter] public string? Src { get; set; }
+    [Parameter] public string? Alt { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _imageFailed;
+
+    protected override void OnParametersSet()
+    {
+        _imageFailed = false;
+    }
+
+    private int ComputeIconSize() => ResolvedSize(Size) switch
+    {
+        ComponentSize.Small => 14,
+        ComponentSize.Large => 20,
+        _ => 16
+    };
+
+    private string ComputedClass
+    {
+        get
+        {
+            var sizeClass = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "w-6 h-6 text-xs",
+                ComponentSize.Large => "w-10 h-10 text-base",
+                _ => "w-8 h-8 text-sm"
+            };
+
+            var shapeClass = Shape == AvatarShape.Square ? "rounded-md" : "rounded-full";
+
+            return new CssBuilder($"tento-avatar inline-flex items-center justify-center overflow-hidden select-none font-medium bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 shrink-0 {sizeClass} {shapeClass}")
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

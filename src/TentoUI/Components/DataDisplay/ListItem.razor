@@ -1,0 +1,21 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<li class="tento-list-item py-3 border-b last:border-b-0 border-slate-200 dark:border-slate-800 flex items-center justify-between @Class"
+    style="@Style"
+    @attributes="AdditionalAttributes">
+    <div class="flex-1">
+        @ChildContent
+    </div>
+    @if (Actions != null)
+    {
+        <div class="flex items-center gap-2 ml-4">
+            @Actions
+        </div>
+    }
+</li>
+
+@code {
+    [Parameter] public RenderFragment? Actions { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

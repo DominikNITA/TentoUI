@@ -1,0 +1,20 @@
+@namespace TentoUI
+@implements IDisposable
+
+@code {
+    [CascadingParameter] protected Tour? ParentTour { get; set; }
+
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? TargetSelector { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentTour?.RegisterStep(this);
+    }
+
+    public void Dispose()
+    {
+        ParentTour?.UnregisterStep(this);
+    }
+}

@@ -1,0 +1,14 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<header class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</header>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-header h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center shrink-0 z-10")
+        .AddClass(Class)
+        .Build();
+}

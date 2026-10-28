@@ -1,0 +1,72 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" data-result-status="@Status.ToString().ToLowerInvariant()" style="@Style" @attributes="AdditionalAttributes">
+    <div class="@ComputeIconWrapperClass()">
+        @if (Icon != null)
+        {
+            @Icon
+        }
+        else
+        {
+            <Icon Name="@ResolveIconName()" Size="40" />
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <h3 class="tento-result-title text-xl font-semibold text-slate-900 dark:text-white mt-4">
+            @Title
+        </h3>
+    }
+
+    @if (!string.IsNullOrEmpty(SubTitle))
+    {
+        <p class="tento-result-subtitle text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md">
+            @SubTitle
+        </p>
+    }
+
+    @if (Extra != null)
+    {
+        <div class="tento-result-extra mt-6 flex flex-wrap items-center justify-center gap-3">
+            @Extra
+        </div>
+    }
+
+    @if (ChildContent != null)
+    {
+        <div class="tento-result-content mt-6 w-full max-w-xl p-4 rounded-lg bg-slate-50 dark:bg-slate-800/60 text-left text-sm text-slate-600 dark:text-slate-300">
+            @ChildContent
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public ResultStatus Status { get; set; } = ResultStatus.Info;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? SubTitle { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? Extra { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ResolveIconName() => Status switch
+    {
+        ResultStatus.Success => IconNames.CheckCircle2,
+        ResultStatus.Warning => IconNames.AlertTriangle,
+        ResultStatus.Error => IconNames.XCircle,
+        _ => IconNames.Info
+    };
+
+    private string ComputeIconWrapperClass() => Status switch
+    {
+        ResultStatus.Success => "tento-result-icon w-16 h-16 rounded-full flex items-center justify-center bg-emerald-50 text-emerald-500 dark:bg-emerald-950/40",
+        ResultStatus.Warning => "tento-result-icon w-16 h-16 rounded-full flex items-center justify-center bg-amber-50 text-amber-500 dark:bg-amber-950/40",
+        ResultStatus.Error => "tento-result-icon w-16 h-16 rounded-full flex items-center justify-center bg-red-50 text-red-500 dark:bg-red-950/40",
+        _ => "tento-result-icon w-16 h-16 rounded-full flex items-center justify-center bg-primary-50 text-primary-500 dark:bg-primary-950/40"
+    };
+
+    private string ComputedClass => new CssBuilder("tento-result flex flex-col items-center justify-center py-10 px-6 text-center")
+        .AddClass(Class)
+        .Build();
+}

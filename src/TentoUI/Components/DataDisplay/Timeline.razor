@@ -1,0 +1,14 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<ol class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</ol>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-timeline relative border-l-2 border-slate-200 dark:border-slate-700 ml-3 space-y-6")
+        .AddClass(Class)
+        .Build();
+}

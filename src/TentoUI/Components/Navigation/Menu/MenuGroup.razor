@@ -1,0 +1,19 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="tento-menu-group my-2" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrEmpty(Title))
+    {
+        <div class="px-4 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider select-none">
+            @Title
+        </div>
+    }
+    <div>
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

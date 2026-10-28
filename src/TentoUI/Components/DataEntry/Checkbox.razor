@@ -1,0 +1,68 @@
+@namespace TentoUI
+@inherits TentoInputBase<bool>
+
+<label class="@ComputeLabelClass()" style="@Style">
+    <input id="@ElementId"
+           type="checkbox"
+           checked="@CurrentValue"
+           disabled="@IsDisabled"
+           @onchange="@HandleChange"
+           aria-checked="@(Indeterminate ? "mixed" : (CurrentValue ? "true" : "false"))"
+           data-indeterminate="@(Indeterminate ? "true" : null)"
+           class="rounded border-slate-300 text-primary-500 focus:ring-primary-500 w-4 h-4"
+           @attributes="AdditionalAttributes" />
+
+    @if (ChildContent != null)
+    {
+        <span>@ChildContent</span>
+    }
+    else if (!string.IsNullOrEmpty(Label))
+    {
+        <span>@Label</span>
+    }
+</label>
+
+@code {
+    [Parameter]
+    public bool Checked
+    {
+        get => CurrentValue;
+        set => CurrentValue = value;
+    }
+    [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public bool Indeterminate { get; set; }
+    [Parameter] public EventCallback<bool> IndeterminateChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        if (IsDisabled) return;
+        if (Indeterminate)
+        {
+            Indeterminate = false;
+            if (IndeterminateChanged.HasDelegate)
+            {
+                await IndeterminateChanged.InvokeAsync(false);
+            }
+        }
+
+        CurrentValue = (bool)(e.Value ?? false);
+        if (CheckedChanged.HasDelegate)
+        {
+            await CheckedChanged.InvokeAsync(CurrentValue);
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out bool result, out string validationErrorMessage)
+    {
+        result = bool.TryParse(value, out var b) && b;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputeLabelClass() => new CssBuilder("tento-checkbox flex items-center space-x-2 cursor-pointer select-none")
+        .AddClass("opacity-50 cursor-not-allowed pointer-events-none", IsDisabled)
+        .AddClass(Class)
+        .Build();
+}

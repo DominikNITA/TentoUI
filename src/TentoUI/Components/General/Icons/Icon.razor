@@ -1,0 +1,47 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="@RenderSize"
+     height="@RenderSize"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="@ResolvedStroke"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     class="@ComputedClass"
+     style="@ComputedStyle"
+     role="@(AriaLabel != null ? "img" : null)"
+     aria-label="@AriaLabel"
+     aria-hidden="@(AriaLabel == null ? "true" : null)"
+     @onclick="OnClick"
+     @attributes="AdditionalAttributes">
+    <path data-name="@Name" d="" class="hidden" />
+    @((MarkupString)SvgPathContent)
+</svg>
+
+@code {
+    [Parameter] public string Name { get; set; } = string.Empty;
+    [Parameter] public object Size { get; set; } = 16;
+    [Parameter] public string? Color { get; set; }
+    [Parameter] public bool Spin { get; set; }
+    [Parameter] public double Rotate { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    private string RenderSize => Size?.ToString() ?? "16";
+    private string ResolvedStroke => !string.IsNullOrEmpty(Color) && !Color.StartsWith("text-") ? Color : "currentColor";
+    private string SvgPathContent => LucideIcons.GetPath(Name);
+
+    private string ComputedClass => new CssBuilder("tento-icon inline-block shrink-0")
+        .AddClass(Color, !string.IsNullOrEmpty(Color) && Color.StartsWith("text-"))
+        .AddClass("animate-spin", Spin)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedStyle => new StyleBuilder()
+        .AddStyle($"transform: rotate({Rotate}deg)", Rotate != 0)
+        .AddStyle(Style)
+        .Build();
+}

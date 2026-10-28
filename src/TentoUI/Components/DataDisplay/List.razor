@@ -1,0 +1,76 @@
+@namespace TentoUI
+@typeparam TItem
+@inherits TentoComponentBase
+
+<div class="@ComputedListClass()" style="@Style" @attributes="AdditionalAttributes">
+    @if (Header != null || !string.IsNullOrEmpty(HeaderText))
+    {
+        <div class="tento-list-header font-medium py-3 border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100">
+            @if (Header != null)
+            {
+                @Header
+            }
+            else
+            {
+                @HeaderText
+            }
+        </div>
+    }
+
+    <ul class="divide-y divide-slate-200 dark:divide-slate-800 list-none p-0 m-0">
+        @if (DataSource != null && RenderItem != null)
+        {
+            @foreach (var item in DataSource)
+            {
+                @RenderItem(item)
+            }
+        }
+        else if (DataSource != null)
+        {
+            @foreach (var item in DataSource)
+            {
+                <li class="tento-list-item py-3 border-b last:border-b-0 border-slate-200 dark:border-slate-800">
+                    @item?.ToString()
+                </li>
+            }
+        }
+        else
+        {
+            @ChildContent
+        }
+    </ul>
+
+    @if (Footer != null || !string.IsNullOrEmpty(FooterText))
+    {
+        <div class="tento-list-footer text-slate-500 dark:text-slate-400 py-3 border-t border-slate-200 dark:border-slate-800 text-sm">
+            @if (Footer != null)
+            {
+                @Footer
+            }
+            else
+            {
+                @FooterText
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TItem>? DataSource { get; set; }
+    [Parameter] public RenderFragment<TItem>? RenderItem { get; set; }
+    [Parameter] public RenderFragment<TItem>? ItemTemplate { get => RenderItem; set => RenderItem = value; }
+    [Parameter] public RenderFragment? Header { get; set; }
+    [Parameter] public string? HeaderText { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+    [Parameter] public string? FooterText { get; set; }
+    [Parameter] public bool Bordered { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedListClass()
+    {
+        return new CssBuilder("tento-list w-full")
+            .AddClass("border border-slate-200 dark:border-slate-800 rounded-lg px-4", Bordered)
+            .AddClass(Class)
+            .Build();
+    }
+}

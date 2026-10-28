@@ -1,0 +1,123 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@if (FullScreen && _shouldSpin)
+{
+    <div class="fixed inset-0 z-[1500] flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm"
+         role="status"
+         aria-live="polite">
+        @RenderSpinnerContent()
+        <span class="sr-only">@(Tip ?? "Loading...")</span>
+    </div>
+}
+else if (ChildContent != null)
+{
+    <div class="relative inline-block w-full" @attributes="AdditionalAttributes">
+        @* Wrapped Content *@
+        <div class="@ChildContainerClass">
+            @ChildContent
+        </div>
+
+        @* Overlay Spinner *@
+        @if (_shouldSpin)
+        {
+            <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-[0.5px] rounded-lg transition-opacity duration-200"
+                 role="status"
+                 aria-live="polite">
+                @RenderSpinnerContent()
+                <span class="sr-only">@(Tip ?? "Loading...")</span>
+            </div>
+        }
+    </div>
+}
+else
+{
+    @* Standalone Spinner *@
+    @if (_shouldSpin)
+    {
+        <div class="inline-flex flex-col items-center justify-center p-2"
+             role="status"
+             aria-live="polite"
+             @attributes="AdditionalAttributes">
+            @RenderSpinnerContent()
+            <span class="sr-only">@(Tip ?? "Loading...")</span>
+        </div>
+    }
+}
+
+@code {
+    private bool _shouldSpin = true;
+    private CancellationTokenSource? _delayCts;
+
+    [Parameter] public bool Spinning { get; set; } = true;
+    [Parameter] public ComponentSize Size { get; set; } = ComponentSize.Middle;
+    [Parameter] public string? Tip { get; set; }
+    [Parameter] public int Delay { get; set; }
+    [Parameter] public RenderFragment? Indicator { get; set; }
+    [Parameter] public bool FullScreen { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ChildContainerClass => new CssBuilder("transition-all duration-200")
+        .AddClass("opacity-40 pointer-events-none select-none blur-[0.5px]", _shouldSpin)
+        .Build();
+
+    protected override void OnParametersSet()
+    {
+        _delayCts?.Cancel();
+        _delayCts?.Dispose();
+        _delayCts = null;
+
+        if (Spinning)
+        {
+            if (Delay > 0)
+            {
+                _shouldSpin = false;
+                _delayCts = new CancellationTokenSource();
+                _ = Task.Delay(Delay, _delayCts.Token).ContinueWith(t =>
+                {
+                    if (!t.IsCanceled)
+                    {
+                        _shouldSpin = true;
+                        InvokeAsync(StateHasChanged);
+                    }
+                }, TaskScheduler.Default);
+            }
+            else
+            {
+                _shouldSpin = true;
+            }
+        }
+        else
+        {
+            _shouldSpin = false;
+        }
+    }
+
+    private RenderFragment RenderSpinnerContent() => __builder =>
+    {
+        <div class="flex flex-col items-center gap-2">
+            @if (Indicator != null)
+            {
+                @Indicator
+            }
+            else
+            {
+                <Icon Name="IconNames.Loader2"
+                      Class="text-primary-500 animate-spin"
+                      Size="@GetSpinnerPixelSize()" />
+            }
+
+            @if (!string.IsNullOrEmpty(Tip))
+            {
+                <span class="text-xs font-medium text-slate-600 dark:text-slate-300">@Tip</span>
+            }
+        </div>
+    };
+
+    private int GetSpinnerPixelSize() => Size switch
+    {
+        ComponentSize.Small => 16,
+        ComponentSize.Large => 36,
+        _ => 24
+    };
+}

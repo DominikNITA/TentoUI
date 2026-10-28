@@ -1,0 +1,76 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<CascadingValue Value="@_rowContext" IsFixed="true">
+    <div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+@code {
+    [Parameter] public object? Gutter { get; set; }
+    [Parameter] public int GutterX { get; set; }
+    [Parameter] public int GutterY { get; set; }
+    [Parameter] public RowJustify Justify { get; set; } = RowJustify.Start;
+    [Parameter] public RowAlign Align { get; set; } = RowAlign.Top;
+    [Parameter] public bool Wrap { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly RowContext _rowContext = new();
+
+    protected override void OnParametersSet()
+    {
+        int h = GutterX;
+        int v = GutterY;
+
+        if (Gutter is int singleGutter)
+        {
+            h = singleGutter;
+            v = singleGutter;
+        }
+        else if (Gutter is ValueTuple<int, int> tuple)
+        {
+            h = tuple.Item1;
+            v = tuple.Item2;
+        }
+
+        _rowContext.HorizontalGutter = h;
+        _rowContext.VerticalGutter = v;
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var justifyClass = Justify switch
+            {
+                RowJustify.Center => "justify-center",
+                RowJustify.End => "justify-end",
+                RowJustify.SpaceBetween => "justify-between",
+                RowJustify.SpaceAround => "justify-around",
+                RowJustify.SpaceEvenly => "justify-evenly",
+                _ => "justify-start"
+            };
+
+            var alignClass = Align switch
+            {
+                RowAlign.Middle => "items-center",
+                RowAlign.Bottom => "items-end",
+                RowAlign.Stretch => "items-stretch",
+                _ => "items-start"
+            };
+
+            var marginX = _rowContext.HorizontalGutter > 0 ? $"-mx-{_rowContext.HorizontalGutter / 2}" : "";
+            var marginY = _rowContext.VerticalGutter > 0 ? $"-my-{_rowContext.VerticalGutter / 2}" : "";
+
+            return new CssBuilder("tento-row flex")
+                .AddClass("flex-wrap", Wrap)
+                .AddClass(justifyClass)
+                .AddClass(alignClass)
+                .AddClass(marginX)
+                .AddClass(marginY)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

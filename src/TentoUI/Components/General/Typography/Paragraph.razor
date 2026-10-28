@@ -1,0 +1,44 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<p class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @if (Strong)
+    {
+        <strong>@ChildContent</strong>
+    }
+    else
+    {
+        @ChildContent
+    }
+</p>
+
+@code {
+    [Parameter] public TypographyType Type { get; set; } = TypographyType.Default;
+    [Parameter] public bool Ellipsis { get; set; }
+    [Parameter] public int Rows { get; set; } = 1;
+    [Parameter] public bool Strong { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var typeClass = Type switch
+            {
+                TypographyType.Secondary => "text-slate-500",
+                TypographyType.Success => "text-emerald-500",
+                TypographyType.Warning => "text-amber-500",
+                TypographyType.Danger => "text-red-500",
+                _ => "text-slate-900 dark:text-slate-100"
+            };
+
+            var clampClass = Ellipsis ? $"line-clamp-{Rows} overflow-hidden" : "";
+
+            return new CssBuilder("tento-typography-paragraph mb-4 leading-relaxed")
+                .AddClass(typeClass)
+                .AddClass(clampClass)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

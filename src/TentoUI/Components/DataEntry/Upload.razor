@@ -1,0 +1,146 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    <label class="@ComputedDropzoneClass">
+        <InputFile OnChange="HandleFilesSelectedAsync"
+                   multiple="@Multiple"
+                   accept="@Accept"
+                   disabled="@Disabled"
+                   aria-label="@(AriaLabel ?? "Upload file")"
+                   class="sr-only" />
+
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+        else if (DragDrop)
+        {
+            <div class="flex flex-col items-center justify-center py-6 px-4 text-center">
+                <Icon Name="@IconNames.Upload" Size="32" Class="text-primary-500 mb-2" />
+                <p class="text-sm font-medium text-slate-700 dark:text-slate-200">@ButtonText</p>
+                @if (!string.IsNullOrEmpty(Hint))
+                {
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">@Hint</p>
+                }
+            </div>
+        }
+        else
+        {
+            <span class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                <Icon Name="@IconNames.Upload" Size="16" />
+                <span>@ButtonText</span>
+            </span>
+        }
+    </label>
+
+    @if (ShowUploadList && FileList.Count > 0)
+    {
+        <ul class="tento-upload-list mt-2 space-y-1.5">
+            @foreach (var file in FileList)
+            {
+                <li class="tento-upload-list-item flex items-center justify-between px-3 py-1.5 text-xs rounded border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/50">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <Icon Name="@IconNames.File" Size="14" Class="text-slate-400 shrink-0" />
+                        <span class="truncate @(file.Status == UploadStatus.Error ? "text-red-600 dark:text-red-400" : "text-slate-700 dark:text-slate-200")">
+                            @file.Name
+                        </span>
+                    </div>
+                    <button type="button"
+                            class="tento-upload-remove ml-2 text-slate-400 hover:text-red-500"
+                            aria-label="@($"Remove {file.Name}")"
+                            @onclick="@(() => RemoveFileAsync(file))">
+                        <Icon Name="@IconNames.Trash2" Size="14" />
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter] public string ButtonText { get; set; } = "Click to Upload";
+    [Parameter] public string? Hint { get; set; }
+    [Parameter] public string? Accept { get; set; }
+    [Parameter] public bool Multiple { get; set; }
+    [Parameter] public bool DragDrop { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ShowUploadList { get; set; } = true;
+    [Parameter] public long MaxFileSize { get; set; } = 10 * 1024 * 1024;
+    [Parameter] public string? AriaLabel { get; set; }
+    [Parameter] public System.Collections.Generic.List<UploadFileItem> FileList { get; set; } = new();
+    [Parameter] public EventCallback<System.Collections.Generic.List<UploadFileItem>> FileListChanged { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnChange { get; set; }
+    [Parameter] public EventCallback<UploadFileItem> OnRemove { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task HandleFilesSelectedAsync(InputFileChangeEventArgs e)
+    {
+        if (Disabled) return;
+
+        var selected = Multiple ? e.GetMultipleFiles(50) : new[] { e.File };
+        if (!Multiple)
+        {
+            FileList.Clear();
+        }
+
+        foreach (var f in selected)
+        {
+            var isTooLarge = f.Size > MaxFileSize;
+            FileList.Add(new UploadFileItem
+            {
+                Name = f.Name,
+                Size = f.Size,
+                ContentType = f.ContentType,
+                Status = isTooLarge ? UploadStatus.Error : UploadStatus.Done,
+                ErrorMessage = isTooLarge ? "File exceeds maximum allowed size." : null
+            });
+        }
+
+        if (FileListChanged.HasDelegate)
+        {
+            await FileListChanged.InvokeAsync(FileList);
+        }
+        if (OnChange.HasDelegate)
+        {
+            await OnChange.InvokeAsync(e);
+        }
+    }
+
+    private async Task RemoveFileAsync(UploadFileItem item)
+    {
+        if (Disabled) return;
+        FileList.Remove(item);
+        if (FileListChanged.HasDelegate)
+        {
+            await FileListChanged.InvokeAsync(FileList);
+        }
+        if (OnRemove.HasDelegate)
+        {
+            await OnRemove.InvokeAsync(item);
+        }
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-upload w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedDropzoneClass
+    {
+        get
+        {
+            if (DragDrop)
+            {
+                return new CssBuilder("tento-upload-dragger block w-full rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-500 bg-slate-50/40 dark:bg-slate-800/30 transition-colors")
+                    .AddClass("opacity-50 cursor-not-allowed", Disabled)
+                    .AddClass("cursor-pointer", !Disabled)
+                    .Build();
+            }
+
+            return new CssBuilder("tento-upload-select inline-block")
+                .AddClass("opacity-50 cursor-not-allowed", Disabled)
+                .AddClass("cursor-pointer", !Disabled)
+                .Build();
+        }
+    }
+}

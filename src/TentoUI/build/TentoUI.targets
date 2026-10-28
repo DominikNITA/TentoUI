@@ -1,0 +1,40 @@
+<Project>
+  <!--
+    Copies the TentoUI Tailwind assets into the consuming project so Tailwind can reference them with a
+    stable relative path:  <project>/tailwind/tentoui/tentoui.theme.css  and  tentoui.classes.txt
+    Opt out with <TentoUISyncTailwind>false</TentoUISyncTailwind>.
+  -->
+  <PropertyGroup>
+    <TentoUISyncTailwind Condition="'$(TentoUISyncTailwind)' == ''">true</TentoUISyncTailwind>
+    <TentoUITailwindSource>$(MSBuildThisFileDirectory)..\tailwind\</TentoUITailwindSource>
+    <TentoUITailwindTarget Condition="'$(TentoUITailwindTarget)' == ''">$(MSBuildProjectDirectory)\tailwind\tentoui\</TentoUITailwindTarget>
+  </PropertyGroup>
+
+  <Target Name="TentoUISyncTailwindAssets" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="'$(TentoUISyncTailwind)' == 'true' And Exists('$(TentoUITailwindSource)')">
+    <ItemGroup>
+      <_TentoUITailwindFiles Include="$(TentoUITailwindSource)*.css;$(TentoUITailwindSource)*.txt" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_TentoUITailwindFiles)" DestinationFolder="$(TentoUITailwindTarget)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!--
+    AI agent skills (SKILL.md) shipped inside the package. Install them into the project once with:
+        dotnet msbuild -t:TentoUIInstallSkills
+    Or keep them in sync on every build with <TentoUISyncSkills>true</TentoUISyncSkills>.
+    Destination defaults to <project>/.skills/ ; override with <TentoUISkillsTarget> (e.g. .gemini/config/skills, .claude/skills).
+  -->
+  <PropertyGroup>
+    <TentoUISkillsSource>$(MSBuildThisFileDirectory)..\skills\</TentoUISkillsSource>
+    <TentoUISkillsTarget Condition="'$(TentoUISkillsTarget)' == ''">$(MSBuildProjectDirectory)\.skills\</TentoUISkillsTarget>
+  </PropertyGroup>
+
+  <Target Name="TentoUIInstallSkills" Condition="Exists('$(TentoUISkillsSource)')">
+    <ItemGroup>
+      <_TentoUISkillFiles Include="$(TentoUISkillsSource)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_TentoUISkillFiles)" DestinationFiles="@(_TentoUISkillFiles->'$(TentoUISkillsTarget)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="TentoUI skills installed to $(TentoUISkillsTarget)" />
+  </Target>
+
+  <Target Name="TentoUISyncSkillsOnBuild" BeforeTargets="BeforeBuild" DependsOnTargets="TentoUIInstallSkills" Condition="'$(TentoUISyncSkills)' == 'true'" />
+</Project>

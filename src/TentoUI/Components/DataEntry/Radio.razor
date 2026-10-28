@@ -1,0 +1,66 @@
+@namespace TentoUI
+@typeparam TValue
+@inherits TentoComponentBase
+
+@if (ParentGroup?.OptionType == RadioOptionType.Button)
+{
+    <button type="button"
+            role="radio"
+            aria-checked="@(IsSelected ? "true" : "false")"
+            disabled="@IsDisabled"
+            class="@ComputeButtonRadioClass()"
+            @onclick="@HandleSelect">
+        @ChildContent
+    </button>
+}
+else
+{
+    <label class="@ComputeDefaultRadioClass()" style="@Style" @attributes="AdditionalAttributes">
+        <input type="radio"
+               name="@(ParentGroup?.Name)"
+               value="@Value"
+               checked="@IsSelected"
+               disabled="@IsDisabled"
+               @onchange="@HandleSelect"
+               class="rounded-full border-slate-300 text-primary-500 focus:ring-primary-500 w-4 h-4" />
+        @if (ChildContent != null)
+        {
+            <span>@ChildContent</span>
+        }
+    </label>
+}
+
+@code {
+    [CascadingParameter] private RadioGroup<TValue>? ParentGroup { get; set; }
+
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool IsDisabled => Disabled || (ParentGroup?.Disabled ?? false);
+    private bool IsSelected => ParentGroup != null && EqualityComparer<TValue>.Default.Equals(ParentGroup.Value, Value);
+
+    private async Task HandleSelect()
+    {
+        if (IsDisabled || ParentGroup == null) return;
+        await ParentGroup.SelectValue(Value);
+    }
+
+    private string ComputeDefaultRadioClass() => new CssBuilder("tento-radio flex items-center space-x-2 cursor-pointer select-none")
+        .AddClass("opacity-50 cursor-not-allowed pointer-events-none", IsDisabled)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeButtonRadioClass()
+    {
+        var activeClass = IsSelected
+            ? "bg-white dark:bg-slate-900 text-primary-600 shadow-sm font-medium"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900";
+
+        return new CssBuilder("px-3 py-1.5 text-xs font-medium rounded transition-all focus:outline-none")
+            .AddClass(activeClass)
+            .AddClass("opacity-50 cursor-not-allowed", IsDisabled)
+            .AddClass(Class)
+            .Build();
+    }
+}

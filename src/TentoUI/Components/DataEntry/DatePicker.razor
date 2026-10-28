@@ -1,0 +1,307 @@
+@namespace TentoUI
+@inherits TentoInputBase<DateTime?>
+
+<div class="tento-datepicker relative flex items-center w-full"
+     @onkeydown="@HandleKeyDown"
+     style="@Style">
+    
+    <div class="@ComputeWrapperClass()" @onclick="@ToggleOpen">
+        <span class="text-slate-400 mr-2 inline-flex items-center">
+            <svg data-icon="calendar" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+        </span>
+
+        <input id="@ElementId"
+               type="text"
+               value="@FormattedDate"
+               placeholder="@Placeholder"
+               disabled="@IsDisabled"
+               readonly="@ReadOnly"
+               @onchange="@HandleManualInput"
+               class="w-full bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+               aria-haspopup="dialog"
+               aria-expanded="@(_isOpen ? "true" : "false")"
+               @attributes="AdditionalAttributes" />
+
+        <div class="flex items-center gap-1.5 ml-2 text-slate-400">
+            @if (AllowClear && CurrentValue.HasValue && !IsDisabled)
+            {
+                <button type="button"
+                        class="hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                        aria-label="Clear date"
+                        @onclick:stopPropagation="true"
+                        @onclick="@ClearDate">
+                    &times;
+                </button>
+            }
+        </div>
+    </div>
+
+    @* Calendar Popover *@
+    @if (_isOpen)
+    {
+        <div class="fixed inset-0 z-40" @onclick="@Close"></div>
+        <div class="tento-datepicker-popover absolute left-0 top-full mt-1 z-50 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl w-72"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Date Picker Calendar">
+            
+            @* Header *@
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-1">
+                    <button type="button"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled="@(!CanPrevYear)"
+                            @onclick="@PrevYear"
+                            aria-label="Previous year">&laquo;</button>
+                    <button type="button"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled="@(!CanPrevMonth)"
+                            @onclick="@PrevMonth"
+                            aria-label="Previous month">&lsaquo;</button>
+                </div>
+                <div class="text-sm font-semibold text-slate-800 dark:text-slate-100 select-none">
+                    @_viewDate.ToString("MMMM yyyy")
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled="@(!CanNextMonth)"
+                            @onclick="@NextMonth"
+                            aria-label="Next month">&rsaquo;</button>
+                    <button type="button"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                            disabled="@(!CanNextYear)"
+                            @onclick="@NextYear"
+                            aria-label="Next year">&raquo;</button>
+                </div>
+            </div>
+
+            @* Days of Week *@
+            <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-400 mb-1" role="row">
+                <span role="columnheader">Su</span>
+                <span role="columnheader">Mo</span>
+                <span role="columnheader">Tu</span>
+                <span role="columnheader">We</span>
+                <span role="columnheader">Th</span>
+                <span role="columnheader">Fr</span>
+                <span role="columnheader">Sa</span>
+            </div>
+
+            @* 42-day Calendar Grid *@
+            <div class="grid grid-cols-7 gap-1" role="grid">
+                @foreach (var day in CalendarDays)
+                {
+                    var isCurrentMonth = day.Month == _viewDate.Month;
+                    var isSelected = CurrentValue.HasValue && day.Date == CurrentValue.Value.Date;
+                    var isToday = day.Date == DateTime.Today;
+                    var isDisabled = IsDateDisabled(day);
+
+                    <button type="button"
+                            role="gridcell"
+                            aria-selected="@(isSelected ? "true" : "false")"
+                            disabled="@isDisabled"
+                            class="@ComputeDayClass(isCurrentMonth, isSelected, isToday, isDisabled)"
+                            @onclick="@(() => SelectDate(day))">
+                        @day.Day
+                    </button>
+                }
+            </div>
+
+            @* Footer Today Shortcut *@
+            <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                <button type="button" class="text-xs text-primary-500 hover:underline font-medium" @onclick="@SelectToday">
+                    Today
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Format { get; set; } = "yyyy-MM-dd";
+    [Parameter] public string? Placeholder { get; set; } = "Select date";
+    [Parameter] public bool AllowClear { get; set; }
+    [Parameter] public DateTime? MinDate { get; set; }
+    [Parameter] public DateTime? MaxDate { get; set; }
+
+    private bool _isOpen;
+    private DateTime _viewDate = DateTime.Today;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (CurrentValue.HasValue)
+        {
+            _viewDate = CurrentValue.Value;
+        }
+    }
+
+    private string FormattedDate => CurrentValue.HasValue ? CurrentValue.Value.ToString(Format) : string.Empty;
+
+    private void ToggleOpen()
+    {
+        if (IsDisabled) return;
+        _isOpen = !_isOpen;
+        if (_isOpen && CurrentValue.HasValue)
+        {
+            _viewDate = CurrentValue.Value;
+        }
+    }
+
+    private void Close() => _isOpen = false;
+
+    private bool CanPrevYear => _viewDate.Year > 1;
+    private bool CanPrevMonth => _viewDate.Year > 1 || _viewDate.Month > 1;
+    private bool CanNextMonth => _viewDate.Year < 9999 || _viewDate.Month < 12;
+    private bool CanNextYear => _viewDate.Year < 9999;
+
+    private void PrevMonth()
+    {
+        if (CanPrevMonth)
+        {
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddMonths(-1);
+        }
+    }
+
+    private void NextMonth()
+    {
+        if (CanNextMonth)
+        {
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddMonths(1);
+        }
+    }
+
+    private void PrevYear()
+    {
+        if (CanPrevYear)
+        {
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddYears(-1);
+        }
+    }
+
+    private void NextYear()
+    {
+        if (CanNextYear)
+        {
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddYears(1);
+        }
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        CurrentValue = date;
+        _isOpen = false;
+    }
+
+    private void SelectToday()
+    {
+        CurrentValue = DateTime.Today;
+        _viewDate = DateTime.Today;
+        _isOpen = false;
+    }
+
+    private void ClearDate()
+    {
+        CurrentValue = null;
+    }
+
+    private void HandleManualInput(ChangeEventArgs e)
+    {
+        var input = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            CurrentValue = null;
+        }
+        else if (DateTime.TryParseExact(input, Format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed))
+        {
+            CurrentValue = parsed;
+            _viewDate = parsed;
+        }
+        else if (DateTime.TryParse(input, out var fallbackParsed))
+        {
+            CurrentValue = fallbackParsed;
+            _viewDate = fallbackParsed;
+        }
+    }
+
+    private bool IsDateDisabled(DateTime day)
+    {
+        if (MinDate.HasValue && day.Date < MinDate.Value.Date) return true;
+        if (MaxDate.HasValue && day.Date > MaxDate.Value.Date) return true;
+        return false;
+    }
+
+    private IEnumerable<DateTime> CalendarDays
+    {
+        get
+        {
+            var firstDayOfMonth = new DateTime(_viewDate.Year, _viewDate.Month, 1);
+            int startOffset = (int)firstDayOfMonth.DayOfWeek; // Sunday = 0
+
+            // Clamp startDate to DateTime.MinValue if underflow would occur in Year 1 Month 1
+            var startDate = (_viewDate.Year == 1 && _viewDate.Month == 1)
+                ? DateTime.MinValue
+                : firstDayOfMonth.AddDays(-startOffset);
+
+            // Clamp total days yielded so we never exceed DateTime.MaxValue.Date (9999-12-31)
+            int maxDays = (int)(DateTime.MaxValue.Date - startDate).TotalDays;
+            int count = Math.Min(42, maxDays + 1);
+
+            for (int i = 0; i < count; i++)
+            {
+                yield return startDate.AddDays(i);
+            }
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            _isOpen = false;
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out DateTime? result, out string validationErrorMessage)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            result = null;
+            validationErrorMessage = string.Empty;
+            return true;
+        }
+
+        if (DateTime.TryParseExact(value, Format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed))
+        {
+            result = parsed;
+            validationErrorMessage = string.Empty;
+            return true;
+        }
+
+        result = null;
+        validationErrorMessage = $"Date format must be {Format}";
+        return false;
+    }
+
+    private string ComputeWrapperClass() => new CssBuilder("flex items-center w-full rounded-md border bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm min-h-[38px] cursor-pointer transition-all")
+        .AddClass(GetStatusBorderClass())
+        .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeDayClass(bool isCurrentMonth, bool isSelected, bool isToday, bool isDisabled)
+    {
+        return new CssBuilder("h-8 w-8 text-xs rounded-full flex items-center justify-center font-medium transition-colors select-none")
+            .AddClass("bg-primary-500 text-white font-bold", isSelected)
+            .AddClass("border border-primary-500 text-primary-500", isToday && !isSelected)
+            .AddClass("text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800", isCurrentMonth && !isSelected && !isToday && !isDisabled)
+            .AddClass("text-slate-300 dark:text-slate-600", !isCurrentMonth && !isSelected && !isDisabled)
+            .AddClass("opacity-30 cursor-not-allowed pointer-events-none", isDisabled)
+            .Build();
+    }
+}

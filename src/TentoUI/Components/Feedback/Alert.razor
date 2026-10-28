@@ -1,0 +1,154 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@if (!_closed)
+{
+    <div class="@ComputedClass"
+         style="@Style"
+         role="@AriaRole"
+         @attributes="AdditionalAttributes">
+
+        @* Status Icon *@
+        @if (ShowIcon || Description != null || DescriptionTemplate != null)
+        {
+            <div class="flex-shrink-0 mt-0.5">
+                @if (Icon != null)
+                {
+                    @Icon
+                }
+                else
+                {
+                    <Icon Name="@GetIconName()" Class="@GetIconClass()" Size="@(HasDescription ? 20 : 16)" />
+                }
+            </div>
+        }
+
+        @* Content Body *@
+        <div class="flex-1 min-w-0">
+            @if (Message != null || MessageTemplate != null)
+            {
+                <div class="@TitleClass">
+                    @if (MessageTemplate != null)
+                    {
+                        @MessageTemplate
+                    }
+                    else
+                    {
+                        @Message
+                    }
+                </div>
+            }
+
+            @if (Description != null || DescriptionTemplate != null)
+            {
+                <div class="text-xs sm:text-sm mt-1 text-slate-600 dark:text-slate-300">
+                    @if (DescriptionTemplate != null)
+                    {
+                        @DescriptionTemplate
+                    }
+                    else
+                    {
+                        @Description
+                    }
+                </div>
+            }
+        </div>
+
+        @* Close Action *@
+        @if (Closable)
+        {
+            <div class="flex-shrink-0 ml-3">
+                @if (CloseTextTemplate != null)
+                {
+                    <span @onclick="HandleClose" class="cursor-pointer">@CloseTextTemplate</span>
+                }
+                else if (!string.IsNullOrEmpty(CloseText))
+                {
+                    <button type="button"
+                            class="text-xs font-semibold hover:underline focus-visible:outline-none"
+                            @onclick="HandleClose">
+                        @CloseText
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            class="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                            aria-label="Close alert"
+                            @onclick="HandleClose">
+                        <Icon Name="IconNames.X" Size="14" />
+                    </button>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private bool _closed;
+
+    [Parameter] public AlertType Type { get; set; } = AlertType.Info;
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public RenderFragment? MessageTemplate { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? DescriptionTemplate { get; set; }
+    [Parameter] public bool ShowIcon { get; set; }
+    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public bool Closable { get; set; }
+    [Parameter] public string? CloseText { get; set; }
+    [Parameter] public RenderFragment? CloseTextTemplate { get; set; }
+    [Parameter] public bool Banner { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClose { get; set; }
+    [Parameter] public EventCallback AfterClose { get; set; }
+
+    private bool HasDescription => Description != null || DescriptionTemplate != null;
+
+    private string AriaRole => Type switch
+    {
+        AlertType.Error or AlertType.Warning => "alert",
+        _ => "status"
+    };
+
+    private string ComputedClass => new CssBuilder("flex items-start gap-3 p-4 border transition-all duration-200")
+        .AddClass("rounded-lg", !Banner)
+        .AddClass("w-full rounded-none border-x-0 border-t-0", Banner)
+        .AddClass("bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-100", Type == AlertType.Success)
+        .AddClass("bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-800 text-sky-900 dark:text-sky-100", Type == AlertType.Info)
+        .AddClass("bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-100", Type == AlertType.Warning)
+        .AddClass("bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-100", Type == AlertType.Error)
+        .AddClass(Class)
+        .Build();
+
+    private string TitleClass => new CssBuilder("font-semibold text-sm")
+        .AddClass("text-base font-bold", HasDescription)
+        .Build();
+
+    private string GetIconName() => Type switch
+    {
+        AlertType.Success => IconNames.CheckCircle,
+        AlertType.Warning => IconNames.AlertTriangle,
+        AlertType.Error => IconNames.XCircle,
+        _ => IconNames.Info
+    };
+
+    private string GetIconClass() => Type switch
+    {
+        AlertType.Success => "text-emerald-500",
+        AlertType.Warning => "text-amber-500",
+        AlertType.Error => "text-rose-500",
+        _ => "text-sky-500"
+    };
+
+    private async Task HandleClose(MouseEventArgs e)
+    {
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync(e);
+        }
+        _closed = true;
+        if (AfterClose.HasDelegate)
+        {
+            await AfterClose.InvokeAsync();
+        }
+    }
+}

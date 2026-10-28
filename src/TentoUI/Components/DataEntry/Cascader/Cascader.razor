@@ -1,0 +1,215 @@
+@namespace TentoUI
+@inherits TentoInputBase<IReadOnlyList<string>>
+
+<div class="@ComputedWrapperClass" style="@Style">
+    <div class="relative w-full">
+        <input id="@ElementId"
+               type="text"
+               readonly
+               disabled="@IsDisabled"
+               placeholder="@Placeholder"
+               value="@FormattedValue"
+               class="@ComputedInputClass"
+               @onclick="TogglePopupAsync"
+               @attributes="AdditionalAttributes" />
+
+        <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            @if (AllowClear && Value != null && Value.Any() && !IsDisabled && !ReadOnly)
+            {
+                <button type="button"
+                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        aria-label="Clear cascader"
+                        @onclick:stopPropagation="true"
+                        @onclick="ClearAsync">
+                    <Icon Name="@IconNames.X" Size="14" />
+                </button>
+            }
+            <Icon Name="@IconNames.ChevronDown" Size="14" Class="text-slate-400 pointer-events-none" />
+        </div>
+    </div>
+
+    @if (_isOpen && !IsDisabled && !ReadOnly && Options != null && Options.Any())
+    {
+        <div class="tento-cascader-popup absolute z-50 mt-1 flex divide-x divide-slate-100 dark:divide-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl overflow-hidden text-xs"
+             @onclick:stopPropagation="true">
+            @* Render each active column *@
+            @for (int colIndex = 0; colIndex < _activeColumns.Count; colIndex++)
+            {
+                var col = _activeColumns[colIndex];
+                var level = colIndex;
+
+                <div class="w-36 max-h-56 overflow-y-auto py-1">
+                    @foreach (var opt in col)
+                    {
+                        var isSelected = _selectedPath.Count > level && _selectedPath[level] == opt.Value;
+                        var hasChildren = opt.Children != null && opt.Children.Count > 0;
+
+                        <button type="button"
+                                disabled="@opt.Disabled"
+                                class="@ComputeOptionClass(isSelected, opt.Disabled)"
+                                @onclick="@(() => HandleOptionClickAsync(opt, level))">
+                            <span class="truncate flex-1 text-left">@opt.Label</span>
+                            @if (hasChildren)
+                            {
+                                <Icon Name="@IconNames.ChevronRight" Size="12" Class="text-slate-400 shrink-0" />
+                            }
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public IEnumerable<CascaderOption>? Options { get; set; }
+    [Parameter] public string? Placeholder { get; set; } = "Please select";
+    [Parameter] public bool AllowClear { get; set; } = true;
+    [Parameter] public bool ChangeOnSelect { get; set; }
+
+    private bool _isOpen;
+    private readonly System.Collections.Generic.List<string> _selectedPath = new();
+    private readonly System.Collections.Generic.List<IReadOnlyList<CascaderOption>> _activeColumns = new();
+
+    private string FormattedValue
+    {
+        get
+        {
+            if (Value == null || !Value.Any() || Options == null) return string.Empty;
+            var labels = new System.Collections.Generic.List<string>();
+            var currentOptions = Options;
+
+            foreach (var val in Value)
+            {
+                var match = currentOptions.FirstOrDefault(o => o.Value == val);
+                if (match != null)
+                {
+                    labels.Add(match.Label);
+                    currentOptions = match.Children;
+                }
+                else
+                {
+                    labels.Add(val);
+                }
+            }
+
+            return string.Join(" / ", labels);
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out IReadOnlyList<string> result, out string validationErrorMessage)
+    {
+        result = value?.Split(',', StringSplitEmptyOptions) ?? Array.Empty<string>();
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private const StringSplitOptions StringSplitEmptyOptions = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
+
+    protected override void OnParametersSet()
+    {
+        if (Options != null && _activeColumns.Count == 0)
+        {
+            _activeColumns.Add(Options.ToList());
+        }
+    }
+
+    private void TogglePopupAsync()
+    {
+        if (IsDisabled || ReadOnly) return;
+        _isOpen = !_isOpen;
+        if (_isOpen && Options != null)
+        {
+            _activeColumns.Clear();
+            _activeColumns.Add(Options.ToList());
+            _selectedPath.Clear();
+            if (Value != null)
+            {
+                _selectedPath.AddRange(Value);
+                // Reconstruct columns for selected path
+                var curr = Options;
+                foreach (var v in Value)
+                {
+                    var opt = curr?.FirstOrDefault(o => o.Value == v);
+                    if (opt?.Children != null && opt.Children.Count > 0)
+                    {
+                        _activeColumns.Add(opt.Children);
+                        curr = opt.Children;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private async Task ClearAsync()
+    {
+        CurrentValue = Array.Empty<string>();
+        _selectedPath.Clear();
+        _isOpen = false;
+    }
+
+    private async Task HandleOptionClickAsync(CascaderOption opt, int level)
+    {
+        if (opt.Disabled) return;
+
+        while (_selectedPath.Count > level)
+        {
+            _selectedPath.RemoveAt(_selectedPath.Count - 1);
+        }
+        _selectedPath.Add(opt.Value);
+
+        while (_activeColumns.Count > level + 1)
+        {
+            _activeColumns.RemoveAt(_activeColumns.Count - 1);
+        }
+
+        if (opt.Children != null && opt.Children.Count > 0)
+        {
+            _activeColumns.Add(opt.Children);
+            if (ChangeOnSelect)
+            {
+                CurrentValue = _selectedPath.ToList();
+            }
+        }
+        else
+        {
+            CurrentValue = _selectedPath.ToList();
+            _isOpen = false;
+        }
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-cascader relative inline-block w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedInputClass
+    {
+        get
+        {
+            var sizePadding = ResolvedSize(Size) switch
+            {
+                ComponentSize.Small => "px-2.5 py-1 text-xs",
+                ComponentSize.Large => "px-4 py-2 text-base",
+                _ => "px-3 py-1.5 text-sm"
+            };
+
+            return new CssBuilder($"w-full rounded-md border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 cursor-pointer focus:outline-none transition-colors pr-8 {sizePadding}")
+                .AddClass(GetStatusBorderClass())
+                .AddClass("opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800", IsDisabled)
+                .Build();
+        }
+    }
+
+    private static string ComputeOptionClass(bool isSelected, bool disabled)
+    {
+        return new CssBuilder("w-full flex items-center justify-between px-3 py-1.5 transition-colors")
+            .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-semibold", isSelected)
+            .AddClass("text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50", !isSelected && !disabled)
+            .AddClass("opacity-40 cursor-not-allowed text-slate-400", disabled)
+            .Build();
+    }
+}

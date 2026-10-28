@@ -1,0 +1,208 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+<div class="@ComputedClass" role="tree" style="@Style" @attributes="AdditionalAttributes">
+    @if (ShowSearch)
+    {
+        <div class="tento-tree-search mb-2">
+            <input type="text"
+                   value="@_searchTerm"
+                   placeholder="@(SearchPlaceholder ?? "Search tree...")"
+                   class="w-full px-2.5 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
+                   @oninput="HandleSearchInput" />
+        </div>
+    }
+
+    <ul class="space-y-0.5">
+        @if (Data != null)
+        {
+            @foreach (var node in Data)
+            {
+                if (MatchesSearchRecursive(node))
+                {
+                    @RenderDataNode(node, 0)
+                }
+            }
+        }
+        else
+        {
+            <CascadingValue Value="@this" IsFixed="true">
+                @ChildContent
+            </CascadingValue>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<TreeDataNode>? Data { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool Checkable { get; set; }
+    [Parameter] public HashSet<string> CheckedKeys { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<string>> CheckedKeysChanged { get; set; }
+    [Parameter] public string? SelectedKey { get; set; }
+    [Parameter] public EventCallback<string> SelectedKeyChanged { get; set; }
+    [Parameter] public EventCallback<string> OnSelect { get; set; }
+    [Parameter] public HashSet<string> ExpandedKeys { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<string>> ExpandedKeysChanged { get; set; }
+    [Parameter] public bool ShowLine { get; set; }
+    [Parameter] public bool ShowIcon { get; set; } = true;
+    [Parameter] public bool ShowSearch { get; set; }
+    [Parameter] public string? SearchPlaceholder { get; set; }
+
+    private string _searchTerm = string.Empty;
+
+    private bool IsExpanded(string key) => ExpandedKeys.Contains(key);
+    private bool IsChecked(string key) => CheckedKeys.Contains(key);
+    private bool IsSelected(string key) => SelectedKey == key;
+
+    private void HandleSearchInput(ChangeEventArgs e)
+    {
+        _searchTerm = e.Value?.ToString() ?? string.Empty;
+        if (!string.IsNullOrWhiteSpace(_searchTerm) && Data != null)
+        {
+            ExpandMatchingPaths(Data);
+        }
+    }
+
+    private bool MatchesSearchRecursive(TreeDataNode node)
+    {
+        if (string.IsNullOrWhiteSpace(_searchTerm)) return true;
+        if (node.Title.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)) return true;
+        return node.Children.Any(MatchesSearchRecursive);
+    }
+
+    private void ExpandMatchingPaths(IEnumerable<TreeDataNode> nodes)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.Children.Any(MatchesSearchRecursive))
+            {
+                ExpandedKeys.Add(node.Key);
+            }
+            ExpandMatchingPaths(node.Children);
+        }
+    }
+
+    internal async Task ToggleExpandAsync(string key)
+    {
+        if (!ExpandedKeys.Remove(key))
+        {
+            ExpandedKeys.Add(key);
+        }
+        if (ExpandedKeysChanged.HasDelegate)
+        {
+            await ExpandedKeysChanged.InvokeAsync(ExpandedKeys);
+        }
+    }
+
+    internal async Task ToggleCheckAsync(string key, bool isChecked)
+    {
+        if (isChecked)
+            CheckedKeys.Add(key);
+        else
+            CheckedKeys.Remove(key);
+
+        if (CheckedKeysChanged.HasDelegate)
+        {
+            await CheckedKeysChanged.InvokeAsync(CheckedKeys);
+        }
+    }
+
+    internal async Task SelectNodeAsync(string key, bool disabled)
+    {
+        if (disabled) return;
+        SelectedKey = key;
+        if (SelectedKeyChanged.HasDelegate)
+        {
+            await SelectedKeyChanged.InvokeAsync(key);
+        }
+        if (OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(key);
+        }
+    }
+
+    private RenderFragment RenderDataNode(TreeDataNode node, int level) => __builder =>
+    {
+        var hasChildren = node.Children != null && node.Children.Count > 0;
+        var isExp = IsExpanded(node.Key);
+        var isChk = IsChecked(node.Key);
+        var isSel = IsSelected(node.Key);
+
+        <li class="tento-tree-node select-none" data-tree-key="@node.Key">
+            <div class="@ComputeNodeRowClass(isSel, node.Disabled)"
+                 style="@($"padding-left: {level * 18 + 4}px;")">
+                
+                @if (hasChildren && !node.IsLeaf)
+                {
+                    <button type="button"
+                            class="p-0.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-transform"
+                            aria-label="@(isExp ? "Collapse" : "Expand")"
+                            @onclick="@(() => ToggleExpandAsync(node.Key))">
+                        <Icon Name="@(isExp ? IconNames.ChevronDown : IconNames.ChevronRight)" Size="14" />
+                    </button>
+                }
+                else
+                {
+                    <span class="w-4.5 inline-block"></span>
+                }
+
+                @if (Checkable)
+                {
+                    <input type="checkbox"
+                           checked="@isChk"
+                           disabled="@node.Disabled"
+                           class="w-3.5 h-3.5 rounded border-slate-300 text-primary-500 focus:ring-primary-500 cursor-pointer mx-1"
+                           @onchange="@(e => ToggleCheckAsync(node.Key, (bool)(e.Value ?? false)))" />
+                }
+
+                @if (ShowIcon)
+                {
+                    var iconName = !string.IsNullOrEmpty(node.Icon)
+                        ? node.Icon
+                        : (hasChildren ? (isExp ? IconNames.Folder : IconNames.Folder) : IconNames.File);
+                    <Icon Name="@iconName" Size="14" Class="text-slate-400 mx-1 shrink-0" />
+                }
+
+                <span class="@ComputeTitleClass(isSel, node.Disabled) tento-tree-title"
+                      @onclick="@(() => SelectNodeAsync(node.Key, node.Disabled))">
+                    @node.Title
+                </span>
+            </div>
+
+            @if (hasChildren && isExp && node.Children != null)
+            {
+                <ul class="@(ShowLine ? "border-l border-slate-200 dark:border-slate-700 ml-3" : "")">
+                    @foreach (var child in node.Children)
+                    {
+                        if (MatchesSearchRecursive(child))
+                        {
+                            @RenderDataNode(child, level + 1)
+                        }
+                    }
+                </ul>
+            }
+        </li>
+    };
+
+    private string ComputedClass => new CssBuilder("tento-tree text-xs text-slate-700 dark:text-slate-200")
+        .AddClass(Class)
+        .Build();
+
+    private static string ComputeNodeRowClass(bool isSel, bool disabled)
+    {
+        return new CssBuilder("flex items-center gap-1 py-1 px-1.5 rounded transition-colors")
+            .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-medium", isSel)
+            .AddClass("hover:bg-slate-100 dark:hover:bg-slate-800", !isSel && !disabled)
+            .AddClass("opacity-40 cursor-not-allowed", disabled)
+            .AddClass("cursor-pointer", !disabled)
+            .Build();
+    }
+
+    private static string ComputeTitleClass(bool isSel, bool disabled)
+    {
+        return new CssBuilder("truncate flex-1 py-0.5")
+            .AddClass("font-semibold", isSel)
+            .Build();
+    }
+}

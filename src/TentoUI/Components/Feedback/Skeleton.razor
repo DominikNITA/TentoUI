@@ -1,0 +1,48 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+
+@if (Loading)
+{
+    <div class="@ComputedClass" aria-busy="true" style="@Style" @attributes="AdditionalAttributes">
+        @if (Avatar)
+        {
+            <div class="tento-skeleton-avatar w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0 @(Active ? "animate-pulse" : "")"></div>
+        }
+
+        <div class="flex-1 space-y-3">
+            @if (Title)
+            {
+                <div class="tento-skeleton-title h-4 w-2/5 rounded bg-slate-200 dark:bg-slate-700 @(Active ? "animate-pulse" : "")"></div>
+            }
+
+            @if (Paragraph)
+            {
+                <div class="tento-skeleton-paragraph space-y-2">
+                    @for (int i = 0; i < Math.Max(1, Rows); i++)
+                    {
+                        var isLast = i == Rows - 1 && Rows > 1;
+                        <div class="tento-skeleton-line h-3 rounded bg-slate-200 dark:bg-slate-700 @(isLast ? "w-3/5" : "w-full") @(Active ? "animate-pulse" : "")"></div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public bool Loading { get; set; } = true;
+    [Parameter] public bool Active { get; set; } = true;
+    [Parameter] public bool Avatar { get; set; }
+    [Parameter] public bool Title { get; set; } = true;
+    [Parameter] public bool Paragraph { get; set; } = true;
+    [Parameter] public int Rows { get; set; } = 3;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("tento-skeleton flex items-start gap-4 w-full")
+        .AddClass(Class)
+        .Build();
+}

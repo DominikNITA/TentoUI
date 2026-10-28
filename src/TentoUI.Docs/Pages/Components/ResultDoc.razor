@@ -1,0 +1,85 @@
+@page "/components/result"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Result - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Result</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Used to feed back the results of a series of operational tasks, such as successful order confirmation or 404/500 HTTP exceptions.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle result status (Success, Error, 404, 500, etc.) dynamically.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Result Status="_status" Title="@_title" SubTitle="@_subTitle">
+                <Extra>
+                    <Button Type="ButtonType.Primary">Go to Console</Button>
+                    <Button Type="ButtonType.Default">Try Again</Button>
+                </Extra>
+            </Result>
+        </div>
+
+        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
+            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Result Status</label>
+            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                    @bind="_status"
+                    @bind:after="UpdateText">
+                <option value="@ResultStatus.Success">Success</option>
+                <option value="@ResultStatus.Info">Info</option>
+                <option value="@ResultStatus.Warning">Warning</option>
+                <option value="@ResultStatus.Error">Error</option>
+            </select>
+        </div>
+    </div>
+
+    <ApiTable Title="Result Properties" Properties="@_props" />
+</div>
+
+@code {
+    private ResultStatus _status = ResultStatus.Success;
+    private string _title = "Successfully Purchased Cloud Instance";
+    private string _subTitle = "Order number: 20261028-4091. Cloud deployment takes 1-3 minutes.";
+
+    private void UpdateText()
+    {
+        switch (_status)
+        {
+            case ResultStatus.Success:
+                _title = "Successfully Purchased Cloud Instance";
+                _subTitle = "Order number: 20261028-4091. Cloud deployment takes 1-3 minutes.";
+                break;
+            case ResultStatus.Info:
+                _title = "Operation Initialized";
+                _subTitle = "Your deployment request is queued and will execute shortly.";
+                break;
+            case ResultStatus.Warning:
+                _title = "There are some problems with your configuration";
+                _subTitle = "Please verify your network VPC CIDR before continuing.";
+                break;
+            case ResultStatus.Error:
+                _title = "Submission Failed";
+                _subTitle = "Please check and modify the following information before resubmitting.";
+                break;
+        }
+    }
+
+    private readonly ApiProp[] _props =
+    [
+        new("Status", "Result status code: Success, Error, Info, Warning.", "ResultStatus", "ResultStatus.Info"),
+        new("Title", "The title text.", "string?", "null"),
+        new("SubTitle", "The sub title text.", "string?", "null"),
+        new("Icon", "Custom icon template.", "RenderFragment?", "null"),
+        new("Extra", "Operating area action buttons.", "RenderFragment?", "null"),
+        new("ChildContent", "Custom detailed content area.", "RenderFragment?", "null")
+    ];
+}

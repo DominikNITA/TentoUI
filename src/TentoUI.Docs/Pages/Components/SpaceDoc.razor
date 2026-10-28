@@ -1,0 +1,97 @@
+@page "/components/space"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Space - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Space</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Sets uniform spacing between child components, supporting horizontal, vertical, and wrapping layouts.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Configure space direction, gap size, and auto-wrapping.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Space Direction="_dir" Size="_size" Wrap="_wrap">
+                <Button Type="ButtonType.Primary">Item 1</Button>
+                <Button Type="ButtonType.Default">Item 2</Button>
+                <Button Type="ButtonType.Dashed">Item 3</Button>
+                <Button Danger="true">Item 4</Button>
+            </Space>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Direction</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_dir">
+                    <option value="@SpaceDirection.Horizontal">Horizontal</option>
+                    <option value="@SpaceDirection.Vertical">Vertical</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Gap</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_sizeStr">
+                    <option value="small">Small (8px)</option>
+                    <option value="middle">Middle (16px)</option>
+                    <option value="large">Large (24px)</option>
+                </select>
+            </div>
+            <div class="flex items-center pt-5">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_wrap" class="rounded text-primary-600" />
+                    <span>Wrap Lines</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @* Use Cases *@
+    <DemoCard Title="Vertical Flow" Description="Stack inputs or buttons with uniform vertical spacing." Code="@_verticalCode">
+        <Space Direction="SpaceDirection.Vertical" Size="SpaceSize.Middle" Class="w-full max-w-xs">
+            <Input Placeholder="First Name" />
+            <Input Placeholder="Last Name" />
+            <Button Type="ButtonType.Primary" Block="true">Save Contact</Button>
+        </Space>
+    </DemoCard>
+
+    <ApiTable Title="Space Properties" Properties="@_props" />
+</div>
+
+@code {
+    private SpaceDirection _dir = SpaceDirection.Horizontal;
+    private string _sizeStr = "middle";
+    private bool _wrap = true;
+
+    private object _size => _sizeStr switch
+    {
+        "small" => SpaceSize.Small,
+        "large" => SpaceSize.Large,
+        _ => SpaceSize.Middle
+    };
+
+    private const string _verticalCode = @"<Space Direction=""SpaceDirection.Vertical"" Size=""SpaceSize.Middle"">
+    <Input Placeholder=""First Name"" />
+    <Button Type=""ButtonType.Primary"">Save</Button>
+</Space>";
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Direction", "Layout flow direction (Horizontal, Vertical).", "SpaceDirection", "SpaceDirection.Horizontal"),
+        new("Size", "Spacing size: SpaceSize enum (Small, Middle, Large), int pixels, or string.", "object", "SpaceSize.Middle"),
+        new("Align", "Cross-axis alignment (Start, End, Center, Baseline).", "SpaceAlign?", "null"),
+        new("Wrap", "Whether child elements wrap across multiple rows.", "bool", "false"),
+        new("Split", "Template rendered between each pair of items.", "RenderFragment?", "null"),
+        new("ChildContent", "Items laid out inside the space container.", "RenderFragment?", "null")
+    ];
+}

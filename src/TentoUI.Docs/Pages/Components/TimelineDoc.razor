@@ -1,0 +1,60 @@
+@page "/components/timeline"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Timeline - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Timeline</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Displays a series of events in chronological order with colored nodes and custom dates.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle chronological reverse order and node alignments.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Timeline Reverse="_reverse">
+                <TimelineItem Color="green" Label="2026-10-28">Released TentoUI v1.0.0 on NuGet</TimelineItem>
+                <TimelineItem Color="blue" Label="2026-10-20">Completed 40+ AntDesign Tailwind components</TimelineItem>
+                <TimelineItem Color="gray" Label="2026-10-01">Extracted standalone git repository</TimelineItem>
+            </Timeline>
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_reverse" class="rounded text-primary-600" />
+                <span>Reverse Chronological Order</span>
+            </label>
+        </div>
+    </div>
+
+    <ApiTable Title="Timeline Properties" Properties="@_timelineProps" />
+    <ApiTable Title="TimelineItem Properties" Properties="@_itemProps" />
+</div>
+
+@code {
+    private bool _reverse;
+
+    private readonly ApiTable.ApiProp[] _timelineProps =
+    [
+        new("Mode", "Node alignment mode (Left, Alternate, Right).", "TimelineMode", "TimelineMode.Left"),
+        new("Reverse", "Whether to reverse chronological order of events.", "bool", "false"),
+        new("ChildContent", "TimelineItem children.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _itemProps =
+    [
+        new("Color", "Circle dot color (e.g. 'blue', 'green', 'red', 'gray').", "string", "'blue'"),
+        new("Label", "Date or label text rendered beside the event.", "string?", "null"),
+        new("Dot", "Custom dot template icon.", "RenderFragment?", "null"),
+        new("ChildContent", "Event description content.", "RenderFragment?", "null")
+    ];
+}

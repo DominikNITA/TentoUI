@@ -1,44 +1,104 @@
 @page "/components/menu"
 @namespace TentoUI.Docs.Pages.Components
 
-<PageTitle>Menu &amp; Tabs - TentoUI</PageTitle>
+<PageTitle>Menu - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Menu &amp; Tabs</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Menu</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Horizontal or vertical navigation menus with nested submenus and tabbed content views.
+            A versatile navigation menu supporting horizontal top bars, vertical sidebars, and nested accordion submenus.
         </p>
     </div>
 
-    <DemoCard Title="Tabs Navigation" Description="Switch between content panes using active tabs." Code="@_tabsCode">
-        <Tabs DefaultActiveKey="1">
-            <TabPane Key="1" Tab="General Settings">
-                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
-                    Configure general workspace properties and profile data.
-                </div>
-            </TabPane>
-            <TabPane Key="2" Tab="Security &amp; API">
-                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
-                    Manage 2FA authentication, API access tokens, and trusted IPs.
-                </div>
-            </TabPane>
-            <TabPane Key="3" Tab="Billing">
-                <div class="p-3 text-xs text-slate-600 dark:text-slate-400">
-                    View active subscription plans, payment methods, and invoices.
-                </div>
-            </TabPane>
-        </Tabs>
-    </DemoCard>
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle theme and mode dynamically to test sidebar navigation.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedKey</strong>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-sm">
+            <Menu @bind-SelectedKey="_selectedKey" Mode="_mode" Theme="_theme">
+                <MenuItem Key="dashboard">
+                    <Icon><TentoUI.Icon Name="@IconNames.Home" Size="14" /></Icon>
+                    <ChildContent>Dashboard</ChildContent>
+                </MenuItem>
+                <SubMenu Key="sub-users" Title="User Management">
+                    <Icon><TentoUI.Icon Name="@IconNames.User" Size="14" /></Icon>
+                    <ChildContent>
+                        <MenuItem Key="all-users">All Users</MenuItem>
+                        <MenuItem Key="roles">Roles &amp; Permissions</MenuItem>
+                    </ChildContent>
+                </SubMenu>
+                <MenuItem Key="settings">
+                    <Icon><TentoUI.Icon Name="@IconNames.Settings" Size="14" /></Icon>
+                    <ChildContent>Settings</ChildContent>
+                </MenuItem>
+            </Menu>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Theme</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_theme">
+                    <option value="@MenuTheme.Light">Light</option>
+                    <option value="@MenuTheme.Dark">Dark</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Mode</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_mode">
+                    <option value="@MenuMode.Inline">Inline (Accordion)</option>
+                    <option value="@MenuMode.Vertical">Vertical</option>
+                    <option value="@MenuMode.Horizontal">Horizontal</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Menu Properties" Properties="@_menuProps" />
+    <ApiTable Title="MenuItem Properties" Properties="@_itemProps" />
+    <ApiTable Title="SubMenu Properties" Properties="@_subMenuProps" />
 </div>
 
 @code {
-    private const string _tabsCode = @"<Tabs DefaultActiveKey=""1"">
-    <TabPane Key=""1"" Tab=""General Settings"">
-        Content 1
-    </TabPane>
-    <TabPane Key=""2"" Tab=""Security"">
-        Content 2
-    </TabPane>
-</Tabs>";
+    private string _selectedKey = "dashboard";
+    private MenuTheme _theme = MenuTheme.Light;
+    private MenuMode _mode = MenuMode.Inline;
+
+    private readonly ApiTable.ApiProp[] _menuProps =
+    [
+        new("Mode", "Layout mode: Inline, Vertical, or Horizontal.", "MenuMode", "MenuMode.Inline"),
+        new("Theme", "Visual theme: Light or Dark.", "MenuTheme", "MenuTheme.Light"),
+        new("SelectedKey", "Currently selected menu item key.", "string?", "null"),
+        new("OpenKeys", "List of open submenu keys in inline mode.", "List<string>", "[]"),
+        new("Collapsed", "Whether inline menu is in collapsed compact mode.", "bool", "false"),
+        new("OnSelect", "Event callback invoked when a menu item is selected.", "EventCallback<MenuSelectEventArgs>", "null"),
+        new("ChildContent", "MenuItem, SubMenu, or MenuGroup children.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _itemProps =
+    [
+        new("Key", "Unique key for this item.", "string", "required"),
+        new("Icon", "Icon name to display.", "string?", "null"),
+        new("Disabled", "Whether the item is disabled.", "bool", "false"),
+        new("ChildContent", "Label text.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _subMenuProps =
+    [
+        new("Key", "Unique key for the submenu.", "string", "required"),
+        new("Title", "Submenu label text.", "string", "null"),
+        new("Icon", "Icon name.", "string?", "null"),
+        new("Disabled", "Whether submenu is disabled.", "bool", "false"),
+        new("ChildContent", "Child MenuItem elements.", "RenderFragment?", "null")
+    ];
 }

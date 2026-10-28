@@ -1,0 +1,54 @@
+@page "/components/image"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Image - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Image</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Previewable image element supporting fallback error handlers, zoom, rotation, and modal lightbox preview.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Hover and click image to trigger lightbox zoom &amp; rotate modal.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
+            <Image Src="https://picsum.photos/400/250"
+                   Alt="Scenic Mountain"
+                   Width="240"
+                   Height="150"
+                   Preview="_preview" />
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_preview" class="rounded text-primary-600" />
+                <span>Enable Modal Lightbox Preview</span>
+            </label>
+        </div>
+    </div>
+
+    <ApiTable Title="Image Properties" Properties="@_props" />
+</div>
+
+@code {
+    private bool _preview = true;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Src", "Image address link.", "string?", "null"),
+        new("Alt", "Image text alternative.", "string?", "'Image'"),
+        new("Width", "Image width dimension (px or string).", "string?", "null"),
+        new("Height", "Image height dimension (px or string).", "string?", "null"),
+        new("Preview", "Whether clicking opens interactive modal lightbox with zoom and rotate.", "bool", "true"),
+        new("Fallback", "Fallback image URL when loading fails.", "string?", "null")
+    ];
+}

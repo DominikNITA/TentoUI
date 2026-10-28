@@ -47,6 +47,9 @@
             Delete Account
         </Button>
     </DemoCard>
+
+    <ApiTable Title="Modal Properties" Properties="@_modalProps" />
+    <ApiTable Title="IModalService Methods" Properties="@_serviceProps" />
 </div>
 
 @code {
@@ -116,4 +119,27 @@ bool confirmed = await ModalService.ConfirmAsync(
     title: ""Delete Account"",
     content: ""Are you sure you want to delete this account?"",
     type: ModalType.Error);";
+
+    private readonly ApiTable.ApiProp[] _modalProps =
+    [
+        new("Visible", "Whether the modal dialog is visible (bindable via @bind-Visible).", "bool", "false"),
+        new("Title", "Modal dialog header title.", "string?", "null"),
+        new("Width", "Width of the modal window in px.", "int", "520"),
+        new("Centered", "Whether to vertically center the modal in the viewport.", "bool", "false"),
+        new("MaskClosable", "Whether clicking the dark background mask dismisses the dialog.", "bool", "true"),
+        new("OkText", "Text label for the primary confirmation button.", "string", "'OK'"),
+        new("CancelText", "Text label for the secondary cancel button.", "string", "'Cancel'"),
+        new("ConfirmLoading", "Display a spinner on the OK button while executing async task.", "bool", "false"),
+        new("OnOk", "Callback triggered when user clicks the OK button.", "EventCallback", "null"),
+        new("OnCancel", "Callback triggered when user clicks Cancel or closes modal.", "EventCallback", "null"),
+        new("ChildContent", "Body markup/forms rendered inside the modal.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _serviceProps =
+    [
+        new("ConfirmAsync(title, content, type)", "Opens confirmation modal dialog returning Task<bool> (true if confirmed).", "Task<bool>", "-"),
+        new("SuccessAsync(title, content)", "Opens success alert dialog returning Task.", "Task", "-"),
+        new("ErrorAsync(title, content)", "Opens error alert dialog returning Task.", "Task", "-"),
+        new("WarningAsync(title, content)", "Opens warning alert dialog returning Task.", "Task", "-")
+    ];
 }

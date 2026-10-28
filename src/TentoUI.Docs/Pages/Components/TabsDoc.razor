@@ -1,0 +1,97 @@
+@page "/components/tabs"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Tabs - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tabs</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Switch between alternate views or content panels inside a compact container, supporting line and card styles.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle tab style (Line vs Card) and active key dynamically.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Active: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_activeTab</strong>
+            </div>
+        </div>
+
+        <div class="p-6 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Tabs @bind-ActiveKey="_activeTab" Type="_type">
+                <TabPane Key="general" Tab="General Profile">
+                    <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                        <h4 class="font-bold text-slate-800 dark:text-white text-sm">Profile Details</h4>
+                        <p>Configure personal credentials, display name, and avatar settings.</p>
+                    </div>
+                </TabPane>
+                <TabPane Key="security" Tab="Security">
+                    <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                        <h4 class="font-bold text-slate-800 dark:text-white text-sm">Security &amp; 2FA</h4>
+                        <p>Manage two-factor authenticator app and personal access tokens.</p>
+                    </div>
+                </TabPane>
+                <TabPane Key="notifications" Tab="Notifications">
+                    <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                        <h4 class="font-bold text-slate-800 dark:text-white text-sm">Email Preferences</h4>
+                        <p>Receive weekly digest and critical workspace deployment alerts.</p>
+                    </div>
+                </TabPane>
+            </Tabs>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tabs Style</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_type">
+                    <option value="@TabType.Line">Line (Underline)</option>
+                    <option value="@TabType.Card">Card</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Active Key</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_activeTab">
+                    <option value="general">General</option>
+                    <option value="security">Security</option>
+                    <option value="notifications">Notifications</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Tabs Properties" Properties="@_tabsProps" />
+    <ApiTable Title="TabPane Properties" Properties="@_paneProps" />
+</div>
+
+@code {
+    private string _activeTab = "general";
+    private TabType _type = TabType.Line;
+
+    private readonly ApiProp[] _tabsProps =
+    [
+        new("ActiveKey", "Currently active tab key (two-way bindable via @bind-ActiveKey).", "string?", "null"),
+        new("DefaultActiveKey", "Initial active tab key if not controlled.", "string?", "null"),
+        new("Type", "Visual tab style (Line, Card, EditableCard).", "TabType", "TabType.Line"),
+        new("Position", "Tab bar placement (Top, Bottom, Left, Right).", "TabPosition", "TabPosition.Top"),
+        new("Size", "Size scale of the tabs.", "ComponentSize?", "null"),
+        new("OnChange", "Callback executed when active tab changes.", "EventCallback<string>", "null"),
+        new("ChildContent", "TabPane elements.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _paneProps =
+    [
+        new("Key", "Unique identifier for this tab pane.", "string", "required"),
+        new("Tab", "Label text rendered in tab header.", "string", "null"),
+        new("TabTemplate", "Custom template rendered in tab header.", "RenderFragment?", "null"),
+        new("Disabled", "Whether this tab is disabled.", "bool", "false"),
+        new("ChildContent", "Content rendered when this tab is active.", "RenderFragment?", "null")
+    ];
+}

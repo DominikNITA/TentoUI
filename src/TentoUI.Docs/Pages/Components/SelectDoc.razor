@@ -1,0 +1,88 @@
+@page "/components/select"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Select - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Select</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Select component to select value from options menu, supporting single, multiple, and search-filterable modes.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Select options dynamically and test clear and search toggles.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_selectedValue</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+            <Select TItem="CityItem"
+                    TValue="string"
+                    DataSource="@_cities"
+                    ValueProperty="@(c => c.Code)"
+                    LabelProperty="@(c => c.Name)"
+                    @bind-Value="_selectedValue"
+                    Placeholder="Choose a destination..."
+                    AllowClear="_allowClear"
+                    ShowSearch="_showSearch"
+                    Disabled="_disabled" />
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_showSearch" class="rounded text-primary-600" />
+                <span>Show Search Filter</span>
+            </label>
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_allowClear" class="rounded text-primary-600" />
+                <span>Allow Clear</span>
+            </label>
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
+                <span>Disabled</span>
+            </label>
+        </div>
+    </div>
+
+    <ApiTable Title="Select Properties" Properties="@_props" />
+</div>
+
+@code {
+    public record CityItem(string Code, string Name);
+
+    private readonly CityItem[] _cities =
+    [
+        new("waw", "Warsaw"),
+        new("ber", "Berlin"),
+        new("lon", "London"),
+        new("par", "Paris"),
+        new("tok", "Tokyo")
+    ];
+
+    private string? _selectedValue = "waw";
+    private bool _showSearch = true;
+    private bool _allowClear = true;
+    private bool _disabled;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("DataSource", "The source data collection for options.", "IEnumerable<TItem>?", "null"),
+        new("Value", "Current selected value (bindable via @bind-Value).", "TValue", "default"),
+        new("Values", "Selected values for multiple mode.", "IEnumerable<TValue>?", "null"),
+        new("Mode", "Selection mode: Single or Multiple.", "SelectMode", "SelectMode.Single"),
+        new("ValueProperty", "Selector function to get option value from item.", "Func<TItem, TValue>?", "null"),
+        new("LabelProperty", "Selector function to get option display label.", "Func<TItem, string>?", "null"),
+        new("Placeholder", "Placeholder text.", "string?", "'Select an option'"),
+        new("ShowSearch", "Enable instant filtering search input.", "bool", "false"),
+        new("AllowClear", "Whether clear button is visible.", "bool", "false"),
+        new("Disabled", "Whether select component is disabled.", "bool", "false")
+    ];
+}

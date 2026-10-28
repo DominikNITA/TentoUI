@@ -1,0 +1,48 @@
+@page "/components/calendar"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Calendar - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Calendar</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Container displaying data in calendar form, supporting month navigation, day selection, and cell templates.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Click dates on the calendar to update the selected date live.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_selectedDate.ToString("yyyy-MM-dd")</strong>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xl mx-auto">
+            <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <Calendar @bind-Value="_selectedDate"
+                          OnSelect="@(d => MessageService.Info($"Selected date: {d:yyyy-MM-dd}"))" />
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Calendar Properties" Properties="@_props" />
+</div>
+
+@code {
+    private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Value", "Current selected date (bindable via @bind-Value).", "DateOnly", "DateTime.Today"),
+        new("Mode", "Display mode: Month or Year.", "CalendarMode", "CalendarMode.Month"),
+        new("OnSelect", "Callback triggered when a day cell is clicked.", "EventCallback<DateOnly>", "null"),
+        new("DateCellTemplate", "Custom cell renderer template.", "RenderFragment<DateOnly>?", "null")
+    ];
+}

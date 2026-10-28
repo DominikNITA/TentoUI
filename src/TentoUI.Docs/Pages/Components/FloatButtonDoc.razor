@@ -1,0 +1,98 @@
+@page "/components/float-button"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>FloatButton - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">FloatButton</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            A button that floats over page content to provide quick access to key contextual actions or scroll-to-top helpers.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Play with shape, variant type, and icon dynamically.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Clicks: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_clicks</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[140px] relative">
+            <FloatButton Type="_type"
+                         Shape="_shape"
+                         Icon="@_icon"
+                         Description="@_desc"
+                         OnClick="@(() => _clicks++)" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Type</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_type">
+                    <option value="@FloatButtonType.Default">Default</option>
+                    <option value="@FloatButtonType.Primary">Primary</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Shape</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_shape">
+                    <option value="@FloatButtonShape.Circle">Circle</option>
+                    <option value="@FloatButtonShape.Square">Square</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description (Square only)</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_desc" />
+            </div>
+        </div>
+    </div>
+
+    @* Use Cases *@
+    <DemoCard Title="Shapes &amp; Grouping" Description="Combine multiple floating buttons into an organized vertical stack." Code="@_groupCode">
+        <div class="flex items-center gap-6">
+            <FloatButton Type="FloatButtonType.Primary" Icon="@IconNames.HelpCircle" />
+            <FloatButton Type="FloatButtonType.Default" Shape="FloatButtonShape.Square" Description="Help" />
+            <FloatButtonGroup>
+                <FloatButton Icon="@IconNames.Edit" />
+                <FloatButton Icon="@IconNames.Settings" />
+            </FloatButtonGroup>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="FloatButton Properties" Properties="@_props" />
+</div>
+
+@code {
+    private FloatButtonType _type = FloatButtonType.Primary;
+    private FloatButtonShape _shape = FloatButtonShape.Circle;
+    private string? _icon = IconNames.HelpCircle;
+    private string? _desc = "Help";
+    private int _clicks;
+
+    private const string _groupCode = @"<FloatButtonGroup>
+    <FloatButton Icon=""@IconNames.Edit"" />
+    <FloatButton Icon=""@IconNames.Settings"" />
+</FloatButtonGroup>";
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Type", "Sets the visual button type (Default, Primary).", "FloatButtonType", "FloatButtonType.Default"),
+        new("Shape", "Sets button shape (Circle, Square).", "FloatButtonShape", "FloatButtonShape.Circle"),
+        new("Icon", "Name of the SVG icon to render inside the button.", "string?", "null"),
+        new("IconTemplate", "Custom icon markup template.", "RenderFragment?", "null"),
+        new("Description", "Text label displayed beneath the icon (Square shape only).", "string?", "null"),
+        new("Href", "URL to navigate to when clicked.", "string?", "null"),
+        new("OnClick", "Callback executed when the floating button is clicked.", "EventCallback<MouseEventArgs>", "null")
+    ];
+}

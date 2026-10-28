@@ -1,58 +1,80 @@
 @page "/components/notification"
 @namespace TentoUI.Docs.Pages.Components
-@inject IMessageService MessageService
 @inject INotificationService NotificationService
 
-<PageTitle>Notification &amp; Message - TentoUI</PageTitle>
+<PageTitle>Notification - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Notification &amp; Message</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Notification</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Global toast messages and corner slide-in notifications powered by scoped services.
+            Display rich notification alert cards in viewport corners with titles, detailed descriptions, custom icons, and auto-dismiss.
         </p>
     </div>
 
-    <DemoCard Title="Message Toasts" Description="Top-centered lightweight feedback messages." Code="@_messageCode">
-        <div class="flex flex-wrap items-center gap-3">
-            <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Operation completed successfully!"))">
-                Success Toast
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Trigger corner notification banners with custom titles and placement.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex flex-wrap items-center justify-center gap-3">
+            <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success(_title, _desc, _duration))">
+                Trigger Success Notice
             </Button>
-            <Button Type="ButtonType.Default" OnClick="@(() => MessageService.Info("New update available for your workspace."))">
-                Info Toast
+            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info(_title, _desc, _duration))">
+                Trigger Info Notice
             </Button>
-            <Button Danger="true" OnClick="@(() => MessageService.Error("Failed to persist changes to the database."))">
-                Error Toast
+            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Warning(_title, _desc, _duration))">
+                Trigger Warning Notice
+            </Button>
+            <Button Danger="true" OnClick="@(() => NotificationService.Error(_title, _desc, _duration))">
+                Trigger Error Notice
             </Button>
         </div>
-    </DemoCard>
 
-    <DemoCard Title="Corner Notifications" Description="Detailed slide-in banner notifications with title and body." Code="@_notifCode">
-        <Button Type="ButtonType.Primary" OnClick="@OpenNotification">
-            Open Complex Notification
-        </Button>
-    </DemoCard>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Notification Title</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_title" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description Body</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_desc" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Auto-Dismiss Duration (s)</label>
+                <input type="number"
+                       min="1"
+                       max="15"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_duration" />
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="INotificationService Methods" Properties="@_props" />
 </div>
 
 @code {
-    private void OpenNotification()
-    {
-        NotificationService.Success(
-            "Deployment Succeeded",
-            "TentoUI documentation was successfully compiled and published to GitHub Pages."
-        );
-    }
+    private string _title = "Deployment Complete";
+    private string _desc = "All cloud worker nodes have successfully upgraded to .NET 10.";
+    private double _duration = 4.5;
 
-    private const string _messageCode = @"@inject IMessageService MessageService
-
-MessageService.Success(""Operation completed successfully!"");
-MessageService.Info(""Update available."");
-MessageService.Error(""Failed to persist changes."");";
-
-    private const string _notifCode = @"@inject INotificationService NotificationService
-
-NotificationService.Success(
-    ""Deployment Succeeded"",
-    ""TentoUI documentation was published to GitHub Pages.""
-);";
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Success(message, description, duration)", "Display corner success notification.", "void", "duration = 4.5"),
+        new("Info(message, description, duration)", "Display corner information notification.", "void", "duration = 4.5"),
+        new("Warning(message, description, duration)", "Display corner warning notification.", "void", "duration = 4.5"),
+        new("Error(message, description, duration)", "Display corner error notification.", "void", "duration = 4.5"),
+        new("Open(config)", "Display notification with full config (placement, key, close button).", "void", "-"),
+        new("Destroy()", "Dismiss all active notifications immediately.", "void", "-")
+    ];
 }

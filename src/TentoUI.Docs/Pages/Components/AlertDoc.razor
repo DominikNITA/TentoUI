@@ -1,0 +1,99 @@
+@page "/components/alert"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Alert - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Alert</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Alert component for displaying important feedback messages with colored accents, dismiss buttons, and descriptions.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle alert types, icons, and closable dismiss actions dynamically.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Alert Type="_type"
+                   Message="@_message"
+                   Description="@_description"
+                   ShowIcon="_showIcon"
+                   Closable="_closable"
+                   OnClose="@(() => MessageService.Info("Alert was closed!"))" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Alert Type</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_type">
+                    <option value="@AlertType.Success">Success</option>
+                    <option value="@AlertType.Info">Info</option>
+                    <option value="@AlertType.Warning">Warning</option>
+                    <option value="@AlertType.Error">Error</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Message Header</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_message"
+                       @bind:event="oninput" />
+            </div>
+            <div class="sm:col-span-2 flex items-center gap-4 pt-2">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_showIcon" class="rounded text-primary-600" />
+                    <span>Show Type Icon</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_closable" class="rounded text-primary-600" />
+                    <span>Closable Dismiss Button</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @* Use Cases *@
+    <DemoCard Title="All Alert Variants" Description="Visual styles for Success, Info, Warning, and Error." Code="@_allAlertsCode">
+        <div class="space-y-3">
+            <Alert Type="AlertType.Success" Message="Deployment Succeeded" Description="All 12 microservices updated without downtime." ShowIcon="true" />
+            <Alert Type="AlertType.Info" Message="System Update Scheduled" Description="Scheduled maintenance at 02:00 UTC." ShowIcon="true" />
+            <Alert Type="AlertType.Warning" Message="Storage Warning" Description="Database disk space usage exceeds 85%." ShowIcon="true" />
+            <Alert Type="AlertType.Error" Message="Authentication Failed" Description="Invalid API bearer token provided." ShowIcon="true" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Alert Properties" Properties="@_props" />
+</div>
+
+@code {
+    private AlertType _type = AlertType.Success;
+    private string _message = "Database backup finished successfully";
+    private string _description = "Snapshot persisted to S3 encrypted bucket.";
+    private bool _showIcon = true;
+    private bool _closable = true;
+
+    private const string _allAlertsCode = @"<Alert Type=""AlertType.Success"" Message=""Deployment Succeeded"" ShowIcon=""true"" />
+<Alert Type=""AlertType.Info"" Message=""Maintenance Scheduled"" ShowIcon=""true"" />
+<Alert Type=""AlertType.Warning"" Message=""Storage Warning"" ShowIcon=""true"" />
+<Alert Type=""AlertType.Error"" Message=""Authentication Failed"" ShowIcon=""true"" />";
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Type", "Type of Alert style (Success, Info, Warning, Error).", "AlertType", "AlertType.Info"),
+        new("Message", "Content of Alert title header.", "string", "required"),
+        new("Description", "Additional explanation content of Alert.", "string?", "null"),
+        new("Closable", "Whether Alert can be closed.", "bool", "false"),
+        new("ShowIcon", "Whether to show type status icon.", "bool", "false"),
+        new("CloseText", "Close text instead of 'x' icon.", "string?", "null"),
+        new("OnClose", "Callback triggered when close icon is clicked.", "EventCallback", "null")
+    ];
+}

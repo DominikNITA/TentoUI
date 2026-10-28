@@ -6,7 +6,7 @@
         <div class="relative">
             <input type="text"
                    value="@_searchTerm"
-                   placeholder="Search components..."
+                   placeholder="Search 65+ components..."
                    class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                    @oninput="@(e => _searchTerm = e.Value?.ToString() ?? string.Empty)" />
             <Icon Name="@IconNames.Search" Size="14" Class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -60,46 +60,86 @@
         ]),
         new("General",
         [
-            new("Button & FloatButton", "components/button"),
+            new("Button", "components/button"),
+            new("FloatButton", "components/float-button"),
+            new("Icon", "components/icon"),
             new("Typography", "components/typography"),
-            new("Icon & Divider", "components/icon")
+            new("Divider", "components/divider")
         ]),
         new("Layout",
         [
-            new("Grid & Space", "components/grid"),
-            new("Layout & Sidebar", "components/layout")
+            new("Grid", "components/grid"),
+            new("Layout", "components/layout"),
+            new("Space", "components/space")
         ]),
         new("Navigation",
         [
-            new("Menu & Tabs", "components/menu"),
-            new("Pagination & Steps", "components/pagination"),
-            new("Dropdown & Breadcrumb", "components/dropdown"),
-            new("Anchor & Affix", "components/anchor")
+            new("Affix", "components/affix"),
+            new("Anchor", "components/anchor"),
+            new("Breadcrumb", "components/breadcrumb"),
+            new("Dropdown", "components/dropdown"),
+            new("Menu", "components/menu"),
+            new("Pagination", "components/pagination"),
+            new("Steps", "components/steps"),
+            new("Tabs", "components/tabs")
         ]),
         new("Data Entry",
         [
-            new("Form & Validation", "components/form"),
-            new("AutoComplete & Select", "components/autocomplete"),
-            new("Time & Color Picker", "components/pickers"),
-            new("Input, Radio & Checkbox", "components/inputs"),
-            new("Transfer & Cascader", "components/transfer"),
-            new("Upload & Sliders", "components/upload")
+            new("AutoComplete", "components/autocomplete"),
+            new("Cascader", "components/cascader"),
+            new("Checkbox", "components/checkbox"),
+            new("ColorPicker", "components/color-picker"),
+            new("DatePicker", "components/date-picker"),
+            new("Form", "components/form"),
+            new("Input", "components/input"),
+            new("InputNumber", "components/input-number"),
+            new("Radio", "components/radio"),
+            new("Rate", "components/rate"),
+            new("Select", "components/select"),
+            new("Slider", "components/slider"),
+            new("Switch", "components/switch"),
+            new("TextArea", "components/textarea"),
+            new("TimePicker", "components/time-picker"),
+            new("Transfer", "components/transfer"),
+            new("TreeSelect", "components/tree-select"),
+            new("Upload", "components/upload")
         ]),
         new("Data Display",
         [
-            new("Table (Custom Columns)", "components/table", "Popular"),
-            new("Tree & Segmented", "components/tree"),
-            new("Card & Descriptions", "components/card"),
-            new("Calendar & QRCode", "components/media"),
-            new("Timeline & Statistic", "components/data-display"),
-            new("Carousel & Image", "components/carousel")
+            new("Avatar", "components/avatar"),
+            new("Badge", "components/badge"),
+            new("Calendar", "components/calendar"),
+            new("Card", "components/card"),
+            new("Carousel", "components/carousel"),
+            new("Collapse", "components/collapse"),
+            new("Descriptions", "components/descriptions"),
+            new("Empty", "components/empty"),
+            new("Image", "components/image"),
+            new("List", "components/list"),
+            new("Popover", "components/popover"),
+            new("QRCode", "components/qrcode"),
+            new("Segmented", "components/segmented"),
+            new("Statistic", "components/statistic"),
+            new("Table", "components/table", "Popular"),
+            new("Tag", "components/tag"),
+            new("Timeline", "components/timeline"),
+            new("Tree", "components/tree"),
+            new("Watermark", "components/watermark")
         ]),
         new("Feedback",
         [
-            new("Notification & Message", "components/notification"),
-            new("Modal & Drawer", "components/modal"),
-            new("Tour & Popconfirm", "components/tour"),
-            new("Progress & Skeleton", "components/feedback")
+            new("Alert", "components/alert"),
+            new("Drawer", "components/drawer"),
+            new("Message", "components/message"),
+            new("Modal", "components/modal"),
+            new("Notification", "components/notification"),
+            new("Popconfirm", "components/popconfirm"),
+            new("Progress", "components/progress"),
+            new("Result", "components/result"),
+            new("Skeleton", "components/skeleton"),
+            new("Spin", "components/spin"),
+            new("Tooltip", "components/tooltip"),
+            new("Tour", "components/tour")
         ])
     ];
 

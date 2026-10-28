@@ -1,0 +1,60 @@
+@page "/components/color-picker"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>ColorPicker - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">ColorPicker</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            A component for selecting colors through predefined palettes or a native hex picker.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Pick color and preview live background updates.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Color: <strong class="font-mono text-sm" style="color: @_color">@_color</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col items-center gap-4">
+            <ColorPicker @bind-Value="_color" ShowText="_showText" Disabled="_disabled" />
+            <div class="w-full max-w-xs h-16 rounded-lg shadow-sm flex items-center justify-center font-bold text-white text-xs" style="background-color: @_color">
+                Preview Container
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_showText" class="rounded text-primary-600" />
+                <span>Show Hex Text</span>
+            </label>
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
+                <span>Disabled</span>
+            </label>
+        </div>
+    </div>
+
+    <ApiTable Title="ColorPicker Properties" Properties="@_props" />
+</div>
+
+@code {
+    private string _color = "#3b82f6";
+    private bool _showText = true;
+    private bool _disabled;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Value", "Selected hex color code (bindable via @bind-Value).", "string", "#1677ff"),
+        new("ShowText", "Whether to show hex text alongside the color swatch.", "bool", "true"),
+        new("Disabled", "Whether the color picker is disabled.", "bool", "false"),
+        new("Presets", "List of preset color hex codes for quick selection.", "IEnumerable<string>?", "10 presets")
+    ];
+}

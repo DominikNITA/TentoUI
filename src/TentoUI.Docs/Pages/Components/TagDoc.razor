@@ -1,0 +1,95 @@
+@page "/components/tag"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Tag - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tag</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Used for categorizing or tagging objects with colored chips, closable dismissals, and selectable filters.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Configure tag colors, close buttons, and checkable modes.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center gap-4">
+            <Tag Color="@_color"
+                 Closable="_closable"
+                 OnClose="@(() => MessageService.Info("Tag closed!"))">
+                @_label
+            </Tag>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Color Preset</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_color">
+                    <option value="blue">Blue</option>
+                    <option value="green">Green (Success)</option>
+                    <option value="gold">Gold (Warning)</option>
+                    <option value="red">Red (Danger)</option>
+                    <option value="purple">Purple</option>
+                    <option value="cyan">Cyan</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tag Label</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_label"
+                       @bind:event="oninput" />
+            </div>
+            <div class="flex items-center pt-2">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_closable" class="rounded text-primary-600" />
+                    <span>Closable Dismiss Button</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @* Use Cases *@
+    <DemoCard Title="Preset Colors" Description="Standard semantic and decorative colors." Code="@_colorsCode">
+        <div class="flex flex-wrap items-center gap-2">
+            <Tag Color="blue">blue</Tag>
+            <Tag Color="green">green</Tag>
+            <Tag Color="gold">gold</Tag>
+            <Tag Color="red">red</Tag>
+            <Tag Color="purple">purple</Tag>
+            <Tag Color="magenta">magenta</Tag>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Tag Properties" Properties="@_props" />
+</div>
+
+@code {
+    private string _color = "blue";
+    private string _label = "Active Status";
+    private bool _closable;
+
+    private const string _colorsCode = @"<Tag Color=""blue"">blue</Tag>
+<Tag Color=""green"">green</Tag>
+<Tag Color=""red"">red</Tag>";
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Color", "Preset color string (e.g. 'blue', 'green', 'red') or custom hex code.", "string?", "null"),
+        new("TagColor", "Strongly-typed TagColor enum value.", "TagColor?", "null"),
+        new("Closable", "Whether the tag can be closed via an 'x' icon.", "bool", "false"),
+        new("Checkable", "Whether the tag functions as a toggle pill.", "bool", "false"),
+        new("Checked", "Checked state when Checkable is true.", "bool", "false"),
+        new("OnClose", "Callback executed when close icon is clicked.", "EventCallback", "null"),
+        new("ChildContent", "Tag content.", "RenderFragment?", "null")
+    ];
+}

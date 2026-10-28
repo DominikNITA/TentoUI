@@ -1,0 +1,74 @@
+@page "/components/drawer"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Drawer - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Drawer</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            A panel which slides out from the edge of the screen, supporting custom edge placements, widths, and nested forms.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Open drawer from Right, Left, Top, or Bottom.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
+            <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
+                Open @_placement Drawer
+            </Button>
+
+            <Drawer @bind-Open="_open"
+                    Title="Workspace Configurations"
+                    Placement="_placement"
+                    Width="360px">
+                <div class="space-y-4 text-xs text-slate-600 dark:text-slate-300">
+                    <p>Customize project repository and notification webhooks.</p>
+                    <Input Placeholder="Webhook URL" />
+                    <Button Type="ButtonType.Primary" Block="true" OnClick="@(() => _open = false)">
+                        Save Settings
+                    </Button>
+                </div>
+            </Drawer>
+        </div>
+
+        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
+            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Slide Placement</label>
+            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                    @bind="_placement">
+                <option value="@DrawerPlacement.Right">Right</option>
+                <option value="@DrawerPlacement.Left">Left</option>
+                <option value="@DrawerPlacement.Top">Top</option>
+                <option value="@DrawerPlacement.Bottom">Bottom</option>
+            </select>
+        </div>
+    </div>
+
+    <ApiTable Title="Drawer Properties" Properties="@_props" />
+</div>
+
+@code {
+    private bool _open;
+    private DrawerPlacement _placement = DrawerPlacement.Right;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Open", "Whether the Drawer dialog is visible (bindable via @bind-Open).", "bool", "false"),
+        new("Title", "The title of the Drawer.", "string?", "null"),
+        new("Placement", "The direction from which Drawer slides out (Right, Left, Top, Bottom).", "DrawerPlacement", "DrawerPlacement.Right"),
+        new("Width", "Width of the Drawer dialog (when Placement is Right or Left).", "string?", "'378px'"),
+        new("Height", "Height of the Drawer dialog (when Placement is Top or Bottom).", "string?", "'378px'"),
+        new("Closable", "Whether a close (x) button is visible.", "bool", "true"),
+        new("MaskClosable", "Clicking on the backdrop mask closes the Drawer.", "bool", "true"),
+        new("Extra", "Extra actions in the title bar.", "RenderFragment?", "null"),
+        new("Footer", "The footer actions for the Drawer.", "RenderFragment?", "null"),
+        new("ChildContent", "Body content of the Drawer.", "RenderFragment?", "null")
+    ];
+}

@@ -75,6 +75,9 @@
             </Table>
         </div>
     </DemoCard>
+
+    <ApiTable Title="Table<TItem> Properties" Properties="@_tableProps" />
+    <ApiTable Title="TableColumn<TItem> Properties" Properties="@_columnProps" />
 </div>
 
 @code {
@@ -154,4 +157,36 @@
         </Tag>
     </TableColumn>
 </Table>";
+
+    private readonly ApiTable.ApiProp[] _tableProps =
+    [
+        new("DataSource", "The source data collection for table rows.", "IEnumerable<TItem>?", "null"),
+        new("PageIndex", "Current active page index (1-based, bindable via @bind-PageIndex).", "int", "1"),
+        new("PageSize", "Number of records displayed per page (bindable via @bind-PageSize).", "int", "10"),
+        new("Total", "Total count of records. If omitted, calculated from DataSource.", "int?", "null"),
+        new("Loading", "Displays a spinner overlay while data is being fetched.", "bool", "false"),
+        new("Bordered", "Whether to show outer and cell grid borders.", "bool", "false"),
+        new("Striped", "Whether alternating rows have zebra background shading.", "bool", "false"),
+        new("Size", "Table padding density (Small, Middle, Large).", "ComponentSize?", "null"),
+        new("ShowSizeChanger", "Display page size changer dropdown in pagination bar.", "bool", "false"),
+        new("ShowQuickJumper", "Display direct page number jump input.", "bool", "false"),
+        new("Columns", "TableColumn child declarations.", "RenderFragment?", "null"),
+        new("EmptyText", "Custom text shown when no rows match.", "string?", "'No Data'")
+    ];
+
+    private readonly ApiTable.ApiProp[] _columnProps =
+    [
+        new("Title", "Column header title text.", "string?", "null"),
+        new("Property", "Property accessor expression for sorting and auto-display.", "Expression<Func<TItem, object>>?", "null"),
+        new("Sortable", "Whether column can be sorted ascending/descending by clicking header.", "bool", "false"),
+        new("Filterable", "Whether column displays an interactive filter popup in header.", "bool", "false"),
+        new("FilterMode", "Filter popup interface: Text search or Select dropdown.", "ColumnFilterMode", "ColumnFilterMode.Text"),
+        new("FilterOptions", "Options array for Select filter mode.", "IEnumerable<ColumnFilterOption>?", "null"),
+        new("FilterPredicate", "Custom filter predicate lambda (item, query) => bool.", "Func<TItem, string, bool>?", "null"),
+        new("FilterPlaceholder", "Placeholder text for text filter input.", "string?", "'Filter...'"),
+        new("Format", "Standard .NET format string (e.g. 'C0', 'N2', 'yyyy-MM-dd').", "string?", "null"),
+        new("Align", "Text alignment: Left, Center, or Right.", "ColumnAlign", "ColumnAlign.Left"),
+        new("Width", "Fixed column width (e.g. '120px', '25%').", "string?", "null"),
+        new("ChildContent", "Custom cell template (accessible via Context='item').", "RenderFragment<TItem>?", "null")
+    ];
 }

@@ -1,0 +1,224 @@
+@page "/components/button"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Button - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Button</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            To trigger an operation or initiate an action in an interactive workflow. Supports variants, shapes, loading states, and size scales.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Adjust the knobs below to customize the button dynamically in real-time.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Clicks registered: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_clickCount</strong>
+            </div>
+        </div>
+
+        @* Live Preview Area *@
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[120px] @(_ghost ? "bg-slate-800" : "")">
+            <Button Type="_type"
+                    Size="_size"
+                    Shape="_shape"
+                    Danger="_danger"
+                    Ghost="_ghost"
+                    Loading="_loading"
+                    Disabled="_disabled"
+                    Block="_block"
+                    OnClick="@(() => _clickCount++)">
+                @_buttonText
+            </Button>
+        </div>
+
+        @* Knobs Control Grid *@
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Type Variant</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_type">
+                    <option value="@ButtonType.Primary">Primary</option>
+                    <option value="@ButtonType.Default">Default</option>
+                    <option value="@ButtonType.Dashed">Dashed</option>
+                    <option value="@ButtonType.Link">Link</option>
+                    <option value="@ButtonType.Text">Text</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Scale</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_size">
+                    <option value="@ComponentSize.Small">Small</option>
+                    <option value="@ComponentSize.Middle">Middle (Default)</option>
+                    <option value="@ComponentSize.Large">Large</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Shape</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_shape">
+                    <option value="@ButtonShape.Default">Default</option>
+                    <option value="@ButtonShape.Round">Round</option>
+                    <option value="@ButtonShape.Circle">Circle</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Button Label</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_buttonText"
+                       @bind:event="oninput" />
+            </div>
+
+            <div class="sm:col-span-2 flex flex-wrap items-center gap-4 pt-4">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_danger" class="rounded text-primary-600" />
+                    <span>Danger</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_ghost" class="rounded text-primary-600" />
+                    <span>Ghost</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_loading" class="rounded text-primary-600" />
+                    <span>Loading</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
+                    <span>Disabled</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_block" class="rounded text-primary-600" />
+                    <span>Block (Full Width)</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    @* Use Case 1: Types *@
+    <DemoCard Title="Button Types" Description="5 basic types: Primary, Default, Dashed, Link, and Text." Code="@_typesCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Primary">Primary Button</Button>
+            <Button Type="ButtonType.Default">Default Button</Button>
+            <Button Type="ButtonType.Dashed">Dashed Button</Button>
+            <Button Type="ButtonType.Text">Text Button</Button>
+            <Button Type="ButtonType.Link" Href="#">Link Button</Button>
+        </div>
+    </DemoCard>
+
+    @* Use Case 2: Danger & Ghost *@
+    <DemoCard Title="Danger &amp; Ghost" Description="Danger highlights destructive actions. Ghost buttons are transparent with inverted borders." Code="@_dangerCode">
+        <div class="space-y-4">
+            <div class="flex flex-wrap items-center gap-3">
+                <Button Type="ButtonType.Primary" Danger="true">Primary Danger</Button>
+                <Button Type="ButtonType.Default" Danger="true">Default Danger</Button>
+                <Button Type="ButtonType.Dashed" Danger="true">Dashed Danger</Button>
+                <Button Type="ButtonType.Text" Danger="true">Text Danger</Button>
+            </div>
+            <div class="p-4 rounded-lg bg-slate-900 flex flex-wrap items-center gap-3">
+                <Button Type="ButtonType.Primary" Ghost="true">Primary Ghost</Button>
+                <Button Type="ButtonType.Default" Ghost="true">Default Ghost</Button>
+                <Button Type="ButtonType.Dashed" Ghost="true">Dashed Ghost</Button>
+                <Button Danger="true" Ghost="true">Danger Ghost</Button>
+            </div>
+        </div>
+    </DemoCard>
+
+    @* Use Case 3: Interactive Loading *@
+    <DemoCard Title="Loading State" Description="Click to trigger an asynchronous operation with animated loading spinner." Code="@_loadingCode">
+        <div class="flex items-center gap-3">
+            <Button Type="ButtonType.Primary"
+                    Loading="_asyncLoading"
+                    OnClick="SimulateAsyncActionAsync">
+                @(_asyncLoading ? "Processing..." : "Click to Trigger Task")
+            </Button>
+            <Button Loading="true">Always Loading</Button>
+        </div>
+    </DemoCard>
+
+    @* Use Case 4: Sizes & Shapes *@
+    <DemoCard Title="Sizes &amp; Shapes" Description="Three size scales (Small, Middle, Large) and round or circular shapes." Code="@_sizesCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Small</Button>
+            <Button Type="ButtonType.Primary" Size="ComponentSize.Middle">Middle</Button>
+            <Button Type="ButtonType.Primary" Size="ComponentSize.Large">Large</Button>
+            <Button Type="ButtonType.Primary" Shape="ButtonShape.Round">Round</Button>
+            <Button Type="ButtonType.Primary" Shape="ButtonShape.Circle">
+                <TentoUI.Icon Name="@IconNames.Search" Size="14" />
+            </Button>
+        </div>
+    </DemoCard>
+
+    @* API Reference Table *@
+    <ApiTable Title="Button Properties" Properties="@_buttonProps" />
+</div>
+
+@code {
+    private ButtonType _type = ButtonType.Primary;
+    private ComponentSize _size = ComponentSize.Middle;
+    private ButtonShape _shape = ButtonShape.Default;
+    private bool _danger;
+    private bool _ghost;
+    private bool _loading;
+    private bool _disabled;
+    private bool _block;
+    private string _buttonText = "Interactive Button";
+    private int _clickCount;
+    private bool _asyncLoading;
+
+    private async Task SimulateAsyncActionAsync()
+    {
+        _asyncLoading = true;
+        await Task.Delay(1500);
+        _asyncLoading = false;
+        MessageService.Success("Operation finished successfully!");
+    }
+
+    private const string _typesCode = @"<Button Type=""ButtonType.Primary"">Primary Button</Button>
+<Button Type=""ButtonType.Default"">Default Button</Button>
+<Button Type=""ButtonType.Dashed"">Dashed Button</Button>
+<Button Type=""ButtonType.Text"">Text Button</Button>
+<Button Type=""ButtonType.Link"" Href=""#"">Link Button</Button>";
+
+    private const string _dangerCode = @"<Button Type=""ButtonType.Primary"" Danger=""true"">Primary Danger</Button>
+<Button Type=""ButtonType.Default"" Danger=""true"">Default Danger</Button>
+<Button Type=""ButtonType.Primary"" Ghost=""true"">Primary Ghost</Button>";
+
+    private const string _loadingCode = @"<Button Type=""ButtonType.Primary"" Loading=""@_isLoading"" OnClick=""SubmitAsync"">
+    Submit
+</Button>";
+
+    private const string _sizesCode = @"<Button Type=""ButtonType.Primary"" Size=""ComponentSize.Small"">Small</Button>
+<Button Type=""ButtonType.Primary"" Size=""ComponentSize.Middle"">Middle</Button>
+<Button Type=""ButtonType.Primary"" Size=""ComponentSize.Large"">Large</Button>
+<Button Type=""ButtonType.Primary"" Shape=""ButtonShape.Round"">Round</Button>";
+
+    private readonly ApiTable.ApiProp[] _buttonProps =
+    [
+        new("Type", "Sets the visual button type variant (Primary, Default, Dashed, Link, Text).", "ButtonType", "ButtonType.Default"),
+        new("Size", "Sets the size scale of the button (Small, Middle, Large).", "ComponentSize?", "null (Middle)"),
+        new("Shape", "Sets the shape of the button (Default, Circle, Round).", "ButtonShape", "ButtonShape.Default"),
+        new("Danger", "Applies danger state styling for destructive operations.", "bool", "false"),
+        new("Ghost", "Makes button background transparent, ideal for colored backgrounds.", "bool", "false"),
+        new("Loading", "Displays a spinner indicator and prevents further clicks.", "bool", "false"),
+        new("Disabled", "Disables user interaction and applies muted opacity styling.", "bool", "false"),
+        new("Block", "Expands the button to span the full width of its parent container.", "bool", "false"),
+        new("Href", "If set, renders an <a> anchor link styled as a button.", "string?", "null"),
+        new("Target", "Target attribute when Href is specified (e.g. '_blank').", "string?", "null"),
+        new("Icon", "Custom icon template rendered before or after the child content.", "RenderFragment?", "null"),
+        new("IconPosition", "Placement of the icon (Start or End).", "IconPosition", "IconPosition.Start"),
+        new("OnClick", "Callback triggered when the button is clicked by mouse or keyboard.", "EventCallback<MouseEventArgs>", "null"),
+        new("ChildContent", "Label or custom content rendered inside the button.", "RenderFragment?", "null")
+    ];
+}

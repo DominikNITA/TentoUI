@@ -1,0 +1,87 @@
+@page "/components/descriptions"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Descriptions - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Descriptions</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Display multiple field terms and key-value properties in a compact, bordered grid list.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle columns, bordered style, and size dynamically.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Descriptions Title="System Cluster Info" Bordered="_bordered" Column="_column" Size="_size">
+                <DescriptionsItem Label="Cluster Name">prod-cluster-us-east-1</DescriptionsItem>
+                <DescriptionsItem Label="Status">Healthy</DescriptionsItem>
+                <DescriptionsItem Label="Nodes">12 / 12 Active</DescriptionsItem>
+                <DescriptionsItem Label="Kubernetes Version">v1.31.2</DescriptionsItem>
+                <DescriptionsItem Label="Uptime">99.99% (94 days)</DescriptionsItem>
+                <DescriptionsItem Label="Primary Region">us-east-1</DescriptionsItem>
+            </Descriptions>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Column Count</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_column">
+                    <option value="1">1 Column</option>
+                    <option value="2">2 Columns</option>
+                    <option value="3">3 Columns</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_size">
+                    <option value="@ComponentSize.Small">Small</option>
+                    <option value="@ComponentSize.Middle">Middle</option>
+                    <option value="@ComponentSize.Large">Large</option>
+                </select>
+            </div>
+            <div class="flex items-center pt-5">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_bordered" class="rounded text-primary-600" />
+                    <span>Bordered Grid Lines</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Descriptions Properties" Properties="@_descProps" />
+    <ApiTable Title="DescriptionsItem Properties" Properties="@_itemProps" />
+</div>
+
+@code {
+    private int _column = 3;
+    private bool _bordered = true;
+    private ComponentSize _size = ComponentSize.Middle;
+
+    private readonly ApiTable.ApiProp[] _descProps =
+    [
+        new("Title", "The title of the description list.", "string?", "null"),
+        new("Bordered", "Whether to display bordered grid lines around cells.", "bool", "false"),
+        new("Column", "The number of descriptions items in one row.", "int", "3"),
+        new("Size", "Size scale of descriptions (Small, Middle, Large).", "ComponentSize?", "null"),
+        new("Extra", "Action button or title header extra element.", "RenderFragment?", "null"),
+        new("ChildContent", "DescriptionsItem child elements.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _itemProps =
+    [
+        new("Label", "Label of the description item.", "string?", "null"),
+        new("Span", "The number of columns included.", "int", "1"),
+        new("ChildContent", "The value content.", "RenderFragment?", "null")
+    ];
+}

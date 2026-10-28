@@ -1,0 +1,84 @@
+@page "/components/watermark"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Watermark - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Watermark</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Overlay watermarks across page elements to protect proprietary copyright and confidential documents.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Modify watermark text, rotation angle, and font size dynamically.</p>
+            </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 overflow-hidden">
+            <Watermark Content="@_text" Rotate="_rotate" FontSize="_fontSize">
+                <div class="h-64 p-6 flex flex-col justify-between">
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        This confidential workspace preview contains proprietary analytics and customer metrics.
+                    </p>
+                    <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Financial Ledger #4092</span>
+                        <p class="text-xs text-slate-500 mt-1">Net surplus: $148,200.00 USD</p>
+                    </div>
+                </div>
+            </Watermark>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Watermark Text</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_text"
+                       @bind:event="oninput" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Rotation Angle</label>
+                <input type="number"
+                       min="-90"
+                       max="90"
+                       step="5"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_rotate" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Font Size (px)</label>
+                <input type="number"
+                       min="10"
+                       max="32"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_fontSize" />
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Watermark Properties" Properties="@_props" />
+</div>
+
+@code {
+    private string _text = "TentoUI CONFIDENTIAL";
+    private int _rotate = -22;
+    private int _fontSize = 14;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Content", "The watermark text to repeat.", "string?", "'TentoUI'"),
+        new("Rotate", "Rotation angle in degrees.", "int", "-22"),
+        new("FontSize", "Font size of watermark text in px.", "int", "14"),
+        new("FontColor", "Color of watermark text.", "string?", "rgba(0,0,0,0.15)"),
+        new("Width", "Watermark canvas pattern width in px.", "int", "120"),
+        new("Height", "Watermark canvas pattern height in px.", "int", "64"),
+        new("ZIndex", "Z-index of the overlay pattern.", "int", "9"),
+        new("ChildContent", "Document or area content to overlay.", "RenderFragment?", "null")
+    ];
+}

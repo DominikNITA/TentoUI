@@ -1,0 +1,92 @@
+@page "/components/form"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>Form - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Form</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Form component for collecting and validating data entries, supporting horizontal, vertical, and inline layouts.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Switch between Vertical, Horizontal, and Inline layouts live.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xl mx-auto">
+            <Form Model="@_model" Layout="_layout" OnFinish="HandleFinish">
+                <FormItem Label="Username" Required="true" Help="Unique identity handle">
+                    <Input @bind-Value="_model.Username" Placeholder="Enter your handle..." />
+                </FormItem>
+
+                <FormItem Label="Email Address" Required="true">
+                    <Input @bind-Value="_model.Email" Placeholder="name@company.com" />
+                </FormItem>
+
+                <FormItem Label="Remember Me">
+                    <Checkbox @bind-Checked="_model.RememberMe">Keep me signed in</Checkbox>
+                </FormItem>
+
+                <div class="pt-4 flex items-center gap-3">
+                    <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Submit Form</Button>
+                    <Button Type="ButtonType.Default" OnClick="@(() => _model = new())">Reset</Button>
+                </div>
+            </Form>
+        </div>
+
+        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
+            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Form Layout</label>
+            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                    @bind="_layout">
+                <option value="@FormLayout.Vertical">Vertical (Stacked)</option>
+                <option value="@FormLayout.Horizontal">Horizontal (Two-column)</option>
+                <option value="@FormLayout.Inline">Inline</option>
+            </select>
+        </div>
+    </div>
+
+    <ApiTable Title="Form Properties" Properties="@_formProps" />
+    <ApiTable Title="FormItem Properties" Properties="@_itemProps" />
+</div>
+
+@code {
+    public class UserLoginForm
+    {
+        public string Username { get; set; } = "dominik";
+        public string Email { get; set; } = "dominik@tento.dev";
+        public bool RememberMe { get; set; } = true;
+    }
+
+    private UserLoginForm _model = new();
+    private FormLayout _layout = FormLayout.Vertical;
+
+    private void HandleFinish()
+    {
+        MessageService.Success($"Submitted form for: {_model.Username} ({_model.Email})");
+    }
+
+    private readonly ApiTable.ApiProp[] _formProps =
+    [
+        new("Model", "Form model data object.", "object?", "null"),
+        new("Layout", "Form item alignment layout: Vertical, Horizontal, Inline.", "FormLayout", "FormLayout.Vertical"),
+        new("OnFinish", "Callback triggered on successful form submission.", "EventCallback<EditContext>", "null"),
+        new("OnFinishFailed", "Callback triggered when form validation fails.", "EventCallback<EditContext>", "null"),
+        new("ChildContent", "FormItem elements.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _itemProps =
+    [
+        new("Label", "Label text for the form field.", "string?", "null"),
+        new("Required", "Displays a red required asterisk next to the label.", "bool", "false"),
+        new("Help", "Helper or validation message text rendered below the input.", "string?", "null"),
+        new("ChildContent", "Input control to host inside form item.", "RenderFragment?", "null")
+    ];
+}

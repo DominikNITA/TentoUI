@@ -1,0 +1,73 @@
+@page "/components/cascader"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Cascader - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Cascader</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Cascade selection allows selection from a set of associated multi-level datasets (e.g. continent > country > city).
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Navigate multi-level cascade levels interactively.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Selected Path: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@(string.Join(" / ", _selectedValues))</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+            <Cascader Options="@_options"
+                      @bind-Values="_selectedValues"
+                      Placeholder="Select location..."
+                      AllowClear="true" />
+        </div>
+    </div>
+
+    <ApiTable Title="Cascader Properties" Properties="@_props" />
+</div>
+
+@code {
+    private IReadOnlyList<string> _selectedValues = new[] { "eu", "pl", "waw" };
+
+    private readonly CascaderOption[] _options =
+    [
+        new("eu", "Europe",
+        [
+            new("pl", "Poland",
+            [
+                new("waw", "Warsaw"),
+                new("krk", "Krakow")
+            ]),
+            new("de", "Germany",
+            [
+                new("ber", "Berlin"),
+                new("muc", "Munich")
+            ])
+        ]),
+        new("na", "North America",
+        [
+            new("us", "United States",
+            [
+                new("nyc", "New York"),
+                new("sf", "San Francisco")
+            ])
+        ])
+    ];
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Options", "Hierarchical data options array.", "IEnumerable<CascaderOption>?", "null"),
+        new("Values", "Selected keys at each cascade depth (bindable via @bind-Values).", "IReadOnlyList<string>", "[]"),
+        new("Placeholder", "Input placeholder text.", "string?", "'Please select'"),
+        new("AllowClear", "Whether clear icon is enabled.", "bool", "true"),
+        new("ChangeOnSelect", "Whether selecting any parent level triggers value update immediately.", "bool", "false")
+    ];
+}

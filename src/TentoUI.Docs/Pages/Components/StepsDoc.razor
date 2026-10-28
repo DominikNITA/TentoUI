@@ -1,0 +1,80 @@
+@page "/components/steps"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Steps - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Steps</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            A navigation component that guides users through the steps of a specified linear task.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Step forwards and backwards to preview state transitions live.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Step: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_current + 1) / 3</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+            <Steps Current="_current" Direction="_direction">
+                <Step Title="Personal Info" Description="Provide name and contact email" />
+                <Step Title="Identity Check" Description="Upload government verification" />
+                <Step Title="Complete" Description="Ready to launch workspace" />
+            </Steps>
+
+            <div class="flex items-center gap-2 pt-6">
+                <Button Disabled="@(_current == 0)" OnClick="@(() => _current = Math.Max(0, _current - 1))">
+                    Previous Step
+                </Button>
+                <Button Type="ButtonType.Primary" Disabled="@(_current == 2)" OnClick="@(() => _current = Math.Min(2, _current + 1))">
+                    Next Step
+                </Button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Direction</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_direction">
+                    <option value="@StepsDirection.Horizontal">Horizontal</option>
+                    <option value="@StepsDirection.Vertical">Vertical</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Steps Properties" Properties="@_stepsProps" />
+    <ApiTable Title="Step Properties" Properties="@_stepProps" />
+</div>
+
+@code {
+    private int _current = 1;
+    private StepsDirection _direction = StepsDirection.Horizontal;
+
+    private readonly ApiTable.ApiProp[] _stepsProps =
+    [
+        new("Current", "Index of the current active step (0-indexed).", "int", "0"),
+        new("Direction", "Layout direction: Horizontal or Vertical.", "StepsDirection", "StepsDirection.Horizontal"),
+        new("Size", "Size scale of step indicators (Small or Middle).", "ComponentSize?", "null"),
+        new("Status", "Current step status override (Wait, Process, Finish, Error).", "StepStatus?", "null"),
+        new("OnChange", "Callback when a clickable step indicator is selected.", "EventCallback<int>", "null"),
+        new("ChildContent", "Step elements.", "RenderFragment?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _stepProps =
+    [
+        new("Title", "Title of the step.", "string", "null"),
+        new("Description", "Detailed description text.", "string?", "null"),
+        new("Icon", "Custom icon name.", "string?", "null"),
+        new("Disabled", "Whether this step cannot be clicked.", "bool", "false")
+    ];
+}

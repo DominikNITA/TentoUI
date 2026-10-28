@@ -1,0 +1,86 @@
+@page "/components/skeleton"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Skeleton - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Skeleton</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Provide a placeholder while you wait for content to load, or to visualize content that doesn't exist yet.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Toggle loading state, animations, avatar placeholder, and rows.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                State: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_loading ? "Skeleton Loading" : "Content Loaded")</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-lg mx-auto">
+            <Skeleton Loading="_loading"
+                      Active="_active"
+                      Avatar="_avatar"
+                      Rows="_rows">
+                <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-3">
+                    <Avatar Text="AL" Size="ComponentSize.Large" />
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white">Alice Lawson</h4>
+                        <p class="text-xs text-slate-500">Staff Infrastructure Engineer at Global Cloud Inc.</p>
+                    </div>
+                </div>
+            </Skeleton>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Rows Count</label>
+                <input type="number"
+                       min="1"
+                       max="8"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_rows" />
+            </div>
+            <div class="flex items-center gap-4 pt-5">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_loading" class="rounded text-primary-600" />
+                    <span>Loading (Show Skeleton)</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_active" class="rounded text-primary-600" />
+                    <span>Pulse Animation</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_avatar" class="rounded text-primary-600" />
+                    <span>Avatar Circle</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Skeleton Properties" Properties="@_props" />
+</div>
+
+@code {
+    private bool _loading = true;
+    private bool _active = true;
+    private bool _avatar = true;
+    private int _rows = 3;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Loading", "Whether to show skeleton placeholder or actual child content.", "bool", "true"),
+        new("Active", "Show pulse shimmer animation effect.", "bool", "true"),
+        new("Avatar", "Show circular avatar placeholder.", "bool", "false"),
+        new("Title", "Show heading title placeholder line.", "bool", "true"),
+        new("Paragraph", "Show paragraph lines placeholder.", "bool", "true"),
+        new("Rows", "Paragraph line count.", "int", "3"),
+        new("ChildContent", "Actual content rendered when Loading is false.", "RenderFragment?", "null")
+    ];
+}

@@ -1,0 +1,65 @@
+@page "/components/empty"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Empty - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Empty</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Empty state placeholder for displaying when there is no data, table rows, or search results available.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Customize empty state text and call-to-action button.</p>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
+            <Empty Description="@_desc">
+                @if (_showAction)
+                {
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">
+                        Create New Record
+                    </Button>
+                }
+            </Empty>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description</label>
+                <input type="text"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_desc"
+                       @bind:event="oninput" />
+            </div>
+            <div class="flex items-center pt-5">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_showAction" class="rounded text-primary-600" />
+                    <span>Include Call to Action Button</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Empty Properties" Properties="@_props" />
+</div>
+
+@code {
+    private string _desc = "No matching records found in this view.";
+    private bool _showAction = true;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Description", "Display text for empty state.", "string?", "'No Data'"),
+        new("DescriptionTemplate", "Custom template for description.", "RenderFragment?", "null"),
+        new("Image", "Custom SVG/image URI to replace default illustration.", "string?", "null"),
+        new("ChildContent", "Bottom action slot (e.g. create button).", "RenderFragment?", "null")
+    ];
+}

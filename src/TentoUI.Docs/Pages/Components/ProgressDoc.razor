@@ -1,0 +1,82 @@
+@page "/components/progress"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Progress - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Progress</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Displays the current progress of an operation flow with animated bars, circular rings, and status highlights.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Change progress percentage and toggle circular vs linear bars.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Progress: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_percent%</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[140px]">
+            <div class="w-full max-w-md">
+                <Progress Percent="_percent"
+                          Type="_type"
+                          Status="_status"
+                          ShowInfo="true" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Percentage (0-100)</label>
+                <input type="range"
+                       min="0"
+                       max="100"
+                       class="w-full accent-primary-600"
+                       @bind="_percent"
+                       @bind:event="oninput" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Progress Type</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_type">
+                    <option value="@ProgressType.Line">Line Bar</option>
+                    <option value="@ProgressType.Circle">Circle Ring</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Status Override</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_status">
+                    <option value="">Normal</option>
+                    <option value="@ProgressStatus.Success">Success</option>
+                    <option value="@ProgressStatus.Exception">Exception (Error)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Progress Properties" Properties="@_props" />
+</div>
+
+@code {
+    private int _percent = 65;
+    private ProgressType _type = ProgressType.Line;
+    private ProgressStatus? _status;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Percent", "The completion percentage (0-100).", "int", "0"),
+        new("Type", "The shape of progress: Line or Circle.", "ProgressType", "ProgressType.Line"),
+        new("Status", "The status of progress (Success, Exception, Normal).", "ProgressStatus?", "null"),
+        new("ShowInfo", "Whether to display the percentage number or status icon.", "bool", "true"),
+        new("StrokeColor", "The custom color of progress stroke.", "string?", "null"),
+        new("CircleSize", "Width/height diameter of circle in px.", "int", "96")
+    ];
+}

@@ -1,58 +1,93 @@
 @page "/components/pagination"
 @namespace TentoUI.Docs.Pages.Components
 
-<PageTitle>Pagination &amp; Steps - TentoUI</PageTitle>
+<PageTitle>Pagination - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Pagination &amp; Steps</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Pagination</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Navigation controls for multi-page datasets and multi-step linear workflows.
+            A long list can be divided into several pages using pagination, with support for quick jump inputs and page size changers.
         </p>
     </div>
 
-    <DemoCard Title="Interactive Steps" Description="Guided multi-step sequence with active status and descriptions." Code="@_stepsCode">
-        <div class="space-y-4">
-            <Steps Current="@_currentStep">
-                <Step Title="Step 1" Description="Account Setup" />
-                <Step Title="Step 2" Description="Profile Verification" />
-                <Step Title="Step 3" Description="Ready to launch" />
-            </Steps>
-
-            <div class="flex items-center gap-2 pt-4">
-                <Button Disabled="@(_currentStep == 0)" OnClick="@(() => _currentStep = Math.Max(0, _currentStep - 1))">
-                    Previous
-                </Button>
-                <Button Type="ButtonType.Primary" Disabled="@(_currentStep == 2)" OnClick="@(() => _currentStep = Math.Min(2, _currentStep + 1))">
-                    Next
-                </Button>
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Change total records, jump to pages, or toggle size changers.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Page <strong class="text-primary-600 dark:text-primary-400 font-mono">@_page</strong> of <strong class="font-mono">@((_total + _pageSize - 1) / _pageSize)</strong>
             </div>
         </div>
-    </DemoCard>
 
-    <DemoCard Title="Pagination" Description="Navigate large sets of records with page size changer and jump input." Code="@_paginationCode">
-        <Pagination Total="500"
-                    @bind-Current="_page"
-                    @bind-PageSize="_pageSize"
-                    ShowSizeChanger="true"
-                    ShowQuickJumper="true" />
-    </DemoCard>
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
+            <Pagination Total="_total"
+                        @bind-Current="_page"
+                        @bind-PageSize="_pageSize"
+                        ShowSizeChanger="_showSizeChanger"
+                        ShowQuickJumper="_showQuickJumper"
+                        Simple="_simple" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Total Records</label>
+                <input type="number"
+                       min="1"
+                       max="5000"
+                       step="50"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_total" />
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Page Size</label>
+                <input type="number"
+                       min="5"
+                       max="100"
+                       step="5"
+                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                       @bind="_pageSize" />
+            </div>
+            <div class="flex flex-col gap-2 pt-2">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_showSizeChanger" class="rounded text-primary-600" />
+                    <span>Show Size Changer</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_showQuickJumper" class="rounded text-primary-600" />
+                    <span>Show Quick Jumper</span>
+                </label>
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_simple" class="rounded text-primary-600" />
+                    <span>Simple Compact Mode</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Pagination Properties" Properties="@_props" />
 </div>
 
 @code {
-    private int _currentStep = 1;
     private int _page = 1;
     private int _pageSize = 10;
+    private int _total = 250;
+    private bool _showSizeChanger = true;
+    private bool _showQuickJumper = true;
+    private bool _simple;
 
-    private const string _stepsCode = @"<Steps Current=""@_currentStep"">
-    <Step Title=""Step 1"" Description=""Account Setup"" />
-    <Step Title=""Step 2"" Description=""Profile Verification"" />
-    <Step Title=""Step 3"" Description=""Ready to launch"" />
-</Steps>";
-
-    private const string _paginationCode = @"<Pagination Total=""500""
-            @bind-Current=""_page""
-            @bind-PageSize=""_pageSize""
-            ShowSizeChanger=""true""
-            ShowQuickJumper=""true"" />";
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Current", "Current page number (1-based, bindable via @bind-Current).", "int", "1"),
+        new("PageSize", "Number of data items per page (bindable via @bind-PageSize).", "int", "10"),
+        new("Total", "Total count of data items.", "int", "0"),
+        new("ShowSizeChanger", "Display page size changer dropdown.", "bool", "false"),
+        new("ShowQuickJumper", "Display input field to jump directly to page.", "bool", "false"),
+        new("Simple", "Render compact mini pagination.", "bool", "false"),
+        new("Disabled", "Whether pagination interaction is disabled.", "bool", "false"),
+        new("OnChange", "Callback triggered when page changes.", "EventCallback<int>", "null")
+    ];
 }

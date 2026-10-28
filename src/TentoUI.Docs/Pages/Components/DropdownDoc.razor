@@ -1,56 +1,106 @@
 @page "/components/dropdown"
 @namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
 
-<PageTitle>Dropdown &amp; Breadcrumb - TentoUI</PageTitle>
+<PageTitle>Dropdown - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Dropdown &amp; Breadcrumb</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Dropdown</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Context menus triggered on click/hover and hierarchical page location breadcrumbs.
+            A dropdown menu triggered by hover or click, positioning a floating contextual overlay next to its trigger.
         </p>
     </div>
 
-    <DemoCard Title="Breadcrumb" Description="Indicate current page location within a navigational hierarchy." Code="@_breadcrumbCode">
-        <Breadcrumb>
-            <BreadcrumbItem Href="#">Home</BreadcrumbItem>
-            <BreadcrumbItem Href="#">Components</BreadcrumbItem>
-            <BreadcrumbItem IsLast="true">Breadcrumb</BreadcrumbItem>
-        </Breadcrumb>
-    </DemoCard>
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Configure trigger mode, placement, and disabled state dynamically.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Action: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_lastAction</strong>
+            </div>
+        </div>
 
-    <DemoCard Title="Dropdown Trigger" Description="Click to reveal a floating action menu." Code="@_dropdownCode">
-        <Dropdown Text="More Actions">
-            <Overlay>
-                <div class="py-1 w-44 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
-                    <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800">
-                        Export as CSV
-                    </button>
-                    <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800">
-                        Duplicate Record
-                    </button>
-                    <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
-                    <button type="button" class="w-full text-left px-3 py-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40">
-                        Delete Forever
-                    </button>
-                </div>
-            </Overlay>
-        </Dropdown>
-    </DemoCard>
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[140px]">
+            <Dropdown Text="@_triggerText"
+                      Disabled="_disabled"
+                      Trigger="_trigger"
+                      Placement="_placement">
+                <Overlay>
+                    <div class="py-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                @onclick="@(() => HandleSelect("Export PDF"))">
+                            Export as PDF
+                        </button>
+                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                @onclick="@(() => HandleSelect("Export CSV"))">
+                            Export as CSV
+                        </button>
+                        <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
+                        <button type="button" class="w-full text-left px-3 py-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                @onclick="@(() => HandleSelect("Archive"))">
+                            Archive Record
+                        </button>
+                    </div>
+                </Overlay>
+            </Dropdown>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Trigger Mode</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_trigger">
+                    <option value="@DropdownTrigger.Click">Click</option>
+                    <option value="@DropdownTrigger.Hover">Hover</option>
+                </select>
+            </div>
+            <div>
+                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Placement</label>
+                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
+                        @bind="_placement">
+                    <option value="@DropdownPlacement.BottomLeft">BottomLeft</option>
+                    <option value="@DropdownPlacement.BottomRight">BottomRight</option>
+                    <option value="@DropdownPlacement.TopLeft">TopLeft</option>
+                    <option value="@DropdownPlacement.TopRight">TopRight</option>
+                </select>
+            </div>
+            <div class="flex items-center pt-5">
+                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
+                    <span>Disabled</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <ApiTable Title="Dropdown Properties" Properties="@_props" />
 </div>
 
 @code {
-    private const string _breadcrumbCode = @"<Breadcrumb>
-    <BreadcrumbItem Href=""#"">Home</BreadcrumbItem>
-    <BreadcrumbItem Href=""#"">Components</BreadcrumbItem>
-    <BreadcrumbItem IsLast=""true"">Breadcrumb</BreadcrumbItem>
-</Breadcrumb>";
+    private DropdownTrigger _trigger = DropdownTrigger.Click;
+    private DropdownPlacement _placement = DropdownPlacement.BottomLeft;
+    private string _triggerText = "Options Menu";
+    private bool _disabled;
+    private string _lastAction = "None";
 
-    private const string _dropdownCode = @"<Dropdown Text=""More Actions"">
-    <Overlay>
-        <div class=""py-1 w-44"">
-            <button class=""px-3 py-1.5"">Export</button>
-        </div>
-    </Overlay>
-</Dropdown>";
+    private void HandleSelect(string action)
+    {
+        _lastAction = action;
+        MessageService.Success($"Selected: {action}");
+    }
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Text", "Label for default button trigger.", "string?", "null"),
+        new("Trigger", "Event triggering the overlay: Click or Hover.", "DropdownTrigger", "DropdownTrigger.Hover"),
+        new("Placement", "Placement position relative to trigger (BottomLeft, BottomRight, TopLeft, TopRight).", "DropdownPlacement", "DropdownPlacement.BottomLeft"),
+        new("Disabled", "Whether the dropdown trigger is disabled.", "bool", "false"),
+        new("Size", "Button trigger size.", "ComponentSize?", "null"),
+        new("Overlay", "Content displayed inside the dropdown overlay.", "RenderFragment?", "null"),
+        new("ChildContent", "Custom trigger element replacing default button.", "RenderFragment?", "null")
+    ];
 }

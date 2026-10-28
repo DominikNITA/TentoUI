@@ -1,0 +1,65 @@
+@page "/components/time-picker"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>TimePicker - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">TimePicker</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            To select or input a time of day with interactive hour/minute selector panels.
+        </p>
+    </div>
+
+    @* Interactive Playground *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
+                <p class="text-xs text-slate-400">Select hour and minute interactively.</p>
+            </div>
+            <div class="text-xs text-slate-400">
+                Selected Time: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@(_time?.ToString("HH:mm") ?? "None")</strong>
+            </div>
+        </div>
+
+        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+            <TimePicker @bind-Value="_time"
+                        Format="@_format"
+                        ShowSeconds="_showSeconds"
+                        AllowClear="true"
+                        Disabled="_disabled" />
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_showSeconds" class="rounded text-primary-600" />
+                <span>Show Seconds Column</span>
+            </label>
+            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
+                <span>Disabled</span>
+            </label>
+        </div>
+    </div>
+
+    <ApiTable Title="TimePicker Properties" Properties="@_props" />
+</div>
+
+@code {
+    private TimeOnly? _time = new(15, 30);
+    private string _format => _showSeconds ? "HH:mm:ss" : "HH:mm";
+    private bool _showSeconds;
+    private bool _disabled;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("Value", "Current selected time (bindable via @bind-Value).", "TimeOnly?", "null"),
+        new("Format", "Format string for time display.", "string", "HH:mm"),
+        new("ShowSeconds", "Whether to show seconds column in picker.", "bool", "false"),
+        new("HourStep", "Interval between hours.", "int", "1"),
+        new("MinuteStep", "Interval between minutes.", "int", "1"),
+        new("AllowClear", "Whether clear button is visible.", "bool", "true"),
+        new("Disabled", "Whether picker is disabled.", "bool", "false")
+    ];
+}

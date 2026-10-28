@@ -11,35 +11,18 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Change custom separator character dynamically.</p>
-            </div>
-        </div>
+    @* Example 1: Basic Breadcrumb *@
+    <DemoCard Title="Basic Breadcrumb" Description="Standard hierarchical navigation trail with default slash separator." Code="@_basicCode">
+        <Breadcrumb Separator="/">
+            <BreadcrumbItem Href="#">Home</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Components</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Navigation</BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Breadcrumb</BreadcrumbItem>
+        </Breadcrumb>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Breadcrumb Separator="@_separator">
-                <BreadcrumbItem Href="#">Home</BreadcrumbItem>
-                <BreadcrumbItem Href="#">Components</BreadcrumbItem>
-                <BreadcrumbItem Href="#">Navigation</BreadcrumbItem>
-                <BreadcrumbItem IsLast="true">Breadcrumb</BreadcrumbItem>
-            </Breadcrumb>
-        </div>
-
-        <div class="max-w-xs text-xs">
-            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Custom Separator</label>
-            <input type="text"
-                   class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                   @bind="_separator"
-                   @bind:event="oninput" />
-        </div>
-    </div>
-
-    @* Use Cases *@
-    <DemoCard Title="Breadcrumb with Icons" Description="Include SVG icons alongside section labels." Code="@_iconCode">
+    @* Example 2: Breadcrumb with Icons *@
+    <DemoCard Title="Breadcrumb with Icons" Description="Include SVG icons alongside section labels for visual hierarchy." Code="@_iconCode">
         <Breadcrumb>
             <BreadcrumbItem Href="#">
                 <Icon><TentoUI.Icon Name="@IconNames.Home" Size="14" /></Icon>
@@ -53,20 +36,50 @@
         </Breadcrumb>
     </DemoCard>
 
+    @* Example 3: Custom Separator *@
+    <DemoCard Title="Custom Separator" Description="Use custom character separators such as arrows or chevrons." Code="@_separatorCode">
+        <Breadcrumb Separator=">">
+            <BreadcrumbItem Href="#">Application</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Clusters</BreadcrumbItem>
+            <BreadcrumbItem Href="#">us-east-1</BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Node Details</BreadcrumbItem>
+        </Breadcrumb>
+    </DemoCard>
+
     <ApiTable Title="Breadcrumb Properties" Properties="@_breadcrumbProps" />
     <ApiTable Title="BreadcrumbItem Properties" Properties="@_itemProps" />
 </div>
 
 @code {
-    private string _separator = "/";
+    private const string _basicCode = """
+        <Breadcrumb Separator="/">
+            <BreadcrumbItem Href="#">Home</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Components</BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Breadcrumb</BreadcrumbItem>
+        </Breadcrumb>
+        """;
 
-    private const string _iconCode = @"<Breadcrumb>
-    <BreadcrumbItem Href=""#"">
-        <Icon><Icon Name=""@IconNames.Home"" Size=""14"" /></Icon>
-        <ChildContent>Home</ChildContent>
-    </BreadcrumbItem>
-    <BreadcrumbItem IsLast=""true"">Report.pdf</BreadcrumbItem>
-</Breadcrumb>";
+    private const string _iconCode = """
+        <Breadcrumb>
+            <BreadcrumbItem Href="#">
+                <Icon><Icon Name="@IconNames.Home" Size="14" /></Icon>
+                <ChildContent>Home</ChildContent>
+            </BreadcrumbItem>
+            <BreadcrumbItem Href="#">
+                <Icon><Icon Name="@IconNames.Folder" Size="14" /></Icon>
+                <ChildContent>Documents</ChildContent>
+            </BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Report.pdf</BreadcrumbItem>
+        </Breadcrumb>
+        """;
+
+    private const string _separatorCode = """
+        <Breadcrumb Separator=">">
+            <BreadcrumbItem Href="#">Application</BreadcrumbItem>
+            <BreadcrumbItem Href="#">Clusters</BreadcrumbItem>
+            <BreadcrumbItem IsLast="true">Node Details</BreadcrumbItem>
+        </Breadcrumb>
+        """;
 
     private readonly ApiTable.ApiProp[] _breadcrumbProps =
     [

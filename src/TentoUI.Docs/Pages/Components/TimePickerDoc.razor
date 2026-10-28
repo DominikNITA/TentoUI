@@ -11,46 +11,43 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Select hour and minute interactively.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected Time: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@(_time?.ToString("HH:mm") ?? "None")</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+    @* Example 1: Basic TimePicker *@
+    <DemoCard Title="Basic TimePicker" Description="Select hour and minute with 24-hour time formatting." Code="@_basicCode">
+        <div class="max-w-xs p-2 space-y-2">
             <TimePicker @bind-Value="_time"
-                        Format="@_format"
-                        ShowSeconds="_showSeconds"
-                        AllowClear="true"
-                        Disabled="_disabled" />
+                        Format="HH:mm"
+                        AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected Time: @(_time?.ToString("HH:mm") ?? "None")</div>
         </div>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_showSeconds" class="rounded text-primary-600" />
-                <span>Show Seconds Column</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                <span>Disabled</span>
-            </label>
+    @* Example 2: With Seconds *@
+    <DemoCard Title="TimePicker with Seconds" Description="Displays third column for precise second selections." Code="@_secondsCode">
+        <div class="max-w-xs p-2">
+            <TimePicker Value="@(new TimeOnly(12, 45, 30))"
+                        Format="HH:mm:ss"
+                        ShowSeconds="true"
+                        AllowClear="true" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="TimePicker Properties" Properties="@_props" />
 </div>
 
 @code {
     private TimeOnly? _time = new(15, 30);
-    private string _format => _showSeconds ? "HH:mm:ss" : "HH:mm";
-    private bool _showSeconds;
-    private bool _disabled;
+
+    private const string _basicCode = """
+        <TimePicker @bind-Value="time"
+                    Format="HH:mm"
+                    AllowClear="true" />
+        """;
+
+    private const string _secondsCode = """
+        <TimePicker Value="@(new TimeOnly(12, 45, 30))"
+                    Format="HH:mm:ss"
+                    ShowSeconds="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

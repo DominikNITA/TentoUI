@@ -7,75 +7,110 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Result</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Used to feed back the results of a series of operational tasks, such as successful order confirmation or 404/500 HTTP exceptions.
+            Used to feed back the results of a series of operational tasks, such as successful order confirmation or operational exceptions.
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle result status (Success, Error, 404, 500, etc.) dynamically.</p>
+    @* Example 1: Success Result *@
+    <DemoCard Title="Success Result" Description="Show a positive confirmation message with primary actions." Code="@_successCode">
+        <Result Status="ResultStatus.Success"
+                Title="Successfully Purchased Cloud Instance"
+                SubTitle="Order number: 20261028-4091. Cloud deployment will finish in 1-3 minutes.">
+            <Extra>
+                <Button Type="ButtonType.Primary">Go to Console</Button>
+                <Button Type="ButtonType.Default">View Order</Button>
+            </Extra>
+        </Result>
+    </DemoCard>
+
+    @* Example 2: Warning & Error *@
+    <DemoCard Title="Warning &amp; Error" Description="Notify users of issues requiring attention or submission failures." Code="@_errorWarningCode">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-950/40">
+                <Result Status="ResultStatus.Warning"
+                        Title="Configuration Incomplete"
+                        SubTitle="Please verify your network VPC CIDR before continuing.">
+                    <Extra>
+                        <Button Type="ButtonType.Primary">Review Settings</Button>
+                    </Extra>
+                </Result>
+            </div>
+            <div class="p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-950/40">
+                <Result Status="ResultStatus.Error"
+                        Title="Submission Failed"
+                        SubTitle="Please check card details and network connectivity before resubmitting.">
+                    <Extra>
+                        <Button Type="ButtonType.Primary" Danger="true">Retry Payment</Button>
+                    </Extra>
+                </Result>
             </div>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Result Status="_status" Title="@_title" SubTitle="@_subTitle">
-                <Extra>
-                    <Button Type="ButtonType.Primary">Go to Console</Button>
-                    <Button Type="ButtonType.Default">Try Again</Button>
-                </Extra>
-            </Result>
-        </div>
-
-        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
-            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Result Status</label>
-            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                    @bind="_status"
-                    @bind:after="UpdateText">
-                <option value="@ResultStatus.Success">Success</option>
-                <option value="@ResultStatus.Info">Info</option>
-                <option value="@ResultStatus.Warning">Warning</option>
-                <option value="@ResultStatus.Error">Error</option>
-            </select>
-        </div>
-    </div>
+    @* Example 3: Info Result with Detailed Content *@
+    <DemoCard Title="Info with Detailed Content" Description="Informational status feedback including nested child content." Code="@_infoCode">
+        <Result Status="ResultStatus.Info"
+                Title="Your operation has been submitted"
+                SubTitle="Task ID: #98421. You will receive an email confirmation once completed.">
+            <Extra>
+                <Button Type="ButtonType.Primary">Track Progress</Button>
+            </Extra>
+            <ChildContent>
+                <div class="text-xs text-slate-500 space-y-1">
+                    <p class="font-medium text-slate-700 dark:text-slate-300">Next Steps:</p>
+                    <p>• Automated security scanning in progress</p>
+                    <p>• DNS propagation takes up to 10 minutes</p>
+                </div>
+            </ChildContent>
+        </Result>
+    </DemoCard>
 
     <ApiTable Title="Result Properties" Properties="@_props" />
 </div>
 
 @code {
-    private ResultStatus _status = ResultStatus.Success;
-    private string _title = "Successfully Purchased Cloud Instance";
-    private string _subTitle = "Order number: 20261028-4091. Cloud deployment takes 1-3 minutes.";
+    private const string _successCode = """
+        <Result Status="ResultStatus.Success"
+                Title="Successfully Purchased Cloud Instance"
+                SubTitle="Order number: 20261028-4091. Cloud deployment will finish in 1-3 minutes.">
+            <Extra>
+                <Button Type="ButtonType.Primary">Go to Console</Button>
+                <Button Type="ButtonType.Default">View Order</Button>
+            </Extra>
+        </Result>
+        """;
 
-    private void UpdateText()
-    {
-        switch (_status)
-        {
-            case ResultStatus.Success:
-                _title = "Successfully Purchased Cloud Instance";
-                _subTitle = "Order number: 20261028-4091. Cloud deployment takes 1-3 minutes.";
-                break;
-            case ResultStatus.Info:
-                _title = "Operation Initialized";
-                _subTitle = "Your deployment request is queued and will execute shortly.";
-                break;
-            case ResultStatus.Warning:
-                _title = "There are some problems with your configuration";
-                _subTitle = "Please verify your network VPC CIDR before continuing.";
-                break;
-            case ResultStatus.Error:
-                _title = "Submission Failed";
-                _subTitle = "Please check and modify the following information before resubmitting.";
-                break;
-        }
-    }
+    private const string _errorWarningCode = """
+        <Result Status="ResultStatus.Warning"
+                Title="Configuration Incomplete"
+                SubTitle="Please verify your network VPC CIDR before continuing.">
+            <Extra>
+                <Button Type="ButtonType.Primary">Review Settings</Button>
+            </Extra>
+        </Result>
+
+        <Result Status="ResultStatus.Error"
+                Title="Submission Failed"
+                SubTitle="Please check card details before resubmitting.">
+            <Extra>
+                <Button Type="ButtonType.Primary" Danger="true">Retry Payment</Button>
+            </Extra>
+        </Result>
+        """;
+
+    private const string _infoCode = """
+        <Result Status="ResultStatus.Info"
+                Title="Your operation has been submitted"
+                SubTitle="Task ID: #98421. You will receive an email confirmation once completed.">
+            <Extra>
+                <Button Type="ButtonType.Primary">Track Progress</Button>
+            </Extra>
+        </Result>
+        """;
 
     private readonly ApiProp[] _props =
     [
-        new("Status", "Result status code: Success, Error, Info, Warning.", "ResultStatus", "ResultStatus.Info"),
+        new("Status", "Result status: Success, Error, Info, Warning.", "ResultStatus", "ResultStatus.Info"),
         new("Title", "The title text.", "string?", "null"),
         new("SubTitle", "The sub title text.", "string?", "null"),
         new("Icon", "Custom icon template.", "RenderFragment?", "null"),

@@ -1,26 +1,43 @@
 @page "/components/transfer"
 @namespace TentoUI.Docs.Pages.Components
 
-<PageTitle>Transfer &amp; Cascader - TentoUI</PageTitle>
+<PageTitle>Transfer - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Transfer &amp; Cascader</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Transfer</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Double-column list shuttle transfer and multi-level cascader selection.
+            Double-column list shuttle transfer for moving items between source and target lists.
         </p>
     </div>
 
-    <DemoCard Title="Transfer Shuttle" Description="Move items between source and target lists with search filtering." Code="@_transferCode">
-        <Transfer DataSource="@_items"
-                  @bind-TargetKeys="_targetKeys"
-                  Titles="@(new[] { "Available Roles", "Assigned Roles" })"
-                  ShowSearch="true" />
+    @* Example 1: Basic Transfer Shuttle *@
+    <DemoCard Title="Transfer Shuttle with Search" Description="Move items between source and target lists with search filtering." Code="@_transferCode">
+        <div class="p-2">
+            <Transfer DataSource="@_items"
+                      @bind-TargetKeys="_targetKeys"
+                      Titles="@(new[] { "Available Roles", "Assigned Roles" })"
+                      ShowSearch="true" />
+            <p class="text-xs text-slate-400 font-mono mt-3">Assigned keys: @string.Join(", ", _targetKeys)</p>
+        </div>
     </DemoCard>
+
+    @* Example 2: Minimal Transfer *@
+    <DemoCard Title="Compact Transfer without Search" Description="Direct shuttle controls for smaller option sets." Code="@_compactCode">
+        <div class="p-2">
+            <Transfer DataSource="@_items"
+                      @bind-TargetKeys="_compactKeys"
+                      Titles="@(new[] { "Left List", "Right List" })"
+                      ShowSearch="false" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Transfer Properties" Properties="@_props" />
 </div>
 
 @code {
     private HashSet<string> _targetKeys = new() { "editor" };
+    private HashSet<string> _compactKeys = new() { "developer" };
 
     private readonly TransferItem[] _items =
     [
@@ -31,8 +48,27 @@
         new("developer", "Developer", "Access to API tokens and webhooks")
     ];
 
-    private const string _transferCode = @"<Transfer DataSource=""@_items""
-          @bind-TargetKeys=""_targetKeys""
-          Titles=""@(new[] { ""Available"", ""Assigned"" })""
-          ShowSearch=""true"" />";
+    private const string _transferCode = """
+        <Transfer DataSource="@items"
+                  @bind-TargetKeys="targetKeys"
+                  Titles="@(new[] { "Available Roles", "Assigned Roles" })"
+                  ShowSearch="true" />
+        """;
+
+    private const string _compactCode = """
+        <Transfer DataSource="@items"
+                  @bind-TargetKeys="compactKeys"
+                  Titles="@(new[] { "Left List", "Right List" })"
+                  ShowSearch="false" />
+        """;
+
+    private readonly ApiTable.ApiProp[] _props =
+    [
+        new("DataSource", "Source data collection for items.", "IEnumerable<TransferItem>?", "null"),
+        new("TargetKeys", "Set of keys located in the target (right) column.", "HashSet<string>", "new()"),
+        new("Titles", "Array of two strings for column titles [Source, Target].", "string[]", "['Source', 'Target']"),
+        new("ShowSearch", "Whether to display search filter input in columns.", "bool", "true"),
+        new("Disabled", "Whether transfer interaction is disabled.", "bool", "false"),
+        new("OnChange", "Callback executed when items move between columns.", "EventCallback", "null")
+    ];
 }

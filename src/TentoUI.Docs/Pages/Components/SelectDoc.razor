@@ -7,23 +7,13 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Select</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Select component to select value from options menu, supporting single, multiple, and search-filterable modes.
+            Select component to pick values from an options menu, supporting single, multiple, and search-filterable modes.
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Select options dynamically and test clear and search toggles.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_selectedValue</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+    @* Example 1: Basic Select *@
+    <DemoCard Title="Basic Single Select" Description="Choose a destination from a typed list of items." Code="@_basicCode">
+        <div class="max-w-xs p-2 space-y-2">
             <Select TItem="CityItem"
                     TValue="string"
                     DataSource="@_cities"
@@ -31,26 +21,40 @@
                     LabelProperty="@(c => c.Name)"
                     @bind-Value="_selectedValue"
                     Placeholder="Choose a destination..."
-                    AllowClear="_allowClear"
-                    ShowSearch="_showSearch"
-                    Disabled="_disabled" />
+                    AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected Code: @_selectedValue</div>
         </div>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_showSearch" class="rounded text-primary-600" />
-                <span>Show Search Filter</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_allowClear" class="rounded text-primary-600" />
-                <span>Allow Clear</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                <span>Disabled</span>
-            </label>
+    @* Example 2: Searchable Select *@
+    <DemoCard Title="Search Filter" Description="Allows users to type and filter long option lists instantaneously." Code="@_searchCode">
+        <div class="max-w-xs p-2">
+            <Select TItem="CityItem"
+                    TValue="string"
+                    DataSource="@_cities"
+                    ValueProperty="@(c => c.Code)"
+                    LabelProperty="@(c => c.Name)"
+                    @bind-Value="_searchSelected"
+                    Placeholder="Search city name..."
+                    ShowSearch="true"
+                    AllowClear="true" />
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 3: Multiple Mode *@
+    <DemoCard Title="Multiple Tag Selection" Description="Select multiple options simultaneously rendered as removable chips." Code="@_multipleCode">
+        <div class="max-w-sm p-2 space-y-2">
+            <Select TItem="CityItem"
+                    TValue="string"
+                    DataSource="@_cities"
+                    ValueProperty="@(c => c.Code)"
+                    LabelProperty="@(c => c.Name)"
+                    @bind-Values="_selectedCities"
+                    Mode="SelectMode.Multiple"
+                    Placeholder="Select multiple destinations..." />
+            <div class="text-xs text-slate-400 font-mono">Selected: @string.Join(", ", _selectedCities)</div>
+        </div>
+    </DemoCard>
 
     <ApiTable Title="Select Properties" Properties="@_props" />
 </div>
@@ -68,15 +72,45 @@
     ];
 
     private string? _selectedValue = "waw";
-    private bool _showSearch = true;
-    private bool _allowClear = true;
-    private bool _disabled;
+    private string? _searchSelected = "tok";
+    private IEnumerable<string> _selectedCities = new[] { "waw", "ber" };
+
+    private const string _basicCode = """
+        <Select TItem="CityItem"
+                TValue="string"
+                DataSource="@cities"
+                ValueProperty="@(c => c.Code)"
+                LabelProperty="@(c => c.Name)"
+                @bind-Value="selectedCode"
+                Placeholder="Choose destination..."
+                AllowClear="true" />
+        """;
+
+    private const string _searchCode = """
+        <Select TItem="CityItem"
+                TValue="string"
+                DataSource="@cities"
+                ValueProperty="@(c => c.Code)"
+                LabelProperty="@(c => c.Name)"
+                @bind-Value="selectedCode"
+                ShowSearch="true" />
+        """;
+
+    private const string _multipleCode = """
+        <Select TItem="CityItem"
+                TValue="string"
+                DataSource="@cities"
+                ValueProperty="@(c => c.Code)"
+                LabelProperty="@(c => c.Name)"
+                @bind-Values="selectedCities"
+                Mode="SelectMode.Multiple" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [
         new("DataSource", "The source data collection for options.", "IEnumerable<TItem>?", "null"),
         new("Value", "Current selected value (bindable via @bind-Value).", "TValue", "default"),
-        new("Values", "Selected values for multiple mode.", "IEnumerable<TValue>?", "null"),
+        new("Values", "Selected values for multiple mode (bindable via @bind-Values).", "IEnumerable<TValue>?", "null"),
         new("Mode", "Selection mode: Single or Multiple.", "SelectMode", "SelectMode.Single"),
         new("ValueProperty", "Selector function to get option value from item.", "Func<TItem, TValue>?", "null"),
         new("LabelProperty", "Selector function to get option display label.", "Func<TItem, string>?", "null"),

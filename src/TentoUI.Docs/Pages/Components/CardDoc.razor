@@ -11,75 +11,93 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle hover effects, borders, and sizes live.</p>
-            </div>
+    @* Example 1: Basic Card *@
+    <DemoCard Title="Basic Card" Description="Card with title header, right-aligned extra action, and body content." Code="@_basicCode">
+        <div class="max-w-md">
+            <Card Title="Default Size Card">
+                <Extra>
+                    <a href="javascript:void(0)" class="text-xs text-primary-500 font-semibold hover:underline">More</a>
+                </Extra>
+                <ChildContent>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Card content line 1</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Card content line 2</p>
+                </ChildContent>
+            </Card>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <div class="w-full max-w-sm">
-                <Card Title="@_title"
-                      Bordered="_bordered"
-                      Hoverable="_hoverable"
-                      Loading="_loading"
-                      Size="_size">
-                    <Extra>
-                        <a href="#" class="text-xs text-primary-500 font-semibold hover:underline">Action</a>
-                    </Extra>
-                    <ChildContent>
-                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                            Card content containing detailed metrics, descriptions, and user attributes.
-                        </p>
-                    </ChildContent>
-                </Card>
-            </div>
+    @* Example 2: Hoverable Card *@
+    <DemoCard Title="Hoverable Card" Description="Hoverable cards elevate with a smooth shadow effect on mouse enter." Code="@_hoverCode">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+            <Card Title="Cloud Instance" Hoverable="true">
+                <p class="text-sm text-slate-600 dark:text-slate-400">CPU: 8 vCPU</p>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Memory: 32 GB RAM</p>
+            </Card>
+            <Card Title="Database Cluster" Hoverable="true">
+                <p class="text-sm text-slate-600 dark:text-slate-400">Engine: PostgreSQL 16</p>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Storage: 500 GB NVMe</p>
+            </Card>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Card Title</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_title" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Scale</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_size">
-                    <option value="@ComponentSize.Small">Small</option>
-                    <option value="@ComponentSize.Middle">Middle</option>
-                </select>
-            </div>
-            <div class="sm:col-span-2 flex items-center gap-4 pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_bordered" class="rounded text-primary-600" />
-                    <span>Bordered</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_hoverable" class="rounded text-primary-600" />
-                    <span>Hover Shadow Effect</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_loading" class="rounded text-primary-600" />
-                    <span>Loading Skeleton</span>
-                </label>
-            </div>
+    @* Example 3: Card with Actions *@
+    <DemoCard Title="Card with Actions" Description="Includes interactive bottom action toolbar." Code="@_actionsCode">
+        <div class="max-w-md">
+            <Card Title="Project Management">
+                <ChildContent>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        Sprint 42 deliverables are ready for review and deployment to staging.
+                    </p>
+                </ChildContent>
+                <Actions>
+                    <div class="flex items-center justify-around w-full py-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                        <button class="hover:text-primary-600">Edit</button>
+                        <span class="text-slate-200 dark:text-slate-700">|</span>
+                        <button class="hover:text-primary-600">Share</button>
+                        <span class="text-slate-200 dark:text-slate-700">|</span>
+                        <button class="hover:text-primary-600">Archive</button>
+                    </div>
+                </Actions>
+            </Card>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Card Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string _title = "Workspace Metrics";
-    private bool _bordered = true;
-    private bool _hoverable = true;
-    private bool _loading;
-    private ComponentSize _size = ComponentSize.Middle;
+    private const string _basicCode = """
+        <Card Title="Default Size Card">
+            <Extra>
+                <a href="#" class="text-xs text-primary-500 font-semibold">More</a>
+            </Extra>
+            <ChildContent>
+                <p class="text-sm text-slate-600">Card content line 1</p>
+                <p class="text-sm text-slate-600">Card content line 2</p>
+            </ChildContent>
+        </Card>
+        """;
+
+    private const string _hoverCode = """
+        <Card Title="Cloud Instance" Hoverable="true">
+            <p class="text-sm text-slate-600">CPU: 8 vCPU</p>
+            <p class="text-sm text-slate-600">Memory: 32 GB RAM</p>
+        </Card>
+        """;
+
+    private const string _actionsCode = """
+        <Card Title="Project Management">
+            <ChildContent>
+                <p class="text-sm text-slate-600">Sprint 42 deliverables are ready for review.</p>
+            </ChildContent>
+            <Actions>
+                <div class="flex justify-around py-2 text-xs">
+                    <button>Edit</button>
+                    <button>Share</button>
+                </div>
+            </Actions>
+        </Card>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

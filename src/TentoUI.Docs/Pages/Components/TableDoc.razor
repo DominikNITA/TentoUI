@@ -76,6 +76,22 @@
         </div>
     </DemoCard>
 
+    @* Demo 2: Simple Minimalist Table *@
+    <DemoCard Title="Simple Table"
+              Description="Compact table layout with auto-generated headers, striped rows, and default alignment."
+              Code="@_simpleTableCode">
+        <div class="w-full">
+            <Table TItem="EmployeeRecord"
+                   DataSource="@_simpleEmployees"
+                   Bordered="true"
+                   Size="ComponentSize.Small">
+                <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" />
+                <TableColumn TItem="EmployeeRecord" Title="Full Name" Property="@(e => e.Name)" />
+                <TableColumn TItem="EmployeeRecord" Title="Department" Property="@(e => e.Department)" />
+            </Table>
+        </div>
+    </DemoCard>
+
     <ApiTable Title="Table<TItem> Properties" Properties="@_tableProps" />
     <ApiTable Title="TableColumn<TItem> Properties" Properties="@_columnProps" />
 </div>
@@ -93,6 +109,24 @@
         new("Marketing", "Marketing"),
         new("Sales", "Sales")
     ];
+
+    private readonly System.Collections.Generic.List<EmployeeRecord> _simpleEmployees =
+    [
+        new(101, "Alice Johnson", "Engineering", 135000m, true),
+        new(102, "Bob Smith", "Product", 115000m, true),
+        new(103, "Charlie Davis", "Engineering", 145000m, false)
+    ];
+
+    private const string _simpleTableCode = """
+        <Table TItem="EmployeeRecord"
+               DataSource="@employees"
+               Bordered="true"
+               Size="ComponentSize.Small">
+            <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" />
+            <TableColumn TItem="EmployeeRecord" Title="Full Name" Property="@(e => e.Name)" />
+            <TableColumn TItem="EmployeeRecord" Title="Department" Property="@(e => e.Department)" />
+        </Table>
+        """;
 
     private readonly System.Collections.Generic.List<EmployeeRecord> _employees =
     [

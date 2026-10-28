@@ -11,20 +11,10 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle theme and mode dynamically to test sidebar navigation.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedKey</strong>
-            </div>
-        </div>
-
-        <div class="p-6 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-sm">
-            <Menu @bind-SelectedKey="_selectedKey" Mode="_mode" Theme="_theme">
+    @* Example 1: Inline Menu *@
+    <DemoCard Title="Inline Sidebar Navigation" Description="Accordion-style expandable menu designed for application sidebars." Code="@_inlineCode">
+        <div class="max-w-xs p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+            <Menu @bind-SelectedKey="_selectedKey" Mode="MenuMode.Inline">
                 <MenuItem Key="dashboard">
                     <Icon><TentoUI.Icon Name="@IconNames.Home" Size="14" /></Icon>
                     <ChildContent>Dashboard</ChildContent>
@@ -42,27 +32,19 @@
                 </MenuItem>
             </Menu>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Theme</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_theme">
-                    <option value="@MenuTheme.Light">Light</option>
-                    <option value="@MenuTheme.Dark">Dark</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Mode</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_mode">
-                    <option value="@MenuMode.Inline">Inline (Accordion)</option>
-                    <option value="@MenuMode.Vertical">Vertical</option>
-                    <option value="@MenuMode.Horizontal">Horizontal</option>
-                </select>
-            </div>
+    @* Example 2: Horizontal Menu *@
+    <DemoCard Title="Horizontal Top Navbar" Description="Top-level horizontal navigation bar." Code="@_horizontalCode">
+        <div class="w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-2">
+            <Menu Mode="MenuMode.Horizontal" SelectedKey="nav-home">
+                <MenuItem Key="nav-home">Overview</MenuItem>
+                <MenuItem Key="nav-features">Features</MenuItem>
+                <MenuItem Key="nav-docs">Documentation</MenuItem>
+                <MenuItem Key="nav-pricing">Pricing</MenuItem>
+            </Menu>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Menu Properties" Properties="@_menuProps" />
     <ApiTable Title="MenuItem Properties" Properties="@_itemProps" />
@@ -71,8 +53,35 @@
 
 @code {
     private string _selectedKey = "dashboard";
-    private MenuTheme _theme = MenuTheme.Light;
-    private MenuMode _mode = MenuMode.Inline;
+
+    private const string _inlineCode = """
+        <Menu @bind-SelectedKey="selectedKey" Mode="MenuMode.Inline">
+            <MenuItem Key="dashboard">
+                <Icon><Icon Name="@IconNames.Home" Size="14" /></Icon>
+                <ChildContent>Dashboard</ChildContent>
+            </MenuItem>
+            <SubMenu Key="sub-users" Title="User Management">
+                <Icon><Icon Name="@IconNames.User" Size="14" /></Icon>
+                <ChildContent>
+                    <MenuItem Key="all-users">All Users</MenuItem>
+                    <MenuItem Key="roles">Roles & Permissions</MenuItem>
+                </ChildContent>
+            </SubMenu>
+            <MenuItem Key="settings">
+                <Icon><Icon Name="@IconNames.Settings" Size="14" /></Icon>
+                <ChildContent>Settings</ChildContent>
+            </MenuItem>
+        </Menu>
+        """;
+
+    private const string _horizontalCode = """
+        <Menu Mode="MenuMode.Horizontal" SelectedKey="nav-home">
+            <MenuItem Key="nav-home">Overview</MenuItem>
+            <MenuItem Key="nav-features">Features</MenuItem>
+            <MenuItem Key="nav-docs">Documentation</MenuItem>
+            <MenuItem Key="nav-pricing">Pricing</MenuItem>
+        </Menu>
+        """;
 
     private readonly ApiTable.ApiProp[] _menuProps =
     [
@@ -98,7 +107,6 @@
         new("Key", "Unique key for the submenu.", "string", "required"),
         new("Title", "Submenu label text.", "string", "null"),
         new("Icon", "Icon name.", "string?", "null"),
-        new("Disabled", "Whether submenu is disabled.", "bool", "false"),
-        new("ChildContent", "Child MenuItem elements.", "RenderFragment?", "null")
+        new("ChildContent", "Submenu items.", "RenderFragment?", "null")
     ];
 }

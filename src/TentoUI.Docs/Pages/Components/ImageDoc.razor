@@ -11,36 +11,52 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Hover and click image to trigger lightbox zoom &amp; rotate modal.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
+    @* Example 1: Lightbox Preview *@
+    <DemoCard Title="Interactive Lightbox Preview" Description="Click the image to trigger an interactive lightbox modal with zoom and rotate controls." Code="@_previewCode">
+        <div class="p-4 flex items-center justify-center">
             <Image Src="https://picsum.photos/400/250"
                    Alt="Scenic Mountain"
-                   Width="240"
-                   Height="150"
-                   Preview="_preview" />
+                   Width="260"
+                   Height="160"
+                   Preview="true" />
         </div>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_preview" class="rounded text-primary-600" />
-                <span>Enable Modal Lightbox Preview</span>
-            </label>
+    @* Example 2: Static Dimensions *@
+    <DemoCard Title="Fixed Dimensions &amp; Aspect Ratio" Description="Display images at constrained dimensions with smooth border radiuses." Code="@_fixedCode">
+        <div class="flex flex-wrap items-center gap-4 p-4">
+            <Image Src="https://picsum.photos/300/200"
+                   Alt="Workspace"
+                   Width="180"
+                   Height="120"
+                   Preview="false" />
+            <Image Src="https://picsum.photos/301/200"
+                   Alt="Architecture"
+                   Width="180"
+                   Height="120"
+                   Preview="false" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Image Properties" Properties="@_props" />
 </div>
 
 @code {
-    private bool _preview = true;
+    private const string _previewCode = """
+        <Image Src="https://picsum.photos/400/250"
+               Alt="Scenic Mountain"
+               Width="260"
+               Height="160"
+               Preview="true" />
+        """;
+
+    private const string _fixedCode = """
+        <Image Src="https://picsum.photos/300/200"
+               Alt="Workspace"
+               Width="180"
+               Height="120"
+               Preview="false" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

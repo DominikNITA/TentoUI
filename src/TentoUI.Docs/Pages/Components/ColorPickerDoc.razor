@@ -11,44 +11,40 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Pick color and preview live background updates.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Color: <strong class="font-mono text-sm" style="color: @_color">@_color</strong>
+    @* Example 1: Basic ColorPicker *@
+    <DemoCard Title="Basic ColorPicker" Description="Select a color swatch with two-way binding and hex code indicator." Code="@_basicCode">
+        <div class="max-w-xs p-2 space-y-4">
+            <ColorPicker @bind-Value="_color" ShowText="true" />
+            <div class="w-full h-12 rounded-lg shadow-sm flex items-center justify-center font-bold text-white text-xs" style="background-color: @_color">
+                Selected: @_color
             </div>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex flex-col items-center gap-4">
-            <ColorPicker @bind-Value="_color" ShowText="_showText" Disabled="_disabled" />
-            <div class="w-full max-w-xs h-16 rounded-lg shadow-sm flex items-center justify-center font-bold text-white text-xs" style="background-color: @_color">
-                Preview Container
-            </div>
+    @* Example 2: Minimal Swatch Only *@
+    <DemoCard Title="Minimal Swatch" Description="Compact color swatch trigger without text label." Code="@_swatchCode">
+        <div class="flex items-center gap-4 p-2">
+            <ColorPicker Value="#10b981" ShowText="false" />
+            <ColorPicker Value="#8b5cf6" ShowText="false" />
+            <ColorPicker Value="#f59e0b" ShowText="false" />
         </div>
-
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_showText" class="rounded text-primary-600" />
-                <span>Show Hex Text</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                <span>Disabled</span>
-            </label>
-        </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="ColorPicker Properties" Properties="@_props" />
 </div>
 
 @code {
     private string _color = "#3b82f6";
-    private bool _showText = true;
-    private bool _disabled;
+
+    private const string _basicCode = """
+        <ColorPicker @bind-Value="color" ShowText="true" />
+        <div style="background-color: @color">Preview</div>
+        """;
+
+    private const string _swatchCode = """
+        <ColorPicker Value="#10b981" ShowText="false" />
+        <ColorPicker Value="#8b5cf6" ShowText="false" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

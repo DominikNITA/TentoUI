@@ -11,48 +11,32 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Change shape, size, and initials dynamically.</p>
+    @* Example 1: Basic Types *@
+    <DemoCard Title="Avatar Types" Description="Initials, icon glyphs, and image avatars." Code="@_typesCode">
+        <div class="flex items-center gap-4">
+            <Avatar Text="JD" />
+            <Avatar Icon="@IconNames.User" />
+            <Avatar Text="Tento" />
+        </div>
+    </DemoCard>
+
+    @* Example 2: Shapes & Sizes *@
+    <DemoCard Title="Shapes &amp; Sizes" Description="Supports circle and square shapes across Small, Middle, and Large scales." Code="@_shapesSizesCode">
+        <div class="space-y-4">
+            <div class="flex items-center gap-4">
+                <Avatar Size="ComponentSize.Small" Text="S" />
+                <Avatar Size="ComponentSize.Middle" Text="M" />
+                <Avatar Size="ComponentSize.Large" Text="L" />
+            </div>
+            <div class="flex items-center gap-4">
+                <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Small" Text="S" />
+                <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Middle" Text="M" />
+                <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Large" Text="L" />
             </div>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Avatar Shape="_shape" Size="_size" Text="@_text" />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Shape</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_shape">
-                    <option value="@AvatarShape.Circle">Circle</option>
-                    <option value="@AvatarShape.Square">Square</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Scale</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_size">
-                    <option value="@ComponentSize.Small">Small</option>
-                    <option value="@ComponentSize.Middle">Middle</option>
-                    <option value="@ComponentSize.Large">Large</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Initials / Text</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_text"
-                       @bind:event="oninput" />
-            </div>
-        </div>
-    </div>
-
-    @* Use Cases *@
+    @* Example 3: Avatar Group *@
     <DemoCard Title="Avatar Group" Description="Stack overlapping avatars with grouped boundaries." Code="@_groupCode">
         <AvatarGroup>
             <Avatar Text="AD" />
@@ -67,16 +51,30 @@
 </div>
 
 @code {
-    private AvatarShape _shape = AvatarShape.Circle;
-    private ComponentSize _size = ComponentSize.Large;
-    private string _text = "JD";
+    private const string _typesCode = """
+        <Avatar Text="JD" />
+        <Avatar Icon="@IconNames.User" />
+        <Avatar Text="Tento" />
+        """;
 
-    private const string _groupCode = @"<AvatarGroup>
-    <Avatar Text=""AD"" />
-    <Avatar Text=""BW"" />
-    <Avatar Text=""CP"" />
-    <Avatar Text=""+3"" />
-</AvatarGroup>";
+    private const string _shapesSizesCode = """
+        <Avatar Size="ComponentSize.Small" Text="S" />
+        <Avatar Size="ComponentSize.Middle" Text="M" />
+        <Avatar Size="ComponentSize.Large" Text="L" />
+
+        <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Small" Text="S" />
+        <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Middle" Text="M" />
+        <Avatar Shape="AvatarShape.Square" Size="ComponentSize.Large" Text="L" />
+        """;
+
+    private const string _groupCode = """
+        <AvatarGroup>
+            <Avatar Text="AD" />
+            <Avatar Text="BW" />
+            <Avatar Text="CP" />
+            <Avatar Text="+3" />
+        </AvatarGroup>
+        """;
 
     private readonly ApiTable.ApiProp[] _avatarProps =
     [
@@ -90,6 +88,7 @@
 
     private readonly ApiTable.ApiProp[] _groupProps =
     [
+        new("MaxCount", "Max number of avatars shown before truncation.", "int?", "null"),
         new("ChildContent", "Avatar children elements.", "RenderFragment?", "null")
     ];
 }

@@ -11,32 +11,35 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Expand tree branches and select target node dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_selectedKey</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+    @* Example 1: Basic TreeSelect *@
+    <DemoCard Title="Basic TreeSelect" Description="Dropdown picker with nested folder and file tree navigation." Code="@_basicCode">
+        <div class="max-w-xs p-2 space-y-2">
             <TreeSelect TreeData="@_treeData"
                         @bind-Value="_selectedKey"
                         Placeholder="Select file or directory..."
-                        AllowClear="true"
-                        ShowSearch="true" />
+                        AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected Key: @_selectedKey</div>
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 2: Searchable TreeSelect *@
+    <DemoCard Title="Searchable Tree Nodes" Description="Type keywords to filter matching branch and leaf nodes directly." Code="@_searchCode">
+        <div class="max-w-xs p-2 space-y-2">
+            <TreeSelect TreeData="@_treeData"
+                        @bind-Value="_searchKey"
+                        Placeholder="Search codebase files..."
+                        ShowSearch="true"
+                        AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected Key: @_searchKey</div>
+        </div>
+    </DemoCard>
 
     <ApiTable Title="TreeSelect Properties" Properties="@_props" />
 </div>
 
 @code {
     private string? _selectedKey = "components";
+    private string? _searchKey = "table";
 
     private readonly TreeDataNode[] _treeData =
     [
@@ -52,6 +55,20 @@
         ]),
         new("readme", "README.md", isLeaf: true)
     ];
+
+    private const string _basicCode = """
+        <TreeSelect TreeData="@treeData"
+                    @bind-Value="selectedKey"
+                    Placeholder="Select node..."
+                    AllowClear="true" />
+        """;
+
+    private const string _searchCode = """
+        <TreeSelect TreeData="@treeData"
+                    @bind-Value="searchKey"
+                    Placeholder="Search files..."
+                    ShowSearch="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

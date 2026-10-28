@@ -11,59 +11,64 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle switch state and check size and loading variants.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                State: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_active ? "Active (ON)" : "Inactive (OFF)")</strong>
-            </div>
+    @* Example 1: Basic Switch *@
+    <DemoCard Title="Basic Switch" Description="Standard toggle switch with two-way boolean binding." Code="@_basicCode">
+        <div class="flex items-center gap-4 p-2">
+            <Switch @bind-Checked="_basicSwitch" />
+            <span class="text-xs text-slate-500 font-mono">Status: @(_basicSwitch ? "Enabled" : "Disabled")</span>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Switch @bind-Checked="_active"
-                    Size="_size"
-                    Loading="_loading"
-                    Disabled="_disabled">
+    @* Example 2: Text / Icons in Switch *@
+    <DemoCard Title="Text &amp; Inner Icons" Description="Render custom labels or icon glyphs inside the switch pill." Code="@_innerCode">
+        <div class="flex flex-wrap items-center gap-6 p-2">
+            <Switch @bind-Checked="_wifi">
                 <CheckedChildren>ON</CheckedChildren>
                 <UnCheckedChildren>OFF</UnCheckedChildren>
             </Switch>
+            <Switch @bind-Checked="_notifications">
+                <CheckedChildren>1</CheckedChildren>
+                <UnCheckedChildren>0</UnCheckedChildren>
+            </Switch>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_size">
-                    <option value="@ComponentSize.Small">Small</option>
-                    <option value="@ComponentSize.Middle">Middle (Default)</option>
-                    <option value="@ComponentSize.Large">Large</option>
-                </select>
-            </div>
-            <div class="flex items-center gap-4 pt-5 sm:col-span-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_loading" class="rounded text-primary-600" />
-                    <span>Loading Spinner</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 3: Sizes & Loading *@
+    <DemoCard Title="Sizes &amp; Loading State" Description="Supports Small, Middle, Large sizes, and asynchronous loading spinners." Code="@_sizesCode">
+        <div class="flex flex-wrap items-center gap-6 p-2">
+            <Switch Size="ComponentSize.Small" Checked="true" />
+            <Switch Size="ComponentSize.Middle" Checked="true" />
+            <Switch Size="ComponentSize.Large" Checked="true" />
+            <Switch Loading="true" Checked="true" />
+            <Switch Disabled="true" Checked="false" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Switch Properties" Properties="@_props" />
 </div>
 
 @code {
-    private bool _active = true;
-    private ComponentSize _size = ComponentSize.Middle;
-    private bool _loading;
-    private bool _disabled;
+    private bool _basicSwitch = true;
+    private bool _wifi = true;
+    private bool _notifications;
+
+    private const string _basicCode = """
+        <Switch @bind-Checked="basicSwitch" />
+        """;
+
+    private const string _innerCode = """
+        <Switch @bind-Checked="wifi">
+            <CheckedChildren>ON</CheckedChildren>
+            <UnCheckedChildren>OFF</UnCheckedChildren>
+        </Switch>
+        """;
+
+    private const string _sizesCode = """
+        <Switch Size="ComponentSize.Small" Checked="true" />
+        <Switch Size="ComponentSize.Middle" Checked="true" />
+        <Switch Size="ComponentSize.Large" Checked="true" />
+        <Switch Loading="true" Checked="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

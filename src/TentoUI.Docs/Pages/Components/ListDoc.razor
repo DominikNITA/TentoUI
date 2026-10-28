@@ -11,37 +11,39 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle borders and header/footer slots dynamically.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-lg mx-auto">
-            <TentoUI.List TItem="string" DataSource="@_tasks" Bordered="_bordered">
-                <Header>
-                    <span class="font-bold text-xs text-slate-700 dark:text-slate-300">Sprint Backlog Items</span>
-                </Header>
+    @* Example 1: Basic List *@
+    <DemoCard Title="Basic List with Metadata" Description="List items featuring letter avatars, titles, and descriptions." Code="@_basicCode">
+        <div class="max-w-lg">
+            <TentoUI.List TItem="string" DataSource="@_tasks" Bordered="true">
                 <ItemTemplate Context="task">
                     <ListItem>
-                        <ListItemMeta Title="@task" Description="Assigned to Core Team">
+                        <ListItemMeta Title="@task" Description="Assigned to Engineering Core Team">
                             <Avatar><Avatar Text="@task[..1]" Size="ComponentSize.Small" /></Avatar>
                         </ListItemMeta>
                     </ListItem>
                 </ItemTemplate>
             </TentoUI.List>
         </div>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_bordered" class="rounded text-primary-600" />
-                <span>Show Outer Border</span>
-            </label>
+    @* Example 2: List with Header & Footer *@
+    <DemoCard Title="Header &amp; Footer Slots" Description="Includes header title bar and summary footer." Code="@_headerFooterCode">
+        <div class="max-w-lg">
+            <TentoUI.List TItem="string" DataSource="@_releases" Bordered="true">
+                <Header>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-300">Upcoming Release Roadmap</span>
+                </Header>
+                <Footer>
+                    <span class="text-xs text-slate-400">Total Milestones: 3 Scheduled</span>
+                </Footer>
+                <ItemTemplate Context="rel">
+                    <ListItem>
+                        <span class="text-xs font-medium text-slate-800 dark:text-slate-200">@rel</span>
+                    </ListItem>
+                </ItemTemplate>
+            </TentoUI.List>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="List Properties" Properties="@_listProps" />
     <ApiTable Title="ListItem Properties" Properties="@_itemProps" />
@@ -56,7 +58,34 @@
         "Verify .NET 10 compilation and tests"
     ];
 
-    private bool _bordered = true;
+    private readonly string[] _releases =
+    [
+        "v1.0.0 - General Availability",
+        "v1.1.0 - Form Validation Suite",
+        "v1.2.0 - Rich Text Editor Integration"
+    ];
+
+    private const string _basicCode = """
+        <TentoUI.List TItem="string" DataSource="@tasks" Bordered="true">
+            <ItemTemplate Context="task">
+                <ListItem>
+                    <ListItemMeta Title="@task" Description="Assigned to Core Team">
+                        <Avatar><Avatar Text="@task[..1]" Size="ComponentSize.Small" /></Avatar>
+                    </ListItemMeta>
+                </ListItem>
+            </ItemTemplate>
+        </TentoUI.List>
+        """;
+
+    private const string _headerFooterCode = """
+        <TentoUI.List TItem="string" DataSource="@releases" Bordered="true">
+            <Header><span>Upcoming Roadmap</span></Header>
+            <Footer><span>3 Milestones</span></Footer>
+            <ItemTemplate Context="rel">
+                <ListItem><span>@rel</span></ListItem>
+            </ItemTemplate>
+        </TentoUI.List>
+        """;
 
     private readonly ApiTable.ApiProp[] _listProps =
     [

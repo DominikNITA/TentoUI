@@ -12,61 +12,36 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Configure tag colors, close buttons, and checkable modes.</p>
-            </div>
+    @* Example 1: Basic Tags & Closable *@
+    <DemoCard Title="Basic &amp; Closable Tags" Description="Standard tags with optional dismiss button." Code="@_basicCode">
+        <div class="flex flex-wrap items-center gap-3 p-2">
+            <Tag>Default Tag</Tag>
+            <Tag Closable="true" OnClose="@(() => MessageService.Info("Tag dismissed"))">Closable Tag</Tag>
+            <Tag Color="blue">Blue Tag</Tag>
+            <Tag Color="green" Closable="true">Success Closable</Tag>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center gap-4">
-            <Tag Color="@_color"
-                 Closable="_closable"
-                 OnClose="@(() => MessageService.Info("Tag closed!"))">
-                @_label
-            </Tag>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Color Preset</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_color">
-                    <option value="blue">Blue</option>
-                    <option value="green">Green (Success)</option>
-                    <option value="gold">Gold (Warning)</option>
-                    <option value="red">Red (Danger)</option>
-                    <option value="purple">Purple</option>
-                    <option value="cyan">Cyan</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tag Label</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_label"
-                       @bind:event="oninput" />
-            </div>
-            <div class="flex items-center pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_closable" class="rounded text-primary-600" />
-                    <span>Closable Dismiss Button</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    @* Use Cases *@
-    <DemoCard Title="Preset Colors" Description="Standard semantic and decorative colors." Code="@_colorsCode">
-        <div class="flex flex-wrap items-center gap-2">
+    @* Example 2: Color Presets *@
+    <DemoCard Title="Color Presets" Description="Standard semantic and decorative colors for status indicators." Code="@_colorsCode">
+        <div class="flex flex-wrap items-center gap-2 p-2">
             <Tag Color="blue">blue</Tag>
             <Tag Color="green">green</Tag>
             <Tag Color="gold">gold</Tag>
             <Tag Color="red">red</Tag>
             <Tag Color="purple">purple</Tag>
+            <Tag Color="cyan">cyan</Tag>
             <Tag Color="magenta">magenta</Tag>
+        </div>
+    </DemoCard>
+
+    @* Example 3: Custom Hex Codes *@
+    <DemoCard Title="Custom Hex Colors" Description="Supports arbitrary custom background hex codes." Code="@_hexCode">
+        <div class="flex flex-wrap items-center gap-2 p-2">
+            <Tag Color="#f50">#f50</Tag>
+            <Tag Color="#2db7f5">#2db7f5</Tag>
+            <Tag Color="#87d068">#87d068</Tag>
+            <Tag Color="#108ee9">#108ee9</Tag>
         </div>
     </DemoCard>
 
@@ -74,13 +49,26 @@
 </div>
 
 @code {
-    private string _color = "blue";
-    private string _label = "Active Status";
-    private bool _closable;
+    private const string _basicCode = """
+        <Tag>Default Tag</Tag>
+        <Tag Closable="true">Closable Tag</Tag>
+        <Tag Color="blue">Blue Tag</Tag>
+        <Tag Color="green" Closable="true">Success Closable</Tag>
+        """;
 
-    private const string _colorsCode = @"<Tag Color=""blue"">blue</Tag>
-<Tag Color=""green"">green</Tag>
-<Tag Color=""red"">red</Tag>";
+    private const string _colorsCode = """
+        <Tag Color="blue">blue</Tag>
+        <Tag Color="green">green</Tag>
+        <Tag Color="gold">gold</Tag>
+        <Tag Color="red">red</Tag>
+        <Tag Color="purple">purple</Tag>
+        """;
+
+    private const string _hexCode = """
+        <Tag Color="#f50">#f50</Tag>
+        <Tag Color="#2db7f5">#2db7f5</Tag>
+        <Tag Color="#87d068">#87d068</Tag>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

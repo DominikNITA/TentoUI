@@ -11,59 +11,89 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle accordion mode, borders, and ghost transparency.</p>
-            </div>
-        </div>
+    @* Example 1: Basic Collapse *@
+    <DemoCard Title="Basic Collapse" Description="Multi-panel unfoldable list with bordered containers." Code="@_basicCode">
+        <Collapse Bordered="true">
+            <CollapsePanel Key="1" Header="What is TentoUI?">
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    TentoUI is an AntDesign-patterned UI component library styled with Tailwind CSS for .NET 10 Blazor.
+                </p>
+            </CollapsePanel>
+            <CollapsePanel Key="2" Header="Can it be used in WebAssembly and Server?">
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Yes! TentoUI works cleanly across Blazor WebAssembly and Blazor Server / Auto modes.
+                </p>
+            </CollapsePanel>
+        </Collapse>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Collapse Accordion="_accordion" Bordered="_bordered" Ghost="_ghost">
-                <CollapsePanel Key="1" Header="What is TentoUI?">
-                    <p class="text-xs text-slate-600 dark:text-slate-400">
-                        TentoUI is an AntDesign-patterned UI component library styled with Tailwind CSS for .NET 10 Blazor.
-                    </p>
-                </CollapsePanel>
-                <CollapsePanel Key="2" Header="Can it be used in WebAssembly and Server?">
-                    <p class="text-xs text-slate-600 dark:text-slate-400">
-                        Yes! TentoUI is compiled as a multi-environment Razor Class Library that works in both Blazor WebAssembly and Blazor Server / Auto modes.
-                    </p>
-                </CollapsePanel>
-                <CollapsePanel Key="3" Header="How does theming work?">
-                    <p class="text-xs text-slate-600 dark:text-slate-400">
-                        TentoUI components use CSS variables synchronized via TentoConfigProvider and bridged to Tailwind v4 colors.
-                    </p>
-                </CollapsePanel>
-            </Collapse>
-        </div>
+    @* Example 2: Accordion Mode *@
+    <DemoCard Title="Accordion Mode" Description="In accordion mode, only a single panel can be expanded at any time." Code="@_accordionCode">
+        <Collapse Accordion="true" Bordered="true">
+            <CollapsePanel Key="1" Header="Section A: Cloud Architecture">
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Deploys globally distributed edge nodes with sub-millisecond response latency.
+                </p>
+            </CollapsePanel>
+            <CollapsePanel Key="2" Header="Section B: Data Security &amp; Compliance">
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    End-to-end encryption at rest and in transit with SOC 2 compliance certifications.
+                </p>
+            </CollapsePanel>
+            <CollapsePanel Key="3" Header="Section C: Automated Backups">
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Daily snapshot replication with point-in-time restore functionality.
+                </p>
+            </CollapsePanel>
+        </Collapse>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_accordion" class="rounded text-primary-600" />
-                <span>Accordion Mode (Single panel open)</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_bordered" class="rounded text-primary-600" />
-                <span>Bordered</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_ghost" class="rounded text-primary-600" />
-                <span>Ghost Transparency</span>
-            </label>
-        </div>
-    </div>
+    @* Example 3: Ghost Style *@
+    <DemoCard Title="Ghost Transparency" Description="Seamless transparent background with no outer container borders." Code="@_ghostCode">
+        <Collapse Ghost="true">
+            <CollapsePanel Key="1" Header="System Status &amp; Telemetry">
+                <p class="text-xs text-slate-600 dark:text-slate-400">All regional services operating normally.</p>
+            </CollapsePanel>
+            <CollapsePanel Key="2" Header="Network Diagnostics">
+                <p class="text-xs text-slate-600 dark:text-slate-400">Packet loss 0.00%, DNS lookup 12ms.</p>
+            </CollapsePanel>
+        </Collapse>
+    </DemoCard>
 
     <ApiTable Title="Collapse Properties" Properties="@_collapseProps" />
     <ApiTable Title="CollapsePanel Properties" Properties="@_panelProps" />
 </div>
 
 @code {
-    private bool _accordion = true;
-    private bool _bordered = true;
-    private bool _ghost;
+    private const string _basicCode = """
+        <Collapse Bordered="true">
+            <CollapsePanel Key="1" Header="What is TentoUI?">
+                <p class="text-xs text-slate-600">TentoUI is an AntDesign-patterned UI library.</p>
+            </CollapsePanel>
+            <CollapsePanel Key="2" Header="Can it be used in WebAssembly?">
+                <p class="text-xs text-slate-600">Yes! Completely client-side ready.</p>
+            </CollapsePanel>
+        </Collapse>
+        """;
+
+    private const string _accordionCode = """
+        <Collapse Accordion="true" Bordered="true">
+            <CollapsePanel Key="1" Header="Section A">
+                <p class="text-xs text-slate-600">Deploys globally distributed edge nodes.</p>
+            </CollapsePanel>
+            <CollapsePanel Key="2" Header="Section B">
+                <p class="text-xs text-slate-600">End-to-end encryption at rest and in transit.</p>
+            </CollapsePanel>
+        </Collapse>
+        """;
+
+    private const string _ghostCode = """
+        <Collapse Ghost="true">
+            <CollapsePanel Key="1" Header="System Status">
+                <p class="text-xs text-slate-600">All services operating normally.</p>
+            </CollapsePanel>
+        </Collapse>
+        """;
 
     private readonly ApiTable.ApiProp[] _collapseProps =
     [

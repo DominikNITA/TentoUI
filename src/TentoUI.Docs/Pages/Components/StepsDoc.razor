@@ -11,54 +11,82 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Step forwards and backwards to preview state transitions live.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Step: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_current + 1) / 3</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Steps Current="_current" Direction="_direction">
+    @* Example 1: Basic Horizontal Steps *@
+    <DemoCard Title="Basic Steps" Description="Simple linear progress flow across multi-stage wizard." Code="@_basicCode">
+        <div class="p-4">
+            <Steps Current="1">
                 <Step Title="Personal Info" Description="Provide name and contact email" />
                 <Step Title="Identity Check" Description="Upload government verification" />
                 <Step Title="Complete" Description="Ready to launch workspace" />
             </Steps>
+        </div>
+    </DemoCard>
 
-            <div class="flex items-center gap-2 pt-6">
-                <Button Disabled="@(_current == 0)" OnClick="@(() => _current = Math.Max(0, _current - 1))">
-                    Previous Step
+    @* Example 2: Interactive Step Navigation *@
+    <DemoCard Title="Interactive Step Navigation" Description="Includes Previous and Next buttons that update the active stage index." Code="@_interactiveCode">
+        <div class="p-4 space-y-6">
+            <Steps Current="_currentStep">
+                <Step Title="Step 1" Description="Account setup" />
+                <Step Title="Step 2" Description="Profile information" />
+                <Step Title="Step 3" Description="Payment method" />
+            </Steps>
+            <div class="flex items-center gap-3">
+                <Button Disabled="@(_currentStep == 0)" OnClick="@(() => _currentStep = Math.Max(0, _currentStep - 1))">
+                    Previous
                 </Button>
-                <Button Type="ButtonType.Primary" Disabled="@(_current == 2)" OnClick="@(() => _current = Math.Min(2, _current + 1))">
-                    Next Step
+                <Button Type="ButtonType.Primary" Disabled="@(_currentStep == 2)" OnClick="@(() => _currentStep = Math.Min(2, _currentStep + 1))">
+                    Next
                 </Button>
+                <span class="text-xs text-slate-400">Step @(_currentStep + 1) of 3</span>
             </div>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Direction</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_direction">
-                    <option value="@StepsDirection.Horizontal">Horizontal</option>
-                    <option value="@StepsDirection.Vertical">Vertical</option>
-                </select>
-            </div>
+    @* Example 3: Vertical Steps *@
+    <DemoCard Title="Vertical Steps" Description="Vertical orientation suitable for sidebars or mobile workflows." Code="@_verticalCode">
+        <div class="p-4 max-w-md">
+            <Steps Current="1" Direction="StepsDirection.Vertical">
+                <Step Title="Order Placed" Description="Received on 2026-10-28 10:14" />
+                <Step Title="In Transit" Description="Carrier: DHL Express" />
+                <Step Title="Delivered" Description="Signature required upon receipt" />
+            </Steps>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Steps Properties" Properties="@_stepsProps" />
     <ApiTable Title="Step Properties" Properties="@_stepProps" />
 </div>
 
 @code {
-    private int _current = 1;
-    private StepsDirection _direction = StepsDirection.Horizontal;
+    private int _currentStep = 0;
+
+    private const string _basicCode = """
+        <Steps Current="1">
+            <Step Title="Personal Info" Description="Provide name and contact email" />
+            <Step Title="Identity Check" Description="Upload government verification" />
+            <Step Title="Complete" Description="Ready to launch workspace" />
+        </Steps>
+        """;
+
+    private const string _interactiveCode = """
+        <Steps Current="@currentStep">
+            <Step Title="Step 1" Description="Account setup" />
+            <Step Title="Step 2" Description="Profile information" />
+            <Step Title="Step 3" Description="Payment method" />
+        </Steps>
+        <div class="flex gap-3">
+            <Button OnClick="Prev">Previous</Button>
+            <Button Type="ButtonType.Primary" OnClick="Next">Next</Button>
+        </div>
+        """;
+
+    private const string _verticalCode = """
+        <Steps Current="1" Direction="StepsDirection.Vertical">
+            <Step Title="Order Placed" Description="Received on 10:14" />
+            <Step Title="In Transit" Description="Carrier: DHL Express" />
+            <Step Title="Delivered" Description="Signature required" />
+        </Steps>
+        """;
 
     private readonly ApiTable.ApiProp[] _stepsProps =
     [

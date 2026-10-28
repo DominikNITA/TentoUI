@@ -11,79 +11,76 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Configure space direction, gap size, and auto-wrapping.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Space Direction="_dir" Size="_size" Wrap="_wrap">
-                <Button Type="ButtonType.Primary">Item 1</Button>
-                <Button Type="ButtonType.Default">Item 2</Button>
-                <Button Type="ButtonType.Dashed">Item 3</Button>
-                <Button Danger="true">Item 4</Button>
+    @* Example 1: Horizontal Space *@
+    <DemoCard Title="Horizontal Flow" Description="Default horizontal arrangement with even spacing between elements." Code="@_horizontalCode">
+        <div class="p-2">
+            <Space Direction="SpaceDirection.Horizontal" Wrap="true">
+                <Button Type="ButtonType.Primary">Primary Action</Button>
+                <Button Type="ButtonType.Default">Default</Button>
+                <Button Type="ButtonType.Dashed">Dashed</Button>
+                <Button Danger="true">Danger</Button>
             </Space>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Direction</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_dir">
-                    <option value="@SpaceDirection.Horizontal">Horizontal</option>
-                    <option value="@SpaceDirection.Vertical">Vertical</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Gap</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_sizeStr">
-                    <option value="small">Small (8px)</option>
-                    <option value="middle">Middle (16px)</option>
-                    <option value="large">Large (24px)</option>
-                </select>
-            </div>
-            <div class="flex items-center pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_wrap" class="rounded text-primary-600" />
-                    <span>Wrap Lines</span>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    @* Use Cases *@
+    @* Example 2: Vertical Space *@
     <DemoCard Title="Vertical Flow" Description="Stack inputs or buttons with uniform vertical spacing." Code="@_verticalCode">
-        <Space Direction="SpaceDirection.Vertical" Size="SpaceSize.Middle" Class="w-full max-w-xs">
-            <Input Placeholder="First Name" />
-            <Input Placeholder="Last Name" />
-            <Button Type="ButtonType.Primary" Block="true">Save Contact</Button>
-        </Space>
+        <div class="p-2">
+            <Space Direction="SpaceDirection.Vertical" Class="w-full max-w-xs">
+                <Input Placeholder="First Name" />
+                <Input Placeholder="Last Name" />
+                <Button Type="ButtonType.Primary" Block="true">Save Contact</Button>
+            </Space>
+        </div>
+    </DemoCard>
+
+    @* Example 3: Space Gaps Scale *@
+    <DemoCard Title="Space Scale Variants" Description="Spacing with Small (8px), Middle (16px), or Large (24px) gaps." Code="@_sizesCode">
+        <div class="space-y-4 p-2">
+            <Space Direction="SpaceDirection.Horizontal" Size="SpaceSize.Small">
+                <Tag Color="blue">Tag 1</Tag>
+                <Tag Color="blue">Tag 2</Tag>
+                <Tag Color="blue">Tag 3</Tag>
+            </Space>
+            <Space Direction="SpaceDirection.Horizontal" Size="SpaceSize.Large">
+                <Tag Color="green">Large Gap A</Tag>
+                <Tag Color="green">Large Gap B</Tag>
+                <Tag Color="green">Large Gap C</Tag>
+            </Space>
+        </div>
     </DemoCard>
 
     <ApiTable Title="Space Properties" Properties="@_props" />
 </div>
 
 @code {
-    private SpaceDirection _dir = SpaceDirection.Horizontal;
-    private string _sizeStr = "middle";
-    private bool _wrap = true;
+    private const string _horizontalCode = """
+        <Space Direction="SpaceDirection.Horizontal" Wrap="true">
+            <Button Type="ButtonType.Primary">Primary Action</Button>
+            <Button Type="ButtonType.Default">Default</Button>
+            <Button Type="ButtonType.Dashed">Dashed</Button>
+            <Button Danger="true">Danger</Button>
+        </Space>
+        """;
 
-    private object _size => _sizeStr switch
-    {
-        "small" => SpaceSize.Small,
-        "large" => SpaceSize.Large,
-        _ => SpaceSize.Middle
-    };
+    private const string _verticalCode = """
+        <Space Direction="SpaceDirection.Vertical" Class="w-full max-w-xs">
+            <Input Placeholder="First Name" />
+            <Input Placeholder="Last Name" />
+            <Button Type="ButtonType.Primary" Block="true">Save Contact</Button>
+        </Space>
+        """;
 
-    private const string _verticalCode = @"<Space Direction=""SpaceDirection.Vertical"" Size=""SpaceSize.Middle"">
-    <Input Placeholder=""First Name"" />
-    <Button Type=""ButtonType.Primary"">Save</Button>
-</Space>";
+    private const string _sizesCode = """
+        <Space Direction="SpaceDirection.Horizontal" Size="SpaceSize.Small">
+            <Tag Color="blue">Tag 1</Tag>
+            <Tag Color="blue">Tag 2</Tag>
+        </Space>
+        <Space Direction="SpaceDirection.Horizontal" Size="SpaceSize.Large">
+            <Tag Color="green">Large Gap A</Tag>
+            <Tag Color="green">Large Gap B</Tag>
+        </Space>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

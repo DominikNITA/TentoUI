@@ -3,7 +3,7 @@
 
 <PageTitle>Typography - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Typography</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
@@ -11,6 +11,7 @@
         </p>
     </div>
 
+    @* Example 1: Headings *@
     <DemoCard Title="Title Headings" Description="Semantic H1 through H5 headings styled according to the active theme." Code="@_titlesCode">
         <div class="space-y-2">
             <Title Level="1">h1. Tento Heading Level 1</Title>
@@ -21,6 +22,7 @@
         </div>
     </DemoCard>
 
+    @* Example 2: Text Variants *@
     <DemoCard Title="Text Variants" Description="Support for secondary, success, warning, danger, copyable, and keyboard variants." Code="@_textCode">
         <div class="flex flex-col gap-2">
             <Text>Regular Body Text</Text>
@@ -35,21 +37,61 @@
             </div>
         </div>
     </DemoCard>
+
+    @* Example 3: Copyable & Keyboard Text *@
+    <DemoCard Title="Interactive &amp; Keyboard" Description="Built-in copyable text snippets and keyboard shortcut badges." Code="@_copyCode">
+        <div class="space-y-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500">Quick search:</span>
+                <Text Keyboard="true">Ctrl + K</Text>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500">API Key:</span>
+                <Text Copyable="true">sk_live_99401828472910</Text>
+            </div>
+        </div>
+    </DemoCard>
+
+    @* API Reference Table *@
+    <ApiTable Title="Text Properties" Properties="@_props" />
 </div>
 
 @code {
-    private const string _titlesCode = @"<Title Level=""1"">h1. Tento Heading Level 1</Title>
-<Title Level=""2"">h2. Tento Heading Level 2</Title>
-<Title Level=""3"">h3. Tento Heading Level 3</Title>
-<Title Level=""4"">h4. Tento Heading Level 4</Title>
-<Title Level=""5"">h5. Tento Heading Level 5</Title>";
+    private const string _titlesCode = """
+        <Title Level="1">h1. Tento Heading Level 1</Title>
+        <Title Level="2">h2. Tento Heading Level 2</Title>
+        <Title Level="3">h3. Tento Heading Level 3</Title>
+        <Title Level="4">h4. Tento Heading Level 4</Title>
+        <Title Level="5">h5. Tento Heading Level 5</Title>
+        """;
 
-    private const string _textCode = @"<Text>Regular Body Text</Text>
-<Text Type=""secondary"">Secondary muted text</Text>
-<Text Type=""success"">Success confirmation</Text>
-<Text Type=""warning"">Warning notice</Text>
-<Text Type=""danger"">Critical alert</Text>
-<Text Strong=""true"">Bold Emphasis</Text>
-<Text Code=""true"">dotnet add package TentoUI</Text>
-<Text Keyboard=""true"">Ctrl + K</Text>";
+    private const string _textCode = """
+        <Text>Regular Body Text</Text>
+        <Text Type="TypographyType.Secondary">Secondary muted text</Text>
+        <Text Type="TypographyType.Success">Success confirmation</Text>
+        <Text Type="TypographyType.Warning">Warning notice</Text>
+        <Text Type="TypographyType.Danger">Critical alert</Text>
+        <Text Strong="true">Bold Emphasis</Text>
+        <Text Code="true">dotnet add package TentoUI</Text>
+        <Text Mark="true">Highlighted</Text>
+        """;
+
+    private const string _copyCode = """
+        <Text Keyboard="true">Ctrl + K</Text>
+        <Text Copyable="true">sk_live_99401828472910</Text>
+        """;
+
+    private readonly ApiProp[] _props =
+    [
+        new("Type", "Visual tone: Secondary, Success, Warning, Danger.", "TypographyType", "TypographyType.Default"),
+        new("Strong", "Whether text is bold.", "bool", "false"),
+        new("Italic", "Whether text is italicized.", "bool", "false"),
+        new("Underline", "Whether text has underline.", "bool", "false"),
+        new("Delete", "Whether text is strikethrough.", "bool", "false"),
+        new("Code", "Inline monospaced code formatting.", "bool", "false"),
+        new("Mark", "Highlighted background accent.", "bool", "false"),
+        new("Keyboard", "Rendered as keyboard kbd chip.", "bool", "false"),
+        new("Copyable", "Whether text includes a 1-click copy icon.", "bool", "false"),
+        new("ChildContent", "Inner text or nodes.", "RenderFragment?", "null")
+    ];
 }

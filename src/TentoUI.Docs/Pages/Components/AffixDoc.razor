@@ -11,39 +11,43 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Test pinning offset and child action button.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Affix OffsetTop="_offsetTop">
+    @* Example 1: Basic Affix (Top Offset) *@
+    <DemoCard Title="Affix Top Offset" Description="Fixes an action button when scrolling beyond the specified pixel offset." Code="@_topCode">
+        <div class="p-4">
+            <Affix OffsetTop="20">
                 <Button Type="ButtonType.Primary">
-                    Pinned Button (OffsetTop: @_offsetTop px)
+                    Pinned Button (OffsetTop: 20px)
                 </Button>
             </Affix>
         </div>
+    </DemoCard>
 
-        <div class="max-w-xs text-xs">
-            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Offset Top (px)</label>
-            <input type="number"
-                   min="0"
-                   max="200"
-                   step="10"
-                   class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                   @bind="_offsetTop" />
+    @* Example 2: Affix Bottom *@
+    <DemoCard Title="Affix Bottom Offset" Description="Fixes a floating status bar near the bottom of the visible viewport." Code="@_bottomCode">
+        <div class="p-4">
+            <Affix OffsetBottom="20">
+                <Button Type="ButtonType.Default">
+                    Pinned to Bottom (OffsetBottom: 20px)
+                </Button>
+            </Affix>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Affix Properties" Properties="@_props" />
 </div>
 
 @code {
-    private int? _offsetTop = 20;
+    private const string _topCode = """
+        <Affix OffsetTop="20">
+            <Button Type="ButtonType.Primary">Pinned Button (OffsetTop: 20px)</Button>
+        </Affix>
+        """;
+
+    private const string _bottomCode = """
+        <Affix OffsetBottom="20">
+            <Button Type="ButtonType.Default">Pinned to Bottom (OffsetBottom: 20px)</Button>
+        </Affix>
+        """;
 
     private readonly ApiProp[] _props =
     [

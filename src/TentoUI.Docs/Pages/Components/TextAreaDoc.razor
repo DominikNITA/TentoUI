@@ -11,73 +11,56 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Configure rows, character count limits, and clear button toggles.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Length: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_text?.Length ?? 0)</strong> chars
-            </div>
+    @* Example 1: Basic TextArea *@
+    <DemoCard Title="Basic TextArea" Description="Multi-line text editor with placeholder and row sizing." Code="@_basicCode">
+        <div class="max-w-lg p-2 space-y-2">
+            <TextArea @bind-Value="_text" Rows="3" Placeholder="Enter notes or feedback..." />
+            <div class="text-xs text-slate-400 font-mono">Bound Value: @_text</div>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-lg mx-auto">
-            <TextArea @bind-Value="_text"
-                      Rows="_rows"
-                      MaxLength="_maxLength"
-                      ShowCount="_showCount"
-                      AllowClear="_allowClear"
-                      Disabled="_disabled"
-                      Placeholder="Write a detailed description..." />
+    @* Example 2: Character Counter *@
+    <DemoCard Title="Character Counter &amp; MaxLength" Description="Visual character indicator enforcing maximum character limits." Code="@_countCode">
+        <div class="max-w-lg p-2">
+            <TextArea @bind-Value="_bio"
+                      Rows="4"
+                      MaxLength="150"
+                      ShowCount="true"
+                      Placeholder="Write a brief profile summary..." />
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Rows</label>
-                <input type="number"
-                       min="2"
-                       max="10"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_rows" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Max Length</label>
-                <input type="number"
-                       min="10"
-                       max="1000"
-                       step="50"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_maxLength" />
-            </div>
-            <div class="sm:col-span-2 flex items-center gap-4 pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_showCount" class="rounded text-primary-600" />
-                    <span>Show Character Count</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_allowClear" class="rounded text-primary-600" />
-                    <span>Allow Clear</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 3: Clear Button & Disabled *@
+    <DemoCard Title="Allow Clear &amp; Disabled" Description="Includes 1-click text clearing or read-only locked state." Code="@_clearCode">
+        <div class="space-y-4 max-w-lg p-2">
+            <TextArea Value="Click the x icon on the right to clear this text" AllowClear="true" Rows="2" />
+            <TextArea Value="This textarea is currently disabled" Disabled="true" Rows="2" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="TextArea Properties" Properties="@_props" />
 </div>
 
 @code {
     private string? _text = "TentoUI provides high-performance Blazor components.";
-    private int _rows = 4;
-    private int? _maxLength = 200;
-    private bool _showCount = true;
-    private bool _allowClear = true;
-    private bool _disabled;
+    private string? _bio = "Engineering lead passionate about modern UI libraries.";
+
+    private const string _basicCode = """
+        <TextArea @bind-Value="text" Rows="3" Placeholder="Enter notes..." />
+        """;
+
+    private const string _countCode = """
+        <TextArea @bind-Value="bio"
+                  Rows="4"
+                  MaxLength="150"
+                  ShowCount="true"
+                  Placeholder="Write a brief profile summary..." />
+        """;
+
+    private const string _clearCode = """
+        <TextArea Value="Clearable content" AllowClear="true" Rows="2" />
+        <TextArea Value="Disabled content" Disabled="true" Rows="2" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

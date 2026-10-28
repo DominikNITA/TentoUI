@@ -11,80 +11,68 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Configure divider orientation, text, and dashed border dynamically.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
+    @* Example 1: Horizontal with Title *@
+    <DemoCard Title="Horizontal Divider with Title" Description="Dividers can contain center, left, or right-aligned titles." Code="@_titleCode">
+        <div class="space-y-4">
             <p class="text-xs text-slate-500">Above the divider content region.</p>
-            <Divider Orientation="_orientation" Dashed="_dashed">
-                @_title
-            </Divider>
-            <p class="text-xs text-slate-500">Below the divider content region.</p>
+            <Divider Orientation="DividerOrientation.Center">Section Overview</Divider>
+            <p class="text-xs text-slate-500">Content placed between distinct sections.</p>
+            <Divider Orientation="DividerOrientation.Left">Left Title</Divider>
+            <p class="text-xs text-slate-500">Section details continuation.</p>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Orientation</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_orientation">
-                    <option value="@DividerOrientation.Center">Center</option>
-                    <option value="@DividerOrientation.Left">Left</option>
-                    <option value="@DividerOrientation.Right">Right</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Divider Text</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_title"
-                       @bind:event="oninput" />
-            </div>
-            <div class="flex items-center pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_dashed" class="rounded text-primary-600" />
-                    <span>Dashed Line</span>
-                </label>
-            </div>
+    @* Example 2: Dashed Divider *@
+    <DemoCard Title="Dashed Divider" Description="Use dashed borders for subtle or secondary section breaks." Code="@_dashedCode">
+        <div class="space-y-4">
+            <p class="text-xs text-slate-500">Primary task instructions.</p>
+            <Divider Dashed="true">Optional Configurations</Divider>
+            <p class="text-xs text-slate-500">Advanced environment parameters.</p>
         </div>
-    </div>
+    </DemoCard>
 
-    @* Use Cases *@
+    @* Example 3: Vertical Inline Divider *@
     <DemoCard Title="Vertical Divider" Description="Use vertical dividers between inline links or actions." Code="@_verticalCode">
         <div class="flex items-center text-xs text-slate-600 dark:text-slate-400">
             <a href="#" class="hover:text-primary-600">Home</a>
             <Divider Type="DividerType.Vertical" />
-            <a href="#" class="hover:text-primary-600">Dashboard</a>
-            <Divider Type="DividerType.Vertical" />
             <a href="#" class="hover:text-primary-600">Settings</a>
+            <Divider Type="DividerType.Vertical" />
+            <a href="#" class="hover:text-primary-600">Documentation</a>
         </div>
     </DemoCard>
 
+    @* API Reference Table *@
     <ApiTable Title="Divider Properties" Properties="@_props" />
 </div>
 
 @code {
-    private DividerOrientation _orientation = DividerOrientation.Center;
-    private string _title = "Section Break";
-    private bool _dashed;
+    private const string _titleCode = """
+        <p>Above the divider content region.</p>
+        <Divider Orientation="DividerOrientation.Center">Section Overview</Divider>
+        <p>Content placed between distinct sections.</p>
+        <Divider Orientation="DividerOrientation.Left">Left Title</Divider>
+        """;
 
-    private const string _verticalCode = @"<div class=""flex items-center"">
-    <a href=""#"">Home</a>
-    <Divider Type=""DividerType.Vertical"" />
-    <a href=""#"">Dashboard</a>
-</div>";
+    private const string _dashedCode = """
+        <Divider Dashed="true">Optional Configurations</Divider>
+        """;
 
-    private readonly ApiTable.ApiProp[] _props =
+    private const string _verticalCode = """
+        <div class="flex items-center text-xs text-slate-600">
+            <a href="#">Home</a>
+            <Divider Type="DividerType.Vertical" />
+            <a href="#">Settings</a>
+            <Divider Type="DividerType.Vertical" />
+            <a href="#">Documentation</a>
+        </div>
+        """;
+
+    private readonly ApiProp[] _props =
     [
-        new("Type", "Direction of the divider (Horizontal, Vertical).", "DividerType", "DividerType.Horizontal"),
-        new("Orientation", "Position of the title text (Left, Right, Center).", "DividerOrientation", "DividerOrientation.Center"),
-        new("Dashed", "Whether the divider is rendered with a dashed border.", "bool", "false"),
-        new("Title", "Title text rendered inside the divider.", "string?", "null"),
-        new("ChildContent", "Custom template rendered inside the divider.", "RenderFragment?", "null")
+        new("Type", "Direction of divider: Horizontal or Vertical.", "DividerType", "DividerType.Horizontal"),
+        new("Orientation", "Alignment of inner text: Left, Center, Right.", "DividerOrientation", "DividerOrientation.Center"),
+        new("Dashed", "Whether the divider line is dashed.", "bool", "false"),
+        new("ChildContent", "Inner label or text rendered in the middle of the divider.", "RenderFragment?", "null")
     ];
 }

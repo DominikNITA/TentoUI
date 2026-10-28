@@ -12,23 +12,10 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Configure trigger mode, placement, and disabled state dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Action: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_lastAction</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center min-h-[140px]">
-            <Dropdown Text="@_triggerText"
-                      Disabled="_disabled"
-                      Trigger="_trigger"
-                      Placement="_placement">
+    @* Example 1: Basic Click Dropdown *@
+    <DemoCard Title="Click Trigger Dropdown" Description="Standard button that opens a contextual action list on click." Code="@_clickCode">
+        <div class="p-4 flex items-center justify-center">
+            <Dropdown Text="Options Menu" Trigger="DropdownTrigger.Click" Placement="DropdownPlacement.BottomLeft">
                 <Overlay>
                     <div class="py-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
                         <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -48,59 +35,68 @@
                 </Overlay>
             </Dropdown>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Trigger Mode</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_trigger">
-                    <option value="@DropdownTrigger.Click">Click</option>
-                    <option value="@DropdownTrigger.Hover">Hover</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Placement</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_placement">
-                    <option value="@DropdownPlacement.BottomLeft">BottomLeft</option>
-                    <option value="@DropdownPlacement.BottomRight">BottomRight</option>
-                    <option value="@DropdownPlacement.TopLeft">TopLeft</option>
-                    <option value="@DropdownPlacement.TopRight">TopRight</option>
-                </select>
-            </div>
-            <div class="flex items-center pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 2: Hover Trigger *@
+    <DemoCard Title="Hover Trigger Dropdown" Description="Expands immediately when hovering over the trigger element." Code="@_hoverCode">
+        <div class="p-4 flex items-center justify-center">
+            <Dropdown Text="Hover for Actions" Trigger="DropdownTrigger.Hover" Placement="DropdownPlacement.BottomLeft">
+                <Overlay>
+                    <div class="py-1 w-40 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
+                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                @onclick="@(() => HandleSelect("Quick Edit"))">
+                            Quick Edit
+                        </button>
+                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                @onclick="@(() => HandleSelect("Duplicate"))">
+                            Duplicate
+                        </button>
+                    </div>
+                </Overlay>
+            </Dropdown>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Dropdown Properties" Properties="@_props" />
 </div>
 
 @code {
-    private DropdownTrigger _trigger = DropdownTrigger.Click;
-    private DropdownPlacement _placement = DropdownPlacement.BottomLeft;
-    private string _triggerText = "Options Menu";
-    private bool _disabled;
-    private string _lastAction = "None";
-
     private void HandleSelect(string action)
     {
-        _lastAction = action;
         MessageService.Success($"Selected: {action}");
     }
+
+    private const string _clickCode = """
+        <Dropdown Text="Options Menu" Trigger="DropdownTrigger.Click">
+            <Overlay>
+                <div class="py-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200">
+                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Export as PDF</button>
+                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Export as CSV</button>
+                    <div class="h-px bg-slate-100 my-1"></div>
+                    <button class="w-full text-left px-3 py-1.5 text-rose-500">Archive</button>
+                </div>
+            </Overlay>
+        </Dropdown>
+        """;
+
+    private const string _hoverCode = """
+        <Dropdown Text="Hover for Actions" Trigger="DropdownTrigger.Hover">
+            <Overlay>
+                <div class="py-1 w-40 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200">
+                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Quick Edit</button>
+                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Duplicate</button>
+                </div>
+            </Overlay>
+        </Dropdown>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [
         new("Text", "Label for default button trigger.", "string?", "null"),
         new("Trigger", "Event triggering the overlay: Click or Hover.", "DropdownTrigger", "DropdownTrigger.Hover"),
         new("Placement", "Placement position relative to trigger (BottomLeft, BottomRight, TopLeft, TopRight).", "DropdownPlacement", "DropdownPlacement.BottomLeft"),
-        new("Disabled", "Whether the dropdown trigger is disabled.", "bool", "false"),
-        new("Size", "Button trigger size.", "ComponentSize?", "null"),
-        new("Overlay", "Content displayed inside the dropdown overlay.", "RenderFragment?", "null"),
-        new("ChildContent", "Custom trigger element replacing default button.", "RenderFragment?", "null")
+        new("Disabled", "Whether dropdown interaction is disabled.", "bool", "false"),
+        new("Overlay", "Dropdown popup content template.", "RenderFragment?", "null"),
+        new("ChildContent", "Custom trigger element template.", "RenderFragment?", "null")
     ];
 }

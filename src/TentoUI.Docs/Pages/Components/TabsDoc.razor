@@ -11,20 +11,10 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle tab style (Line vs Card) and active key dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Active: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_activeTab</strong>
-            </div>
-        </div>
-
-        <div class="p-6 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Tabs @bind-ActiveKey="_activeTab" Type="_type">
+    @* Example 1: Basic Line Tabs *@
+    <DemoCard Title="Line Tabs" Description="Default underline indicator with responsive panel switching." Code="@_lineCode">
+        <div class="p-2">
+            <Tabs @bind-ActiveKey="_activeTab" Type="TabType.Line">
                 <TabPane Key="general" Tab="General Profile">
                     <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 space-y-2">
                         <h4 class="font-bold text-slate-800 dark:text-white text-sm">Profile Details</h4>
@@ -45,27 +35,28 @@
                 </TabPane>
             </Tabs>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tabs Style</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_type">
-                    <option value="@TabType.Line">Line (Underline)</option>
-                    <option value="@TabType.Card">Card</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Active Key</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_activeTab">
-                    <option value="general">General</option>
-                    <option value="security">Security</option>
-                    <option value="notifications">Notifications</option>
-                </select>
-            </div>
+    @* Example 2: Card Style Tabs *@
+    <DemoCard Title="Card Style Tabs" Description="Pill/card headers with distinct active tab boundaries." Code="@_cardCode">
+        <div class="p-2">
+            <Tabs DefaultActiveKey="tab-1" Type="TabType.Card">
+                <TabPane Key="tab-1" Tab="Tab 1">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-b-lg border border-slate-200 dark:border-slate-800 text-xs">
+                        Content of Tab Pane 1
+                    </div>
+                </TabPane>
+                <TabPane Key="tab-2" Tab="Tab 2">
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-b-lg border border-slate-200 dark:border-slate-800 text-xs">
+                        Content of Tab Pane 2
+                    </div>
+                </TabPane>
+                <TabPane Key="tab-3" Tab="Tab 3 (Disabled)" Disabled="true">
+                    <div class="p-4">Disabled Tab Content</div>
+                </TabPane>
+            </Tabs>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Tabs Properties" Properties="@_tabsProps" />
     <ApiTable Title="TabPane Properties" Properties="@_paneProps" />
@@ -73,7 +64,34 @@
 
 @code {
     private string _activeTab = "general";
-    private TabType _type = TabType.Line;
+
+    private const string _lineCode = """
+        <Tabs @bind-ActiveKey="activeTab" Type="TabType.Line">
+            <TabPane Key="general" Tab="General Profile">
+                <p>Configure personal credentials and avatar settings.</p>
+            </TabPane>
+            <TabPane Key="security" Tab="Security">
+                <p>Manage two-factor authenticator app.</p>
+            </TabPane>
+            <TabPane Key="notifications" Tab="Notifications">
+                <p>Receive weekly digest alerts.</p>
+            </TabPane>
+        </Tabs>
+        """;
+
+    private const string _cardCode = """
+        <Tabs DefaultActiveKey="tab-1" Type="TabType.Card">
+            <TabPane Key="tab-1" Tab="Tab 1">
+                <p>Content of Tab Pane 1</p>
+            </TabPane>
+            <TabPane Key="tab-2" Tab="Tab 2">
+                <p>Content of Tab Pane 2</p>
+            </TabPane>
+            <TabPane Key="tab-3" Tab="Tab 3" Disabled="true">
+                <p>Disabled Tab Content</p>
+            </TabPane>
+        </Tabs>
+        """;
 
     private readonly ApiProp[] _tabsProps =
     [
@@ -86,7 +104,7 @@
         new("ChildContent", "TabPane elements.", "RenderFragment?", "null")
     ];
 
-    private readonly ApiTable.ApiProp[] _paneProps =
+    private readonly ApiProp[] _paneProps =
     [
         new("Key", "Unique identifier for this tab pane.", "string", "required"),
         new("Tab", "Label text rendered in tab header.", "string", "null"),

@@ -11,17 +11,10 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Trigger popover on hover or click with custom placements.</p>
-            </div>
-        </div>
-
-        <div class="p-12 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Popover Title="Cluster Statistics" Trigger="_trigger" Placement="_placement">
+    @* Example 1: Basic Hover Popover *@
+    <DemoCard Title="Hover Popover" Description="Floating card opened when hovering over the anchor button." Code="@_hoverCode">
+        <div class="p-8 flex items-center justify-center">
+            <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">
                 <ContentTemplate>
                     <div class="w-56 space-y-2 text-xs">
                         <p class="text-slate-500">Node memory usage is currently at 42% across all availability zones.</p>
@@ -29,39 +22,63 @@
                     </div>
                 </ContentTemplate>
                 <ChildContent>
-                    <Button Type="ButtonType.Default">Hover / Click for Details</Button>
+                    <Button Type="ButtonType.Default">Hover for Cluster Metrics</Button>
                 </ChildContent>
             </Popover>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Trigger Event</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_trigger">
-                    <option value="@TooltipTrigger.Hover">Hover</option>
-                    <option value="@TooltipTrigger.Click">Click</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Placement</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_placement">
-                    <option value="@TooltipPlacement.Top">Top</option>
-                    <option value="@TooltipPlacement.Bottom">Bottom</option>
-                    <option value="@TooltipPlacement.Left">Left</option>
-                    <option value="@TooltipPlacement.Right">Right</option>
-                </select>
-            </div>
+    @* Example 2: Click Trigger *@
+    <DemoCard Title="Click Trigger Popover" Description="Requires a click to open and remains visible until clicked again or dismissed." Code="@_clickCode">
+        <div class="p-8 flex items-center justify-center">
+            <Popover Title="User Quick Actions" Trigger="TooltipTrigger.Click" Placement="TooltipPlacement.Bottom">
+                <ContentTemplate>
+                    <div class="w-48 space-y-2 text-xs">
+                        <a href="javascript:void(0)" class="block text-slate-700 dark:text-slate-300 hover:text-primary-600">Profile Settings</a>
+                        <a href="javascript:void(0)" class="block text-slate-700 dark:text-slate-300 hover:text-primary-600">API Credentials</a>
+                        <div class="border-t border-slate-100 dark:border-slate-800 pt-1">
+                            <a href="javascript:void(0)" class="block text-red-500 hover:underline">Sign Out</a>
+                        </div>
+                    </div>
+                </ContentTemplate>
+                <ChildContent>
+                    <Button Type="ButtonType.Primary">Click for Options</Button>
+                </ChildContent>
+            </Popover>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Popover Properties" Properties="@_props" />
 </div>
 
 @code {
-    private TooltipTrigger _trigger = TooltipTrigger.Hover;
-    private TooltipPlacement _placement = TooltipPlacement.Top;
+    private const string _hoverCode = """
+        <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">
+            <ContentTemplate>
+                <div class="w-56 space-y-2 text-xs">
+                    <p class="text-slate-500">Node memory usage is at 42%.</p>
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small" Block="true">View Metrics</Button>
+                </div>
+            </ContentTemplate>
+            <ChildContent>
+                <Button Type="ButtonType.Default">Hover for Metrics</Button>
+            </ChildContent>
+        </Popover>
+        """;
+
+    private const string _clickCode = """
+        <Popover Title="User Quick Actions" Trigger="TooltipTrigger.Click" Placement="TooltipPlacement.Bottom">
+            <ContentTemplate>
+                <div class="w-48 space-y-2 text-xs">
+                    <a href="#" class="block">Profile Settings</a>
+                    <a href="#" class="block text-red-500">Sign Out</a>
+                </div>
+            </ContentTemplate>
+            <ChildContent>
+                <Button Type="ButtonType.Primary">Click for Options</Button>
+            </ChildContent>
+        </Popover>
+        """;
 
     private readonly ApiProp[] _props =
     [

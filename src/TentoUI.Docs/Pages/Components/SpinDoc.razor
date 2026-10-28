@@ -11,20 +11,30 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle spinning overlay on wrapped container.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                State: <strong class="text-primary-600 dark:text-primary-400 font-mono">@(_spinning ? "Spinning" : "Idle")</strong>
-            </div>
+    @* Example 1: Basic Spinners *@
+    <DemoCard Title="Spinner Sizes" Description="Standalone spinners with Small, Middle, and Large scales." Code="@_sizesCode">
+        <div class="flex items-center gap-8 p-4">
+            <Spin Size="ComponentSize.Small" />
+            <Spin Size="ComponentSize.Middle" />
+            <Spin Size="ComponentSize.Large" />
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-lg mx-auto">
-            <Spin Spinning="_spinning" Size="_size" Tip="@_tip">
+    @* Example 2: Spin with Tip *@
+    <DemoCard Title="Custom Tip Message" Description="Add descriptive text beneath the spinner." Code="@_tipCode">
+        <div class="p-4">
+            <Spin Tip="Synchronizing telemetry..." />
+        </div>
+    </DemoCard>
+
+    @* Example 3: Container Loading Overlay *@
+    <DemoCard Title="Container Overlay" Description="Wrap cards, forms, or data views to display a blurred loading backdrop." Code="@_containerCode">
+        <div class="space-y-4 max-w-lg">
+            <Button Type="ButtonType.Default" OnClick="() => _spinning = !_spinning">
+                Toggle Loading (@(_spinning ? "Stop" : "Start"))
+            </Button>
+
+            <Spin Spinning="_spinning" Tip="Processing data...">
                 <div class="p-6 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm space-y-2 text-xs">
                     <h4 class="font-bold text-sm text-slate-800 dark:text-white">Live Data Feed</h4>
                     <p class="text-slate-500">Processing live telemetry stream from IoT gateway devices.</p>
@@ -32,40 +42,32 @@
                 </div>
             </Spin>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Size Scale</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_size">
-                    <option value="@ComponentSize.Small">Small</option>
-                    <option value="@ComponentSize.Middle">Middle</option>
-                    <option value="@ComponentSize.Large">Large</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Tip Message</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_tip"
-                       @bind:event="oninput" />
-            </div>
-            <div class="sm:col-span-2 flex items-center pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_spinning" class="rounded text-primary-600" />
-                    <span>Spinning Active</span>
-                </label>
-            </div>
-        </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Spin Properties" Properties="@_props" />
 </div>
 
 @code {
     private bool _spinning = true;
-    private ComponentSize _size = ComponentSize.Middle;
-    private string _tip = "Loading data...";
+
+    private const string _sizesCode = """
+        <Spin Size="ComponentSize.Small" />
+        <Spin Size="ComponentSize.Middle" />
+        <Spin Size="ComponentSize.Large" />
+        """;
+
+    private const string _tipCode = """
+        <Spin Tip="Synchronizing telemetry..." />
+        """;
+
+    private const string _containerCode = """
+        <Spin Spinning="@spinning" Tip="Processing data...">
+            <div class="p-6 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                <h4 class="font-bold text-sm">Live Data Feed</h4>
+                <p class="text-xs text-slate-500">Processing live telemetry stream...</p>
+            </div>
+        </Spin>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

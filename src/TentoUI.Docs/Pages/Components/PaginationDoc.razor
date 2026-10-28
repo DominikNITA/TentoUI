@@ -11,73 +11,57 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Change total records, jump to pages, or toggle size changers.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Page <strong class="text-primary-600 dark:text-primary-400 font-mono">@_page</strong> of <strong class="font-mono">@((_total + _pageSize - 1) / _pageSize)</strong>
-            </div>
+    @* Example 1: Basic Pagination *@
+    <DemoCard Title="Basic Pagination" Description="Standard page numbering with previous and next arrow buttons." Code="@_basicCode">
+        <div class="flex flex-col items-center gap-3 p-4">
+            <Pagination Total="50" @bind-Current="_basicPage" />
+            <span class="text-xs text-slate-400">Current page: @_basicPage</span>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Pagination Total="_total"
+    @* Example 2: Full Controls *@
+    <DemoCard Title="Size Changer &amp; Quick Jumper" Description="Includes dropdown selector for page sizes and numeric input to jump directly to target page." Code="@_fullCode">
+        <div class="flex flex-col items-center gap-3 p-4">
+            <Pagination Total="480"
                         @bind-Current="_page"
                         @bind-PageSize="_pageSize"
-                        ShowSizeChanger="_showSizeChanger"
-                        ShowQuickJumper="_showQuickJumper"
-                        Simple="_simple" />
+                        ShowSizeChanger="true"
+                        ShowQuickJumper="true" />
+            <span class="text-xs text-slate-400">Viewing page @_page with @_pageSize items per page</span>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Total Records</label>
-                <input type="number"
-                       min="1"
-                       max="5000"
-                       step="50"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_total" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Page Size</label>
-                <input type="number"
-                       min="5"
-                       max="100"
-                       step="5"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_pageSize" />
-            </div>
-            <div class="flex flex-col gap-2 pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_showSizeChanger" class="rounded text-primary-600" />
-                    <span>Show Size Changer</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_showQuickJumper" class="rounded text-primary-600" />
-                    <span>Show Quick Jumper</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_simple" class="rounded text-primary-600" />
-                    <span>Simple Compact Mode</span>
-                </label>
-            </div>
+    @* Example 3: Simple Compact Mode *@
+    <DemoCard Title="Simple Compact Mode" Description="Compact indicator for constrained sidebars or mobile footers." Code="@_simpleCode">
+        <div class="flex items-center justify-center p-4">
+            <Pagination Total="100" @bind-Current="_simplePage" Simple="true" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Pagination Properties" Properties="@_props" />
 </div>
 
 @code {
-    private int _page = 1;
+    private int _basicPage = 1;
+    private int _page = 2;
     private int _pageSize = 10;
-    private int _total = 250;
-    private bool _showSizeChanger = true;
-    private bool _showQuickJumper = true;
-    private bool _simple;
+    private int _simplePage = 1;
+
+    private const string _basicCode = """
+        <Pagination Total="50" @bind-Current="basicPage" />
+        """;
+
+    private const string _fullCode = """
+        <Pagination Total="480"
+                    @bind-Current="page"
+                    @bind-PageSize="pageSize"
+                    ShowSizeChanger="true"
+                    ShowQuickJumper="true" />
+        """;
+
+    private const string _simpleCode = """
+        <Pagination Total="100" @bind-Current="simplePage" Simple="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

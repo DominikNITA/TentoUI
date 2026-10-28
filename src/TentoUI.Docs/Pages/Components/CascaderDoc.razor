@@ -7,35 +7,38 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Cascader</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Cascade selection allows selection from a set of associated multi-level datasets (e.g. continent > country > city).
+            Cascade selection allows selection from a set of associated multi-level datasets (e.g. continent &gt; country &gt; city).
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Navigate multi-level cascade levels interactively.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected Path: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@(string.Join(" / ", _selectedValues))</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+    @* Example 1: Basic Cascader *@
+    <DemoCard Title="Geographic Cascade" Description="Navigate continent, country, and city in adjacent dropdown panels." Code="@_geoCode">
+        <div class="max-w-xs p-2 space-y-2">
             <Cascader Options="@_options"
                       @bind-Values="_selectedValues"
                       Placeholder="Select location..."
                       AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected Path: @string.Join(" / ", _selectedValues)</div>
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 2: Category Selector *@
+    <DemoCard Title="Category Hierarchy" Description="Classify items by departmental and subdepartmental categories." Code="@_catCode">
+        <div class="max-w-xs p-2 space-y-2">
+            <Cascader Options="@_categoryOptions"
+                      @bind-Values="_selectedCategory"
+                      Placeholder="Select department..."
+                      AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Department Path: @string.Join(" / ", _selectedCategory)</div>
+        </div>
+    </DemoCard>
 
     <ApiTable Title="Cascader Properties" Properties="@_props" />
 </div>
 
 @code {
     private IReadOnlyList<string> _selectedValues = new[] { "eu", "pl", "waw" };
+    private IReadOnlyList<string> _selectedCategory = new[] { "tech", "frontend" };
 
     private readonly CascaderOption[] _options =
     [
@@ -61,6 +64,35 @@
             ])
         ])
     ];
+
+    private readonly CascaderOption[] _categoryOptions =
+    [
+        new("tech", "Engineering",
+        [
+            new("frontend", "Frontend & UI"),
+            new("backend", "Cloud & Backend"),
+            new("devops", "Infrastructure & SRE")
+        ]),
+        new("design", "Product Design",
+        [
+            new("ux", "User Research"),
+            new("design-system", "Design Tokens & System")
+        ])
+    ];
+
+    private const string _geoCode = """
+        <Cascader Options="@options"
+                  @bind-Values="selectedValues"
+                  Placeholder="Select location..."
+                  AllowClear="true" />
+        """;
+
+    private const string _catCode = """
+        <Cascader Options="@categoryOptions"
+                  @bind-Values="selectedCategory"
+                  Placeholder="Select department..."
+                  AllowClear="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

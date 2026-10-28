@@ -11,72 +11,51 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Step through values and inspect constraints dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Current Number: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_number</strong>
-            </div>
+    @* Example 1: Basic InputNumber *@
+    <DemoCard Title="Basic InputNumber" Description="Numeric input with mouse-clickable stepper arrows." Code="@_basicCode">
+        <div class="flex items-center gap-4 max-w-xs p-2">
+            <TentoUI.InputNumber TValue="double" @bind-Value="_number" Step="1" />
+            <span class="text-xs text-slate-400 font-mono">Value: @_number</span>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
-            <TentoUI.InputNumber TValue="double"
-                                 @bind-Value="_number"
-                                 Min="_min"
-                                 Max="_max"
-                                 Step="_step"
-                                 Size="_size"
-                                 Disabled="_disabled"
-                                 Controls="_controls" />
+    @* Example 2: Min, Max, Step *@
+    <DemoCard Title="Min, Max &amp; Custom Step" Description="Bound between 0 and 100 with steps of 5." Code="@_rangeCode">
+        <div class="flex items-center gap-4 max-w-xs p-2">
+            <TentoUI.InputNumber TValue="double" @bind-Value="_ranged" Min="0" Max="100" Step="5" />
+            <span class="text-xs text-slate-400 font-mono">Value: @_ranged</span>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Step Increment</label>
-                <input type="number"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_step" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Min Value</label>
-                <input type="number"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_min" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Max Value</label>
-                <input type="number"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_max" />
-            </div>
-            <div class="sm:col-span-3 flex items-center gap-4 pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_controls" class="rounded text-primary-600" />
-                    <span>Show Stepper Controls</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 3: Sizes & Hidden Steppers *@
+    <DemoCard Title="Sizes &amp; Hidden Steppers" Description="Different sizes and optional removal of the stepper buttons." Code="@_sizesCode">
+        <div class="space-y-3 max-w-xs p-2">
+            <TentoUI.InputNumber TValue="double" Value="10" Size="ComponentSize.Small" />
+            <TentoUI.InputNumber TValue="double" Value="20" Size="ComponentSize.Middle" />
+            <TentoUI.InputNumber TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="InputNumber Properties" Properties="@_props" />
 </div>
 
 @code {
     private double _number = 42;
-    private double? _min = 0;
-    private double? _max = 100;
-    private double _step = 5;
-    private ComponentSize _size = ComponentSize.Middle;
-    private bool _controls = true;
-    private bool _disabled;
+    private double _ranged = 25;
+
+    private const string _basicCode = """
+        <TentoUI.InputNumber TValue="double" @bind-Value="number" Step="1" />
+        """;
+
+    private const string _rangeCode = """
+        <TentoUI.InputNumber TValue="double" @bind-Value="ranged" Min="0" Max="100" Step="5" />
+        """;
+
+    private const string _sizesCode = """
+        <TentoUI.InputNumber TValue="double" Value="10" Size="ComponentSize.Small" />
+        <TentoUI.InputNumber TValue="double" Value="20" Size="ComponentSize.Middle" />
+        <TentoUI.InputNumber TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

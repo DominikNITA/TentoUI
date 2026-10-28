@@ -8,21 +8,14 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Form</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Form component for collecting and validating data entries, supporting horizontal, vertical, and inline layouts.
+            Form component for collecting and validating data entries, supporting vertical, horizontal, and inline layouts.
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Switch between Vertical, Horizontal, and Inline layouts live.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xl mx-auto">
-            <Form Model="@_model" Layout="_layout" OnFinish="HandleFinish">
+    @* Example 1: Vertical Form *@
+    <DemoCard Title="Vertical Form" Description="Standard stacked form layout where labels appear above inputs." Code="@_verticalCode">
+        <div class="max-w-md p-2">
+            <Form Model="@_model" Layout="FormLayout.Vertical" OnFinish="HandleFinish">
                 <FormItem Label="Username" Required="true" Help="Unique identity handle">
                     <Input @bind-Value="_model.Username" Placeholder="Enter your handle..." />
                 </FormItem>
@@ -35,23 +28,30 @@
                     <Checkbox @bind-Checked="_model.RememberMe">Keep me signed in</Checkbox>
                 </FormItem>
 
-                <div class="pt-4 flex items-center gap-3">
+                <div class="pt-2 flex items-center gap-3">
                     <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Submit Form</Button>
                     <Button Type="ButtonType.Default" OnClick="@(() => _model = new())">Reset</Button>
                 </div>
             </Form>
         </div>
+    </DemoCard>
 
-        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
-            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Form Layout</label>
-            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                    @bind="_layout">
-                <option value="@FormLayout.Vertical">Vertical (Stacked)</option>
-                <option value="@FormLayout.Horizontal">Horizontal (Two-column)</option>
-                <option value="@FormLayout.Inline">Inline</option>
-            </select>
+    @* Example 2: Horizontal Form *@
+    <DemoCard Title="Horizontal Form" Description="Labels and fields aligned side-by-side in columns." Code="@_horizontalCode">
+        <div class="max-w-lg p-2">
+            <Form Model="@_model" Layout="FormLayout.Horizontal" OnFinish="HandleFinish">
+                <FormItem Label="Full Name" Required="true">
+                    <Input @bind-Value="_model.Username" />
+                </FormItem>
+                <FormItem Label="Work Email" Required="true">
+                    <Input @bind-Value="_model.Email" />
+                </FormItem>
+                <div class="pt-2 flex justify-end">
+                    <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Save Changes</Button>
+                </div>
+            </Form>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Form Properties" Properties="@_formProps" />
     <ApiTable Title="FormItem Properties" Properties="@_itemProps" />
@@ -66,12 +66,35 @@
     }
 
     private UserLoginForm _model = new();
-    private FormLayout _layout = FormLayout.Vertical;
 
     private void HandleFinish()
     {
         MessageService.Success($"Submitted form for: {_model.Username} ({_model.Email})");
     }
+
+    private const string _verticalCode = """
+        <Form Model="@model" Layout="FormLayout.Vertical" OnFinish="HandleFinish">
+            <FormItem Label="Username" Required="true">
+                <Input @bind-Value="model.Username" />
+            </FormItem>
+            <FormItem Label="Email Address" Required="true">
+                <Input @bind-Value="model.Email" />
+            </FormItem>
+            <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Submit</Button>
+        </Form>
+        """;
+
+    private const string _horizontalCode = """
+        <Form Model="@model" Layout="FormLayout.Horizontal" OnFinish="HandleFinish">
+            <FormItem Label="Full Name" Required="true">
+                <Input @bind-Value="model.Username" />
+            </FormItem>
+            <FormItem Label="Work Email" Required="true">
+                <Input @bind-Value="model.Email" />
+            </FormItem>
+            <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Save</Button>
+        </Form>
+        """;
 
     private readonly ApiTable.ApiProp[] _formProps =
     [

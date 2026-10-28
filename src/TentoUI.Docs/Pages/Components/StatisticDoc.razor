@@ -11,53 +11,71 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Modify metrics, precision, and titles dynamically.</p>
-            </div>
+    @* Example 1: Basic Statistics *@
+    <DemoCard Title="Basic Statistics" Description="Clean numeric metrics for dashboards and reports." Code="@_basicCode">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+            <Statistic Title="Active Users" Value="112893" />
+            <Statistic Title="Account Balance" Value="93245" Precision="2">
+                <Prefix><span class="text-slate-500 mr-1">$</span></Prefix>
+            </Statistic>
+            <Statistic Title="Server Health" Value="99.98">
+                <Suffix><span class="text-slate-400 ml-1">%</span></Suffix>
+            </Statistic>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Statistic Title="@_title" Value="_val" Precision="_precision">
+    @* Example 2: Financial Metrics with Prefix and Suffix *@
+    <DemoCard Title="Financial Metrics" Description="Includes currency prefix and ISO currency suffix tags." Code="@_financeCode">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
+            <Statistic Title="Monthly Recurring Revenue" Value="128450.75" Precision="2">
                 <Prefix><span class="text-emerald-500 mr-1">$</span></Prefix>
                 <Suffix><span class="text-xs text-slate-400 ml-1">USD</span></Suffix>
             </Statistic>
+            <Statistic Title="Customer Acquisition Cost" Value="42.50" Precision="2">
+                <Prefix><span class="text-indigo-500 mr-1">$</span></Prefix>
+                <Suffix><span class="text-xs text-slate-400 ml-1">USD</span></Suffix>
+            </Statistic>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Title</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_title" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Numeric Value</label>
-                <input type="number"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_val" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Decimal Precision</label>
-                <input type="number"
-                       min="0"
-                       max="4"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_precision" />
-            </div>
+    @* Example 3: Performance Trends *@
+    <DemoCard Title="Growth &amp; Feedback Trends" Description="Highlight positive or negative performance indicators." Code="@_growthCode">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
+            <Statistic Title="Feedback Rating" Value="4.8" Precision="1">
+                <Prefix><span class="text-amber-400 mr-1">★</span></Prefix>
+                <Suffix><span class="text-xs text-slate-400 ml-1">/ 5.0</span></Suffix>
+            </Statistic>
+            <Statistic Title="Year-over-Year Growth" Value="24.8" Precision="1">
+                <Prefix><span class="text-emerald-500 mr-1">▲</span></Prefix>
+                <Suffix><span class="text-xs text-emerald-500 ml-1">%</span></Suffix>
+            </Statistic>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Statistic Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string _title = "Monthly Recurring Revenue";
-    private double _val = 128450.75;
-    private int _precision = 2;
+    private const string _basicCode = """
+        <Statistic Title="Active Users" Value="112893" />
+        <Statistic Title="Account Balance" Value="93245" Precision="2">
+            <Prefix><span class="text-slate-500 mr-1">$</span></Prefix>
+        </Statistic>
+        """;
+
+    private const string _financeCode = """
+        <Statistic Title="Monthly Recurring Revenue" Value="128450.75" Precision="2">
+            <Prefix><span class="text-emerald-500 mr-1">$</span></Prefix>
+            <Suffix><span class="text-xs text-slate-400 ml-1">USD</span></Suffix>
+        </Statistic>
+        """;
+
+    private const string _growthCode = """
+        <Statistic Title="Year-over-Year Growth" Value="24.8" Precision="1">
+            <Prefix><span class="text-emerald-500 mr-1">▲</span></Prefix>
+            <Suffix><span class="text-xs text-emerald-500 ml-1">%</span></Suffix>
+        </Statistic>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

@@ -2,50 +2,85 @@
 @inject IJSRuntime JSRuntime
 @inject IMessageService MessageService
 
-<div class="tento-demo-card rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden my-6">
+<div class="tento-demo-card rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden my-6 transition-all">
     <div class="p-6">
         @if (!string.IsNullOrEmpty(Title))
         {
-            <div class="mb-4">
-                <h3 class="text-base font-semibold text-slate-900 dark:text-white">@Title</h3>
-                @if (!string.IsNullOrEmpty(Description))
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">@Title</h3>
+                    @if (!string.IsNullOrEmpty(Description))
+                    {
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@Description</p>
+                    }
+                </div>
+                @if (_isModified)
                 {
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@Description</p>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                        Live Modified
+                    </span>
                 }
             </div>
         }
 
-        <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex flex-wrap items-center gap-4">
-            @ChildContent
+        @* Live Preview Area *@
+        <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 flex flex-wrap items-center gap-4 min-h-[64px]">
+            @if (_isModified && !string.IsNullOrWhiteSpace(_currentCode))
+            {
+                <TentoMarkupRenderer Markup="@_currentCode" Fallback="@ChildContent" />
+            }
+            else
+            {
+                @ChildContent
+            }
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(Code))
-    {
-        <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 py-2 flex items-center justify-between text-xs">
+    @* Action Toolbar *@
+    <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 py-2 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
             <span class="text-slate-400 font-mono text-[11px]">Razor</span>
-            <div class="flex items-center gap-2">
+            @if (_isModified)
+            {
                 <button type="button"
-                        class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
-                        @onclick="CopyCodeAsync">
-                    <Icon Name="@IconNames.Copy" Size="13" />
-                    <span>Copy</span>
+                        class="px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors inline-flex items-center gap-1"
+                        @onclick="ResetCode">
+                    <Icon Name="@IconNames.RefreshCw" Size="11" />
+                    <span>Reset</span>
                 </button>
-                <button type="button"
-                        class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
-                        @onclick="@(() => _showCode = !_showCode)">
-                    <Icon Name="@IconNames.Edit2" Size="13" />
-                    <span>@(_showCode ? "Hide Code" : "Show Code")</span>
-                </button>
-            </div>
+            }
         </div>
 
-        @if (_showCode)
-        {
-            <div class="p-4 bg-slate-950 text-slate-200 text-xs font-mono overflow-x-auto border-t border-slate-800 leading-relaxed selection:bg-primary-600">
-                <pre class="whitespace-pre"><code>@Code.Trim()</code></pre>
+        <div class="flex items-center gap-2">
+            <button type="button"
+                    class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                    @onclick="CopyCodeAsync">
+                <Icon Name="@IconNames.Copy" Size="13" />
+                <span>Copy</span>
+            </button>
+            <button type="button"
+                    class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                    @onclick="@(() => _showEditor = !_showEditor)">
+                <Icon Name="@IconNames.Edit2" Size="13" />
+                <span>@(_showEditor ? "Hide Editor" : "Modify Code")</span>
+            </button>
+        </div>
+    </div>
+
+    @* Interactive Live Code Editor *@
+    @if (_showEditor)
+    {
+        <div class="border-t border-slate-800 bg-slate-950 p-3 space-y-2">
+            <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                <span>Modify code below — preview updates live:</span>
+                <span class="font-mono text-[10px] text-slate-500">live sync enabled</span>
             </div>
-        }
+            <textarea rows="@ComputeRows()"
+                      class="w-full rounded-lg bg-slate-900 text-slate-100 font-mono text-xs p-3 leading-relaxed border border-slate-800 focus:outline-none focus:border-primary-500 selection:bg-primary-600 resize-y"
+                      value="@_currentCode"
+                      @oninput="HandleCodeInput"
+                      placeholder="Type Razor markup here..."></textarea>
+        </div>
     }
 </div>
 
@@ -55,14 +90,45 @@
     [Parameter] public string? Code { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private bool _showCode;
+    private string? _currentCode;
+    private bool _showEditor;
+    private bool _isModified;
+
+    protected override void OnParametersSet()
+    {
+        if (!_isModified)
+        {
+            _currentCode = Code?.Trim();
+        }
+    }
+
+    private void HandleCodeInput(ChangeEventArgs e)
+    {
+        _currentCode = e.Value?.ToString() ?? string.Empty;
+        _isModified = !string.Equals(_currentCode?.Trim(), Code?.Trim(), StringComparison.Ordinal);
+    }
+
+    private void ResetCode()
+    {
+        _currentCode = Code?.Trim();
+        _isModified = false;
+        MessageService.Info("Code reset to original example.");
+    }
+
+    private int ComputeRows()
+    {
+        if (string.IsNullOrEmpty(_currentCode)) return 3;
+        var lines = _currentCode.Split('\n').Length;
+        return Math.Clamp(lines + 1, 3, 16);
+    }
 
     private async Task CopyCodeAsync()
     {
-        if (string.IsNullOrEmpty(Code)) return;
+        var textToCopy = _currentCode ?? Code ?? string.Empty;
+        if (string.IsNullOrEmpty(textToCopy)) return;
         try
         {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Code.Trim());
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", textToCopy.Trim());
             MessageService.Success("Code copied to clipboard!");
         }
         catch

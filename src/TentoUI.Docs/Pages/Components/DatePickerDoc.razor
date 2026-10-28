@@ -11,57 +11,57 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Select dates and inspect formatting outputs dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Selected: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@(_date?.ToString("yyyy-MM-dd") ?? "None")</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xs mx-auto">
+    @* Example 1: Basic DatePicker *@
+    <DemoCard Title="Basic DatePicker" Description="Select a single date using the popup calendar grid." Code="@_basicCode">
+        <div class="max-w-xs p-2 space-y-2">
             <DatePicker @bind-Value="_date"
-                        Format="@_format"
+                        Format="yyyy-MM-dd"
                         Placeholder="Select target date"
-                        AllowClear="_allowClear"
-                        Disabled="_disabled" />
+                        AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Selected: @(_date?.ToString("yyyy-MM-dd") ?? "None")</div>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Format String</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_format">
-                    <option value="yyyy-MM-dd">yyyy-MM-dd</option>
-                    <option value="MM/dd/yyyy">MM/dd/yyyy</option>
-                    <option value="dd.MM.yyyy">dd.MM.yyyy</option>
-                </select>
-            </div>
-            <div class="flex items-center gap-4 pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_allowClear" class="rounded text-primary-600" />
-                    <span>Allow Clear</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 2: Custom Date Format *@
+    <DemoCard Title="Custom Date Formatting" Description="Format strings such as MM/dd/yyyy or dd.MM.yyyy." Code="@_formatCode">
+        <div class="max-w-xs p-2">
+            <DatePicker Value="@DateTime.Today"
+                        Format="dd.MM.yyyy"
+                        Placeholder="dd.MM.yyyy" />
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 3: Disabled State *@
+    <DemoCard Title="Disabled DatePicker" Description="Read-only calendar input that prevents user interaction." Code="@_disabledCode">
+        <div class="max-w-xs p-2">
+            <DatePicker Value="@DateTime.Today"
+                        Disabled="true"
+                        Placeholder="Locked date" />
+        </div>
+    </DemoCard>
 
     <ApiTable Title="DatePicker Properties" Properties="@_props" />
 </div>
 
 @code {
     private DateTime? _date = DateTime.Today;
-    private string _format = "yyyy-MM-dd";
-    private bool _allowClear = true;
-    private bool _disabled;
+
+    private const string _basicCode = """
+        <DatePicker @bind-Value="date"
+                    Format="yyyy-MM-dd"
+                    Placeholder="Select target date"
+                    AllowClear="true" />
+        """;
+
+    private const string _formatCode = """
+        <DatePicker Value="@DateTime.Today"
+                    Format="dd.MM.yyyy" />
+        """;
+
+    private const string _disabledCode = """
+        <DatePicker Value="@DateTime.Today"
+                    Disabled="true" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

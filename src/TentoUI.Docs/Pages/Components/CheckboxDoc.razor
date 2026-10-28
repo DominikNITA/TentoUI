@@ -11,45 +11,68 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle checked and indeterminate states dynamically.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Checked: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_checked</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40">
-            <Checkbox @bind-Checked="_checked"
-                      Indeterminate="_indeterminate"
-                      Disabled="_disabled">
+    @* Example 1: Basic Checkbox *@
+    <DemoCard Title="Basic Checkbox" Description="Two-way boolean binding with interactive toggle." Code="@_basicCode">
+        <div class="flex items-center gap-4 p-2">
+            <Checkbox @bind-Checked="_checked">
                 Accept Terms of Service and Privacy Policy
             </Checkbox>
+            <span class="text-xs text-slate-400 font-mono">Value: @_checked</span>
         </div>
+    </DemoCard>
 
-        <div class="flex items-center gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_indeterminate" class="rounded text-primary-600" />
-                <span>Indeterminate (Partial)</span>
-            </label>
-            <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                <span>Disabled</span>
-            </label>
+    @* Example 2: Indeterminate & Disabled *@
+    <DemoCard Title="Indeterminate &amp; Disabled States" Description="Partial check state for parent nodes and read-only disabled states." Code="@_statesCode">
+        <div class="flex flex-wrap items-center gap-6 p-2">
+            <Checkbox Indeterminate="true">
+                Partially Selected
+            </Checkbox>
+            <Checkbox Disabled="true">
+                Disabled Unchecked
+            </Checkbox>
+            <Checkbox Checked="true" Disabled="true">
+                Disabled Checked
+            </Checkbox>
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 3: Multiple Options *@
+    <DemoCard Title="Feature Selection" Description="Select multiple independent features from a list." Code="@_multipleCode">
+        <div class="space-y-2 p-2">
+            <Checkbox @bind-Checked="_opt1">Automated Cloud Backups</Checkbox>
+            <Checkbox @bind-Checked="_opt2">Sub-domain SSL Certificate</Checkbox>
+            <Checkbox @bind-Checked="_opt3">Dedicated IP Address</Checkbox>
+        </div>
+    </DemoCard>
 
     <ApiTable Title="Checkbox Properties" Properties="@_props" />
 </div>
 
 @code {
     private bool _checked = true;
-    private bool _indeterminate;
-    private bool _disabled;
+    private bool _opt1 = true;
+    private bool _opt2 = true;
+    private bool _opt3;
+
+    private const string _basicCode = """
+        <Checkbox @bind-Checked="isChecked">
+            Accept Terms of Service and Privacy Policy
+        </Checkbox>
+        """;
+
+    private const string _statesCode = """
+        <Checkbox Indeterminate="true">Partially Selected</Checkbox>
+        <Checkbox Disabled="true">Disabled Unchecked</Checkbox>
+        <Checkbox Checked="true" Disabled="true">Disabled Checked</Checkbox>
+        """;
+
+    private const string _multipleCode = """
+        <div class="space-y-2">
+            <Checkbox @bind-Checked="opt1">Automated Cloud Backups</Checkbox>
+            <Checkbox @bind-Checked="opt2">Sub-domain SSL Certificate</Checkbox>
+            <Checkbox @bind-Checked="opt3">Dedicated IP Address</Checkbox>
+        </div>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

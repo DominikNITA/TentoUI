@@ -11,49 +11,50 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Customize empty state text and call-to-action button.</p>
-            </div>
+    @* Example 1: Basic Empty *@
+    <DemoCard Title="Basic Empty State" Description="Default placeholder icon and message." Code="@_basicCode">
+        <div class="p-4">
+            <Empty Description="No Data" />
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Empty Description="@_desc">
-                @if (_showAction)
-                {
-                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">
-                        Create New Record
-                    </Button>
-                }
+    @* Example 2: Empty with Action *@
+    <DemoCard Title="Empty with Action Button" Description="Provides a call-to-action button to guide the user to create their first item." Code="@_actionCode">
+        <div class="p-4">
+            <Empty Description="No projects created yet">
+                <Button Type="ButtonType.Primary" Size="ComponentSize.Small">
+                    Create New Project
+                </Button>
             </Empty>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_desc"
-                       @bind:event="oninput" />
-            </div>
-            <div class="flex items-center pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_showAction" class="rounded text-primary-600" />
-                    <span>Include Call to Action Button</span>
-                </label>
-            </div>
+    @* Example 3: Search Results Empty *@
+    <DemoCard Title="Search Not Found" Description="Contextual message when a filter or search produces zero results." Code="@_searchCode">
+        <div class="p-4">
+            <Empty Description="No records matched your search filters. Try adjusting query terms." />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Empty Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string _desc = "No matching records found in this view.";
-    private bool _showAction = true;
+    private const string _basicCode = """
+        <Empty Description="No Data" />
+        """;
+
+    private const string _actionCode = """
+        <Empty Description="No projects created yet">
+            <Button Type="ButtonType.Primary" Size="ComponentSize.Small">
+                Create New Project
+            </Button>
+        </Empty>
+        """;
+
+    private const string _searchCode = """
+        <Empty Description="No records matched your search filters." />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

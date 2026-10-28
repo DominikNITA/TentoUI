@@ -11,55 +11,93 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Increment counts or toggle red dot notification modes.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Count: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_count</strong>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center gap-8">
-            <Badge Count="_count" Dot="_dot" OverflowCount="_overflowCount">
-                <div class="w-12 h-12 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
-                    <TentoUI.Icon Name="@IconNames.Bell" Size="20" />
+    @* Example 1: Basic Count Badges *@
+    <DemoCard Title="Basic Count Badges" Description="Badges wrapping avatar or card elements to display unread item counts." Code="@_basicCode">
+        <div class="flex items-center gap-6 p-4">
+            <Badge Count="5">
+                <div class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    <Icon Name="@IconNames.Inbox" Size="18" />
                 </div>
             </Badge>
+            <Badge Count="0" ShowZero="true">
+                <div class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    <Icon Name="@IconNames.Bell" Size="18" />
+                </div>
+            </Badge>
+        </div>
+    </DemoCard>
 
-            <div class="flex items-center gap-2">
-                <Button Size="ComponentSize.Small" OnClick="@(() => _count = Math.Max(0, _count - 1))">- 1</Button>
-                <Button Size="ComponentSize.Small" OnClick="@(() => _count++)">+ 1</Button>
-                <Button Size="ComponentSize.Small" OnClick="@(() => _count = 120)">Set 120 (Overflow)</Button>
+    @* Example 2: Overflow Count *@
+    <DemoCard Title="Overflow Count" Description="Displays 99+ when count exceeds the configured overflow limit." Code="@_overflowCode">
+        <div class="flex items-center gap-6 p-4">
+            <Badge Count="120" OverflowCount="99">
+                <div class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    <Icon Name="@IconNames.Bell" Size="18" />
+                </div>
+            </Badge>
+            <Badge Count="1000" OverflowCount="999">
+                <div class="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    <Icon Name="@IconNames.Inbox" Size="18" />
+                </div>
+            </Badge>
+        </div>
+    </DemoCard>
+
+    @* Example 3: Red Dot & Status Badges *@
+    <DemoCard Title="Dot &amp; Status Badges" Description="Red notification dot for unread status, or standalone colored status indicators." Code="@_statusDotCode">
+        <div class="space-y-4 p-4">
+            <div class="flex items-center gap-6">
+                <Badge Dot="true">
+                    <Icon Name="@IconNames.Bell" Size="20" />
+                </Badge>
+                <Badge Dot="true">
+                    <a href="javascript:void(0)" class="text-sm text-primary-600 dark:text-primary-400">Link with Notification</a>
+                </Badge>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 text-xs">
+                <Badge Status="BadgeStatus.Success" Text="Active Service" />
+                <Badge Status="BadgeStatus.Processing" Text="Deploying" />
+                <Badge Status="BadgeStatus.Warning" Text="High Latency" />
+                <Badge Status="BadgeStatus.Error" Text="Service Outage" />
             </div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Max Overflow Count</label>
-                <input type="number"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_overflowCount" />
-            </div>
-            <div class="flex items-center pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_dot" class="rounded text-primary-600" />
-                    <span>Red Dot Only Mode</span>
-                </label>
-            </div>
-        </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Badge Properties" Properties="@_props" />
 </div>
 
 @code {
-    private int _count = 8;
-    private int _overflowCount = 99;
-    private bool _dot;
+    private const string _basicCode = """
+        <Badge Count="5">
+            <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                <Icon Name="@IconNames.Inbox" Size="18" />
+            </div>
+        </Badge>
+        <Badge Count="0" ShowZero="true">
+            <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                <Icon Name="@IconNames.Bell" Size="18" />
+            </div>
+        </Badge>
+        """;
+
+    private const string _overflowCode = """
+        <Badge Count="120" OverflowCount="99">
+            <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                <Icon Name="@IconNames.Bell" Size="18" />
+            </div>
+        </Badge>
+        """;
+
+    private const string _statusDotCode = """
+        <Badge Dot="true">
+            <Icon Name="@IconNames.Bell" Size="20" />
+        </Badge>
+
+        <Badge Status="BadgeStatus.Success" Text="Active Service" />
+        <Badge Status="BadgeStatus.Processing" Text="Deploying" />
+        <Badge Status="BadgeStatus.Warning" Text="High Latency" />
+        <Badge Status="BadgeStatus.Error" Text="Service Outage" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

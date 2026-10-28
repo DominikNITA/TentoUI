@@ -12,78 +12,69 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Click button to open interactive confirmation popover.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Confirmed: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_confirmCount times</strong>
-            </div>
-        </div>
-
-        <div class="p-12 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Popconfirm Title="@_title"
-                        Description="@_desc"
-                        OkText="@_okText"
-                        CancelText="Cancel"
-                        OnConfirm="HandleConfirm"
-                        OnCancel="@(() => MessageService.Info("Action cancelled."))">
+    @* Example 1: Basic Popconfirm *@
+    <DemoCard Title="Basic Popconfirm" Description="Prompt user confirmation before executing a destructive action." Code="@_basicCode">
+        <div class="p-4 flex items-center justify-center">
+            <Popconfirm Title="Delete this task?"
+                        Description="This action cannot be undone."
+                        OkText="Yes, Delete"
+                        CancelText="No"
+                        OnConfirm="@(() => MessageService.Success("Item deleted successfully!"))"
+                        OnCancel="@(() => MessageService.Info("Deletion cancelled."))">
                 <Button Danger="true">
-                    Delete Database Table
+                    Delete Task
                 </Button>
             </Popconfirm>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Title Prompt</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_title" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_desc" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">OK Button Label</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_okText" />
-            </div>
+    @* Example 2: Non-Destructive Action *@
+    <DemoCard Title="Publish Confirmation" Description="Confirming positive operations like publishing or archiving." Code="@_publishCode">
+        <div class="p-4 flex items-center justify-center">
+            <Popconfirm Title="Publish changes to production?"
+                        Description="Live users will see the changes immediately."
+                        OkText="Publish"
+                        CancelText="Review"
+                        OnConfirm="@(() => MessageService.Success("Published!"))">
+                <Button Type="ButtonType.Primary">
+                    Publish Release
+                </Button>
+            </Popconfirm>
         </div>
-    </div>
+    </DemoCard>
 
+    @* API Reference Table *@
     <ApiTable Title="Popconfirm Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string _title = "Permanently delete database table?";
-    private string _desc = "This operation will drop all schema tables and cannot be undone.";
-    private string _okText = "Yes, Drop Table";
-    private int _confirmCount;
+    private const string _basicCode = """
+        <Popconfirm Title="Delete this task?"
+                    Description="This action cannot be undone."
+                    OkText="Yes, Delete"
+                    CancelText="No"
+                    OnConfirm="@HandleDelete">
+            <Button Danger="true">Delete Task</Button>
+        </Popconfirm>
+        """;
 
-    private void HandleConfirm()
-    {
-        _confirmCount++;
-        MessageService.Success("Table dropped successfully!");
-    }
+    private const string _publishCode = """
+        <Popconfirm Title="Publish changes to production?"
+                    Description="Live users will see changes immediately."
+                    OkText="Publish"
+                    OnConfirm="@HandlePublish">
+            <Button Type="ButtonType.Primary">Publish Release</Button>
+        </Popconfirm>
+        """;
 
-    private readonly ApiTable.ApiProp[] _props =
+    private readonly ApiProp[] _props =
     [
-        new("Title", "The title of the confirmation box.", "string", "'Are you sure?'"),
-        new("Description", "Detailed description text.", "string?", "null"),
-        new("OkText", "Text of the Confirm button.", "string", "'Yes'"),
-        new("CancelText", "Text of the Cancel button.", "string", "'No'"),
-        new("Icon", "Icon name to display next to title.", "string", "IconNames.AlertCircle"),
-        new("Disabled", "Whether clicking target button will open confirmation box.", "bool", "false"),
-        new("OnConfirm", "Callback executed when OK button is clicked.", "EventCallback", "null"),
-        new("OnCancel", "Callback executed when Cancel button is clicked.", "EventCallback", "null"),
-        new("ChildContent", "Target element triggering the confirmation box.", "RenderFragment?", "null")
+        new("Title", "Confirmation title question.", "string", "-"),
+        new("Description", "Detailed explanation text.", "string?", "null"),
+        new("OkText", "Label for confirmation OK button.", "string", "OK"),
+        new("CancelText", "Label for cancel button.", "string", "Cancel"),
+        new("OnConfirm", "Callback when OK is confirmed.", "EventCallback", "null"),
+        new("OnCancel", "Callback when Cancel is clicked.", "EventCallback", "null"),
+        new("ChildContent", "Trigger element wrapped by the popconfirm.", "RenderFragment?", "null")
     ];
 }

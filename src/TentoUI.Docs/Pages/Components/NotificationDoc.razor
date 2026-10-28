@@ -12,69 +12,61 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Trigger corner notification banners with custom titles and placement.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex flex-wrap items-center justify-center gap-3">
-            <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success(_title, _desc, _duration))">
-                Trigger Success Notice
+    @* Example 1: Notification Types *@
+    <DemoCard Title="Notification Types" Description="Trigger corner notifications for Success, Info, Warning, and Error events." Code="@_typesCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success("Deployment Finished", "All services were verified and deployed successfully."))">
+                Success Notice
             </Button>
-            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info(_title, _desc, _duration))">
-                Trigger Info Notice
+            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info("New Updates Available", "A new version of the client library is available."))">
+                Info Notice
             </Button>
-            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Warning(_title, _desc, _duration))">
-                Trigger Warning Notice
+            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Warning("Quota Threshold", "You have used 85% of your storage limit."))">
+                Warning Notice
             </Button>
-            <Button Danger="true" OnClick="@(() => NotificationService.Error(_title, _desc, _duration))">
-                Trigger Error Notice
+            <Button Danger="true" OnClick="@(() => NotificationService.Error("Build Failed", "Compilation timed out after 300 seconds."))">
+                Error Notice
             </Button>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Notification Title</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_title" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Description Body</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_desc" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Auto-Dismiss Duration (s)</label>
-                <input type="number"
-                       min="1"
-                       max="15"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_duration" />
-            </div>
+    @* Example 2: Extended Duration *@
+    <DemoCard Title="Persistent / Custom Duration" Description="Customize the notification auto-dismiss delay." Code="@_durationCode">
+        <div class="flex items-center gap-3">
+            <Button OnClick="@(() => NotificationService.Info("Security Alert", "A new device logged in from Frankfurt, Germany.", 10))">
+                10-Second Notice
+            </Button>
         </div>
-    </div>
+    </DemoCard>
 
-    <ApiTable Title="INotificationService Methods" Properties="@_props" />
+    @* API Reference Table *@
+    <ApiTable Title="INotificationService Methods" Properties="@_serviceProps" />
 </div>
 
 @code {
-    private string _title = "Deployment Complete";
-    private string _desc = "All cloud worker nodes have successfully upgraded to .NET 10.";
-    private double _duration = 4.5;
+    private const string _typesCode = """
+        <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success("Deployment Finished", "All services were verified and deployed successfully."))">
+            Success Notice
+        </Button>
+        <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info("New Updates Available", "A new version is available."))">
+            Info Notice
+        </Button>
+        <Button Danger="true" OnClick="@(() => NotificationService.Error("Build Failed", "Compilation timed out."))">
+            Error Notice
+        </Button>
+        """;
 
-    private readonly ApiTable.ApiProp[] _props =
+    private const string _durationCode = """
+        <Button OnClick="@(() => NotificationService.Info("Security Alert", "A new device logged in.", 10))">
+            10-Second Notice
+        </Button>
+        """;
+
+    private readonly ApiProp[] _serviceProps =
     [
-        new("Success(message, description, duration)", "Display corner success notification.", "void", "duration = 4.5"),
-        new("Info(message, description, duration)", "Display corner information notification.", "void", "duration = 4.5"),
-        new("Warning(message, description, duration)", "Display corner warning notification.", "void", "duration = 4.5"),
-        new("Error(message, description, duration)", "Display corner error notification.", "void", "duration = 4.5"),
-        new("Open(config)", "Display notification with full config (placement, key, close button).", "void", "-"),
-        new("Destroy()", "Dismiss all active notifications immediately.", "void", "-")
+        new("Success", "Opens green success notification card with title and body.", "void (string title, string description, double? duration = 4.5)", "-"),
+        new("Info", "Opens blue informational notification card.", "void (string title, string description, double? duration = 4.5)", "-"),
+        new("Warning", "Opens amber warning notification card.", "void (string title, string description, double? duration = 4.5)", "-"),
+        new("Error", "Opens red error notification card.", "void (string title, string description, double? duration = 4.5)", "-")
     ];
 }

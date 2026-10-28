@@ -11,64 +11,88 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Open drawer from Right, Left, Top, or Bottom.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
-                Open @_placement Drawer
+    @* Example 1: Basic Drawer *@
+    <DemoCard Title="Basic Drawer" Description="Standard sliding drawer panel triggered by an action button." Code="@_basicCode">
+        <div>
+            <Button Type="ButtonType.Primary" OnClick="@(() => _openBasic = true)">
+                Open Right Drawer
             </Button>
 
-            <Drawer @bind-Open="_open"
+            <Drawer @bind-Open="_openBasic"
                     Title="Workspace Configurations"
-                    Placement="_placement"
+                    Placement="DrawerPlacement.Right"
                     Width="360px">
                 <div class="space-y-4 text-xs text-slate-600 dark:text-slate-300">
                     <p>Customize project repository and notification webhooks.</p>
                     <Input Placeholder="Webhook URL" />
-                    <Button Type="ButtonType.Primary" Block="true" OnClick="@(() => _open = false)">
+                    <Button Type="ButtonType.Primary" Block="true" OnClick="@(() => _openBasic = false)">
                         Save Settings
                     </Button>
                 </div>
             </Drawer>
         </div>
+    </DemoCard>
 
-        <div class="max-w-xs text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
-            <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Slide Placement</label>
-            <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                    @bind="_placement">
-                <option value="@DrawerPlacement.Right">Right</option>
-                <option value="@DrawerPlacement.Left">Left</option>
-                <option value="@DrawerPlacement.Top">Top</option>
-                <option value="@DrawerPlacement.Bottom">Bottom</option>
-            </select>
+    @* Example 2: Placements (Left / Top / Bottom) *@
+    <DemoCard Title="Alternative Placements" Description="Drawers can slide out from Left, Top, or Bottom screen edges." Code="@_leftCode">
+        <div class="flex items-center gap-3">
+            <Button OnClick="@(() => _openLeft = true)">Slide from Left</Button>
+
+            <Drawer @bind-Open="_openLeft"
+                    Title="Navigation Menu"
+                    Placement="DrawerPlacement.Left"
+                    Width="280px">
+                <div class="space-y-2 text-xs">
+                    <p class="font-semibold text-slate-900 dark:text-white">Quick Links</p>
+                    <ul class="space-y-1 text-slate-600 dark:text-slate-400">
+                        <li><a href="#" class="hover:text-primary-600">Dashboard</a></li>
+                        <li><a href="#" class="hover:text-primary-600">Analytics</a></li>
+                        <li><a href="#" class="hover:text-primary-600">Settings</a></li>
+                    </ul>
+                </div>
+            </Drawer>
         </div>
-    </div>
+    </DemoCard>
 
+    @* API Reference Table *@
     <ApiTable Title="Drawer Properties" Properties="@_props" />
 </div>
 
 @code {
-    private bool _open;
-    private DrawerPlacement _placement = DrawerPlacement.Right;
+    private bool _openBasic;
+    private bool _openLeft;
 
-    private readonly ApiTable.ApiProp[] _props =
+    private const string _basicCode = """
+        <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
+            Open Drawer
+        </Button>
+
+        <Drawer @bind-Open="_open"
+                Title="Workspace Configurations"
+                Placement="DrawerPlacement.Right"
+                Width="360px">
+            <p>Drawer content goes here...</p>
+        </Drawer>
+        """;
+
+    private const string _leftCode = """
+        <Drawer @bind-Open="_openLeft"
+                Title="Navigation Menu"
+                Placement="DrawerPlacement.Left"
+                Width="280px">
+            <p>Navigation links...</p>
+        </Drawer>
+        """;
+
+    private readonly ApiProp[] _props =
     [
-        new("Open", "Whether the Drawer dialog is visible (bindable via @bind-Open).", "bool", "false"),
-        new("Title", "The title of the Drawer.", "string?", "null"),
-        new("Placement", "The direction from which Drawer slides out (Right, Left, Top, Bottom).", "DrawerPlacement", "DrawerPlacement.Right"),
-        new("Width", "Width of the Drawer dialog (when Placement is Right or Left).", "string?", "'378px'"),
-        new("Height", "Height of the Drawer dialog (when Placement is Top or Bottom).", "string?", "'378px'"),
-        new("Closable", "Whether a close (x) button is visible.", "bool", "true"),
-        new("MaskClosable", "Clicking on the backdrop mask closes the Drawer.", "bool", "true"),
-        new("Extra", "Extra actions in the title bar.", "RenderFragment?", "null"),
-        new("Footer", "The footer actions for the Drawer.", "RenderFragment?", "null"),
-        new("ChildContent", "Body content of the Drawer.", "RenderFragment?", "null")
+        new("Open", "Whether the drawer dialog is visible (two-way bindable).", "bool", "false"),
+        new("Title", "The header title of the drawer.", "string?", "null"),
+        new("Placement", "Screen edge: Right, Left, Top, Bottom.", "DrawerPlacement", "DrawerPlacement.Right"),
+        new("Width", "Width of horizontal drawer (e.g. '360px').", "string", "378px"),
+        new("Height", "Height of vertical drawer (e.g. '300px').", "string", "378px"),
+        new("Closable", "Whether to show dismiss close 'X' icon.", "bool", "true"),
+        new("MaskClosable", "Clicking backdrop mask closes the drawer.", "bool", "true"),
+        new("ChildContent", "Body content rendered inside drawer.", "RenderFragment?", "null")
     ];
 }

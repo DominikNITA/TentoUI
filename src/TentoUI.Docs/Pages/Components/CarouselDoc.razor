@@ -11,21 +11,10 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Toggle autoplay, arrow navigation, and dot indicators live.</p>
-            </div>
-        </div>
-
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-lg mx-auto">
-            <Carousel AutoPlay="_autoPlay"
-                      AutoPlaySpeed="_speed"
-                      Dots="_dots"
-                      Arrows="_arrows"
-                      DotPosition="_dotPos">
+    @* Example 1: Basic Autoplay Carousel *@
+    <DemoCard Title="Autoplay Carousel with Arrows" Description="Cycles automatically through slides with navigation arrows and bottom dots." Code="@_autoplayCode">
+        <div class="max-w-xl mx-auto">
+            <Carousel AutoPlay="true" AutoPlaySpeed="4000" Dots="true" Arrows="true">
                 <CarouselPanel>
                     <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 text-center">
                         <h4 class="font-bold text-lg mb-1">Modern Blazor UI</h4>
@@ -46,51 +35,62 @@
                 </CarouselPanel>
             </Carousel>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Dot Position</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_dotPos">
-                    <option value="@CarouselDotPosition.Bottom">Bottom</option>
-                    <option value="@CarouselDotPosition.Top">Top</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Speed (ms)</label>
-                <input type="number"
-                       min="1000"
-                       max="10000"
-                       step="500"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_speed" />
-            </div>
-            <div class="sm:col-span-2 flex items-center gap-4 pt-2">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_autoPlay" class="rounded text-primary-600" />
-                    <span>Auto Play</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_dots" class="rounded text-primary-600" />
-                    <span>Show Indicator Dots</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_arrows" class="rounded text-primary-600" />
-                    <span>Show Prev / Next Arrows</span>
-                </label>
-            </div>
+    @* Example 2: Static Carousel with Top Dots *@
+    <DemoCard Title="Top Indicator Dots" Description="Carousel with indicator dots placed at the top position." Code="@_topDotsCode">
+        <div class="max-w-xl mx-auto">
+            <Carousel Dots="true" DotPosition="CarouselDotPosition.Top">
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-800 text-white font-semibold">
+                        Slide 1: Overview
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-700 text-white font-semibold">
+                        Slide 2: Features
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-600 text-white font-semibold">
+                        Slide 3: Documentation
+                    </div>
+                </CarouselPanel>
+            </Carousel>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Carousel Properties" Properties="@_props" />
 </div>
 
 @code {
-    private bool _autoPlay = true;
-    private int _speed = 3500;
-    private bool _dots = true;
-    private bool _arrows = true;
-    private CarouselDotPosition _dotPos = CarouselDotPosition.Bottom;
+    private const string _autoplayCode = """
+        <Carousel AutoPlay="true" AutoPlaySpeed="4000" Dots="true" Arrows="true">
+            <CarouselPanel>
+                <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
+                    <h4 class="font-bold text-lg">Modern Blazor UI</h4>
+                    <p class="text-xs">Tailwind CSS powered components</p>
+                </div>
+            </CarouselPanel>
+            <CarouselPanel>
+                <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6">
+                    <h4 class="font-bold text-lg">WebAssembly Ready</h4>
+                    <p class="text-xs">Zero server prerequisites</p>
+                </div>
+            </CarouselPanel>
+        </Carousel>
+        """;
+
+    private const string _topDotsCode = """
+        <Carousel Dots="true" DotPosition="CarouselDotPosition.Top">
+            <CarouselPanel>
+                <div class="h-36 rounded-lg flex items-center justify-center bg-slate-800 text-white">Slide 1</div>
+            </CarouselPanel>
+            <CarouselPanel>
+                <div class="h-36 rounded-lg flex items-center justify-center bg-slate-700 text-white">Slide 2</div>
+            </CarouselPanel>
+        </Carousel>
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [
@@ -98,7 +98,7 @@
         new("AutoPlaySpeed", "Duration between slide transitions in milliseconds.", "int", "3000"),
         new("Dots", "Whether to show pagination indicator dots.", "bool", "true"),
         new("Arrows", "Whether to show next/previous arrow navigation buttons.", "bool", "false"),
-        new("DotPosition", "Position of dots (Top, Bottom, Left, Right).", "CarouselDotPosition", "CarouselDotPosition.Bottom"),
+        new("DotPosition", "Position of dots indicator (Top, Bottom, Left, Right).", "CarouselDotPosition", "CarouselDotPosition.Bottom"),
         new("ChildContent", "CarouselPanel child elements.", "RenderFragment?", "null")
     ];
 }

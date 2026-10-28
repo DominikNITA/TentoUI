@@ -12,60 +12,58 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Type text to generate QR code in real-time, adjust size, or test expired state.</p>
-            </div>
+    @* Example 1: Basic QR Code *@
+    <DemoCard Title="Basic QR Code" Description="Generates instant client-side QR codes for URLs or text data." Code="@_basicCode">
+        <div class="p-6 flex items-center justify-center">
+            <QRCode Value="https://github.com/dominik/TentoUI" Size="140" />
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <QRCode Value="@_value"
-                    Size="_size"
-                    Color="@_color"
-                    Status="_status"
-                    OnRefresh="@(() => { _status = QRCodeStatus.Active; MessageService.Success("QR code refreshed!"); })" />
+    @* Example 2: Custom Sizing & Color *@
+    <DemoCard Title="Custom Size &amp; Colors" Description="Control dimensions and color accents to suit your branding." Code="@_colorsCode">
+        <div class="p-6 flex flex-wrap items-center justify-center gap-8">
+            <QRCode Value="https://tentoui.dev/docs" Size="120" Color="#2563eb" />
+            <QRCode Value="https://tentoui.dev/themes" Size="120" Color="#059669" />
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Encoded Value</label>
-                <input type="text"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_value"
-                       @bind:event="oninput" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Dimension Size (px)</label>
-                <input type="number"
-                       min="96"
-                       max="256"
-                       step="16"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_size" />
-            </div>
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Status Overlay</label>
-                <select class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                        @bind="_status">
-                    <option value="@QRCodeStatus.Active">Active</option>
-                    <option value="@QRCodeStatus.Loading">Loading</option>
-                    <option value="@QRCodeStatus.Expired">Expired (Refresh button)</option>
-                </select>
-            </div>
+    @* Example 3: Expired State *@
+    <DemoCard Title="Status Overlays (Expired / Loading)" Description="Includes built-in interactive refresh overlay when a time-sensitive code expires." Code="@_statusCode">
+        <div class="p-6 flex items-center justify-center">
+            <QRCode Value="https://tentoui.dev/auth/session"
+                    Size="140"
+                    Status="_qrStatus"
+                    OnRefresh="HandleRefresh" />
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="QRCode Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string _value = "https://github.com/dominik/TentoUI";
-    private int _size = 140;
-    private string _color = "#0f172a";
-    private QRCodeStatus _status = QRCodeStatus.Active;
+    private QRCodeStatus _qrStatus = QRCodeStatus.Expired;
+
+    private void HandleRefresh()
+    {
+        _qrStatus = QRCodeStatus.Active;
+        MessageService.Success("QR code refreshed successfully!");
+    }
+
+    private const string _basicCode = """
+        <QRCode Value="https://github.com/dominik/TentoUI" Size="140" />
+        """;
+
+    private const string _colorsCode = """
+        <QRCode Value="https://tentoui.dev/docs" Size="120" Color="#2563eb" />
+        <QRCode Value="https://tentoui.dev/themes" Size="120" Color="#059669" />
+        """;
+
+    private const string _statusCode = """
+        <QRCode Value="https://tentoui.dev/auth/session"
+                Size="140"
+                Status="QRCodeStatus.Expired"
+                OnRefresh="HandleRefresh" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

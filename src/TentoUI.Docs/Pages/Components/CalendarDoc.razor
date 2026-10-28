@@ -12,31 +12,42 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Click dates on the calendar to update the selected date live.</p>
+    @* Example 1: Basic Calendar *@
+    <DemoCard Title="Basic Calendar" Description="Full month grid view with two-way date binding and date click notification." Code="@_basicCode">
+        <div class="max-w-xl mx-auto space-y-3">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+                Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedDate.ToString("yyyy-MM-dd")</strong>
             </div>
-            <div class="text-xs text-slate-400">
-                Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono text-sm">@_selectedDate.ToString("yyyy-MM-dd")</strong>
-            </div>
-        </div>
-
-        <div class="p-4 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 max-w-xl mx-auto">
             <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <Calendar @bind-Value="_selectedDate"
                           OnSelect="@(d => MessageService.Info($"Selected date: {d:yyyy-MM-dd}"))" />
             </div>
         </div>
-    </div>
+    </DemoCard>
+
+    @* Example 2: Static Month Display *@
+    <DemoCard Title="Stand-alone Month View" Description="Calendar container embedded cleanly inside dashboard cards." Code="@_embeddedCode">
+        <div class="max-w-md mx-auto">
+            <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                <Calendar Value="@DateOnly.FromDateTime(DateTime.Today)" />
+            </div>
+        </div>
+    </DemoCard>
 
     <ApiTable Title="Calendar Properties" Properties="@_props" />
 </div>
 
 @code {
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
+
+    private const string _basicCode = """
+        <Calendar @bind-Value="selectedDate"
+                  OnSelect="@(d => MessageService.Info($"Selected: {d:yyyy-MM-dd}"))" />
+        """;
+
+    private const string _embeddedCode = """
+        <Calendar Value="@DateOnly.FromDateTime(DateTime.Today)" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

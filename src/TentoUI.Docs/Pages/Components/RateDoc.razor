@@ -11,61 +11,48 @@
         </p>
     </div>
 
-    @* Interactive Playground *@
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden p-6 space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white">Interactive Playground</h3>
-                <p class="text-xs text-slate-400">Click stars to evaluate and toggle read-only / clear options.</p>
-            </div>
-            <div class="text-xs text-slate-400">
-                Score: <strong class="text-amber-500 font-mono text-sm">@_score / @_count</strong>
-            </div>
+    @* Example 1: Basic Rate *@
+    <DemoCard Title="Basic Star Rating" Description="Interactive star rating with two-way integer binding." Code="@_basicCode">
+        <div class="flex items-center gap-4 p-2">
+            <Rate @bind-Value="_score" Count="5" AllowClear="true" />
+            <span class="text-xs text-amber-500 font-bold font-mono">@_score / 5 Stars</span>
         </div>
+    </DemoCard>
 
-        <div class="p-8 rounded-lg border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 flex items-center justify-center">
-            <Rate @bind-Value="_score"
-                  Count="_count"
-                  AllowClear="_allowClear"
-                  Disabled="_disabled"
-                  ReadOnly="_readOnly" />
+    @* Example 2: Read-only Score *@
+    <DemoCard Title="Read-only Score Display" Description="Display fixed customer evaluation scores without click modifications." Code="@_readOnlyCode">
+        <div class="flex items-center gap-4 p-2">
+            <Rate Value="4" ReadOnly="true" />
+            <span class="text-xs text-slate-500">(4.0 / 5.0 from 1,248 reviews)</span>
         </div>
+    </DemoCard>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
-            <div>
-                <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Star Count</label>
-                <input type="number"
-                       min="3"
-                       max="10"
-                       class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-xs text-slate-800 dark:text-slate-200"
-                       @bind="_count" />
-            </div>
-            <div class="flex items-center gap-4 pt-5">
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_allowClear" class="rounded text-primary-600" />
-                    <span>Allow Clear</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_readOnly" class="rounded text-primary-600" />
-                    <span>Read Only</span>
-                </label>
-                <label class="flex items-center gap-1.5 font-medium cursor-pointer text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" @bind="_disabled" class="rounded text-primary-600" />
-                    <span>Disabled</span>
-                </label>
-            </div>
+    @* Example 3: 10 Stars Scale *@
+    <DemoCard Title="10 Star Scale" Description="Expanded 10-star evaluation scale for granular Net Promoter Scores." Code="@_tenStarsCode">
+        <div class="p-2 space-y-2">
+            <Rate @bind-Value="_npsScore" Count="10" />
+            <span class="text-xs text-slate-400 font-mono">NPS Rating: @_npsScore / 10</span>
         </div>
-    </div>
+    </DemoCard>
 
     <ApiTable Title="Rate Properties" Properties="@_props" />
 </div>
 
 @code {
     private int _score = 4;
-    private int _count = 5;
-    private bool _allowClear = true;
-    private bool _readOnly;
-    private bool _disabled;
+    private int _npsScore = 8;
+
+    private const string _basicCode = """
+        <Rate @bind-Value="score" Count="5" AllowClear="true" />
+        """;
+
+    private const string _readOnlyCode = """
+        <Rate Value="4" ReadOnly="true" />
+        """;
+
+    private const string _tenStarsCode = """
+        <Rate @bind-Value="npsScore" Count="10" />
+        """;
 
     private readonly ApiTable.ApiProp[] _props =
     [

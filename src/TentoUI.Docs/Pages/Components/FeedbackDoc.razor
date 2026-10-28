@@ -1,51 +1,49 @@
-@page "/components/notification"
+@page "/components/feedback"
 @namespace TentoUI.Docs.Pages.Components
-@inject INotificationService NotificationService
-@inject IMessageService MessageService
 
-<PageTitle>Notification &amp; Message - TentoUI</PageTitle>
+<PageTitle>Feedback - TentoUI</PageTitle>
 
 <div class="max-w-4xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Notification &amp; Message</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Feedback</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Toast messages and rich corner notifications for application feedback.
+            Visual feedback indicators including progress bars, alert banners, loading spinners, and skeleton placeholders.
         </p>
     </div>
 
-    <DemoCard Title="Notification Service" Description="Rich notification cards in corner with titles, descriptions, and auto-dismiss." Code="@_notifCode">
-        <div class="flex flex-wrap items-center gap-2">
-            <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success("Deploy Completed", "Deployment #142 finished successfully."))">
-                Success
-            </Button>
-            <Button Type="ButtonType.Default" OnClick="@(() => NotificationService.Info("Notice", "New system update available."))">
-                Info
-            </Button>
-            <Button Type="ButtonType.Default" Danger="true" OnClick="@(() => NotificationService.Error("Action Failed", "Database connection timed out."))">
-                Error
-            </Button>
+    <DemoCard Title="Alert Banners" Description="Static inline feedback messages with status icons." Code="@_alertCode">
+        <div class="space-y-3">
+            <Alert Type="AlertType.Success" Message="Success Tip" Description="Detailed explanation of the successful operation." ShowIcon="true" Closable="true" />
+            <Alert Type="AlertType.Info" Message="Informational Note" ShowIcon="true" />
+            <Alert Type="AlertType.Warning" Message="Warning: Storage approaching 90% capacity" ShowIcon="true" />
+            <Alert Type="AlertType.Error" Message="Error Encountered" Description="Unable to establish connection with primary replica." ShowIcon="true" />
         </div>
     </DemoCard>
 
-    <DemoCard Title="Message Toasts" Description="Lightweight feedback prompts centered at top of viewport." Code="@_msgCode">
-        <div class="flex flex-wrap items-center gap-2">
-            <Button OnClick="@(() => MessageService.Success("Profile updated successfully!"))">Success Toast</Button>
-            <Button OnClick="@(() => MessageService.Warning("Please verify your email address."))">Warning Toast</Button>
-            <Button OnClick="@(() => MessageService.Error("Failed to save changes."))">Error Toast</Button>
+    <DemoCard Title="Progress Indicators" Description="Linear progress bars with status and custom percentages." Code="@_progressCode">
+        <div class="space-y-4 max-w-md">
+            <Progress Percent="75" />
+            <Progress Percent="100" Status="ProgressStatus.Success" />
+            <Progress Percent="45" Status="ProgressStatus.Exception" />
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Skeleton Placeholders" Description="Provide a clean loading state when waiting for remote data." Code="@_skeletonCode">
+        <div class="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 max-w-md">
+            <Skeleton Active="true" Rows="3" Avatar="true" />
         </div>
     </DemoCard>
 </div>
 
 @code {
-    private const string _notifCode = @"@inject INotificationService NotificationService
+    private const string _alertCode = @"<Alert Type=""AlertType.Success"" Message=""Success Tip"" ShowIcon=""true"" Closable=""true"" />
+<Alert Type=""AlertType.Info"" Message=""Informational Note"" ShowIcon=""true"" />
+<Alert Type=""AlertType.Warning"" Message=""Warning"" ShowIcon=""true"" />
+<Alert Type=""AlertType.Error"" Message=""Error"" ShowIcon=""true"" />";
 
-NotificationService.Success(""Deploy Completed"", ""Deployment #142 finished successfully."");
-NotificationService.Info(""Notice"", ""New system update available."");
-NotificationService.Error(""Action Failed"", ""Database connection timed out."");";
+    private const string _progressCode = @"<Progress Percent=""75"" />
+<Progress Percent=""100"" Status=""ProgressStatus.Success"" />
+<Progress Percent=""45"" Status=""ProgressStatus.Exception"" />";
 
-    private const string _msgCode = @"@inject IMessageService MessageService
-
-MessageService.Success(""Profile updated successfully!"");
-MessageService.Warning(""Please verify your email address."");
-MessageService.Error(""Failed to save changes."");";
+    private const string _skeletonCode = @"<Skeleton Active=""true"" Rows=""3"" Avatar=""true"" />";
 }

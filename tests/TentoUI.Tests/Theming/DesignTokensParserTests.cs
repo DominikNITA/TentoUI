@@ -19,6 +19,12 @@ public class DesignTokensParserTests
           text: "#3c3c3c"
           text-muted: "#777777"
           accent: "#1cb0f6"
+          dark:
+            primary: "#58cc02"
+            background: "#131f24"
+            surface: "#18282e"
+            text: "#f7f7f7"
+            text-muted: "#8899a6"
 
         typography:
           display:
@@ -54,6 +60,13 @@ public class DesignTokensParserTests
         Assert.Equal("#1cb0f6", tokens.AccentColor);
         Assert.Equal("12px", tokens.BorderRadius);
         Assert.Equal("duolingo-sans, sans-serif", tokens.FontFamily);
+
+        // Dark variants
+        Assert.Equal("#58cc02", tokens.DarkPrimaryColor);
+        Assert.Equal("#131f24", tokens.DarkBackgroundColor);
+        Assert.Equal("#18282e", tokens.DarkSurfaceColor);
+        Assert.Equal("#f7f7f7", tokens.DarkTextColor);
+        Assert.Equal("#8899a6", tokens.DarkTextMutedColor);
     }
 
     [Fact]
@@ -69,10 +82,59 @@ public class DesignTokensParserTests
         Assert.Equal("12px", theme.BorderRadius);
         Assert.Equal("duolingo-sans, sans-serif", theme.FontFamily);
 
-        var style = theme.ToCssStyle();
-        Assert.Contains("--tento-primary-500: #a5ed6e", style);
-        Assert.Contains("--tento-bg-app: #ddf4ff", style);
-        Assert.Contains("--tento-radius-md: 12px", style);
+        // Dark mode disabled: should emit light tokens
+        theme.DarkMode = false;
+        var lightStyle = theme.ToCssStyle();
+        Assert.Contains("--tento-primary-500: #a5ed6e", lightStyle);
+        Assert.Contains("--tento-bg-app: #ddf4ff", lightStyle);
+        Assert.Contains("--tento-radius-md: 12px", lightStyle);
+
+        // Dark mode enabled: should emit dark variant tokens
+        theme.DarkMode = true;
+        var darkStyle = theme.ToCssStyle();
+        Assert.Contains("--tento-primary-500: #58cc02", darkStyle);
+        Assert.Contains("--tento-bg-app: #131f24", darkStyle);
+        Assert.Contains("--tento-bg-surface: #18282e", darkStyle);
+        Assert.Contains("--tento-text-base: #f7f7f7", darkStyle);
+    }
+
+    [Fact]
+    public void BentoTheme_DirectDarkVariant_Overrides_FallbackWhenNull()
+    {
+        var theme = new TentoTheme
+        {
+            PrimaryColor = "#2563eb",
+            AppBgColor = "#f8fafc",
+            Dark =
+            {
+                PrimaryColor = "#60a5fa",
+                AppBgColor = "#0f172a"
+            }
+        };
+
+        theme.DarkMode = false;
+        Assert.Contains("--tento-primary-500: #2563eb", theme.ToCssStyle());
+        Assert.Contains("--tento-bg-app: #f8fafc", theme.ToCssStyle());
+
+        theme.DarkMode = true;
+        Assert.Contains("--tento-primary-500: #60a5fa", theme.ToCssStyle());
+        Assert.Contains("--tento-bg-app: #0f172a", theme.ToCssStyle());
+    }
+
+    [Fact]
+    public void BentoTheme_DarkVariant_FallsBackToLight_WhenDarkNotSpecified()
+    {
+        var theme = new TentoTheme
+        {
+            PrimaryColor = "#2563eb",
+            SuccessColor = "#10b981",
+            DarkMode = true
+        };
+
+        // When Dark.PrimaryColor is not set, it should fallback to PrimaryColor
+        var darkStyle = theme.ToCssStyle();
+        Assert.Contains("--tento-primary-500: #2563eb", darkStyle);
+        Assert.Contains("--tento-success: #10b981", darkStyle);
     }
 
     [Fact]
@@ -82,11 +144,15 @@ public class DesignTokensParserTests
 
         var csharp = tokens.ToCSharpCode();
         Assert.Contains("theme.PrimaryColor = \"#a5ed6e\";", csharp);
+        Assert.Contains("theme.Dark.PrimaryColor = \"#58cc02\";", csharp);
 
         var css = tokens.ToCssVariables();
         Assert.Contains("--tento-primary-500: #a5ed6e;", css);
+        Assert.Contains(".dark, [data-theme=\"dark\"]", css);
+        Assert.Contains("--tento-primary-500: #58cc02;", css);
 
         var json = tokens.ToJsonConfig();
         Assert.Contains("\"PrimaryColor\": \"#a5ed6e\"", json);
+        Assert.Contains("\"Dark\"", json);
     }
 }

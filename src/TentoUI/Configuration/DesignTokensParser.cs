@@ -18,6 +18,15 @@ public record DesignTokens(
     string? SuccessColor = null,
     string? WarningColor = null,
     string? ErrorColor = null,
+    string? DarkPrimaryColor = null,
+    string? DarkBackgroundColor = null,
+    string? DarkSurfaceColor = null,
+    string? DarkTextColor = null,
+    string? DarkTextMutedColor = null,
+    string? DarkAccentColor = null,
+    string? DarkSuccessColor = null,
+    string? DarkWarningColor = null,
+    string? DarkErrorColor = null,
     string? BorderRadius = null,
     string? FontFamily = null,
     Dictionary<string, string>? AdditionalTokens = null);
@@ -48,6 +57,7 @@ public static class DesignTokensParser
 
         var lines = yamlContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
         var currentSection = "";
+        var inDarkSubsection = false;
         var name = "";
         var description = "";
         var primary = "";
@@ -59,6 +69,18 @@ public static class DesignTokensParser
         var success = "";
         var warning = "";
         var error = "";
+
+        // Dark variants
+        var darkPrimary = "";
+        var darkBg = "";
+        var darkSurface = "";
+        var darkText = "";
+        var darkTextMuted = "";
+        var darkAccent = "";
+        var darkSuccess = "";
+        var darkWarning = "";
+        var darkError = "";
+
         var radius = "";
         var font = "";
         var additional = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -69,20 +91,45 @@ public static class DesignTokensParser
             if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
                 continue;
 
-            // Indentation determines nesting
             var indent = rawLine.Length - rawLine.TrimStart().Length;
             var trimmed = line.Trim();
 
             if (indent == 0 && trimmed.EndsWith(':'))
             {
                 currentSection = trimmed[..^1].Trim().ToLowerInvariant();
+                inDarkSubsection = (currentSection == "dark");
                 continue;
+            }
+
+            if (trimmed.EndsWith(':'))
+            {
+                var subKey = trimmed[..^1].Trim().ToLowerInvariant();
+                if (subKey == "dark")
+                {
+                    inDarkSubsection = true;
+                    continue;
+                }
+            }
+
+            // If we are at outer indentation level, reset sub-section
+            if (indent <= 2 && inDarkSubsection && !trimmed.StartsWith("dark", StringComparison.OrdinalIgnoreCase))
+            {
+                // check if indent has decreased back to section level
+                if (indent == 2 && currentSection == "colors" && trimmed.Contains(':'))
+                {
+                    // If line is not indented under dark:, leave dark subsection
+                    // Note: child of colors is indent 2, child of dark under colors is indent 4
+                    if (rawLine.TakeWhile(char.IsWhiteSpace).Count() <= 2)
+                    {
+                        inDarkSubsection = false;
+                    }
+                }
             }
 
             var colonIdx = trimmed.IndexOf(':');
             if (colonIdx > 0)
             {
-                var key = trimmed[..colonIdx].Trim().ToLowerInvariant();
+                var key = trimmed[..colonIdx].Trim().ToLowerInvariant().Replace('_', '-');
                 var val = trimmed[(colonIdx + 1)..].Trim().Trim('"', '\'');
 
                 if (indent == 0)
@@ -90,23 +137,48 @@ public static class DesignTokensParser
                     if (key == "name") name = val;
                     else if (key == "description") description = val;
                 }
-                else if (currentSection == "colors")
+                else if (currentSection == "colors" || currentSection == "dark")
                 {
-                    switch (key)
+                    var isDark = inDarkSubsection || currentSection == "dark" || key.StartsWith("dark-");
+                    var cleanKey = key.StartsWith("dark-") ? key[5..] : key;
+
+                    if (isDark)
                     {
-                        case "primary": primary = val; break;
-                        case "on-primary": onPrimary = val; break;
-                        case "background": bg = val; break;
-                        case "text": text = val; break;
-                        case "text-muted": textMuted = val; break;
-                        case "accent": accent = val; break;
-                        case "success": success = val; break;
-                        case "warning": warning = val; break;
-                        case "error": error = val; break;
-                        default:
-                            if (!string.IsNullOrEmpty(val))
-                                additional[$"color-{key}"] = val;
-                            break;
+                        switch (cleanKey)
+                        {
+                            case "primary": darkPrimary = val; break;
+                            case "background": case "bg": case "app-bg": darkBg = val; break;
+                            case "surface": case "surface-bg": darkSurface = val; break;
+                            case "text": darkText = val; break;
+                            case "text-muted": darkTextMuted = val; break;
+                            case "accent": darkAccent = val; break;
+                            case "success": darkSuccess = val; break;
+                            case "warning": darkWarning = val; break;
+                            case "error": darkError = val; break;
+                            default:
+                                if (!string.IsNullOrEmpty(val))
+                                    additional[$"dark-color-{cleanKey}"] = val;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (cleanKey)
+                        {
+                            case "primary": primary = val; break;
+                            case "on-primary": onPrimary = val; break;
+                            case "background": case "bg": bg = val; break;
+                            case "text": text = val; break;
+                            case "text-muted": textMuted = val; break;
+                            case "accent": accent = val; break;
+                            case "success": success = val; break;
+                            case "warning": warning = val; break;
+                            case "error": error = val; break;
+                            default:
+                                if (!string.IsNullOrEmpty(val))
+                                    additional[$"color-{cleanKey}"] = val;
+                                break;
+                        }
                     }
                 }
                 else if (currentSection == "radius" && (key == "sm" || key == "md" || key == "base"))
@@ -136,6 +208,15 @@ public static class DesignTokensParser
             SuccessColor: string.IsNullOrWhiteSpace(success) ? null : success,
             WarningColor: string.IsNullOrWhiteSpace(warning) ? null : warning,
             ErrorColor: string.IsNullOrWhiteSpace(error) ? null : error,
+            DarkPrimaryColor: string.IsNullOrWhiteSpace(darkPrimary) ? null : darkPrimary,
+            DarkBackgroundColor: string.IsNullOrWhiteSpace(darkBg) ? null : darkBg,
+            DarkSurfaceColor: string.IsNullOrWhiteSpace(darkSurface) ? null : darkSurface,
+            DarkTextColor: string.IsNullOrWhiteSpace(darkText) ? null : darkText,
+            DarkTextMutedColor: string.IsNullOrWhiteSpace(darkTextMuted) ? null : darkTextMuted,
+            DarkAccentColor: string.IsNullOrWhiteSpace(darkAccent) ? null : darkAccent,
+            DarkSuccessColor: string.IsNullOrWhiteSpace(darkSuccess) ? null : darkSuccess,
+            DarkWarningColor: string.IsNullOrWhiteSpace(darkWarning) ? null : darkWarning,
+            DarkErrorColor: string.IsNullOrWhiteSpace(darkError) ? null : darkError,
             BorderRadius: string.IsNullOrWhiteSpace(radius) ? null : radius,
             FontFamily: string.IsNullOrWhiteSpace(font) ? null : font,
             AdditionalTokens: additional);
@@ -148,6 +229,7 @@ public static class DesignTokensParser
     {
         var theme = new TentoTheme();
 
+        // Light tokens
         if (!string.IsNullOrEmpty(tokens.PrimaryColor))
             theme.PrimaryColor = tokens.PrimaryColor;
 
@@ -175,6 +257,35 @@ public static class DesignTokensParser
         if (!string.IsNullOrEmpty(tokens.ErrorColor))
             theme.ErrorColor = tokens.ErrorColor;
 
+        // Dark variants
+        if (!string.IsNullOrEmpty(tokens.DarkPrimaryColor))
+            theme.Dark.PrimaryColor = tokens.DarkPrimaryColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkBackgroundColor))
+            theme.Dark.AppBgColor = tokens.DarkBackgroundColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkSurfaceColor))
+            theme.Dark.SurfaceBgColor = tokens.DarkSurfaceColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkTextColor))
+            theme.Dark.BaseTextColor = tokens.DarkTextColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkTextMutedColor))
+            theme.Dark.MutedTextColor = tokens.DarkTextMutedColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkAccentColor))
+            theme.Dark.InfoColor = tokens.DarkAccentColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkSuccessColor))
+            theme.Dark.SuccessColor = tokens.DarkSuccessColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkWarningColor))
+            theme.Dark.WarningColor = tokens.DarkWarningColor;
+
+        if (!string.IsNullOrEmpty(tokens.DarkErrorColor))
+            theme.Dark.ErrorColor = tokens.DarkErrorColor;
+
+        // Shared tokens
         if (!string.IsNullOrEmpty(tokens.BorderRadius))
             theme.BorderRadius = tokens.BorderRadius;
 
@@ -185,7 +296,14 @@ public static class DesignTokensParser
         {
             foreach (var (k, v) in tokens.AdditionalTokens)
             {
-                theme.CustomTokens[k] = v;
+                if (k.StartsWith("dark-", StringComparison.OrdinalIgnoreCase))
+                {
+                    theme.Dark.CustomTokens[k[5..]] = v;
+                }
+                else
+                {
+                    theme.CustomTokens[k] = v;
+                }
             }
         }
 
@@ -214,16 +332,40 @@ public static class DesignTokensParser
             sb.AppendLine($"    theme.BorderRadius = \"{tokens.BorderRadius}\";");
         if (!string.IsNullOrEmpty(tokens.FontFamily))
             sb.AppendLine($"    theme.FontFamily = \"{tokens.FontFamily}\";");
+
+        // Dark variants
+        var hasDark = !string.IsNullOrEmpty(tokens.DarkPrimaryColor)
+                   || !string.IsNullOrEmpty(tokens.DarkBackgroundColor)
+                   || !string.IsNullOrEmpty(tokens.DarkSurfaceColor)
+                   || !string.IsNullOrEmpty(tokens.DarkTextColor);
+
+        if (hasDark)
+        {
+            sb.AppendLine();
+            sb.AppendLine("    // Dark Theme Variants");
+            if (!string.IsNullOrEmpty(tokens.DarkPrimaryColor))
+                sb.AppendLine($"    theme.Dark.PrimaryColor = \"{tokens.DarkPrimaryColor}\";");
+            if (!string.IsNullOrEmpty(tokens.DarkBackgroundColor))
+                sb.AppendLine($"    theme.Dark.AppBgColor = \"{tokens.DarkBackgroundColor}\";");
+            if (!string.IsNullOrEmpty(tokens.DarkSurfaceColor))
+                sb.AppendLine($"    theme.Dark.SurfaceBgColor = \"{tokens.DarkSurfaceColor}\";");
+            if (!string.IsNullOrEmpty(tokens.DarkTextColor))
+                sb.AppendLine($"    theme.Dark.BaseTextColor = \"{tokens.DarkTextColor}\";");
+            if (!string.IsNullOrEmpty(tokens.DarkTextMutedColor))
+                sb.AppendLine($"    theme.Dark.MutedTextColor = \"{tokens.DarkTextMutedColor}\";");
+        }
+
         sb.AppendLine("});");
         return sb.ToString();
     }
 
     /// <summary>
-    /// Generates CSS variables stylesheet.
+    /// Generates CSS variables stylesheet with both :root and .dark rules.
     /// </summary>
     public static string ToCssVariables(this DesignTokens tokens)
     {
         var sb = new StringBuilder();
+        sb.AppendLine("/* Light Theme */");
         sb.AppendLine(":root {");
         if (!string.IsNullOrEmpty(tokens.PrimaryColor))
             sb.AppendLine($"  --tento-primary-500: {tokens.PrimaryColor};");
@@ -240,6 +382,24 @@ public static class DesignTokensParser
         if (!string.IsNullOrEmpty(tokens.FontFamily))
             sb.AppendLine($"  --tento-font-family: {tokens.FontFamily};");
         sb.AppendLine("}");
+
+        sb.AppendLine();
+        sb.AppendLine("/* Dark Theme Variants */");
+        sb.AppendLine(".dark, [data-theme=\"dark\"] {");
+        if (!string.IsNullOrEmpty(tokens.DarkPrimaryColor))
+            sb.AppendLine($"  --tento-primary-500: {tokens.DarkPrimaryColor};");
+        if (!string.IsNullOrEmpty(tokens.DarkBackgroundColor))
+            sb.AppendLine($"  --tento-bg-app: {tokens.DarkBackgroundColor};");
+        if (!string.IsNullOrEmpty(tokens.DarkSurfaceColor))
+            sb.AppendLine($"  --tento-bg-surface: {tokens.DarkSurfaceColor};");
+        if (!string.IsNullOrEmpty(tokens.DarkTextColor))
+            sb.AppendLine($"  --tento-text-base: {tokens.DarkTextColor};");
+        if (!string.IsNullOrEmpty(tokens.DarkTextMutedColor))
+            sb.AppendLine($"  --tento-text-muted: {tokens.DarkTextMutedColor};");
+        if (!string.IsNullOrEmpty(tokens.DarkAccentColor))
+            sb.AppendLine($"  --tento-info: {tokens.DarkAccentColor};");
+        sb.AppendLine("}");
+
         return sb.ToString();
     }
 
@@ -265,6 +425,23 @@ public static class DesignTokensParser
             items.Add($"    \"BorderRadius\": \"{tokens.BorderRadius}\"");
         if (!string.IsNullOrEmpty(tokens.FontFamily))
             items.Add($"    \"FontFamily\": \"{tokens.FontFamily}\"");
+
+        var darkItems = new System.Collections.Generic.List<string>();
+        if (!string.IsNullOrEmpty(tokens.DarkPrimaryColor))
+            darkItems.Add($"      \"PrimaryColor\": \"{tokens.DarkPrimaryColor}\"");
+        if (!string.IsNullOrEmpty(tokens.DarkBackgroundColor))
+            darkItems.Add($"      \"AppBgColor\": \"{tokens.DarkBackgroundColor}\"");
+        if (!string.IsNullOrEmpty(tokens.DarkSurfaceColor))
+            darkItems.Add($"      \"SurfaceBgColor\": \"{tokens.DarkSurfaceColor}\"");
+        if (!string.IsNullOrEmpty(tokens.DarkTextColor))
+            darkItems.Add($"      \"BaseTextColor\": \"{tokens.DarkTextColor}\"");
+
+        if (darkItems.Count > 0)
+        {
+            var darkSection = "    \"Dark\": {\n" + string.Join(",\n", darkItems) + "\n    }";
+            items.Add(darkSection);
+        }
+
         sb.AppendLine(string.Join(",\n", items));
         sb.AppendLine("  }");
         return sb.ToString();

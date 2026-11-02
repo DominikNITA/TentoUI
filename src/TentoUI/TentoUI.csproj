@@ -33,8 +33,8 @@
     <None Include="tailwind\**\*" Pack="true" PackagePath="tailwind\" />
     <None Include="build\TentoUI.targets" Pack="true" PackagePath="build\;buildTransitive\" />
     <!-- AI agent skills shipped with the package; installed on demand by the TentoUIInstallSkills target -->
-    <None Include="..\Skills\tentoui-components\SKILL.md" Link="skills\tentoui-components\SKILL.md" Pack="true" PackagePath="skills\tentoui-components\" />
-    <None Include="..\Skills\tentoui-tailwind-setup\SKILL.md" Link="skills\tentoui-tailwind-setup\SKILL.md" Pack="true" PackagePath="skills\tentoui-tailwind-setup\" />
+    <None Include="..\..\.skills\tentoui-components\SKILL.md" Link="skills\tentoui-components\SKILL.md" Pack="true" PackagePath="skills\tentoui-components\" />
+    <None Include="..\..\.skills\tentoui-tailwind-setup\SKILL.md" Link="skills\tentoui-tailwind-setup\SKILL.md" Pack="true" PackagePath="skills\tentoui-tailwind-setup\" />
   </ItemGroup>
 
 </Project>

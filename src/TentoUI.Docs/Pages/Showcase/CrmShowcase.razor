@@ -1,0 +1,408 @@
+@page "/showcase/crm"
+@namespace TentoUI.Docs.Pages.Showcase
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
+
+<PageTitle>CRM &amp; Sales Pipeline - TentoUI Showcase</PageTitle>
+
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
+    @* Navigation & Top Action Bar *@
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+            <Button Size="ComponentSize.Small" OnClick="@(() => Navigation.NavigateTo("showcase"))">
+                <span class="inline-flex items-center gap-1.5">
+                    <Icon Name="@IconNames.ArrowLeft" Size="14" />
+                    <span>Showcases</span>
+                </span>
+            </Button>
+            <div class="h-4 w-px bg-slate-300 dark:bg-slate-700"></div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Enterprise CRM &amp; Pipeline</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-primary-100 text-primary-800 dark:bg-primary-950/80 dark:text-primary-400">
+                        Q4 Active
+                    </span>
+                </h1>
+                <p class="text-xs text-slate-500">Track deal velocity, qualification stages, and account relationships</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <Button Type="ButtonType.Primary" Size="ComponentSize.Small" OnClick="@(() => _isNewDealModalOpen = true)">
+                <span class="inline-flex items-center gap-1.5">
+                    <Icon Name="@IconNames.Plus" Size="14" />
+                    <span>New Deal</span>
+                </span>
+            </Button>
+        </div>
+    </div>
+
+    @* Pipeline KPI Strip *@
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card Class="shadow-xs">
+            <Statistic Title="Total Pipeline"
+                       Value="@TotalPipelineValue"
+                       Precision="0">
+                <Prefix>$</Prefix>
+            </Statistic>
+            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+                <span>Across</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-300">@_deals.Count active opportunities</span>
+            </div>
+        </Card>
+
+        <Card Class="shadow-xs">
+            <Statistic Title="Weighted Forecast"
+                       Value="@WeightedForecast"
+                       Precision="0">
+                <Prefix>$</Prefix>
+            </Statistic>
+            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+                <span>Probability-adjusted revenue</span>
+            </div>
+        </Card>
+
+        <Card Class="shadow-xs">
+            <Statistic Title="Win Rate (L90D)"
+                       Value="68.4">
+                <Suffix>%</Suffix>
+            </Statistic>
+            <div class="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                <span>+5.2% over target benchmark</span>
+            </div>
+        </Card>
+
+        <Card Class="shadow-xs">
+            <Statistic Title="Avg Deal Size"
+                       Value="@AverageDealSize"
+                       Precision="0">
+                <Prefix>$</Prefix>
+            </Statistic>
+            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+                <span>Enterprise ACV contract metric</span>
+            </div>
+        </Card>
+    </div>
+
+    @* Filters Toolbar *@
+    <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex flex-1 flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            <div class="w-full sm:w-72">
+                <Input Placeholder="Search deal or company..."
+                       @bind-Value="_searchQuery"
+                       AllowClear="true" />
+            </div>
+
+            <div class="w-full sm:w-48">
+                <Select TItem="string"
+                        TValue="string"
+                        DataSource="@_stageFilters"
+                        @bind-Value="_selectedStageFilter"
+                        Placeholder="Filter by Stage" />
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+            <span>Showing: <strong class="text-slate-800 dark:text-slate-200">@FilteredDeals.Count()</strong> deals</span>
+        </div>
+    </div>
+
+    @* Deals Grid *@
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @foreach (var deal in FilteredDeals)
+        {
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:shadow-md hover:border-primary-400 transition-all flex flex-col justify-between space-y-4">
+                <div class="space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">@deal.Company</span>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white leading-snug">@deal.Title</h3>
+                        </div>
+                        @switch (deal.Stage)
+                        {
+                            case "Prospecting":
+                                <Tag Color="default">Prospecting</Tag>
+                                break;
+                            case "Qualified":
+                                <Tag Color="blue">Qualified</Tag>
+                                break;
+                            case "Proposal":
+                                <Tag Color="purple">Proposal</Tag>
+                                break;
+                            case "Negotiation":
+                                <Tag Color="orange">Negotiation</Tag>
+                                break;
+                            case "Closed Won":
+                                <Tag Color="green">Won</Tag>
+                                break;
+                            default:
+                                <Tag>@deal.Stage</Tag>
+                                break;
+                        }
+                    </div>
+
+                    <div class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                        $@deal.Amount.ToString("N0")
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400">Health Score:</span>
+                        <Rate Value="@deal.HealthScore" ReadOnly="true" />
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <Avatar Text="@deal.Owner[..1]" Size="ComponentSize.Small" />
+                            <span class="text-slate-600 dark:text-slate-300 font-medium">@deal.Owner</span>
+                        </div>
+                        <span class="text-slate-400 text-[11px]">Est. @deal.CloseDate</span>
+                    </div>
+
+                    <Button Size="ComponentSize.Small" Class="w-full mt-2" OnClick="@(() => OpenDealDrawer(deal))">
+                        Inspect Opportunity
+                    </Button>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* Slide-over Deal Details Drawer *@
+    <Drawer @bind-Open="_isDrawerOpen"
+            Title="@(_selectedDeal?.Title ?? "Deal Overview")"
+            Width="480px">
+        @if (_selectedDeal != null)
+        {
+            <div class="space-y-6">
+                @* Deal Summary Banner *@
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Contract Value</span>
+                        <span class="text-2xl font-black text-slate-900 dark:text-white">$@_selectedDeal.Amount.ToString("N0")</span>
+                    </div>
+                    <Tag Color="blue" Class="text-xs px-2.5 py-1">@_selectedDeal.Stage</Tag>
+                </div>
+
+                @* Deal Info Descriptions *@
+                <Descriptions Title="Account Details" Bordered="true" Column="1">
+                    <DescriptionsItem Label="Account">@_selectedDeal.Company</DescriptionsItem>
+                    <DescriptionsItem Label="Primary Contact">@_selectedDeal.ContactName (@_selectedDeal.ContactEmail)</DescriptionsItem>
+                    <DescriptionsItem Label="Deal Health">
+                        <div class="flex items-center gap-2">
+                            <Rate Value="@_selectedDeal.HealthScore" ReadOnly="true" />
+                            <span class="text-xs text-slate-500">(@_selectedDeal.HealthScore / 5)</span>
+                        </div>
+                    </DescriptionsItem>
+                    <DescriptionsItem Label="Account Executive">@_selectedDeal.Owner</DescriptionsItem>
+                    <DescriptionsItem Label="Target Close Date">@_selectedDeal.CloseDate</DescriptionsItem>
+                </Descriptions>
+
+                @* Activity Timeline *@
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Opportunity Timeline</h4>
+                    <Timeline>
+                        <TimelineItem Color="green" Label="Yesterday">
+                            <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Security Architecture Review Passed</span>
+                            <span class="text-[11px] text-slate-400">Infosec compliance checklist signed by VP Engineering.</span>
+                        </TimelineItem>
+                        <TimelineItem Color="blue" Label="Oct 24">
+                            <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Executive Demo Completed</span>
+                            <span class="text-[11px] text-slate-400">Presented BentoUI component architecture to lead frontend team.</span>
+                        </TimelineItem>
+                        <TimelineItem Color="gray" Label="Oct 12">
+                            <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Inbound Lead Qualified</span>
+                            <span class="text-[11px] text-slate-400">Initial discovery call confirmed $80k+ enterprise budget.</span>
+                        </TimelineItem>
+                    </Timeline>
+                </div>
+
+                @* Drawer Action Buttons *@
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+                    <Button Type="ButtonType.Primary" Class="w-full" OnClick="AdvanceStage">
+                        Advance to Next Stage
+                    </Button>
+                    <Button Class="w-full !bg-emerald-600 hover:!bg-emerald-700 !text-white !border-emerald-600" OnClick="MarkClosedWon">
+                        Mark as Closed Won
+                    </Button>
+                </div>
+            </div>
+        }
+    </Drawer>
+
+    @* New Deal Modal *@
+    <Modal @bind-Visible="_isNewDealModalOpen"
+           Title="Create New Deal Opportunity"
+           Width="520px"
+           OkText="Create Deal"
+           OnOk="CreateDealAsync">
+        <div class="space-y-4 py-2">
+            <Form Model="@_newDeal" Layout="FormLayout.Vertical">
+                <FormItem Label="Opportunity Title" Required="true">
+                    <Input @bind-Value="_newDeal.Title" Placeholder="e.g. Enterprise License Expansion" />
+                </FormItem>
+
+                <FormItem Label="Account / Company" Required="true">
+                    <Input @bind-Value="_newDeal.Company" Placeholder="e.g. Stripe Inc." />
+                </FormItem>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <FormItem Label="Estimated Value ($ USD)" Required="true">
+                        <TentoUI.InputNumber TValue="double" @bind-Value="_newDeal.Amount" Step="5000" />
+                    </FormItem>
+
+                    <FormItem Label="Initial Stage">
+                        <Select TItem="string"
+                                TValue="string"
+                                DataSource="@_stageNames"
+                                @bind-Value="_newDeal.Stage" />
+                    </FormItem>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <FormItem Label="Lead Owner">
+                        <Input @bind-Value="_newDeal.Owner" Placeholder="e.g. Sarah Connor" />
+                    </FormItem>
+
+                    <FormItem Label="Health Evaluation">
+                        <div class="pt-1">
+                            <Rate @bind-Value="_newDeal.HealthScore" />
+                        </div>
+                    </FormItem>
+                </div>
+            </Form>
+        </div>
+    </Modal>
+</div>
+
+@code {
+    private string _searchQuery = string.Empty;
+    private string _selectedStageFilter = "All Stages";
+    private bool _isDrawerOpen = false;
+    private bool _isNewDealModalOpen = false;
+    private DealRecord? _selectedDeal;
+
+    private readonly string[] _stageFilters = ["All Stages", "Prospecting", "Qualified", "Proposal", "Negotiation", "Closed Won"];
+    private readonly string[] _stageNames = ["Prospecting", "Qualified", "Proposal", "Negotiation", "Closed Won"];
+
+    public class DealRecord
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N")[..8];
+        public string Title { get; set; } = string.Empty;
+        public string Company { get; set; } = string.Empty;
+        public double Amount { get; set; }
+        public string Stage { get; set; } = "Qualified";
+        public string Owner { get; set; } = "Dominik K.";
+        public int HealthScore { get; set; } = 4;
+        public string CloseDate { get; set; } = "Nov 28, 2026";
+        public string ContactName { get; set; } = "Alex Rivera";
+        public string ContactEmail { get; set; } = "alex@enterprise.corp";
+    }
+
+    private DealRecord _newDeal = new()
+    {
+        Title = "Global Multi-Tenant Expansion",
+        Company = "Datadog Systems",
+        Amount = 75000,
+        Stage = "Qualified",
+        Owner = "Dominik K.",
+        HealthScore = 4
+    };
+
+    private readonly System.Collections.Generic.List<DealRecord> _deals =
+    [
+        new() { Title = "Multi-Region Cloud License", Company = "Acme Corp", Amount = 120000, Stage = "Negotiation", Owner = "Dominik K.", HealthScore = 5, CloseDate = "Nov 15, 2026", ContactName = "Elena Rostova", ContactEmail = "elena@acme.com" },
+        new() { Title = "Fintech Core Integration", Company = "NovaPay Financial", Amount = 85000, Stage = "Proposal", Owner = "Sarah Connor", HealthScore = 4, CloseDate = "Nov 22, 2026", ContactName = "Marcus Bell", ContactEmail = "m.bell@novapay.io" },
+        new() { Title = "Healthcare Portal Overhaul", Company = "AuraHealth Care", Amount = 145000, Stage = "Qualified", Owner = "Dominik K.", HealthScore = 4, CloseDate = "Dec 05, 2026", ContactName = "Dr. Linda Gray", ContactEmail = "l.gray@aurahealth.org" },
+        new() { Title = "Design System Standardization", Company = "Apex Media", Amount = 48000, Stage = "Closed Won", Owner = "Sarah Connor", HealthScore = 5, CloseDate = "Oct 28, 2026", ContactName = "Toby Flenderson", ContactEmail = "toby@apexmedia.net" },
+        new() { Title = "Developer Platform Migration", Company = "HyperStack Inc", Amount = 92000, Stage = "Negotiation", Owner = "Dominik K.", HealthScore = 3, CloseDate = "Nov 18, 2026", ContactName = "Chloe Zhao", ContactEmail = "chloe@hyperstack.tech" },
+        new() { Title = "Security Infrastructure Suite", Company = "Krypton Cyber", Amount = 210000, Stage = "Prospecting", Owner = "Sarah Connor", HealthScore = 3, CloseDate = "Dec 20, 2026", ContactName = "Vance Vance", ContactEmail = "vance@kryptoncyber.com" }
+    ];
+
+    private double TotalPipelineValue => _deals.Sum(d => d.Amount);
+    private double WeightedForecast => _deals.Sum(d => d.Amount * (d.Stage switch
+    {
+        "Closed Won" => 1.0,
+        "Negotiation" => 0.8,
+        "Proposal" => 0.6,
+        "Qualified" => 0.4,
+        _ => 0.2
+    }));
+    private double AverageDealSize => _deals.Count > 0 ? _deals.Average(d => d.Amount) : 0;
+
+    private IEnumerable<DealRecord> FilteredDeals
+    {
+        get
+        {
+            var res = _deals.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                res = res.Where(d => d.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                     d.Company.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(_selectedStageFilter) && _selectedStageFilter != "All Stages")
+            {
+                res = res.Where(d => d.Stage == _selectedStageFilter);
+            }
+            return res;
+        }
+    }
+
+    private void OpenDealDrawer(DealRecord deal)
+    {
+        _selectedDeal = deal;
+        _isDrawerOpen = true;
+    }
+
+    private void AdvanceStage()
+    {
+        if (_selectedDeal == null) return;
+        var stages = _stageNames;
+        var idx = Array.IndexOf(stages, _selectedDeal.Stage);
+        if (idx >= 0 && idx < stages.Length - 1)
+        {
+            _selectedDeal.Stage = stages[idx + 1];
+            MessageService.Success($"Deal advanced to {_selectedDeal.Stage}!");
+        }
+        else
+        {
+            MessageService.Info("Deal is already at final stage.");
+        }
+    }
+
+    private void MarkClosedWon()
+    {
+        if (_selectedDeal == null) return;
+        _selectedDeal.Stage = "Closed Won";
+        MessageService.Success($"Congratulations! Deal for {_selectedDeal.Company} marked as Closed Won!");
+    }
+
+    private Task CreateDealAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_newDeal.Title) || string.IsNullOrWhiteSpace(_newDeal.Company))
+        {
+            MessageService.Error("Please provide an opportunity title and company name.");
+            return Task.CompletedTask;
+        }
+
+        _deals.Insert(0, new DealRecord
+        {
+            Title = _newDeal.Title,
+            Company = _newDeal.Company,
+            Amount = _newDeal.Amount,
+            Stage = _newDeal.Stage,
+            Owner = string.IsNullOrWhiteSpace(_newDeal.Owner) ? "Dominik K." : _newDeal.Owner,
+            HealthScore = _newDeal.HealthScore,
+            CloseDate = "Dec 15, 2026",
+            ContactName = "New Contact",
+            ContactEmail = "contact@" + _newDeal.Company.ToLower().Replace(" ", "") + ".com"
+        });
+
+        _isNewDealModalOpen = false;
+        MessageService.Success($"Opportunity '{_newDeal.Title}' successfully added to pipeline!");
+
+        // Reset form
+        _newDeal = new DealRecord { Title = "", Company = "", Amount = 50000, Stage = "Qualified" };
+        return Task.CompletedTask;
+    }
+}

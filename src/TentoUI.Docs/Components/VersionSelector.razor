@@ -1,0 +1,100 @@
+@namespace TentoUI.Docs.Components
+@inject VersionService VersionService
+@inject IMessageService MessageService
+@implements IDisposable
+
+<div class="relative inline-block text-left" @onclick:stopPropagation="true">
+    <button type="button"
+            class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+            aria-expanded="@_isOpen"
+            aria-haspopup="true"
+            @onclick="ToggleDropdown">
+        <span class="w-1.5 h-1.5 rounded-full @(VersionService.CurrentVersion.IsLatest ? "bg-emerald-500" : VersionService.CurrentVersion.IsPreview ? "bg-amber-500" : "bg-slate-400")"></span>
+        <span>@VersionService.CurrentVersion.Label</span>
+        <Icon Name="@IconNames.ChevronDown" Size="12" Class="text-slate-400 transition-transform duration-150" />
+    </button>
+
+    @if (_isOpen)
+    {
+        <div class="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-slate-200 dark:border-slate-800 py-2 z-50 focus:outline-none divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="px-3 py-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    Documentation Versions
+                </span>
+            </div>
+
+            <div class="py-1">
+                @foreach (var v in VersionService.AvailableVersions)
+                {
+                    var isSelected = v == VersionService.CurrentVersion;
+                    <button type="button"
+                            class="w-full text-left px-3 py-2 flex items-start justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors @(isSelected ? "bg-primary-50/60 dark:bg-primary-950/30" : "")"
+                            @onclick="@(() => SelectVersion(v))">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-xs @(isSelected ? "text-primary-600 dark:text-primary-400" : "text-slate-800 dark:text-slate-200")">
+                                    @v.Label
+                                </span>
+                                @if (v.IsLatest)
+                                {
+                                    <span class="px-1.5 py-0.2 text-[9px] font-bold rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                                        Latest
+                                    </span>
+                                }
+                                else if (v.IsPreview)
+                                {
+                                    <span class="px-1.5 py-0.2 text-[9px] font-bold rounded bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                                        Preview
+                                    </span>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(v.Notes))
+                            {
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">@v.Notes</p>
+                            }
+                        </div>
+                        @if (isSelected)
+                        {
+                            <Icon Name="@IconNames.Check" Size="14" Class="text-primary-600 dark:text-primary-400 mt-0.5 shrink-0" />
+                        }
+                    </button>
+                }
+            </div>
+
+            <div class="px-3 py-2 bg-slate-50/50 dark:bg-slate-950/40">
+                <a href="overview/versioning"
+                   class="text-[11px] font-semibold text-primary-600 dark:text-primary-400 hover:underline inline-flex items-center gap-1"
+                   @onclick="@(() => _isOpen = false)">
+                    <span>Multi-Version Architecture Guide</span>
+                    <Icon Name="@IconNames.ArrowRight" Size="11" />
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool _isOpen;
+
+    protected override void OnInitialized()
+    {
+        VersionService.OnVersionChanged += StateHasChanged;
+    }
+
+    private void ToggleDropdown()
+    {
+        _isOpen = !_isOpen;
+    }
+
+    private void SelectVersion(DocVersion version)
+    {
+        _isOpen = false;
+        VersionService.SetVersion(version);
+        MessageService.Success($"Switched to documentation context for {version.Label}");
+    }
+
+    public void Dispose()
+    {
+        VersionService.OnVersionChanged -= StateHasChanged;
+    }
+}

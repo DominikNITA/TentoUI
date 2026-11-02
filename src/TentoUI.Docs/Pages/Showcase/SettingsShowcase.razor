@@ -1,0 +1,357 @@
+@page "/showcase/settings"
+@namespace TentoUI.Docs.Pages.Showcase
+@inject NavigationManager Navigation
+@inject IMessageService MessageService
+
+<PageTitle>Settings Hub - TentoUI Showcase</PageTitle>
+
+<div class="max-w-5xl mx-auto space-y-6 pb-12">
+    @* Navigation & Top Action Bar *@
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+            <Button Size="ComponentSize.Small" OnClick="@(() => Navigation.NavigateTo("showcase"))">
+                <span class="inline-flex items-center gap-1.5">
+                    <Icon Name="@IconNames.ArrowLeft" Size="14" />
+                    <span>Showcases</span>
+                </span>
+            </Button>
+            <div class="h-4 w-px bg-slate-300 dark:bg-slate-700"></div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>Application Settings &amp; Preferences</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-400">
+                        Workspace Admin
+                    </span>
+                </h1>
+                <p class="text-xs text-slate-500">Configure profile identity, theming tokens, security 2FA, and alerts</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <Tag Color="purple">Enterprise Plan</Tag>
+        </div>
+    </div>
+
+    @* Main Settings Tabs Card *@
+    <Card Class="shadow-xs">
+        <Tabs @bind-ActiveKey="_activeTab" Type="TabType.Line">
+            @* Tab 1: Profile *@
+            <TabPane Key="profile" Tab="Profile Identity">
+                <div class="py-4 space-y-6 max-w-2xl">
+                    <div class="flex items-center gap-4">
+                        <Avatar Text="DK" Size="ComponentSize.Large" Class="bg-primary-600 text-white font-bold" />
+                        <div>
+                            <span class="font-bold text-sm text-slate-900 dark:text-white block">Dominik K.</span>
+                            <span class="text-xs text-slate-400">Workspace Administrator &bull; dominik@tentoui.dev</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Display Name</label>
+                                <Input @bind-Value="_profileName" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Email Address</label>
+                                <Input @bind-Value="_profileEmail" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Job Role</label>
+                                <Input @bind-Value="_profileRole" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Timezone</label>
+                                <Select TItem="string" TValue="string" DataSource="@_timezones" @bind-Value="_selectedTimezone" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Bio / Status</label>
+                            <TextArea @bind-Value="_profileBio" Rows="3" />
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Profile settings updated successfully!"))">
+                            Save Profile Changes
+                        </Button>
+                    </div>
+                </div>
+            </TabPane>
+
+            @* Tab 2: Appearance & Theming *@
+            <TabPane Key="appearance" Tab="Appearance & Theming">
+                <div class="py-4 space-y-6 max-w-2xl">
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Brand Accent Color</h3>
+                        <p class="text-xs text-slate-500">Customize the primary brand color used across buttons, progress indicators, and active states.</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <ColorPicker @bind-Value="_brandColor" ShowText="true" />
+                            <div>
+                                <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 block">Current Accent Token</span>
+                                <span class="text-[11px] font-mono text-slate-400">@_brandColor</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-1.5">
+                            @foreach (var preset in _colorPresets)
+                            {
+                                <button type="button"
+                                        aria-label="@($"Select {preset} color preset")"
+                                        class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 shadow-xs cursor-pointer hover:scale-110 transition-transform"
+                                        style="background-color: @preset"
+                                        @onclick="@(() => _brandColor = preset)"></button>
+                            }
+                        </div>
+                    </div>
+
+                    @* Live Preview Container *@
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Accent Preview</h4>
+                        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <button class="px-4 py-2 rounded-lg text-white font-semibold text-xs shadow-sm transition-opacity hover:opacity-90"
+                                        style="background-color: @_brandColor">
+                                    Primary Action
+                                </button>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-xs"
+                                      style="background-color: @_brandColor">
+                                    Active Badge
+                                </span>
+                                <span class="text-xs font-medium" style="color: @_brandColor">
+                                    Interactive Text Link &rarr;
+                                </span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-xs text-slate-500">
+                                    <span>Sync Progress</span>
+                                    <span class="font-bold">78%</span>
+                                </div>
+                                <div class="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-300"
+                                         style="width: 78%; background-color: @_brandColor"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <div class="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800">
+                            <div>
+                                <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 block">High Contrast Mode</span>
+                                <span class="text-[11px] text-slate-400">Boost borders and focus rings for maximum accessibility</span>
+                            </div>
+                            <Switch @bind-Checked="_highContrast" />
+                        </div>
+
+                        <div class="flex items-center justify-between py-2 border-t border-slate-100 dark:border-slate-800">
+                            <div>
+                                <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 block">Reduce Motion</span>
+                                <span class="text-[11px] text-slate-400">Minimize animations and transition durations</span>
+                            </div>
+                            <Switch @bind-Checked="_reduceMotion" />
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success($"Theme accent set to {_brandColor}!"))">
+                            Apply Theme Settings
+                        </Button>
+                    </div>
+                </div>
+            </TabPane>
+
+            @* Tab 3: Security & 2FA *@
+            <TabPane Key="security" Tab="Security & 2FA">
+                <div class="py-4 space-y-6 max-w-2xl">
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Two-Factor Authentication (2FA)</h3>
+                        <p class="text-xs text-slate-500">Protect your workspace account using a time-based one-time password (TOTP) authenticator application.</p>
+                    </div>
+
+                    <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row items-center gap-6">
+                        <div class="p-3 bg-white rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 shrink-0">
+                            <QRCode Value="otpauth://totp/TentoUI:dominik@tentoui.dev?secret=JBSWY3DPEHPK3PXP&issuer=TentoUI" Size="130" />
+                        </div>
+
+                        <div class="space-y-3 flex-1">
+                            <div>
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">1. Scan QR Code</span>
+                                <span class="text-xs text-slate-500">Scan this code with Google Authenticator, 1Password, or Authy.</span>
+                            </div>
+
+                            <div>
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">2. Manual Secret Key</span>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <code class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300">
+                                        JBSW-Y3DP-EHPK-3PXP
+                                    </code>
+                                    <Button Size="ComponentSize.Small" OnClick="@(() => MessageService.Success("Secret key copied to clipboard!"))">
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <Icon Name="@IconNames.Copy" Size="12" />
+                                            <span>Copy</span>
+                                        </span>
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div class="pt-1 flex items-center gap-2">
+                                <div class="w-32">
+                                    <Input Placeholder="6-digit code" @bind-Value="_twoFactorCode" MaxLength="6" />
+                                </div>
+                                <Button Type="ButtonType.Primary" Size="ComponentSize.Small" OnClick="Verify2Fa">
+                                    Verify &amp; Activate
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Change Password</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Current Password</label>
+                                <Input Type="InputType.Password" AllowShowPassword="true" @bind-Value="_currentPassword" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">New Password</label>
+                                <Input Type="InputType.Password" AllowShowPassword="true" @bind-Value="_newPassword" />
+                            </div>
+                        </div>
+                        <Button OnClick="@(() => MessageService.Success("Password updated successfully!"))">
+                            Update Password
+                        </Button>
+                    </div>
+                </div>
+            </TabPane>
+
+            @* Tab 4: Notifications *@
+            <TabPane Key="notifications" Tab="Notifications">
+                <div class="py-4 space-y-6 max-w-2xl">
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Workspace Alert Channels</h3>
+                        <p class="text-xs text-slate-500">Select which events trigger real-time notifications and email reports.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <div>
+                                <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 block">Security &amp; Suspicious Login Alerts</span>
+                                <span class="text-[11px] text-slate-400">Immediate notifications for new IP sessions or failed 2FA attempts</span>
+                            </div>
+                            <Switch @bind-Checked="_alertSecurity" />
+                        </div>
+
+                        <div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <div>
+                                <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 block">Cluster &amp; Service Deployments</span>
+                                <span class="text-[11px] text-slate-400">Updates whenever a service pod or release pipeline finishes</span>
+                            </div>
+                            <Switch @bind-Checked="_alertDeployments" />
+                        </div>
+
+                        <div class="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <div>
+                                <span class="font-semibold text-xs text-slate-800 dark:text-slate-200 block">Weekly Executive Digest</span>
+                                <span class="text-[11px] text-slate-400">Summary of infrastructure usage, SLA health, and sales pipeline metrics</span>
+                            </div>
+                            <Switch @bind-Checked="_alertDigest" />
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Notification preferences saved!"))">
+                            Save Notification Preferences
+                        </Button>
+                    </div>
+                </div>
+            </TabPane>
+
+            @* Tab 5: Danger Zone *@
+            <TabPane Key="danger" Tab="Danger Zone">
+                <div class="py-4 space-y-6 max-w-2xl">
+                    <Alert Type="AlertType.Warning"
+                           Message="Warning: Destructive Workspace Operations"
+                           Description="Actions executed here cannot be undone. Please proceed with caution."
+                           ShowIcon="true" />
+
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <span class="font-bold text-xs text-red-900 dark:text-red-200 block">Delete Entire Project</span>
+                                <span class="text-[11px] text-red-600 dark:text-red-400">Permanently delete this project and all associated database records.</span>
+                            </div>
+                            <Popconfirm Title="Permanently delete project?"
+                                        Description="All production data will be irrevocably purged."
+                                        OkText="Yes, Delete Permanently"
+                                        CancelText="Cancel"
+                                        OnConfirm="HandleDeleteProject">
+                                <Button Danger="true">
+                                    Delete Project
+                                </Button>
+                            </Popconfirm>
+                        </div>
+                    </div>
+                </div>
+            </TabPane>
+        </Tabs>
+    </Card>
+</div>
+
+@code {
+    private string _activeTab = "profile";
+
+    private string _profileName = "Dominik K.";
+    private string _profileEmail = "dominik@tentoui.dev";
+    private string _profileRole = "Lead Software Architect";
+    private string _selectedTimezone = "UTC+01:00 (Europe/Warsaw)";
+    private string _profileBio = "Building high-performance Blazor WebAssembly component libraries with Tailwind CSS.";
+
+    private readonly string[] _timezones =
+    [
+        "UTC-08:00 (Pacific Time)",
+        "UTC-05:00 (Eastern Time)",
+        "UTC+00:00 (London, GMT)",
+        "UTC+01:00 (Europe/Warsaw)",
+        "UTC+09:00 (Tokyo, JST)"
+    ];
+
+    private string _brandColor = "#3b82f6";
+    private readonly string[] _colorPresets = ["#3b82f6", "#059669", "#7c3aed", "#e11d48", "#f59e0b", "#0284c7"];
+    private bool _highContrast = false;
+    private bool _reduceMotion = false;
+
+    private string _twoFactorCode = "";
+    private string _currentPassword = "";
+    private string _newPassword = "";
+
+    private bool _alertSecurity = true;
+    private bool _alertDeployments = true;
+    private bool _alertDigest = false;
+
+    private void Verify2Fa()
+    {
+        if (_twoFactorCode.Length == 6)
+        {
+            MessageService.Success("Two-Factor Authentication successfully verified and activated!");
+            _twoFactorCode = "";
+        }
+        else
+        {
+            MessageService.Error("Please enter a valid 6-digit confirmation code.");
+        }
+    }
+
+    private void HandleDeleteProject()
+    {
+        MessageService.Warning("Simulated deletion: In production, this would purge the workspace.");
+    }
+}

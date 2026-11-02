@@ -1,0 +1,236 @@
+@page "/showcase"
+@namespace TentoUI.Docs.Pages.Showcase
+@inject NavigationManager Navigation
+
+<PageTitle>Showcases - TentoUI Application Templates</PageTitle>
+
+<div class="max-w-6xl mx-auto space-y-10 pb-12">
+    @* Hero Header *@
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-primary-950 to-slate-900 p-8 sm:p-12 text-white shadow-xl border border-primary-900/30">
+        <div class="relative z-10 max-w-3xl space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary-500/20 text-primary-300 border border-primary-500/30">
+                <Icon Name="@IconNames.Star" Size="14" />
+                <span>Production-Ready Application Templates</span>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                Crafted with <span class="bg-gradient-to-r from-primary-400 via-sky-300 to-indigo-300 bg-clip-text text-transparent">TentoUI</span>
+            </h1>
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Explore fully functional, enterprise-grade application showcases composed entirely with TentoUI components and Tailwind CSS.
+                Designed for Blazor WebAssembly with instant reactivity, clean architecture, and seamless dark mode support.
+            </p>
+            <div class="flex flex-wrap items-center gap-4 pt-2">
+                <Button Type="ButtonType.Primary" Size="ComponentSize.Large" OnClick="@(() => Navigation.NavigateTo("showcase/dashboard"))">
+                    Explore Dashboard
+                </Button>
+                <Button Size="ComponentSize.Large" Class="bg-white/10 hover:bg-white/20 text-white border-white/20" OnClick="@(() => Navigation.NavigateTo("overview/installation"))">
+                    Get Started with TentoUI
+                </Button>
+            </div>
+        </div>
+
+        @* Decorative background shapes *@
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary-500/10 blur-3xl pointer-events-none"></div>
+        <div class="absolute right-32 -bottom-24 w-72 h-72 rounded-full bg-sky-500/10 blur-3xl pointer-events-none"></div>
+    </div>
+
+    @* Fast Metrics Strip *@
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-950/60 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                <Icon Name="@IconNames.CheckCircle2" Size="20" />
+            </div>
+            <div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white block">65+</span>
+                <span class="text-xs text-slate-500">AntDesign Components</span>
+            </div>
+        </div>
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <Icon Name="@IconNames.Check" Size="20" />
+            </div>
+            <div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white block">100%</span>
+                <span class="text-xs text-slate-500">Client-Side WebAssembly</span>
+            </div>
+        </div>
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-950/60 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                <Icon Name="@IconNames.Moon" Size="20" />
+            </div>
+            <div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white block">Tailwind v4</span>
+                <span class="text-xs text-slate-500">CSS Tokens &amp; Dark Mode</span>
+            </div>
+        </div>
+        <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                <Icon Name="@IconNames.Clock" Size="20" />
+            </div>
+            <div>
+                <span class="text-xl font-bold text-slate-900 dark:text-white block">0 JS Bloat</span>
+                <span class="text-xs text-slate-500">Clean DOM Performance</span>
+            </div>
+        </div>
+    </div>
+
+    @* Showcase Applications Grid *@
+    <div class="space-y-4">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Featured Application Showcases</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Select any application template below to explore its live interactive implementation.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            @* Showcase 1: Analytics Dashboard *@
+            <div class="group flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-primary-500/50">
+                <div class="h-44 bg-gradient-to-br from-primary-600 to-indigo-700 p-6 flex flex-col justify-between text-white relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 backdrop-blur-xs text-white">
+                            Analytics &amp; Cloud
+                        </span>
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <Icon Name="@IconNames.ExternalLink" Size="16" />
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-primary-200 block">SaaS &amp; Infrastructure</span>
+                        <h3 class="text-xl font-bold text-white tracking-tight">Analytics Dashboard</h3>
+                    </div>
+                    @* Mini visual mock *@
+                    <div class="absolute -right-4 -bottom-6 w-32 h-20 bg-white/10 rounded-tl-xl border border-white/20 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300"></div>
+                </div>
+
+                <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Comprehensive cloud operations dashboard featuring multi-currency KPI statistics, interactive timeframe Segmented control, CPU/RAM progress rings, and a filterable cluster workloads table.
+                        </p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Statistic</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Segmented</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Progress</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Table</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Timeline</span>
+                        </div>
+                    </div>
+                    <Button Type="ButtonType.Primary" Class="w-full" OnClick="@(() => Navigation.NavigateTo("showcase/dashboard"))">
+                        Launch Dashboard
+                    </Button>
+                </div>
+            </div>
+
+            @* Showcase 2: CRM & Sales Pipeline *@
+            <div class="group flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-emerald-500/50">
+                <div class="h-44 bg-gradient-to-br from-emerald-600 to-teal-700 p-6 flex flex-col justify-between text-white relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 backdrop-blur-xs text-white">
+                            Sales &amp; Deals
+                        </span>
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <Icon Name="@IconNames.ExternalLink" Size="16" />
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-emerald-200 block">Enterprise Workflow</span>
+                        <h3 class="text-xl font-bold text-white tracking-tight">CRM &amp; Pipeline</h3>
+                    </div>
+                    @* Mini visual mock *@
+                    <div class="absolute -right-4 -bottom-6 w-32 h-20 bg-white/10 rounded-tl-xl border border-white/20 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300"></div>
+                </div>
+
+                <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Sales pipeline and deal tracker featuring pipeline metrics, live deal stages, interactive slide-over Drawer with client inspection details, and a validated Modal form to create new deals.
+                        </p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Drawer</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Modal</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Descriptions</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Rate</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Select</span>
+                        </div>
+                    </div>
+                    <Button Type="ButtonType.Primary" Class="w-full !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600" OnClick="@(() => Navigation.NavigateTo("showcase/crm"))">
+                        Launch CRM Pipeline
+                    </Button>
+                </div>
+            </div>
+
+            @* Showcase 3: Settings Hub *@
+            <div class="group flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-xl transition-all duration-300 hover:border-purple-500/50">
+                <div class="h-44 bg-gradient-to-br from-purple-600 to-indigo-800 p-6 flex flex-col justify-between text-white relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 backdrop-blur-xs text-white">
+                            System Preferences
+                        </span>
+                        <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                            <Icon Name="@IconNames.ExternalLink" Size="16" />
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-xs font-medium text-purple-200 block">Security &amp; Appearance</span>
+                        <h3 class="text-xl font-bold text-white tracking-tight">Settings Hub</h3>
+                    </div>
+                    @* Mini visual mock *@
+                    <div class="absolute -right-4 -bottom-6 w-32 h-20 bg-white/10 rounded-tl-xl border border-white/20 backdrop-blur-md transform group-hover:scale-105 transition-transform duration-300"></div>
+                </div>
+
+                <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Enterprise profile and system administration center. Features multi-tab organization, 2FA setup with instant client-side QR Code, live theme ColorPicker accent customization, and Popconfirm protected actions.
+                        </p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Tabs</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">QRCode</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">ColorPicker</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Switch</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Popconfirm</span>
+                        </div>
+                    </div>
+                    <Button Type="ButtonType.Primary" Class="w-full !bg-purple-600 hover:!bg-purple-700 !border-purple-600" OnClick="@(() => Navigation.NavigateTo("showcase/settings"))">
+                        Launch Settings Hub
+                    </Button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Component Philosophy Section *@
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 space-y-6">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Why build with TentoUI?</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-sm">
+                    <Icon Name="@IconNames.CheckCircle" Size="16" Class="text-primary-500" />
+                    <span>Pure Tailwind CSS v4</span>
+                </div>
+                <p>
+                    Zero cumbersome external CSS frameworks or heavy runtime stylesheets. Everything compiles with modern CSS variables and utility classes.
+                </p>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-sm">
+                    <Icon Name="@IconNames.CheckCircle" Size="16" Class="text-emerald-500" />
+                    <span>AntDesign Ergonomics</span>
+                </div>
+                <p>
+                    Familiar component API design with strong typing, generics (<code class="text-slate-800 dark:text-slate-200">Table&lt;TItem&gt;</code>, <code class="text-slate-800 dark:text-slate-200">Select&lt;TItem, TValue&gt;</code>), and declarative parameters.
+                </p>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-sm">
+                    <Icon Name="@IconNames.CheckCircle" Size="16" Class="text-purple-500" />
+                    <span>AI-Agent Ready</span>
+                </div>
+                <p>
+                    Comes bundled with a comprehensive <code class="text-slate-800 dark:text-slate-200">llms.txt</code> index and design token mapping so modern AI coding assistants can generate accurate TentoUI code on first attempt.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

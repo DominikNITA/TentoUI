@@ -16,9 +16,10 @@
                 </div>
                 @if (_isModified)
                 {
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                        Live Modified
-                    </span>
+                    <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Live Preview Active</span>
+                    </div>
                 }
             </div>
         }
@@ -46,20 +47,20 @@
                         class="px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors inline-flex items-center gap-1"
                         @onclick="ResetCode">
                     <Icon Name="@IconNames.RefreshCw" Size="11" />
-                    <span>Reset</span>
+                    <span>Revert to Original</span>
                 </button>
             }
         </div>
 
         <div class="flex items-center gap-2">
             <button type="button"
-                    class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium"
                     @onclick="CopyCodeAsync">
                 <Icon Name="@IconNames.Copy" Size="13" />
                 <span>Copy</span>
             </button>
             <button type="button"
-                    class="px-2 py-1 rounded text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1 font-medium"
+                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium"
                     @onclick="@(() => _showEditor = !_showEditor)">
                 <Icon Name="@IconNames.Edit2" Size="13" />
                 <span>@(_showEditor ? "Hide Editor" : "Modify Code")</span>
@@ -72,8 +73,8 @@
     {
         <div class="border-t border-slate-800 bg-slate-950 p-3 space-y-2">
             <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                <span>Modify code below — preview updates live:</span>
-                <span class="font-mono text-[10px] text-slate-500">live sync enabled</span>
+                <span>Edit markup below — preview updates in real time:</span>
+                <span class="font-mono text-[10px] text-slate-500">instant live sync</span>
             </div>
             <textarea rows="@ComputeRows()"
                       class="w-full rounded-lg bg-slate-900 text-slate-100 font-mono text-xs p-3 leading-relaxed border border-slate-800 focus:outline-none focus:border-primary-500 selection:bg-primary-600 resize-y"

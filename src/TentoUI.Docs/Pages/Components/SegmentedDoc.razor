@@ -8,108 +8,89 @@
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Segmented</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Segmented controls display mutually exclusive options or views horizontally, functioning as modern pill tabs or radio buttons.
+            Supports declarative <code class="text-primary-600 dark:text-primary-400">&lt;SegmentedItem&gt;</code> child components, inline comma-separated option strings, and strongly-typed models.
         </p>
     </div>
 
-    @* Example 1: Basic Segmented *@
-    <DemoCard Title="Basic Usage" Description="Linear pill selector for choosing timeframes or views." Code="@_basicCode">
-        <div class="flex flex-col sm:flex-row items-center gap-4">
-            <Segmented TValue="string"
-                       Value="@_selectedVal"
-                       ValueChanged="@((v) => _selectedVal = v)"
-                       Options="@_options" />
-            <span class="text-xs font-mono text-slate-500">Selected: <strong>@_selectedVal</strong></span>
-        </div>
-    </DemoCard>
+    @* Example 1: Declarative Child Items *@
+    <DemoCard Title="Declarative Child Items"
+              Description="Declare options directly in markup using SegmentedItem child elements. Every option is visible and editable."
+              Code="@_basicCode" />
 
-    @* Example 2: With Icons *@
-    <DemoCard Title="Segmented with Icons" Description="Segments featuring icon glyphs for compact toolbar views." Code="@_iconCode">
-        <div class="flex flex-col sm:flex-row items-center gap-4">
-            <Segmented TValue="string"
-                       Value="@_viewMode"
-                       ValueChanged="@((v) => _viewMode = v)"
-                       Options="@_iconOptions" />
-            <span class="text-xs font-mono text-slate-500">Active View: <strong>@_viewMode</strong></span>
-        </div>
-    </DemoCard>
+    @* Example 2: Segmented with Icons *@
+    <DemoCard Title="Segmented with Icons"
+              Description="Combine icon glyphs with text labels for compact, intuitive toolbar selectors."
+              Code="@_iconCode" />
 
-    @* Example 3: Sizes & Disabled Option *@
-    <DemoCard Title="Sizes &amp; Disabled State" Description="Supports Small, Middle, and Large sizes, and selectively disabled items." Code="@_sizesCode">
-        <div class="space-y-4">
-            <Segmented TValue="string"
-                       Value="@_sizeVal"
-                       ValueChanged="@((v) => _sizeVal = v)"
-                       Options="@_options"
-                       Size="ComponentSize.Small" />
+    @* Example 3: Sizes & Disabled State *@
+    <DemoCard Title="Sizes &amp; Disabled State"
+              Description="Supports Small, Middle, and Large scales, plus selectively disabled option items."
+              Code="@_sizesCode" />
 
-            <Segmented TValue="string"
-                       Value="@_scope"
-                       ValueChanged="@((v) => _scope = v)"
-                       Options="@_disabledOptions" />
-        </div>
-    </DemoCard>
+    @* Example 4: Comma-Separated String Options *@
+    <DemoCard Title="Inline String Options"
+              Description="For quick simple text lists, specify options as a comma-separated string attribute directly on the component."
+              Code="@_stringOptionsCode" />
 
     <ApiTable Title="Segmented<TValue> Properties" Properties="@_apiProps" />
+    <ApiTable Title="SegmentedItem<TValue> Properties" Properties="@_itemApiProps" />
 </div>
 
 @code {
-    private string _selectedVal = "Daily";
-    private string _sizeVal = "Daily";
-    private string _viewMode = "edit";
-    private string _scope = "team";
-
-    private readonly SegmentedOption<string>[] _options =
-    [
-        new("Daily", "Daily"),
-        new("Weekly", "Weekly"),
-        new("Monthly", "Monthly"),
-        new("Quarterly", "Quarterly")
-    ];
-
-    private readonly SegmentedOption<string>[] _iconOptions =
-    [
-        new("edit", "Edit", IconNames.Edit),
-        new("menu", "Menu", IconNames.Menu)
-    ];
-
-    private readonly SegmentedOption<string>[] _disabledOptions =
-    [
-        new("personal", "Personal"),
-        new("team", "Team"),
-        new("enterprise", "Enterprise (Locked)", Disabled: true)
-    ];
-
     private const string _basicCode = """
-        <Segmented TValue="string"
-                   @bind-Value="selectedVal"
-                   Options="@options" />
+        <Segmented TValue="string" Value="Daily">
+            <SegmentedItem Value="Daily">Daily</SegmentedItem>
+            <SegmentedItem Value="Weekly">Weekly</SegmentedItem>
+            <SegmentedItem Value="Monthly">Monthly</SegmentedItem>
+            <SegmentedItem Value="Quarterly">Quarterly</SegmentedItem>
+        </Segmented>
         """;
 
     private const string _iconCode = """
-        <Segmented TValue="string"
-                   @bind-Value="viewMode"
-                   Options="@iconOptions" />
+        <Segmented TValue="string" Value="edit">
+            <SegmentedItem Value="edit" Label="Edit" Icon="@IconNames.Edit" />
+            <SegmentedItem Value="menu" Label="Menu" Icon="@IconNames.Menu" />
+        </Segmented>
         """;
 
     private const string _sizesCode = """
-        <Segmented TValue="string"
-                   @bind-Value="val"
-                   Options="@options"
-                   Size="ComponentSize.Small" />
+        <div class="space-y-4">
+            <Segmented TValue="string" Value="Daily" Size="ComponentSize.Small">
+                <SegmentedItem Value="Daily">Daily</SegmentedItem>
+                <SegmentedItem Value="Weekly">Weekly</SegmentedItem>
+                <SegmentedItem Value="Monthly">Monthly</SegmentedItem>
+            </Segmented>
 
-        <Segmented TValue="string"
-                   @bind-Value="scope"
-                   Options="@disabledOptions" />
+            <Segmented TValue="string" Value="team">
+                <SegmentedItem Value="personal">Personal</SegmentedItem>
+                <SegmentedItem Value="team">Team</SegmentedItem>
+                <SegmentedItem Value="enterprise" Disabled="true">Enterprise (Locked)</SegmentedItem>
+            </Segmented>
+        </div>
+        """;
+
+    private const string _stringOptionsCode = """
+        <Segmented TValue="string" Value="Map" Options="Map, Transit, Satellite" />
         """;
 
     private readonly ApiTable.ApiProp[] _apiProps =
     [
         new("Value", "Current selected value.", "TValue?", "default"),
         new("ValueChanged", "Callback when selected value changes.", "EventCallback<TValue>", "—"),
-        new("Options", "List of SegmentedOption<TValue> items.", "IReadOnlyList<SegmentedOption<TValue>>", "empty"),
+        new("ChildContent", "Declarative SegmentedItem child elements.", "RenderFragment?", "null"),
+        new("Options", "Comma-separated string or collection of options.", "object?", "null"),
         new("Size", "Control height (Small, Middle, Large).", "ComponentSize", "ComponentSize.Middle"),
         new("Block", "Fit parent container width (flex-1 items).", "bool", "false"),
         new("Disabled", "Disable all interaction.", "bool", "false"),
         new("Class", "Additional CSS class names.", "string?", "null")
+    ];
+
+    private readonly ApiTable.ApiProp[] _itemApiProps =
+    [
+        new("Value", "The distinct option value.", "TValue", "required"),
+        new("Label", "Display label text (overrides child text).", "string?", "null"),
+        new("Icon", "Optional icon name from IconNames.", "string?", "null"),
+        new("Disabled", "Whether this specific option is disabled.", "bool", "false"),
+        new("ChildContent", "Inline text or markup for the option.", "RenderFragment?", "null")
     ];
 }

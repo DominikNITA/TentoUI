@@ -9,75 +9,46 @@
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">AutoComplete</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Dynamic input completion offering suggestions as the user types into the field.
+            Supports inline options strings as well as strongly-typed options.
         </p>
     </div>
 
     @* Example 1: Email Domain Suggestions *@
-    <DemoCard Title="Email AutoComplete" Description="Provides common email domain suffix suggestions." Code="@_emailCode">
-        <div class="max-w-xs p-2 space-y-2">
-            <AutoComplete @bind-Value="_emailValue"
-                          Placeholder="Enter email address..."
-                          SimpleOptions="@_suggestions"
-                          OnSelect="@(opt => MessageService.Info($"Selected domain: {opt}"))" />
-            <p class="text-xs text-slate-400 font-mono">Bound Value: @_emailValue</p>
-        </div>
-    </DemoCard>
+    <DemoCard Title="Email AutoComplete"
+              Description="Provides common email domain suffix suggestions. The options are directly visible and editable in the snippet."
+              Code="@_emailCode" />
 
     @* Example 2: Search Terms Suggestions *@
-    <DemoCard Title="Search Suggestions" Description="Instant keyword suggestions for searching products or documentation." Code="@_searchCode">
-        <div class="max-w-xs p-2">
-            <AutoComplete @bind-Value="_searchQuery"
-                          Placeholder="Search components..."
-                          SimpleOptions="@_componentSuggestions"
-                          AllowClear="true" />
-        </div>
-    </DemoCard>
+    <DemoCard Title="Search Suggestions"
+              Description="Instant keyword suggestions for searching products or documentation."
+              Code="@_searchCode" />
 
     <ApiTable Title="AutoComplete Properties" Properties="@_props" />
 </div>
 
 @code {
-    private string? _emailValue;
-    private string? _searchQuery;
-
-    private readonly string[] _suggestions =
-    [
-        "gmail.com",
-        "outlook.com",
-        "yahoo.com",
-        "icloud.com",
-        "company.org"
-    ];
-
-    private readonly string[] _componentSuggestions =
-    [
-        "Button",
-        "Badge",
-        "Card",
-        "Modal",
-        "Table",
-        "Tabs",
-        "Tree"
-    ];
-
     private const string _emailCode = """
-        <AutoComplete @bind-Value="emailValue"
-                      Placeholder="Enter email address..."
-                      SimpleOptions="@suggestions" />
+        <div class="max-w-xs p-2">
+            <AutoComplete Placeholder="Enter email address..."
+                          OptionsString="gmail.com, outlook.com, yahoo.com, icloud.com, proton.me"
+                          AllowClear="true" />
+        </div>
         """;
 
     private const string _searchCode = """
-        <AutoComplete @bind-Value="searchQuery"
-                      Placeholder="Search components..."
-                      SimpleOptions="@componentSuggestions"
-                      AllowClear="true" />
+        <div class="max-w-xs p-2">
+            <AutoComplete Placeholder="Search components..."
+                          OptionsString="Button, Badge, Card, Modal, Table, Tabs, Tree, Segmented"
+                          AllowClear="true" />
+        </div>
         """;
 
     private readonly ApiTable.ApiProp[] _props =
     [
-        new("Value", "Current text value in the input (bindable via @bind-Value).", "string?", "null"),
+        new("OptionsString", "Comma-separated string of suggestions (e.g. 'Option 1, Option 2').", "string?", "null"),
         new("SimpleOptions", "Array or list of string suggestions.", "IEnumerable<string>?", "null"),
         new("Options", "List of strongly-typed AutoCompleteOption items.", "IEnumerable<AutoCompleteOption>?", "null"),
+        new("Value", "Current text value in the input (bindable via @bind-Value).", "string?", "null"),
         new("Placeholder", "Placeholder prompt text.", "string?", "null"),
         new("AllowClear", "Whether clear button is visible.", "bool", "true"),
         new("OnSelect", "Callback invoked when a suggestion is clicked.", "EventCallback<string>", "null")

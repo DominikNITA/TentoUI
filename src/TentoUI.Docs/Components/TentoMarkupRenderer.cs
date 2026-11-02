@@ -40,6 +40,7 @@ public class TentoMarkupRenderer : ComponentBase
         // 2. Register closed generic components with standard/sensible default type arguments
         s_componentMap["InputNumber"] = typeof(InputNumber<double>);
         s_componentMap["Segmented"] = typeof(Segmented<string>);
+        s_componentMap["SegmentedItem"] = typeof(SegmentedItem<string>);
         s_componentMap["Radio"] = typeof(Radio<string>);
         s_componentMap["RadioGroup"] = typeof(RadioGroup<string>);
         s_componentMap["CheckboxGroup"] = typeof(CheckboxGroup<string>);
@@ -512,16 +513,21 @@ public class TentoMarkupRenderer : ComponentBase
         // 1. Segmented default options
         if (compType == typeof(Segmented<string>))
         {
-            if (!node.Attributes.ContainsKey("Options") || node.Attributes["Options"].StartsWith("@"))
+            var hasChildItems = node.Children.Any(c => c.TagName.Equals("SegmentedItem", StringComparison.OrdinalIgnoreCase));
+            if (!hasChildItems)
             {
-                var defaultOpts = new SegmentedOption<string>[]
+                if (node.Attributes.TryGetValue("Options", out var optVal) &&
+                    !optVal.StartsWith("@") &&
+                    !optVal.Equals("options", StringComparison.OrdinalIgnoreCase) &&
+                    !optVal.Equals("iconOptions", StringComparison.OrdinalIgnoreCase) &&
+                    !optVal.Equals("disabledOptions", StringComparison.OrdinalIgnoreCase))
                 {
-                    new("Daily", "Daily"),
-                    new("Weekly", "Weekly"),
-                    new("Monthly", "Monthly"),
-                    new("Quarterly", "Quarterly")
-                };
-                builder.AddAttribute(seq++, "Options", (IEnumerable<SegmentedOption<string>>)defaultOpts);
+                    builder.AddAttribute(seq++, "Options", (object)optVal);
+                }
+                else
+                {
+                    builder.AddAttribute(seq++, "Options", (object)"Daily, Weekly, Monthly, Quarterly");
+                }
             }
             if (!node.Attributes.ContainsKey("Value"))
             {

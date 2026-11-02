@@ -8,111 +8,68 @@
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Select</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Select component to pick values from an options menu, supporting single, multiple, and search-filterable modes.
+            Options can be specified as a direct inline string list or bound to strongly-typed collections.
         </p>
     </div>
 
-    @* Example 1: Basic Select *@
-    <DemoCard Title="Basic Single Select" Description="Choose a destination from a typed list of items." Code="@_basicCode">
-        <div class="max-w-xs p-2 space-y-2">
-            <Select TItem="CityItem"
-                    TValue="string"
-                    DataSource="@_cities"
-                    ValueProperty="@(c => c.Code)"
-                    LabelProperty="@(c => c.Name)"
-                    @bind-Value="_selectedValue"
-                    Placeholder="Choose a destination..."
-                    AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected Code: @_selectedValue</div>
-        </div>
-    </DemoCard>
+    @* Example 1: Basic Select with Inline Options *@
+    <DemoCard Title="Basic Single Select"
+              Description="Choose a destination from an inline options list. All options are visible and editable in the code."
+              Code="@_basicCode" />
 
     @* Example 2: Searchable Select *@
-    <DemoCard Title="Search Filter" Description="Allows users to type and filter long option lists instantaneously." Code="@_searchCode">
-        <div class="max-w-xs p-2">
-            <Select TItem="CityItem"
-                    TValue="string"
-                    DataSource="@_cities"
-                    ValueProperty="@(c => c.Code)"
-                    LabelProperty="@(c => c.Name)"
-                    @bind-Value="_searchSelected"
-                    Placeholder="Search city name..."
-                    ShowSearch="true"
-                    AllowClear="true" />
-        </div>
-    </DemoCard>
+    <DemoCard Title="Search Filter"
+              Description="Allows users to type and filter long option lists instantaneously."
+              Code="@_searchCode" />
 
     @* Example 3: Multiple Mode *@
-    <DemoCard Title="Multiple Tag Selection" Description="Select multiple options simultaneously rendered as removable chips." Code="@_multipleCode">
-        <div class="max-w-sm p-2 space-y-2">
-            <Select TItem="CityItem"
-                    TValue="string"
-                    DataSource="@_cities"
-                    ValueProperty="@(c => c.Code)"
-                    LabelProperty="@(c => c.Name)"
-                    @bind-Values="_selectedCities"
-                    Mode="SelectMode.Multiple"
-                    Placeholder="Select multiple destinations..." />
-            <div class="text-xs text-slate-400 font-mono">Selected: @string.Join(", ", _selectedCities)</div>
-        </div>
-    </DemoCard>
+    <DemoCard Title="Multiple Tag Selection"
+              Description="Select multiple options simultaneously rendered as removable chips."
+              Code="@_multipleCode" />
 
     <ApiTable Title="Select Properties" Properties="@_props" />
 </div>
 
 @code {
-    public record CityItem(string Code, string Name);
-
-    private readonly CityItem[] _cities =
-    [
-        new("waw", "Warsaw"),
-        new("ber", "Berlin"),
-        new("lon", "London"),
-        new("par", "Paris"),
-        new("tok", "Tokyo")
-    ];
-
-    private string? _selectedValue = "waw";
-    private string? _searchSelected = "tok";
-    private IEnumerable<string> _selectedCities = new[] { "waw", "ber" };
-
     private const string _basicCode = """
-        <Select TItem="CityItem"
-                TValue="string"
-                DataSource="@cities"
-                ValueProperty="@(c => c.Code)"
-                LabelProperty="@(c => c.Name)"
-                @bind-Value="selectedCode"
-                Placeholder="Choose destination..."
-                AllowClear="true" />
+        <div class="max-w-xs p-2">
+            <Select TItem="string"
+                    TValue="string"
+                    Placeholder="Choose a destination..."
+                    Options="Warsaw, Berlin, London, Paris, Tokyo, Sydney"
+                    AllowClear="true" />
+        </div>
         """;
 
     private const string _searchCode = """
-        <Select TItem="CityItem"
-                TValue="string"
-                DataSource="@cities"
-                ValueProperty="@(c => c.Code)"
-                LabelProperty="@(c => c.Name)"
-                @bind-Value="selectedCode"
-                ShowSearch="true" />
+        <div class="max-w-xs p-2">
+            <Select TItem="string"
+                    TValue="string"
+                    Placeholder="Search city name..."
+                    Options="Warsaw, Berlin, London, Paris, Tokyo, New York, San Francisco, Singapore, Zurich"
+                    ShowSearch="true"
+                    AllowClear="true" />
+        </div>
         """;
 
     private const string _multipleCode = """
-        <Select TItem="CityItem"
-                TValue="string"
-                DataSource="@cities"
-                ValueProperty="@(c => c.Code)"
-                LabelProperty="@(c => c.Name)"
-                @bind-Values="selectedCities"
-                Mode="SelectMode.Multiple" />
+        <div class="max-w-sm p-2">
+            <Select TItem="string"
+                    TValue="string"
+                    Mode="SelectMode.Multiple"
+                    Placeholder="Select multiple destinations..."
+                    Options="Warsaw, Berlin, London, Paris, Tokyo, Rome, Madrid" />
+        </div>
         """;
 
     private readonly ApiTable.ApiProp[] _props =
     [
-        new("DataSource", "The source data collection for options.", "IEnumerable<TItem>?", "null"),
+        new("Options", "Comma-separated string of options (e.g. 'Option 1, Option 2').", "string?", "null"),
+        new("DataSource", "The source data collection for strongly-typed items.", "IEnumerable<TItem>?", "null"),
         new("Value", "Current selected value (bindable via @bind-Value).", "TValue", "default"),
         new("Values", "Selected values for multiple mode (bindable via @bind-Values).", "IEnumerable<TValue>?", "null"),
         new("Mode", "Selection mode: Single or Multiple.", "SelectMode", "SelectMode.Single"),
-        new("ValueProperty", "Selector function to get option value from item.", "Func<TItem, TValue>?", "null"),
+        new("ValueProperty", "Selector function to get option value from typed item.", "Func<TItem, TValue>?", "null"),
         new("LabelProperty", "Selector function to get option display label.", "Func<TItem, string>?", "null"),
         new("Placeholder", "Placeholder text.", "string?", "'Select an option'"),
         new("ShowSearch", "Enable instant filtering search input.", "bool", "false"),

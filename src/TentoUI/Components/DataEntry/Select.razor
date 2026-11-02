@@ -130,6 +130,7 @@
 @code {
     [Parameter] public SelectMode Mode { get; set; } = SelectMode.Single;
     [Parameter] public IEnumerable<TItem>? DataSource { get; set; }
+    [Parameter] public string? Options { get; set; }
     [Parameter] public Func<TItem, TValue>? ValueProperty { get; set; }
     [Parameter] public Func<TItem, string>? LabelProperty { get; set; }
     [Parameter] public RenderFragment<TItem>? OptionTemplate { get; set; }
@@ -139,6 +140,24 @@
     [Parameter] public IEnumerable<TValue>? Values { get; set; }
     [Parameter] public EventCallback<IEnumerable<TValue>> ValuesChanged { get; set; }
 
+    private IEnumerable<TItem>? EffectiveDataSource
+    {
+        get
+        {
+            if (DataSource != null) return DataSource;
+            if (!string.IsNullOrWhiteSpace(Options))
+            {
+                var splitted = Options.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (typeof(TItem) == typeof(string))
+                {
+                    return (IEnumerable<TItem>)(object)splitted;
+                }
+                return splitted.Select(s => (TItem)Convert.ChangeType(s, typeof(TItem), System.Globalization.CultureInfo.InvariantCulture));
+            }
+            return null;
+        }
+    }
+
     private bool _isOpen;
     private string _searchQuery = string.Empty;
     private int _highlightIndex = -1;
@@ -146,17 +165,17 @@
     private string _arrowTransformClass => _isOpen ? "transform rotate-180" : "";
     private bool HasSelection => Mode == SelectMode.Single ? HasSelectedItem : SelectedItems.Count > 0;
 
-    private bool HasSelectedItem => DataSource != null && DataSource.Any(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue));
-    private TItem SelectedItem => DataSource != null ? DataSource.FirstOrDefault(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue))! : default!;
-    private System.Collections.Generic.List<TItem> SelectedItems => DataSource?.Where(x => Values != null && Values.Contains(GetValue(x))).ToList() ?? new System.Collections.Generic.List<TItem>();
+    private bool HasSelectedItem => EffectiveDataSource != null && EffectiveDataSource.Any(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue));
+    private TItem SelectedItem => EffectiveDataSource != null ? EffectiveDataSource.FirstOrDefault(x => EqualityComparer<TValue>.Default.Equals(GetValue(x), CurrentValue))! : default!;
+    private System.Collections.Generic.List<TItem> SelectedItems => EffectiveDataSource?.Where(x => Values != null && Values.Contains(GetValue(x))).ToList() ?? new System.Collections.Generic.List<TItem>();
 
     private System.Collections.Generic.List<TItem> FilteredItems
     {
         get
         {
-            if (DataSource == null) return new System.Collections.Generic.List<TItem>();
-            if (string.IsNullOrWhiteSpace(_searchQuery)) return DataSource.ToList();
-            return DataSource.Where(x => GetLabel(x).Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (EffectiveDataSource == null) return new System.Collections.Generic.List<TItem>();
+            if (string.IsNullOrWhiteSpace(_searchQuery)) return EffectiveDataSource.ToList();
+            return EffectiveDataSource.Where(x => GetLabel(x).Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
 

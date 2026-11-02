@@ -158,4 +158,124 @@ public class TentoMarkupRendererTests : TestContext
         cut.Find(".tento-carousel").Should().NotBeNull();
         cut.Markup.Should().Contain("Direct Slide 1");
     }
+
+    [Fact]
+    public void TentoMarkupRenderer_RendersSegmented_WithDeclarativeItems()
+    {
+        // Arrange
+        const string markup = """
+            <Segmented TValue="string" Value="Daily">
+                <SegmentedItem Value="Daily">Daily</SegmentedItem>
+                <SegmentedItem Value="Weekly">Weekly</SegmentedItem>
+                <SegmentedItem Value="Monthly">Monthly</SegmentedItem>
+            </Segmented>
+            """;
+
+        // Act
+        var cut = RenderComponent<TentoMarkupRenderer>(parameters => parameters
+            .Add(p => p.Markup, markup));
+
+        // Assert
+        cut.Find(".tento-segmented").Should().NotBeNull();
+        var items = cut.FindAll(".tento-segmented-item");
+        items.Should().HaveCount(3);
+        items[0].TextContent.Trim().Should().Be("Daily");
+        items[1].TextContent.Trim().Should().Be("Weekly");
+        items[2].TextContent.Trim().Should().Be("Monthly");
+    }
+
+    [Fact]
+    public void TentoMarkupRenderer_RendersSegmented_WithStringOptions()
+    {
+        // Arrange
+        const string markup = """<Segmented TValue="string" Value="Map" Options="Map, Transit, Satellite" />""";
+
+        // Act
+        var cut = RenderComponent<TentoMarkupRenderer>(parameters => parameters
+            .Add(p => p.Markup, markup));
+
+        // Assert
+        cut.Find(".tento-segmented").Should().NotBeNull();
+        var items = cut.FindAll(".tento-segmented-item");
+        items.Should().HaveCount(3);
+        items[0].TextContent.Trim().Should().Be("Map");
+        items[1].TextContent.Trim().Should().Be("Transit");
+        items[2].TextContent.Trim().Should().Be("Satellite");
+    }
+
+    [Fact]
+    public void DemoCard_RendersSegmented_DirectlyFromCodePropertyInitially()
+    {
+        // Arrange
+        Services.AddTentoUI();
+        const string code = """
+            <Segmented TValue="string" Value="Monthly">
+                <SegmentedItem Value="Daily">Daily</SegmentedItem>
+                <SegmentedItem Value="Monthly">Monthly</SegmentedItem>
+            </Segmented>
+            """;
+
+        // Act
+        var cut = RenderComponent<DemoCard>(parameters => parameters
+            .Add(p => p.Title, "Live Segmented Demo")
+            .Add(p => p.Code, code));
+
+        // Assert - The preview area must render the segmented control with options immediately
+        cut.Find(".tento-segmented").Should().NotBeNull();
+        var items = cut.FindAll(".tento-segmented-item");
+        items.Should().HaveCount(2);
+        items[1].TextContent.Trim().Should().Be("Monthly");
+        items[1].GetAttribute("aria-checked").Should().Be("true");
+    }
+
+    [Fact]
+    public void TentoMarkupRenderer_RendersSelect_WithStringOptions()
+    {
+        // Arrange
+        const string markup = """<Select TItem="string" TValue="string" Placeholder="Choose..." Options="Warsaw, Berlin, London" />""";
+
+        // Act
+        var cut = RenderComponent<TentoMarkupRenderer>(parameters => parameters
+            .Add(p => p.Markup, markup));
+
+        // Assert
+        cut.Find(".tento-select").Should().NotBeNull();
+        cut.Markup.Should().Contain("Choose...");
+    }
+
+    [Fact]
+    public void TentoMarkupRenderer_RendersAutoComplete_WithOptionsString()
+    {
+        // Arrange
+        const string markup = """<AutoComplete Placeholder="Search email..." OptionsString="gmail.com, outlook.com, yahoo.com" />""";
+
+        // Act
+        var cut = RenderComponent<TentoMarkupRenderer>(parameters => parameters
+            .Add(p => p.Markup, markup));
+
+        // Assert
+        cut.Find(".tento-autocomplete").Should().NotBeNull();
+        cut.Find("input").GetAttribute("placeholder").Should().Be("Search email...");
+    }
+
+    [Fact]
+    public void TentoMarkupRenderer_RendersList_WithDeclarativeItems()
+    {
+        // Arrange
+        const string markup = """
+            <List Bordered="true">
+                <ListItem>Task One</ListItem>
+                <ListItem>Task Two</ListItem>
+            </List>
+            """;
+
+        // Act
+        var cut = RenderComponent<TentoMarkupRenderer>(parameters => parameters
+            .Add(p => p.Markup, markup));
+
+        // Assert
+        cut.Find(".tento-list").Should().NotBeNull();
+        cut.Markup.Should().Contain("Task One");
+        cut.Markup.Should().Contain("Task Two");
+    }
 }

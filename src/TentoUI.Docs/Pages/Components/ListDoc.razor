@@ -8,91 +8,70 @@
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">List</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Simple and clean list view for text, avatars, actions, and metadata rows.
+            Items can be declared directly as child components or bound to dynamic data collections.
         </p>
     </div>
 
     @* Example 1: Basic List *@
-    <DemoCard Title="Basic List with Metadata" Description="List items featuring letter avatars, titles, and descriptions." Code="@_basicCode">
-        <div class="max-w-lg">
-            <TentoUI.List TItem="string" DataSource="@_tasks" Bordered="true">
-                <ItemTemplate Context="task">
-                    <ListItem>
-                        <ListItemMeta Title="@task" Description="Assigned to Engineering Core Team">
-                            <Avatar><Avatar Text="@task[..1]" Size="ComponentSize.Small" /></Avatar>
-                        </ListItemMeta>
-                    </ListItem>
-                </ItemTemplate>
-            </TentoUI.List>
-        </div>
-    </DemoCard>
+    <DemoCard Title="Basic List with Metadata"
+              Description="List items featuring letter avatars, titles, and descriptions. All items are visible and editable in the snippet."
+              Code="@_basicCode" />
 
     @* Example 2: List with Header & Footer *@
-    <DemoCard Title="Header &amp; Footer Slots" Description="Includes header title bar and summary footer." Code="@_headerFooterCode">
-        <div class="max-w-lg">
-            <TentoUI.List TItem="string" DataSource="@_releases" Bordered="true">
-                <Header>
-                    <span class="font-bold text-xs text-slate-700 dark:text-slate-300">Upcoming Release Roadmap</span>
-                </Header>
-                <Footer>
-                    <span class="text-xs text-slate-400">Total Milestones: 3 Scheduled</span>
-                </Footer>
-                <ItemTemplate Context="rel">
-                    <ListItem>
-                        <span class="text-xs font-medium text-slate-800 dark:text-slate-200">@rel</span>
-                    </ListItem>
-                </ItemTemplate>
-            </TentoUI.List>
-        </div>
-    </DemoCard>
+    <DemoCard Title="Header &amp; Footer Slots"
+              Description="Includes header title bar and summary footer slots with declarative items."
+              Code="@_headerFooterCode" />
 
     <ApiTable Title="List Properties" Properties="@_listProps" />
     <ApiTable Title="ListItem Properties" Properties="@_itemProps" />
 </div>
 
 @code {
-    private readonly string[] _tasks =
-    [
-        "Setup Blazor WASM Showcase",
-        "Implement Table with customizable columns",
-        "Add GitHub Pages automated workflow",
-        "Verify .NET 10 compilation and tests"
-    ];
-
-    private readonly string[] _releases =
-    [
-        "v1.0.0 - General Availability",
-        "v1.1.0 - Form Validation Suite",
-        "v1.2.0 - Rich Text Editor Integration"
-    ];
-
     private const string _basicCode = """
-        <TentoUI.List TItem="string" DataSource="@tasks" Bordered="true">
-            <ItemTemplate Context="task">
+        <div class="max-w-lg">
+            <List Bordered="true">
                 <ListItem>
-                    <ListItemMeta Title="@task" Description="Assigned to Core Team">
-                        <Avatar><Avatar Text="@task[..1]" Size="ComponentSize.Small" /></Avatar>
+                    <ListItemMeta Title="Setup Blazor WASM Showcase" Description="Assigned to Engineering Core Team">
+                        <Avatar><Avatar Text="S" Size="ComponentSize.Small" /></Avatar>
                     </ListItemMeta>
                 </ListItem>
-            </ItemTemplate>
-        </TentoUI.List>
+                <ListItem>
+                    <ListItemMeta Title="Implement Table with customizable columns" Description="Assigned to Engineering Core Team">
+                        <Avatar><Avatar Text="I" Size="ComponentSize.Small" /></Avatar>
+                    </ListItemMeta>
+                </ListItem>
+                <ListItem>
+                    <ListItemMeta Title="Add GitHub Pages automated workflow" Description="Assigned to Engineering Core Team">
+                        <Avatar><Avatar Text="A" Size="ComponentSize.Small" /></Avatar>
+                    </ListItemMeta>
+                </ListItem>
+            </List>
+        </div>
         """;
 
     private const string _headerFooterCode = """
-        <TentoUI.List TItem="string" DataSource="@releases" Bordered="true">
-            <Header><span>Upcoming Roadmap</span></Header>
-            <Footer><span>3 Milestones</span></Footer>
-            <ItemTemplate Context="rel">
-                <ListItem><span>@rel</span></ListItem>
-            </ItemTemplate>
-        </TentoUI.List>
+        <div class="max-w-lg">
+            <List Bordered="true">
+                <Header>
+                    <span class="font-bold text-xs text-slate-700 dark:text-slate-300">Upcoming Release Roadmap</span>
+                </Header>
+                <Footer>
+                    <span class="text-xs text-slate-400">Total Milestones: 3 Scheduled</span>
+                </Footer>
+                <ListItem><span class="text-xs font-medium text-slate-800 dark:text-slate-200">v1.0.0 - General Availability</span></ListItem>
+                <ListItem><span class="text-xs font-medium text-slate-800 dark:text-slate-200">v1.1.0 - Form Validation Suite</span></ListItem>
+                <ListItem><span class="text-xs font-medium text-slate-800 dark:text-slate-200">v1.2.0 - Rich Text Editor Integration</span></ListItem>
+            </List>
+        </div>
         """;
 
     private readonly ApiTable.ApiProp[] _listProps =
     [
-        new("DataSource", "Data source collection for list rows.", "IEnumerable<TItem>?", "null"),
         new("Bordered", "Whether to show outer bordered container.", "bool", "false"),
-        new("Header", "List header renderer.", "RenderFragment?", "null"),
-        new("Footer", "List footer renderer.", "RenderFragment?", "null"),
+        new("Header", "List header slot.", "RenderFragment?", "null"),
+        new("Footer", "List footer slot.", "RenderFragment?", "null"),
+        new("ChildContent", "Declarative ListItem child elements.", "RenderFragment?", "null"),
+        new("DataSource", "Data source collection for list rows.", "IEnumerable<TItem>?", "null"),
         new("ItemTemplate", "Custom template for each list item row.", "RenderFragment<TItem>?", "null")
     ];
 

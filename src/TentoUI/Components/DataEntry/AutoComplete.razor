@@ -61,6 +61,7 @@
 @code {
     [Parameter] public IEnumerable<AutoCompleteOption>? Options { get; set; }
     [Parameter] public IEnumerable<string>? SimpleOptions { get; set; }
+    [Parameter] public string? OptionsString { get; set; }
     [Parameter] public RenderFragment<AutoCompleteOption>? OptionTemplate { get; set; }
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public bool AllowClear { get; set; } = true;
@@ -83,6 +84,9 @@
         {
             if (Options != null) return Options.ToList();
             if (SimpleOptions != null) return SimpleOptions.Select(s => new AutoCompleteOption(s)).ToList();
+            if (!string.IsNullOrWhiteSpace(OptionsString))
+                return OptionsString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => new AutoCompleteOption(s)).ToList();
             return Array.Empty<AutoCompleteOption>();
         }
     }

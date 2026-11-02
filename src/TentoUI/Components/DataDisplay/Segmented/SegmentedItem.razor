@@ -11,9 +11,36 @@
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
+    private TValue? _prevValue;
+    private string? _prevLabel;
+    private string? _prevIcon;
+    private bool _prevDisabled;
+    private bool _initialized;
+
     protected override void OnInitialized()
     {
+        _prevValue = Value;
+        _prevLabel = Label;
+        _prevIcon = Icon;
+        _prevDisabled = Disabled;
+        _initialized = true;
         ParentSegmented?.RegisterItem(this);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_initialized &&
+            (!EqualityComparer<TValue>.Default.Equals(Value, _prevValue) ||
+             _prevLabel != Label ||
+             _prevIcon != Icon ||
+             _prevDisabled != Disabled))
+        {
+            _prevValue = Value;
+            _prevLabel = Label;
+            _prevIcon = Icon;
+            _prevDisabled = Disabled;
+            ParentSegmented?.NotifyItemChanged();
+        }
     }
 
     public void Dispose()

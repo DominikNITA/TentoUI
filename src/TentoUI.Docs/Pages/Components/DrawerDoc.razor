@@ -76,6 +76,10 @@
         """;
 
     private const string _leftCode = """
+        <Button Type="ButtonType.Primary" OnClick="@(() => _openLeft = true)">
+            Slide from Left
+        </Button>
+
         <Drawer @bind-Open="_openLeft"
                 Title="Navigation Menu"
                 Placement="DrawerPlacement.Left"

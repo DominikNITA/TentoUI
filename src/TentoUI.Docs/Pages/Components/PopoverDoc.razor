@@ -13,7 +13,7 @@
 
     @* Example 1: Basic Hover Popover *@
     <DemoCard Title="Hover Popover" Description="Floating card opened when hovering over the anchor button." Code="@_hoverCode">
-        <div class="p-8 flex items-center justify-center">
+        <div class="py-14 flex items-center justify-center">
             <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">
                 <ContentTemplate>
                     <div class="w-56 space-y-2 text-xs">
@@ -30,7 +30,7 @@
 
     @* Example 2: Click Trigger *@
     <DemoCard Title="Click Trigger Popover" Description="Requires a click to open and remains visible until clicked again or dismissed." Code="@_clickCode">
-        <div class="p-8 flex items-center justify-center">
+        <div class="py-14 flex items-center justify-center">
             <Popover Title="User Quick Actions" Trigger="TooltipTrigger.Click" Placement="TooltipPlacement.Bottom">
                 <ContentTemplate>
                     <div class="w-48 space-y-2 text-xs">
@@ -53,31 +53,35 @@
 
 @code {
     private const string _hoverCode = """
-        <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">
-            <ContentTemplate>
-                <div class="w-56 space-y-2 text-xs">
-                    <p class="text-slate-500">Node memory usage is at 42%.</p>
-                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small" Block="true">View Metrics</Button>
-                </div>
-            </ContentTemplate>
-            <ChildContent>
-                <Button Type="ButtonType.Default">Hover for Metrics</Button>
-            </ChildContent>
-        </Popover>
+        <div class="py-14 flex items-center justify-center">
+            <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">
+                <ContentTemplate>
+                    <div class="w-56 space-y-2 text-xs">
+                        <p class="text-slate-500">Node memory usage is at 42%.</p>
+                        <Button Type="ButtonType.Primary" Size="ComponentSize.Small" Block="true">View Metrics</Button>
+                    </div>
+                </ContentTemplate>
+                <ChildContent>
+                    <Button Type="ButtonType.Default">Hover for Metrics</Button>
+                </ChildContent>
+            </Popover>
+        </div>
         """;
 
     private const string _clickCode = """
-        <Popover Title="User Quick Actions" Trigger="TooltipTrigger.Click" Placement="TooltipPlacement.Bottom">
-            <ContentTemplate>
-                <div class="w-48 space-y-2 text-xs">
-                    <a href="#" class="block">Profile Settings</a>
-                    <a href="#" class="block text-red-500">Sign Out</a>
-                </div>
-            </ContentTemplate>
-            <ChildContent>
-                <Button Type="ButtonType.Primary">Click for Options</Button>
-            </ChildContent>
-        </Popover>
+        <div class="py-14 flex items-center justify-center">
+            <Popover Title="User Quick Actions" Trigger="TooltipTrigger.Click" Placement="TooltipPlacement.Bottom">
+                <ContentTemplate>
+                    <div class="w-48 space-y-2 text-xs">
+                        <a href="#" class="block">Profile Settings</a>
+                        <a href="#" class="block text-red-500">Sign Out</a>
+                    </div>
+                </ContentTemplate>
+                <ChildContent>
+                    <Button Type="ButtonType.Primary">Click for Options</Button>
+                </ChildContent>
+            </Popover>
+        </div>
         """;
 
     private readonly ApiProp[] _props =

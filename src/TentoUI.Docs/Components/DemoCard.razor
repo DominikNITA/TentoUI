@@ -2,7 +2,7 @@
 @inject IJSRuntime JSRuntime
 @inject IMessageService MessageService
 
-<div class="tento-demo-card rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden my-6 transition-all">
+<div class="tento-demo-card rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm relative overflow-visible my-6 transition-all">
     <div class="p-6">
         @if (!string.IsNullOrEmpty(Title))
         {
@@ -25,10 +25,10 @@
         }
 
         @* Live Preview Area *@
-        <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 min-h-[64px] overflow-hidden">
+        <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 min-h-[96px] relative overflow-visible">
             @if (!string.IsNullOrWhiteSpace(_currentCode))
             {
-                <TentoMarkupRenderer Markup="@_currentCode" Fallback="@ChildContent" />
+                <TentoMarkupRenderer @key="_currentCode" Markup="@_currentCode" Fallback="@ChildContent" />
             }
             else
             {
@@ -107,6 +107,7 @@
     {
         _currentCode = e.Value?.ToString() ?? string.Empty;
         _isModified = !string.Equals(_currentCode?.Trim(), Code?.Trim(), StringComparison.Ordinal);
+        StateHasChanged();
     }
 
     private void ResetCode()

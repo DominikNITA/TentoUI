@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.Components.Web;
 using TentoUI;
 
 namespace TentoUI.Docs.Components;
@@ -15,10 +16,18 @@ namespace TentoUI.Docs.Components;
 /// </summary>
 public class TentoMarkupRenderer : ComponentBase
 {
+    [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
+
+    private IMessageService? MessageService => ServiceProvider.GetService(typeof(IMessageService)) as IMessageService;
+    private INotificationService? NotificationService => ServiceProvider.GetService(typeof(INotificationService)) as INotificationService;
+    private IModalService? ModalService => ServiceProvider.GetService(typeof(IModalService)) as IModalService;
+
     [Parameter] public string? Markup { get; set; }
     [Parameter] public RenderFragment? Fallback { get; set; }
 
     public string? ParseError { get; private set; }
+
+    private bool _overlayOpen;
 
     private static readonly Dictionary<string, Type> s_componentMap = new(StringComparer.OrdinalIgnoreCase);
     private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> s_parameterCache = new();
@@ -47,6 +56,7 @@ public class TentoMarkupRenderer : ComponentBase
         s_componentMap["Select"] = typeof(Select<string, string>);
         s_componentMap["List"] = typeof(List<string>);
         s_componentMap["Table"] = typeof(Table<object>);
+        s_componentMap["TableColumn"] = typeof(TableColumn<object>);
 
         // 3. Precache parameter properties for fast runtime resolution
         foreach (var (_, type) in s_componentMap)
@@ -92,7 +102,41 @@ public class TentoMarkupRenderer : ComponentBase
             }
 
             var seq = 0;
-            // If all top-level elements are inline widgets (e.g. multiple Buttons, Tags, Badges), wrap in a flex row
+
+            // 1. Check if there is an interactive Drawer or Modal that lacks an opening trigger button
+            var hasOverlay = nodes.Any(n => n.TagName.Equals("Drawer", StringComparison.OrdinalIgnoreCase) ||
+                                           n.TagName.Equals("Modal", StringComparison.OrdinalIgnoreCase));
+            var hasButtonTrigger = nodes.Any(n => n.TagName.Equals("Button", StringComparison.OrdinalIgnoreCase));
+
+            if (hasOverlay && !hasButtonTrigger && !_overlayOpen)
+            {
+                builder.OpenComponent<Button>(seq++);
+                builder.AddAttribute(seq++, "Type", ButtonType.Primary);
+                builder.AddAttribute(seq++, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(this, () =>
+                {
+                    _overlayOpen = true;
+                    StateHasChanged();
+                }));
+                builder.AddAttribute(seq++, "ChildContent", (RenderFragment)(b => b.AddContent(0, "Open Panel")));
+                builder.CloseComponent();
+            }
+
+            // 2. Standalone Popover, Tooltip, or Dropdown root: provide generous spacing and centering so floating overlays never clip
+            var isFloatingRoot = nodes.Count == 1 &&
+                (nodes[0].TagName.Equals("Popover", StringComparison.OrdinalIgnoreCase) ||
+                 nodes[0].TagName.Equals("Tooltip", StringComparison.OrdinalIgnoreCase) ||
+                 nodes[0].TagName.Equals("Dropdown", StringComparison.OrdinalIgnoreCase));
+
+            if (isFloatingRoot)
+            {
+                builder.OpenElement(seq++, "div");
+                builder.AddAttribute(seq++, "class", "py-14 flex items-center justify-center w-full min-h-[140px] relative overflow-visible");
+                RenderNode(nodes[0], builder, ref seq);
+                builder.CloseElement();
+                return;
+            }
+
+            // 3. If all top-level elements are inline widgets (e.g. multiple Buttons, Tags, Badges), wrap in a flex row
             var needsFlexWrap = nodes.Count > 1 && nodes.All(n => IsInlineTag(n.TagName));
             if (needsFlexWrap)
             {
@@ -129,7 +173,8 @@ public class TentoMarkupRenderer : ComponentBase
 
     /// <summary>
     /// Parses markup into a hierarchical AST using a stack-based algorithm.
-    /// Handles arbitrarily nested tags of identical names (divs, carousels, cards, panels).
+    /// Handles arbitrarily nested tags of identical names (divs, carousels, cards, panels),
+    /// lambda expressions in attributes (@(() => ...)), and nested quotes.
     /// </summary>
     public static System.Collections.Generic.List<MarkupNode> ParseNodes(string input)
     {
@@ -182,8 +227,8 @@ public class TentoMarkupRenderer : ComponentBase
                 continue;
             }
 
-            // Find closing tag bracket '>'
-            var nextGt = input.IndexOf('>', pos);
+            // Find closing tag bracket '>' respecting quotes, parentheses, and lambdas
+            var nextGt = FindTagClosingBracket(input, pos + 1);
             if (nextGt == -1) break;
 
             var rawTagContent = input.Substring(pos + 1, nextGt - pos - 1).Trim();
@@ -249,6 +294,40 @@ public class TentoMarkupRenderer : ComponentBase
         return roots;
     }
 
+    private static int FindTagClosingBracket(string input, int startPos)
+    {
+        var len = input.Length;
+        var inQuote = '\0';
+        var parenDepth = 0;
+
+        for (var i = startPos; i < len; i++)
+        {
+            var c = input[i];
+
+            if (inQuote != '\0')
+            {
+                if (c == '(') parenDepth++;
+                else if (c == ')') { if (parenDepth > 0) parenDepth--; }
+                else if (c == inQuote && parenDepth == 0)
+                {
+                    inQuote = '\0';
+                }
+            }
+            else
+            {
+                if (c == '"' || c == '\'')
+                {
+                    inQuote = c;
+                }
+                else if (c == '>')
+                {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     private static void AddNode(MarkupNode node, Stack<MarkupNode> stack, System.Collections.Generic.List<MarkupNode> roots)
     {
         if (stack.Count > 0)
@@ -257,30 +336,89 @@ public class TentoMarkupRenderer : ComponentBase
             roots.Add(node);
     }
 
-    private static (string TagName, Dictionary<string, string> Attributes) ParseTagHeader(string header)
+    public static (string TagName, Dictionary<string, string> Attributes) ParseTagHeader(string header)
     {
         var attrs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         if (string.IsNullOrWhiteSpace(header)) return (string.Empty, attrs);
 
-        var match = Regex.Match(header, @"^([a-zA-Z0-9_\.:]+)");
-        if (!match.Success) return (string.Empty, attrs);
+        var i = 0;
+        var len = header.Length;
 
-        var tagName = match.Groups[1].Value;
+        // 1. Tag name
+        while (i < len && char.IsWhiteSpace(header[i])) i++;
+        var tagStart = i;
+        while (i < len && !char.IsWhiteSpace(header[i]) && header[i] != '/' && header[i] != '>') i++;
+        if (tagStart == i) return (string.Empty, attrs);
+
+        var tagName = header[tagStart..i];
         if (tagName.StartsWith("TentoUI.", StringComparison.OrdinalIgnoreCase))
             tagName = tagName[8..];
 
-        var rest = header[match.Length..].Trim();
-
-        // Match attributes: key="value", key='value', key=@value, or bare key
-        var attrMatches = Regex.Matches(rest, @"([@a-zA-Z0-9_\-\.:]+)(?:\s*=\s*(?:""([^""]*)""|'([^']*)'|([^\s>]+)))?");
-
-        foreach (Match m in attrMatches)
+        // 2. Attributes
+        while (i < len)
         {
-            var rawKey = m.Groups[1].Value;
-            var val = m.Groups[2].Success ? m.Groups[2].Value
-                    : m.Groups[3].Success ? m.Groups[3].Value
-                    : m.Groups[4].Success ? m.Groups[4].Value
-                    : "true"; // bare attribute flag
+            // Skip whitespace
+            while (i < len && char.IsWhiteSpace(header[i])) i++;
+            if (i >= len) break;
+
+            if (header[i] == '/' || header[i] == '>')
+            {
+                i++;
+                continue;
+            }
+
+            // Attribute name
+            var keyStart = i;
+            while (i < len && !char.IsWhiteSpace(header[i]) && header[i] != '=' && header[i] != '/' && header[i] != '>')
+                i++;
+            var rawKey = header[keyStart..i].Trim();
+            if (string.IsNullOrEmpty(rawKey)) break;
+
+            // Skip whitespace after key
+            while (i < len && char.IsWhiteSpace(header[i])) i++;
+
+            string rawVal;
+            if (i < len && header[i] == '=')
+            {
+                i++; // consume '='
+                while (i < len && char.IsWhiteSpace(header[i])) i++;
+
+                if (i < len && (header[i] == '"' || header[i] == '\''))
+                {
+                    var quoteChar = header[i];
+                    i++; // consume opening quote
+                    var valStart = i;
+                    var parenDepth = 0;
+
+                    while (i < len)
+                    {
+                        var c = header[i];
+                        if (c == '(') parenDepth++;
+                        else if (c == ')') { if (parenDepth > 0) parenDepth--; }
+                        else if (c == quoteChar && parenDepth == 0)
+                        {
+                            break;
+                        }
+                        i++;
+                    }
+
+                    rawVal = header[valStart..i];
+                    if (i < len && header[i] == quoteChar) i++; // consume closing quote
+                }
+                else
+                {
+                    // Bare unquoted value (e.g. key=val)
+                    var valStart = i;
+                    while (i < len && !char.IsWhiteSpace(header[i]) && header[i] != '/' && header[i] != '>')
+                        i++;
+                    rawVal = header[valStart..i];
+                }
+            }
+            else
+            {
+                // Bare flag attribute (e.g. Disabled, Danger, Striped)
+                rawVal = "true";
+            }
 
             // Normalize key: strip @bind- or leading @
             var key = rawKey;
@@ -291,9 +429,8 @@ public class TentoMarkupRenderer : ComponentBase
             else if (key.StartsWith("@", StringComparison.OrdinalIgnoreCase))
                 key = key[1..];
 
-            // Normalize value: strip leading @ or wrapping @("...")
-            val = NormalizeAttributeValue(val);
-
+            // Normalize value: strip leading wrapping quotes
+            var val = NormalizeAttributeValue(rawVal);
             attrs[key] = val;
         }
 
@@ -311,13 +448,11 @@ public class TentoMarkupRenderer : ComponentBase
         if (val.StartsWith("@\"") && val.EndsWith("\""))
             return val[2..^1];
 
-        // Handle leading @ (e.g. @ButtonType.Primary, @IconNames.Search, @true, @false)
-        if (val.StartsWith('@'))
-            val = val[1..].Trim();
-
         // Handle IconNames.X -> x
         if (val.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
             val = val[10..].ToLowerInvariant();
+        else if (val.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
+            val = val[11..].ToLowerInvariant();
 
         return val;
     }
@@ -340,7 +475,7 @@ public class TentoMarkupRenderer : ComponentBase
         tag.Equals("Text", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Link", StringComparison.OrdinalIgnoreCase);
 
-    private static void RenderNode(MarkupNode node, RenderTreeBuilder builder, ref int seq)
+    private void RenderNode(MarkupNode node, RenderTreeBuilder builder, ref int seq)
     {
         // 1. Plain text node
         if (string.IsNullOrEmpty(node.TagName))
@@ -381,7 +516,7 @@ public class TentoMarkupRenderer : ComponentBase
         builder.CloseElement();
     }
 
-    private static void RenderDynamicComponent(Type compType, MarkupNode node, RenderTreeBuilder builder, ref int seq)
+    private void RenderDynamicComponent(Type compType, MarkupNode node, RenderTreeBuilder builder, ref int seq)
     {
         builder.OpenComponent(seq++, compType);
 
@@ -411,16 +546,35 @@ public class TentoMarkupRenderer : ComponentBase
         // Bind attributes
         foreach (var (attrKey, rawVal) in node.Attributes)
         {
-            // Skip Razor type arguments (e.g. TValue, TItem) and unresolvable lambdas
+            // Skip Razor type arguments (e.g. TValue, TItem)
             if (attrKey.Equals("TValue", StringComparison.OrdinalIgnoreCase) ||
-                attrKey.Equals("TItem", StringComparison.OrdinalIgnoreCase) ||
-                rawVal.Contains("=>"))
+                attrKey.Equals("TItem", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
             if (paramProps.TryGetValue(attrKey, out var prop))
             {
+                // Handle EventCallback parameters (like OnClick)
+                if (prop.PropertyType == typeof(EventCallback<MouseEventArgs>))
+                {
+                    var cb = CreateMouseCallback(rawVal);
+                    if (cb.HasDelegate)
+                    {
+                        builder.AddAttribute(seq++, prop.Name, cb);
+                        continue;
+                    }
+                }
+                else if (prop.PropertyType == typeof(EventCallback))
+                {
+                    var cb = CreateSimpleCallback(rawVal);
+                    if (cb.HasDelegate)
+                    {
+                        builder.AddAttribute(seq++, prop.Name, cb);
+                        continue;
+                    }
+                }
+
                 var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                 try
@@ -432,6 +586,7 @@ public class TentoMarkupRenderer : ComponentBase
                     else if (targetType == typeof(bool))
                     {
                         var bVal = string.Equals(rawVal, "true", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(rawVal, "@true", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(rawVal, "1", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(rawVal, attrKey, StringComparison.OrdinalIgnoreCase) ||
                                    string.IsNullOrEmpty(rawVal);
@@ -508,10 +663,59 @@ public class TentoMarkupRenderer : ComponentBase
         builder.CloseComponent();
     }
 
-    private static void ApplySpecialComponentAttributes(Type compType, MarkupNode node, RenderTreeBuilder builder, ref int seq)
+    private void ApplySpecialComponentAttributes(Type compType, MarkupNode node, RenderTreeBuilder builder, ref int seq)
     {
-        // 1. Segmented default options
-        if (compType == typeof(Segmented<string>))
+        // 1. Drawer open state and interactive dismiss
+        if (compType == typeof(Drawer))
+        {
+            var isExplicitTrue = node.Attributes.TryGetValue("Open", out var oVal) &&
+                                 (string.Equals(oVal, "true", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(oVal, "1", StringComparison.OrdinalIgnoreCase));
+
+            builder.AddAttribute(seq++, "Open", isExplicitTrue || _overlayOpen);
+
+            builder.AddAttribute(seq++, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                _overlayOpen = false;
+                StateHasChanged();
+            }));
+
+            builder.AddAttribute(seq++, "OpenChanged", EventCallback.Factory.Create<bool>(this, val =>
+            {
+                _overlayOpen = val;
+                StateHasChanged();
+            }));
+        }
+        // 2. Modal visible state and interactive dismiss
+        else if (compType == typeof(Modal))
+        {
+            var isExplicitTrue = node.Attributes.TryGetValue("Visible", out var vVal) &&
+                                 (string.Equals(vVal, "true", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(vVal, "1", StringComparison.OrdinalIgnoreCase));
+
+            builder.AddAttribute(seq++, "Visible", isExplicitTrue || _overlayOpen);
+
+            builder.AddAttribute(seq++, "VisibleChanged", EventCallback.Factory.Create<bool>(this, val =>
+            {
+                _overlayOpen = val;
+                StateHasChanged();
+            }));
+
+            builder.AddAttribute(seq++, "OnCancel", EventCallback.Factory.Create(this, () =>
+            {
+                _overlayOpen = false;
+                StateHasChanged();
+            }));
+
+            builder.AddAttribute(seq++, "OnOk", EventCallback.Factory.Create(this, () =>
+            {
+                _overlayOpen = false;
+                MessageService?.Success("Modal action confirmed!");
+                StateHasChanged();
+            }));
+        }
+        // 3. Segmented default options
+        else if (compType == typeof(Segmented<string>))
         {
             var hasChildItems = node.Children.Any(c => c.TagName.Equals("SegmentedItem", StringComparison.OrdinalIgnoreCase));
             if (!hasChildItems)
@@ -534,7 +738,7 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Value", "Daily");
             }
         }
-        // 2. Select default options
+        // 4. Select default options
         else if (compType == typeof(Select<string, string>))
         {
             if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
@@ -543,7 +747,7 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "DataSource", (IEnumerable<string>)defaultItems);
             }
         }
-        // 3. RadioGroup default selected value
+        // 5. RadioGroup default selected value
         else if (compType == typeof(RadioGroup<string>))
         {
             if (!node.Attributes.ContainsKey("Value"))
@@ -555,7 +759,7 @@ public class TentoMarkupRenderer : ComponentBase
                 }
             }
         }
-        // 4. Rate default score if bound to a variable
+        // 6. Rate default score if bound to a variable
         else if (compType == typeof(Rate))
         {
             if (!node.Attributes.ContainsKey("Value") || !int.TryParse(node.Attributes["Value"], out _))
@@ -563,7 +767,7 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Value", 4);
             }
         }
-        // 5. Slider default value
+        // 7. Slider default value
         else if (compType == typeof(Slider))
         {
             if (!node.Attributes.ContainsKey("Value") || !double.TryParse(node.Attributes["Value"], out _))
@@ -571,7 +775,7 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Value", 35.0);
             }
         }
-        // 6. Switch default checked state if variable bound
+        // 8. Switch default checked state if variable bound
         else if (compType == typeof(Switch))
         {
             if (!node.Attributes.ContainsKey("Checked"))
@@ -579,7 +783,7 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Checked", true);
             }
         }
-        // 7. Icon name normalization
+        // 9. Icon name normalization
         else if (compType == typeof(Icon))
         {
             if (node.Attributes.TryGetValue("Name", out var nameVal))
@@ -587,11 +791,123 @@ public class TentoMarkupRenderer : ComponentBase
                 var cleanName = nameVal;
                 if (cleanName.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
                     cleanName = cleanName[10..];
+                if (cleanName.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
+                    cleanName = cleanName[11..];
                 if (cleanName.StartsWith("@"))
                     cleanName = cleanName[1..];
                 builder.AddAttribute(seq++, "Name", cleanName.ToLowerInvariant());
             }
         }
+        // 10. Table dummy rows for typed data visualization
+        else if (compType == typeof(Table<object>))
+        {
+            if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
+            {
+                var dummyData = new System.Collections.Generic.List<object>
+                {
+                    new { Id = 101, Name = "Alice Johnson", Department = "Engineering", Salary = 135000m, Active = true },
+                    new { Id = 102, Name = "Bob Smith", Department = "Product", Salary = 115000m, Active = true },
+                    new { Id = 103, Name = "Charlie Davis", Department = "Engineering", Salary = 145000m, Active = false },
+                    new { Id = 104, Name = "Diana Prince", Department = "Marketing", Salary = 95000m, Active = true }
+                };
+                builder.AddAttribute(seq++, "DataSource", (IEnumerable<object>)dummyData);
+            }
+        }
+    }
+
+    private EventCallback<MouseEventArgs> CreateMouseCallback(string rawVal)
+    {
+        var action = ResolveAction(rawVal);
+        return EventCallback.Factory.Create<MouseEventArgs>(this, action);
+    }
+
+    private EventCallback CreateSimpleCallback(string rawVal)
+    {
+        var action = ResolveAction(rawVal);
+        return EventCallback.Factory.Create(this, action);
+    }
+
+    private Action ResolveAction(string rawVal)
+    {
+        if (string.IsNullOrWhiteSpace(rawVal))
+        {
+            return () => { };
+        }
+
+        // 1. MessageService toast trigger
+        var msgMatch = Regex.Match(rawVal, @"(?:MessageService|Message)\.(Success|Info|Warning|Error|Loading)\s*\(\s*""([^""]*)""(?:\s*,\s*([0-9\.]+))?", RegexOptions.IgnoreCase);
+        if (msgMatch.Success)
+        {
+            var method = msgMatch.Groups[1].Value.ToLowerInvariant();
+            var content = msgMatch.Groups[2].Value;
+            double? duration = msgMatch.Groups[3].Success && double.TryParse(msgMatch.Groups[3].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : null;
+
+            return () =>
+            {
+                if (MessageService == null) return;
+                switch (method)
+                {
+                    case "success": MessageService.Success(content, duration ?? 3); break;
+                    case "info": MessageService.Info(content, duration ?? 3); break;
+                    case "warning": MessageService.Warning(content, duration ?? 3); break;
+                    case "error": MessageService.Error(content, duration ?? 3); break;
+                    case "loading": MessageService.Loading(content, duration ?? 0); break;
+                }
+            };
+        }
+
+        // 2. NotificationService corner notice trigger
+        var notifMatch = Regex.Match(rawVal, @"(?:NotificationService|Notification)\.(Success|Info|Warning|Error)\s*\(\s*""([^""]*)""(?:\s*,\s*""([^""]*)"")?(?:\s*,\s*([0-9\.]+))?", RegexOptions.IgnoreCase);
+        if (notifMatch.Success)
+        {
+            var method = notifMatch.Groups[1].Value.ToLowerInvariant();
+            var title = notifMatch.Groups[2].Value;
+            var desc = notifMatch.Groups[3].Success ? notifMatch.Groups[3].Value : null;
+            double? duration = notifMatch.Groups[4].Success && double.TryParse(notifMatch.Groups[4].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : null;
+
+            return () =>
+            {
+                if (NotificationService == null) return;
+                switch (method)
+                {
+                    case "success": NotificationService.Success(title, desc, duration ?? 4.5); break;
+                    case "info": NotificationService.Info(title, desc, duration ?? 4.5); break;
+                    case "warning": NotificationService.Warning(title, desc, duration ?? 4.5); break;
+                    case "error": NotificationService.Error(title, desc, duration ?? 4.5); break;
+                }
+            };
+        }
+
+        // 3. Open Drawer / Modal action
+        if (rawVal.Contains("true", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("open", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("modal", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("drawer", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("show", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("edit", StringComparison.OrdinalIgnoreCase))
+        {
+            return () =>
+            {
+                _overlayOpen = true;
+                StateHasChanged();
+            };
+        }
+
+        // 4. Close Drawer / Modal action
+        if (rawVal.Contains("false", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("close", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("hide", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("cancel", StringComparison.OrdinalIgnoreCase) ||
+            rawVal.Contains("save", StringComparison.OrdinalIgnoreCase))
+        {
+            return () =>
+            {
+                _overlayOpen = false;
+                StateHasChanged();
+            };
+        }
+
+        return () => { };
     }
 
     private static string NormalizeEnumString(string val)

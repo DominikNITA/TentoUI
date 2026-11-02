@@ -65,31 +65,50 @@
 
 @code {
     private const string _autoplayCode = """
-        <Carousel AutoPlay="true" AutoPlaySpeed="4000" Dots="true" Arrows="true">
-            <CarouselPanel>
-                <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-                    <h4 class="font-bold text-lg">Modern Blazor UI</h4>
-                    <p class="text-xs">Tailwind CSS powered components</p>
-                </div>
-            </CarouselPanel>
-            <CarouselPanel>
-                <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6">
-                    <h4 class="font-bold text-lg">WebAssembly Ready</h4>
-                    <p class="text-xs">Zero server prerequisites</p>
-                </div>
-            </CarouselPanel>
-        </Carousel>
+        <div class="max-w-xl mx-auto">
+            <Carousel AutoPlay="true" AutoPlaySpeed="4000" Dots="true" Arrows="true">
+                <CarouselPanel>
+                    <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 text-center">
+                        <h4 class="font-bold text-lg mb-1">Modern Blazor UI</h4>
+                        <p class="text-xs opacity-90">Tailwind CSS powered components patterned after AntDesign</p>
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-6 text-center">
+                        <h4 class="font-bold text-lg mb-1">WebAssembly Ready</h4>
+                        <p class="text-xs opacity-90">Runs directly in the browser with zero server prerequisites</p>
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-44 rounded-lg flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6 text-center">
+                        <h4 class="font-bold text-lg mb-1">Production Tested</h4>
+                        <p class="text-xs opacity-90">Comprehensive unit tests and GitHub Actions deployment</p>
+                    </div>
+                </CarouselPanel>
+            </Carousel>
+        </div>
         """;
 
     private const string _topDotsCode = """
-        <Carousel Dots="true" DotPosition="CarouselDotPosition.Top">
-            <CarouselPanel>
-                <div class="h-36 rounded-lg flex items-center justify-center bg-slate-800 text-white">Slide 1</div>
-            </CarouselPanel>
-            <CarouselPanel>
-                <div class="h-36 rounded-lg flex items-center justify-center bg-slate-700 text-white">Slide 2</div>
-            </CarouselPanel>
-        </Carousel>
+        <div class="max-w-xl mx-auto">
+            <Carousel Dots="true" DotPosition="CarouselDotPosition.Top">
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-800 text-white font-semibold">
+                        Slide 1: Overview
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-700 text-white font-semibold">
+                        Slide 2: Features
+                    </div>
+                </CarouselPanel>
+                <CarouselPanel>
+                    <div class="h-36 rounded-lg flex items-center justify-center bg-slate-600 text-white font-semibold">
+                        Slide 3: Documentation
+                    </div>
+                </CarouselPanel>
+            </Carousel>
+        </div>
         """;
 
     private readonly ApiTable.ApiProp[] _props =

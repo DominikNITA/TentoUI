@@ -6,3 +6,11 @@ public enum QRCodeStatus
     Expired,
     Loading
 }
+
+public enum QRCodeErrorLevel
+{
+    L,
+    M,
+    Q,
+    H
+}

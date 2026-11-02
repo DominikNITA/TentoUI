@@ -8,12 +8,12 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">QRCode</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Generate crisp SVG QR codes client-side with zero external image requests, supporting custom dimensions, colors, and expiry states.
+            Generate crisp, standard-compliant SVG QR codes client-side with zero external image requests, supporting custom dimensions, colors, error correction levels, central icons, and expiry states.
         </p>
     </div>
 
     @* Example 1: Basic QR Code *@
-    <DemoCard Title="Basic QR Code" Description="Generates instant client-side QR codes for URLs or text data." Code="@_basicCode">
+    <DemoCard Title="Basic QR Code" Description="Generates standard ISO-compliant scannable QR codes for URLs or text data." Code="@_basicCode">
         <div class="p-6 flex items-center justify-center">
             <QRCode Value="https://github.com/dominik/TentoUI" Size="140" />
         </div>
@@ -34,6 +34,17 @@
                     Size="140"
                     Status="_qrStatus"
                     OnRefresh="HandleRefresh" />
+        </div>
+    </DemoCard>
+
+    @* Example 4: Center Icon & Error Level *@
+    <DemoCard Title="Logo Icon &amp; Error Correction Level" Description="Embed a center icon image with high error correction (Level Q or H) so the code remains 100% scannable." Code="@_iconCode">
+        <div class="p-6 flex items-center justify-center">
+            <QRCode Value="https://tentoui.dev"
+                    Size="160"
+                    ErrorLevel="QRCodeErrorLevel.H"
+                    Icon="favicon.png"
+                    IconSize="36" />
         </div>
     </DemoCard>
 
@@ -65,13 +76,25 @@
                 OnRefresh="HandleRefresh" />
         """;
 
-    private readonly ApiTable.ApiProp[] _props =
+    private const string _iconCode = """
+        <QRCode Value="https://tentoui.dev"
+                Size="160"
+                ErrorLevel="QRCodeErrorLevel.H"
+                Icon="favicon.png"
+                IconSize="36" />
+        """;
+
+    private readonly ApiProp[] _props =
     [
         new("Value", "The text or URL encoded in the QR code.", "string", "required"),
         new("Size", "Width and height dimension in pixels.", "int", "160"),
         new("Color", "Foreground pixel color hex string.", "string", "'#000000'"),
         new("BgColor", "Background fill color hex string.", "string", "'#ffffff'"),
+        new("Bordered", "Whether to show outer border card frame.", "bool", "true"),
         new("Status", "Status overlay: Active, Expired, or Loading.", "QRCodeStatus", "QRCodeStatus.Active"),
+        new("ErrorLevel", "Error correction capacity: L (7%), M (15%), Q (25%), H (30%).", "QRCodeErrorLevel", "QRCodeErrorLevel.M"),
+        new("Icon", "Optional central logo/icon image URL.", "string?", "null"),
+        new("IconSize", "Pixel size of the central logo.", "int", "40"),
         new("OnRefresh", "Callback executed when user clicks Refresh in Expired state.", "EventCallback", "null")
     ];
 }

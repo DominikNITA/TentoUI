@@ -101,4 +101,33 @@ public class ButtonTests : TestContext
         link.GetAttribute("href").Should().Be("https://example.com");
         link.GetAttribute("role").Should().Be("button");
     }
+
+    [Fact]
+    public void Button_WithIconName_RendersIconComponent()
+    {
+        var cut = RenderComponent<Button>(parameters => parameters
+            .Add(p => p.IconName, "plus")
+            .AddChildContent("Add Item"));
+
+        var icon = cut.Find("svg.tento-icon");
+        icon.Should().NotBeNull();
+        cut.Markup.Should().Contain("Add Item");
+    }
+
+    [Fact]
+    public void Button_WithDirectChildIconComponent_RendersWithoutClash()
+    {
+        var cut = RenderComponent<Button>(parameters => parameters
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<Icon>(0);
+                builder.AddAttribute(1, nameof(Icon.Name), "trash");
+                builder.CloseComponent();
+                builder.AddContent(2, "Delete");
+            }));
+
+        var icon = cut.Find("svg.tento-icon");
+        icon.Should().NotBeNull();
+        cut.Markup.Should().Contain("Delete");
+    }
 }

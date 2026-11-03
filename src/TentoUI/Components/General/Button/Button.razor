@@ -39,7 +39,8 @@ else
     [Parameter] public bool Block { get; set; }
     [Parameter] public string? Href { get; set; }
     [Parameter] public string? Target { get; set; }
-    [Parameter] public RenderFragment? Icon { get; set; }
+    [Parameter] public RenderFragment? IconTemplate { get; set; }
+    [Parameter] public string? IconName { get; set; }
     [Parameter] public IconPosition IconPosition { get; set; } = IconPosition.Start;
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
@@ -122,6 +123,17 @@ else
 
     private RenderFragment RenderContent() => __builder =>
     {
+        var hasIcon = IconTemplate != null || !string.IsNullOrWhiteSpace(IconName);
+        RenderFragment renderIcon = IconTemplate ?? (builder =>
+        {
+            if (!string.IsNullOrWhiteSpace(IconName))
+            {
+                builder.OpenComponent<Icon>(0);
+                builder.AddAttribute(1, nameof(Icon.Name), IconName);
+                builder.CloseComponent();
+            }
+        });
+
         if (Loading)
         {
             <span class="animate-spin mr-2 inline-flex items-center">
@@ -131,9 +143,9 @@ else
                 </svg>
             </span>
         }
-        else if (Icon != null && IconPosition == IconPosition.Start)
+        else if (hasIcon && IconPosition == IconPosition.Start)
         {
-            <span class="inline-flex items-center mr-1.5">@Icon</span>
+            <span class="inline-flex items-center mr-1.5">@renderIcon</span>
         }
 
         if (ChildContent != null)
@@ -141,9 +153,9 @@ else
             @ChildContent
         }
 
-        if (!Loading && Icon != null && IconPosition == IconPosition.End)
+        if (!Loading && hasIcon && IconPosition == IconPosition.End)
         {
-            <span class="inline-flex items-center ml-1.5">@Icon</span>
+            <span class="inline-flex items-center ml-1.5">@renderIcon</span>
         }
     };
 }

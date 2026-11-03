@@ -48,13 +48,15 @@ public class TentoMarkupRenderer : ComponentBase
 
         // 2. Register closed generic components with standard/sensible default type arguments
         s_componentMap["InputNumber"] = typeof(InputNumber<double>);
+        s_componentMap["NumberInput"] = typeof(NumberInput<double>);
         s_componentMap["Segmented"] = typeof(Segmented<string>);
         s_componentMap["SegmentedItem"] = typeof(SegmentedItem<string>);
         s_componentMap["Radio"] = typeof(Radio<string>);
         s_componentMap["RadioGroup"] = typeof(RadioGroup<string>);
         s_componentMap["CheckboxGroup"] = typeof(CheckboxGroup<string>);
         s_componentMap["Select"] = typeof(Select<string, string>);
-        s_componentMap["List"] = typeof(List<string>);
+        s_componentMap["List"] = typeof(ListView<string>);
+        s_componentMap["ListView"] = typeof(ListView<string>);
         s_componentMap["Table"] = typeof(Table<object>);
         s_componentMap["TableColumn"] = typeof(TableColumn<object>);
 

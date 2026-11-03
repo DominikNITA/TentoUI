@@ -125,4 +125,36 @@ public class FormAndInputTests : TestContext
 
         searchedTerm.Should().Be("blazor components");
     }
+
+    [Fact]
+    public void NumberInput_WithDecimalMinAndStep_RendersAndParsesCorrectly()
+    {
+        decimal price = 19.99m;
+        var cut = RenderComponent<NumberInput<decimal>>(parameters => parameters
+            .Add(p => p.Value, price)
+            .Add(p => p.Min, 0.01m)
+            .Add(p => p.Step, 0.05m)
+            .Add(p => p.ValueChanged, EventCallback.Factory.Create<decimal>(this, v => price = v)));
+
+        var input = cut.Find("input");
+        input.GetAttribute("min").Should().Be("0.01");
+        input.GetAttribute("step").Should().Be("0.05");
+        input.GetAttribute("value").Should().Be("19.99");
+    }
+
+    [Fact]
+    public void InputNumber_WithIntMinAndStep_RendersAndParsesCorrectly()
+    {
+        int quantity = 5;
+        var cut = RenderComponent<InputNumber<int>>(parameters => parameters
+            .Add(p => p.Value, quantity)
+            .Add(p => p.Min, 1)
+            .Add(p => p.Step, 1)
+            .Add(p => p.ValueChanged, EventCallback.Factory.Create<int>(this, v => quantity = v)));
+
+        var input = cut.Find("input");
+        input.GetAttribute("min").Should().Be("1");
+        input.GetAttribute("step").Should().Be("1");
+        input.GetAttribute("value").Should().Be("5");
+    }
 }

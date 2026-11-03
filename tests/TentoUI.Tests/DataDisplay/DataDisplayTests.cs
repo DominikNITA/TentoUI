@@ -90,11 +90,11 @@ public class DataDisplayTests : TestContext
     }
 
     [Fact]
-    public void List_RendersItemsAndMeta()
+    public void ListView_RendersItemsAndMeta()
     {
-        var items = new System.Collections.Generic.List<string> { "Item 1", "Item 2" };
+        var items = new List<string> { "Item 1", "Item 2" };
 
-        var cut = RenderComponent<TentoUI.List<string>>(parameters => parameters
+        var cut = RenderComponent<ListView<string>>(parameters => parameters
             .Add(p => p.DataSource, items)
             .Add(p => p.ItemTemplate, (RenderFragment<string>)(item => builder =>
             {

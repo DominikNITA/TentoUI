@@ -13,9 +13,9 @@
 
     <input id="@ElementId"
            type="number"
-           step="@Step"
-           min="@Min"
-           max="@Max"
+           step="@ResolvedStep"
+           min="@ResolvedMin"
+           max="@ResolvedMax"
            placeholder="@Placeholder"
            disabled="@IsDisabled"
            readonly="@ReadOnly"
@@ -46,12 +46,18 @@
 </div>
 
 @code {
-    [Parameter] public double Step { get; set; } = 1;
-    [Parameter] public double? Min { get; set; }
-    [Parameter] public double? Max { get; set; }
+    [Parameter] public TValue? Step { get; set; }
+    [Parameter] public TValue? Min { get; set; }
+    [Parameter] public TValue? Max { get; set; }
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public bool Controls { get; set; } = true;
     [Parameter] public RenderFragment? Prefix { get; set; }
+
+    private string? ResolvedMin => Min != null ? Convert.ToString(Min, CultureInfo.InvariantCulture) : null;
+    private string? ResolvedMax => Max != null ? Convert.ToString(Max, CultureInfo.InvariantCulture) : null;
+    private string ResolvedStep => Step != null
+        ? Convert.ToString(Step, CultureInfo.InvariantCulture)!
+        : (typeof(TValue) == typeof(decimal) || typeof(TValue) == typeof(double) || typeof(TValue) == typeof(float) ? "any" : "1");
 
     protected override bool TryParseValueFromString(string? value, out TValue result, out string validationErrorMessage)
     {
@@ -76,15 +82,25 @@
     {
         if (IsDisabled || ReadOnly) return Task.CompletedTask;
 
-        double current = 0;
-        if (CurrentValue != null && double.TryParse(Convert.ToString(CurrentValue, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+        decimal current = 0;
+        if (CurrentValue != null && decimal.TryParse(Convert.ToString(CurrentValue, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
         {
             current = parsed;
         }
 
-        double next = current + (direction * Step);
-        if (Min.HasValue && next < Min.Value) next = Min.Value;
-        if (Max.HasValue && next > Max.Value) next = Max.Value;
+        decimal step = 1;
+        if (Step != null && decimal.TryParse(Convert.ToString(Step, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var s))
+        {
+            step = s;
+        }
+
+        decimal next = current + (direction * step);
+
+        if (Min != null && decimal.TryParse(Convert.ToString(Min, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var minVal) && next < minVal)
+            next = minVal;
+
+        if (Max != null && decimal.TryParse(Convert.ToString(Max, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var maxVal) && next > maxVal)
+            next = maxVal;
 
         CurrentValueAsString = next.ToString(CultureInfo.InvariantCulture);
         return Task.CompletedTask;
@@ -92,13 +108,16 @@
 
     private TValue ClampIfNeeded(TValue val)
     {
-        if (!Min.HasValue && !Max.HasValue) return val;
-        if (double.TryParse(Convert.ToString(val, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var num))
+        if (Min == null && Max == null) return val;
+        if (decimal.TryParse(Convert.ToString(val, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var num))
         {
             var clamped = num;
-            if (Min.HasValue && clamped < Min.Value) clamped = Min.Value;
-            if (Max.HasValue && clamped > Max.Value) clamped = Max.Value;
-            if (Math.Abs(clamped - num) > double.Epsilon &&
+            if (Min != null && decimal.TryParse(Convert.ToString(Min, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var minVal) && clamped < minVal)
+                clamped = minVal;
+            if (Max != null && decimal.TryParse(Convert.ToString(Max, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var maxVal) && clamped > maxVal)
+                clamped = maxVal;
+
+            if (clamped != num &&
                 BindConverter.TryConvertTo<TValue>(clamped.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out var converted) &&
                 converted is not null)
             {

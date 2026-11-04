@@ -13,8 +13,8 @@
     </div>
 
     @* Example 1: 4 Alert Types *@
-    <DemoCard Title="Alert Types" Description="Four semantic types: Success, Info, Warning, and Error." Code="@_typesCode">
-        <div class="space-y-3 w-full">
+    <DemoCard Title="Alert Types" Description="Four semantic types: Success, Info, Warning, and Error with clean vertical separation." Code="@_typesCode">
+        <div class="flex flex-col gap-4 w-full">
             <Alert Type="AlertType.Success" Message="Success Text" ShowIcon="true" />
             <Alert Type="AlertType.Info" Message="Informational Notes" ShowIcon="true" />
             <Alert Type="AlertType.Warning" Message="Warning: Your subscription renews soon" ShowIcon="true" />
@@ -24,7 +24,7 @@
 
     @* Example 2: With Description *@
     <DemoCard Title="With Detailed Description" Description="Alerts can display secondary descriptions for detailed context." Code="@_descCode">
-        <div class="space-y-3 w-full">
+        <div class="flex flex-col gap-4 w-full">
             <Alert Type="AlertType.Success"
                    Message="Order Processed Successfully"
                    Description="Your payment has been cleared and invoice #2026-992 was sent to your email."
@@ -39,7 +39,7 @@
 
     @* Example 3: Closable and Banner *@
     <DemoCard Title="Closable &amp; Banner Mode" Description="Dismissible alerts with close callbacks and banner mode for top announcements." Code="@_closableCode">
-        <div class="space-y-3 w-full">
+        <div class="flex flex-col gap-4 w-full">
             <Alert Type="AlertType.Info"
                    Message="System Maintenance Scheduled"
                    Description="Platform will undergo scheduled updates on Sunday from 02:00 to 04:00 UTC."
@@ -52,48 +52,43 @@
     </DemoCard>
 
     @* API Reference Table *@
-    <ApiTable Title="Alert Properties" Properties="@_alertProps" />
+    <ApiTable Title="Alert Properties" ComponentType="@typeof(Alert)" />
 </div>
 
 @code {
     private const string _typesCode = """
-        <Alert Type="AlertType.Success" Message="Success Text" ShowIcon="true" />
-        <Alert Type="AlertType.Info" Message="Informational Notes" ShowIcon="true" />
-        <Alert Type="AlertType.Warning" Message="Warning: Your subscription renews soon" ShowIcon="true" />
-        <Alert Type="AlertType.Error" Message="Error: Failed to connect to payment gateway" ShowIcon="true" />
+        <div class="flex flex-col gap-4 w-full">
+            <Alert Type="AlertType.Success" Message="Success Text" ShowIcon="true" />
+            <Alert Type="AlertType.Info" Message="Informational Notes" ShowIcon="true" />
+            <Alert Type="AlertType.Warning" Message="Warning: Your subscription renews soon" ShowIcon="true" />
+            <Alert Type="AlertType.Error" Message="Error: Failed to connect to payment gateway" ShowIcon="true" />
+        </div>
         """;
 
     private const string _descCode = """
-        <Alert Type="AlertType.Success"
-               Message="Order Processed Successfully"
-               Description="Your payment has been cleared and invoice #2026-992 was sent to your email."
-               ShowIcon="true"
-               Closable="true" />
-        <Alert Type="AlertType.Warning"
-               Message="Security Recommendation"
-               Description="You have not enabled multi-factor authentication yet. We strongly advise setting it up."
-               ShowIcon="true" />
+        <div class="flex flex-col gap-4 w-full">
+            <Alert Type="AlertType.Success"
+                   Message="Order Processed Successfully"
+                   Description="Your payment has been cleared and invoice #2026-992 was sent to your email."
+                   ShowIcon="true"
+                   Closable="true" />
+            <Alert Type="AlertType.Warning"
+                   Message="Security Recommendation"
+                   Description="You have not enabled multi-factor authentication yet."
+                   ShowIcon="true" />
+        </div>
         """;
 
     private const string _closableCode = """
-        <Alert Type="AlertType.Info"
-               Message="System Maintenance Scheduled"
-               Description="Platform will undergo scheduled updates on Sunday from 02:00 to 04:00 UTC."
-               Closable="true"
-               OnClose="@HandleClose" />
-        <Alert Type="AlertType.Warning"
-               Banner="true"
-               Message="Notice: Running in preview sandbox mode" />
+        <div class="flex flex-col gap-4 w-full">
+            <Alert Type="AlertType.Info"
+                   Message="System Maintenance Scheduled"
+                   Description="Platform updates on Sunday from 02:00 to 04:00 UTC."
+                   Closable="true"
+                   OnClose="@HandleClose" />
+            <Alert Type="AlertType.Warning"
+                   Banner="true"
+                   Message="Notice: Running in preview sandbox mode" />
+        </div>
         """;
-
-    private readonly ApiProp[] _alertProps =
-    [
-        new("Type", "Type of Alert styles: Success, Info, Warning, Error.", "AlertType", "AlertType.Info"),
-        new("Message", "Content of Alert title header.", "string", "-"),
-        new("Description", "Additional detailed explanation text.", "string?", "null"),
-        new("ShowIcon", "Whether to show type-specific leading icon.", "bool", "false"),
-        new("Closable", "Whether Alert can be closed / dismissed.", "bool", "false"),
-        new("Banner", "Whether to show as top banner without rounded borders.", "bool", "false"),
-        new("OnClose", "Callback triggered when close icon is clicked.", "EventCallback", "null")
-    ];
 }

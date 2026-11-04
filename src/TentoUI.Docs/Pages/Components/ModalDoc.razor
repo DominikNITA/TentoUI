@@ -5,12 +5,28 @@
 
 <PageTitle>Modal &amp; Dialogs - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Modal &amp; Dialogs</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Modal dialogs for user confirmations, alerts, and rich form submissions.
+            Modal dialogs for user confirmations, alerts, and rich form submissions with support for declarative components and programmatic IModalService dialogs.
         </p>
+    </div>
+
+    @* Setup Note for IModalService *@
+    <div class="rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/70 dark:bg-sky-950/30 p-4 text-xs text-sky-900 dark:text-sky-200 space-y-2">
+        <div class="flex items-center gap-2 font-bold text-sky-800 dark:text-sky-300">
+            <Icon Name="@IconNames.Info" Size="16" />
+            <span>Configuring Programmatic IModalService</span>
+        </div>
+        <p class="leading-relaxed">
+            To use programmatic dialogs (<code class="px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900 font-mono text-[11px]">ModalService.ConfirmAsync</code>, <code class="px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-900 font-mono text-[11px]">ModalService.SuccessAsync</code>, etc.), ensure the following setup is present in your application:
+        </p>
+        <ol class="list-decimal list-inside space-y-1 font-mono text-[11px] text-sky-800 dark:text-sky-300">
+            <li>Register TentoUI services in <span class="font-semibold">Program.cs</span>: <code class="bg-sky-100 dark:bg-sky-900 px-1 py-0.5 rounded">builder.Services.AddTentoUI();</code></li>
+            <li>Place the host component in <span class="font-semibold">MainLayout.razor</span> or <span class="font-semibold">App.razor</span>: <code class="bg-sky-100 dark:bg-sky-900 px-1 py-0.5 rounded">&lt;ModalHost /&gt;</code></li>
+            <li>Inject the service into your Razor component: <code class="bg-sky-100 dark:bg-sky-900 px-1 py-0.5 rounded">@@inject IModalService ModalService</code></li>
+        </ol>
     </div>
 
     @* Form Modal Demo *@
@@ -21,7 +37,7 @@
 
         <Modal @bind-Visible="_isFormModalOpen"
                Title="Edit Member Profile"
-               Width="500px"
+               Width="520px"
                ConfirmLoading="_isSaving"
                OkText="Save"
                OnOk="SaveMemberAsync">
@@ -42,13 +58,23 @@
     </DemoCard>
 
     @* Confirmation Modal Demo *@
-    <DemoCard Title="Programmatic Confirm Dialog" Description="Open a confirmation modal using IModalService." Code="@_confirmCode">
-        <Button Type="ButtonType.Default" Danger="true" OnClick="ConfirmDeleteAsync">
-            Delete Account
-        </Button>
+    <DemoCard Title="Programmatic Confirm &amp; Alert Dialogs"
+              Description="Open confirmation dialogs and alert popups dynamically from C# code via IModalService without declaring markup modals."
+              Code="@_confirmCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Default" Danger="true" OnClick="ConfirmDeleteAsync">
+                Confirm Delete (Danger)
+            </Button>
+            <Button Type="ButtonType.Primary" OnClick="ShowSuccessDialogAsync">
+                Success Dialog
+            </Button>
+            <Button Type="ButtonType.Default" OnClick="ShowWarningDialogAsync">
+                Warning Dialog
+            </Button>
+        </div>
     </DemoCard>
 
-    <ApiTable Title="Modal Properties" Properties="@_modalProps" />
+    <ApiTable Title="Modal Properties" ComponentType="@typeof(Modal)" />
     <ApiTable Title="IModalService Methods" Properties="@_serviceProps" />
 </div>
 
@@ -91,6 +117,20 @@
         }
     }
 
+    private async Task ShowSuccessDialogAsync()
+    {
+        await ModalService.SuccessAsync(
+            title: "Payment Processed",
+            content: "Your transaction has been approved and invoice #9402 was sent to your email.");
+    }
+
+    private async Task ShowWarningDialogAsync()
+    {
+        await ModalService.WarningAsync(
+            title: "Unsaved Changes",
+            content: "You have uncommitted modifications. Navigating away now will discard them.");
+    }
+
     public class MemberEditDto
     {
         [System.ComponentModel.DataAnnotations.Required]
@@ -100,40 +140,34 @@
         public string Role { get; set; } = "Editor";
     }
 
-    private const string _formModalCode = @"<Button Type=""ButtonType.Primary"" OnClick=""OpenEditModal"">Edit Member</Button>
+    private const string _formModalCode = """
+        <Button Type="ButtonType.Primary" OnClick="OpenEditModal">Edit Member</Button>
 
-<Modal @bind-Visible=""_isFormModalOpen"" Title=""Edit Member Profile"" OnOk=""SaveMemberAsync"">
-    <Form Model=""@_editModel"" Layout=""FormLayout.Vertical"">
-        <FormItem Label=""Full Name"" Required=""true"" For=""@(() => _editModel.Name)"">
-            <Input @bind-Value=""_editModel.Name"" />
-        </FormItem>
-        <FormItem Label=""Email Address"" Required=""true"" For=""@(() => _editModel.Email)"">
-            <Input @bind-Value=""_editModel.Email"" />
-        </FormItem>
-    </Form>
-</Modal>";
+        <Modal @bind-Visible="isFormModalOpen" Title="Edit Member Profile" Width="520px" OnOk="SaveMemberAsync">
+            <Form Model="@editModel" Layout="FormLayout.Vertical">
+                <FormItem Label="Full Name" Required="true">
+                    <Input @bind-Value="editModel.Name" />
+                </FormItem>
+                <FormItem Label="Email Address" Required="true">
+                    <Input @bind-Value="editModel.Email" />
+                </FormItem>
+            </Form>
+        </Modal>
+        """;
 
-    private const string _confirmCode = @"@inject IModalService ModalService
-
-bool confirmed = await ModalService.ConfirmAsync(
-    title: ""Delete Account"",
-    content: ""Are you sure you want to delete this account?"",
-    type: ModalType.Error);";
-
-    private readonly ApiTable.ApiProp[] _modalProps =
-    [
-        new("Visible", "Whether the modal dialog is visible (bindable via @bind-Visible).", "bool", "false"),
-        new("Title", "Modal dialog header title.", "string?", "null"),
-        new("Width", "Width of the modal window in px.", "int", "520"),
-        new("Centered", "Whether to vertically center the modal in the viewport.", "bool", "false"),
-        new("MaskClosable", "Whether clicking the dark background mask dismisses the dialog.", "bool", "true"),
-        new("OkText", "Text label for the primary confirmation button.", "string", "'OK'"),
-        new("CancelText", "Text label for the secondary cancel button.", "string", "'Cancel'"),
-        new("ConfirmLoading", "Display a spinner on the OK button while executing async task.", "bool", "false"),
-        new("OnOk", "Callback triggered when user clicks the OK button.", "EventCallback", "null"),
-        new("OnCancel", "Callback triggered when user clicks Cancel or closes modal.", "EventCallback", "null"),
-        new("ChildContent", "Body markup/forms rendered inside the modal.", "RenderFragment?", "null")
-    ];
+    private const string _confirmCode = """
+        <div class="flex flex-wrap items-center gap-3">
+            <Button Type="ButtonType.Default" Danger="true" OnClick="ConfirmDeleteAsync">
+                Confirm Delete (Danger)
+            </Button>
+            <Button Type="ButtonType.Primary" OnClick="ShowSuccessDialogAsync">
+                Success Dialog
+            </Button>
+            <Button Type="ButtonType.Default" OnClick="ShowWarningDialogAsync">
+                Warning Dialog
+            </Button>
+        </div>
+        """;
 
     private readonly ApiTable.ApiProp[] _serviceProps =
     [

@@ -7,7 +7,7 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Progress</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Displays the current progress of an operation flow with animated bars, circular rings, and status highlights.
+            Displays the current progress of an operation flow with animated bars, circular rings, dynamic controls, and status highlights.
         </p>
     </div>
 
@@ -23,7 +23,7 @@
 
     @* Example 2: Circular Progress *@
     <DemoCard Title="Circular Progress" Description="Circular ring progress indicators for dashboards and statistics." Code="@_circleCode">
-        <div class="flex items-center gap-6">
+        <div class="flex flex-wrap items-center gap-8">
             <Progress Percent="75" Type="ProgressType.Circle" />
             <Progress Percent="100" Type="ProgressType.Circle" Status="ProgressStatus.Success" />
             <Progress Percent="60" Type="ProgressType.Circle" Status="ProgressStatus.Exception" />
@@ -31,26 +31,57 @@
     </DemoCard>
 
     @* Example 3: Dynamic Controls *@
-    <DemoCard Title="Dynamic Progress Updates" Description="Adjust progress values dynamically via buttons or background tasks." Code="@_dynamicCode">
+    <DemoCard Title="Dynamic Progress Updates" Description="Adjust progress values dynamically via button controls in real-time." Code="@_dynamicCode">
         <div class="space-y-4 w-full max-w-md">
-            <Progress Percent="_dynamicPercent" Status="ProgressStatus.Active" />
+            <div class="flex items-center gap-6">
+                <div class="flex-1">
+                    <Progress Percent="@_dynamicPercent"
+                              Status="@(_dynamicPercent >= 100 ? ProgressStatus.Success : ProgressStatus.Active)" />
+                </div>
+                <div class="shrink-0">
+                    <Progress Percent="@_dynamicPercent"
+                              Type="ProgressType.Circle"
+                              CircleSize="64"
+                              Status="@(_dynamicPercent >= 100 ? ProgressStatus.Success : null)" />
+                </div>
+            </div>
+
             <div class="flex items-center gap-2">
-                <Button Size="ComponentSize.Small" OnClick="@(() => _dynamicPercent = Math.Max(0, _dynamicPercent - 10))">
+                <Button Size="ComponentSize.Small" OnClick="DecreaseProgress" Disabled="@(_dynamicPercent <= 0)">
                     -10%
                 </Button>
-                <Button Size="ComponentSize.Small" OnClick="@(() => _dynamicPercent = Math.Min(100, _dynamicPercent + 10))">
+                <Button Size="ComponentSize.Small" OnClick="IncreaseProgress" Disabled="@(_dynamicPercent >= 100)">
                     +10%
                 </Button>
+                <Button Size="ComponentSize.Small" Type="ButtonType.Default" OnClick="ResetProgress">
+                    Reset
+                </Button>
+                <span class="text-xs font-mono text-slate-400 ml-2">Value: @_dynamicPercent%</span>
             </div>
         </div>
     </DemoCard>
 
     @* API Reference Table *@
-    <ApiTable Title="Progress Properties" Properties="@_props" />
+    <ApiTable Title="Progress Properties" ComponentType="@typeof(Progress)" />
 </div>
 
 @code {
     private int _dynamicPercent = 40;
+
+    private void IncreaseProgress()
+    {
+        _dynamicPercent = Math.Min(100, _dynamicPercent + 10);
+    }
+
+    private void DecreaseProgress()
+    {
+        _dynamicPercent = Math.Max(0, _dynamicPercent - 10);
+    }
+
+    private void ResetProgress()
+    {
+        _dynamicPercent = 0;
+    }
 
     private const string _linearCode = """
         <Progress Percent="30" />
@@ -62,19 +93,16 @@
     private const string _circleCode = """
         <Progress Percent="75" Type="ProgressType.Circle" />
         <Progress Percent="100" Type="ProgressType.Circle" Status="ProgressStatus.Success" />
+        <Progress Percent="60" Type="ProgressType.Circle" Status="ProgressStatus.Exception" />
         """;
 
     private const string _dynamicCode = """
-        <Progress Percent="@_percent" Status="ProgressStatus.Active" />
-        <Button OnClick="IncreaseProgress">+10%</Button>
-        """;
+        <Progress Percent="@dynamicPercent" Status="ProgressStatus.Active" />
 
-    private readonly ApiProp[] _props =
-    [
-        new("Percent", "Completion percentage from 0 to 100.", "int", "0"),
-        new("Type", "Visual shape: Line or Circle.", "ProgressType", "ProgressType.Line"),
-        new("Status", "Status style override: Normal, Success, Exception, Active.", "ProgressStatus?", "null"),
-        new("ShowInfo", "Whether to show percentage text suffix.", "bool", "true"),
-        new("StrokeColor", "Custom color for progress bar fill.", "string?", "null")
-    ];
+        <div class="flex items-center gap-2 mt-3">
+            <Button Size="ComponentSize.Small" OnClick="DecreaseProgress">-10%</Button>
+            <Button Size="ComponentSize.Small" OnClick="IncreaseProgress">+10%</Button>
+            <Button Size="ComponentSize.Small" OnClick="ResetProgress">Reset</Button>
+        </div>
+        """;
 }

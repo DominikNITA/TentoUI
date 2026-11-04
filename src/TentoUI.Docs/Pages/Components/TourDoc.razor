@@ -8,97 +8,145 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tour</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A popup tour component for guiding new users through essential features and workflow steps.
+            A popup tour component for guiding new users through essential features, interface targets, and multi-step workflows.
         </p>
     </div>
 
-    @* Example 1: Basic Guided Tour *@
-    <DemoCard Title="Product Onboarding Tour" Description="Launch a step-by-step walkthrough modal with next, previous, and finish actions." Code="@_tourCode">
-        <div class="p-6 flex items-center justify-center">
-            <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
-                Start Product Walkthrough
+    @* Example 1: Targeted Guided Tour *@
+    <DemoCard Title="Targeted Interface Walkthrough" Description="Guide users across concrete DOM targets using CSS selectors (#tour-search, #tour-action, #tour-settings)." Code="@_tourCode">
+        <div class="p-6 flex flex-col items-center gap-6 w-full">
+            <div class="w-full max-w-xl p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50">
+                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Mock Application Header</div>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div id="tour-search" class="relative flex-1 min-w-[200px]">
+                        <Input Placeholder="Search components or docs..." PrefixIcon="@IconNames.Search" />
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div id="tour-action">
+                            <Button Type="ButtonType.Primary" Icon="@IconNames.Plus">New Project</Button>
+                        </div>
+                        <div id="tour-settings">
+                            <Button Type="ButtonType.Default" Icon="@IconNames.Settings" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <Button Type="ButtonType.Primary" OnClick="@StartMainTour">
+                Start Guided Tour
             </Button>
 
-            <Tour @bind-Open="_open" @bind-Current="_current" Mask="true" OnClose="OnTourClosed">
-                <TourStep Title="Welcome to TentoUI"
-                          Description="TentoUI provides AntDesign-patterned components beautifully styled with Tailwind CSS for .NET 10." />
-                <TourStep Title="Live Editable Demos"
-                          Description="Every component includes real dynamic live-editable code cards with 1-click copy." />
-                <TourStep Title="GitHub Pages Ready"
-                          Description="Deploy your documentation as a 100% client-side Blazor WebAssembly static website." />
+            <Tour @bind-Open="_open" @bind-Current="_current" Mask="true" OnClose="OnTourClosed" OnFinish="OnTourFinished">
+                <TourStep Target="#tour-search"
+                          Title="Global Search"
+                          Description="Quickly locate any component, form control, layout pattern, or design token across the library." />
+                <TourStep Target="#tour-action"
+                          Title="Primary Actions"
+                          Description="Trigger primary operations like launching the project creation dialog or provisioning resources." />
+                <TourStep Target="#tour-settings"
+                          Title="Preferences & Theming"
+                          Description="Configure application options, switch dark mode variants, or manage authentication state." />
             </Tour>
         </div>
     </DemoCard>
 
     @* Example 2: Minimal Tour Without Backdrop Mask *@
-    <DemoCard Title="Tour Without Backdrop Mask" Description="Run a tour without darkening the background page." Code="@_noMaskCode">
-        <div class="p-6 flex items-center justify-center">
-            <Button Type="ButtonType.Default" OnClick="@(() => _openNoMask = true)">
+    <DemoCard Title="Tour Without Backdrop Mask" Description="Run a non-blocking floating tour without dimming the background viewport." Code="@_noMaskCode">
+        <div class="p-6 flex flex-col items-center gap-4">
+            <Button Type="ButtonType.Default" OnClick="@StartNoMaskTour">
                 Start Tour (No Mask)
             </Button>
 
-            <Tour @bind-Open="_openNoMask" @bind-Current="_currentNoMask" Mask="false">
-                <TourStep Title="Lightweight Mode"
-                          Description="A subtle floating tour popup that keeps the page completely interactive." />
+            <Tour @bind-Open="_openNoMask" @bind-Current="_currentNoMask" Mask="false" OnClose="OnNoMaskClosed">
+                <TourStep Title="Lightweight Float Mode"
+                          Description="A non-blocking floating card allowing users to interact with the underlying interface while learning." />
+                <TourStep Title="Step 2 of Exploration"
+                          Description="Progress through key tips without dimming or locking out standard navigation." />
                 <TourStep Title="Ready to Ship"
-                          Description="Works effortlessly in modern WebAssembly applications." />
+                          Description="Seamlessly integrated with .NET 10 Blazor WebAssembly and Tailwind styling." />
             </Tour>
         </div>
     </DemoCard>
 
-    <ApiTable Title="Tour Properties" Properties="@_tourProps" />
-    <ApiTable Title="TourStep Properties" Properties="@_stepProps" />
+    <ApiTable Title="Tour Properties" ComponentType="@typeof(Tour)" />
+    <ApiTable Title="TourStep Properties" ComponentType="@typeof(TourStep)" />
 </div>
 
 @code {
-    private bool _open;
-    private int _current;
-    private bool _openNoMask;
-    private int _currentNoMask;
+    private bool _open = false;
+    private int _current = 0;
+    private bool _openNoMask = false;
+    private int _currentNoMask = 0;
+
+    private void StartMainTour()
+    {
+        _current = 0;
+        _open = true;
+    }
+
+    private void StartNoMaskTour()
+    {
+        _currentNoMask = 0;
+        _openNoMask = true;
+    }
 
     private void OnTourClosed()
     {
-        MessageService.Info("Onboarding tour completed!");
+        MessageService.Info("Tour was dismissed.");
+    }
+
+    private void OnTourFinished()
+    {
+        MessageService.Success("Great job! You finished the onboarding tour.");
+    }
+
+    private void OnNoMaskClosed()
+    {
+        MessageService.Info("Lightweight tour dismissed.");
     }
 
     private const string _tourCode = """
-        <Button Type="ButtonType.Primary" OnClick="@(() => open = true)">
-            Start Product Walkthrough
+        <div class="flex items-center gap-3">
+            <div id="tour-search">
+                <Input Placeholder="Search..." PrefixIcon="search" />
+            </div>
+            <div id="tour-action">
+                <Button Type="ButtonType.Primary" Icon="plus">New Project</Button>
+            </div>
+            <div id="tour-settings">
+                <Button Type="ButtonType.Default" Icon="settings" />
+            </div>
+        </div>
+
+        <Button Type="ButtonType.Primary" OnClick="@(() => { current = 0; open = true; })">
+            Start Guided Tour
         </Button>
 
         <Tour @bind-Open="open" @bind-Current="current" Mask="true">
-            <TourStep Title="Welcome to TentoUI"
-                      Description="TentoUI provides AntDesign-patterned components." />
-            <TourStep Title="Live Editable Demos"
-                      Description="Every component includes real dynamic live-editable code cards." />
-            <TourStep Title="GitHub Pages Ready"
-                      Description="Deploy your documentation as static Blazor WebAssembly." />
+            <TourStep Target="#tour-search"
+                      Title="Global Search"
+                      Description="Quickly locate any component or design token." />
+            <TourStep Target="#tour-action"
+                      Title="Primary Actions"
+                      Description="Trigger primary operations like creating projects." />
+            <TourStep Target="#tour-settings"
+                      Title="Preferences & Theming"
+                      Description="Configure application options and dark mode." />
         </Tour>
         """;
 
     private const string _noMaskCode = """
+        <Button Type="ButtonType.Default" OnClick="@(() => { current = 0; open = true; })">
+            Start Tour (No Mask)
+        </Button>
+
         <Tour @bind-Open="open" @bind-Current="current" Mask="false">
-            <TourStep Title="Lightweight Mode"
-                      Description="Subtle floating tour popup without background mask." />
+            <TourStep Title="Lightweight Float Mode"
+                      Description="A non-blocking floating card allowing interface interaction." />
+            <TourStep Title="Step 2 of Exploration"
+                      Description="Progress through key tips without dimming." />
             <TourStep Title="Ready to Ship"
-                      Description="Works effortlessly in modern WebAssembly applications." />
+                      Description="Seamlessly integrated with .NET 10 Blazor WebAssembly." />
         </Tour>
         """;
-
-    private readonly ApiTable.ApiProp[] _tourProps =
-    [
-        new("Open", "Whether the tour is active (bindable via @bind-Open).", "bool", "false"),
-        new("Current", "Index of the current active step (0-indexed, bindable via @bind-Current).", "int", "0"),
-        new("Mask", "Whether to show blurred backdrop mask.", "bool", "true"),
-        new("OnClose", "Callback executed when user closes the tour.", "EventCallback", "null"),
-        new("OnChange", "Callback executed when step index changes.", "EventCallback<int>", "null"),
-        new("ChildContent", "TourStep children.", "RenderFragment?", "null")
-    ];
-
-    private readonly ApiTable.ApiProp[] _stepProps =
-    [
-        new("Title", "Title header of the tour step.", "string", "null"),
-        new("Description", "Explanatory description of the tour step.", "string?", "null"),
-        new("Target", "CSS selector for target element highlight.", "string?", "null")
-    ];
 }

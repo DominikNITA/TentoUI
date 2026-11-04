@@ -7,13 +7,13 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tooltip</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A simple text popup tip displayed when hovering over or focusing on an element.
+            A simple text popup tip displayed when hovering over or focusing on an element with placement directions, arrow indicators, and custom accent colors.
         </p>
     </div>
 
     @* Example 1: Basic Tooltip *@
     <DemoCard Title="Basic Usage" Description="Hover over the target to reveal contextual prompt text." Code="@_basicCode">
-        <div class="p-6">
+        <div class="p-4">
             <Tooltip Title="Prompt text appears on hover">
                 <Button Type="ButtonType.Primary">Hover over me</Button>
             </Tooltip>
@@ -21,8 +21,8 @@
     </DemoCard>
 
     @* Example 2: Placements *@
-    <DemoCard Title="Placement Directions" Description="Supports Top, Bottom, Left, and Right positioning." Code="@_placementsCode">
-        <div class="flex flex-wrap items-center gap-4 p-6">
+    <DemoCard Title="Placement Directions" Description="Supports Top, Bottom, Left, and Right positioning with generous spacing between triggers." Code="@_placementsCode">
+        <div class="flex flex-wrap items-center gap-4 p-4">
             <Tooltip Title="Top tooltip message" Placement="TooltipPlacement.Top">
                 <Button Type="ButtonType.Default">Top</Button>
             </Tooltip>
@@ -39,8 +39,8 @@
     </DemoCard>
 
     @* Example 3: Custom Colors *@
-    <DemoCard Title="Custom Colors" Description="Customize tooltip accent background colors for brand alignment." Code="@_colorsCode">
-        <div class="flex flex-wrap items-center gap-4 p-6">
+    <DemoCard Title="Custom Colors" Description="Customize tooltip accent background colors without black arrow artifacts." Code="@_colorsCode">
+        <div class="flex flex-wrap items-center gap-4 p-4">
             <Tooltip Title="Primary blue style" Color="#3b82f6">
                 <Button Type="ButtonType.Default">Blue Tooltip</Button>
             </Tooltip>
@@ -50,10 +50,13 @@
             <Tooltip Title="Danger red style" Color="#ef4444">
                 <Button Type="ButtonType.Default">Red Tooltip</Button>
             </Tooltip>
+            <Tooltip Title="Purple accent style" Color="#8b5cf6">
+                <Button Type="ButtonType.Default">Purple Tooltip</Button>
+            </Tooltip>
         </div>
     </DemoCard>
 
-    <ApiTable Title="Tooltip Properties" Properties="@_props" />
+    <ApiTable Title="Tooltip Properties" ComponentType="@typeof(Tooltip)" />
 </div>
 
 @code {
@@ -64,37 +67,36 @@
         """;
 
     private const string _placementsCode = """
-        <Tooltip Title="Top tooltip message" Placement="TooltipPlacement.Top">
-            <Button Type="ButtonType.Default">Top</Button>
-        </Tooltip>
-        <Tooltip Title="Bottom tooltip message" Placement="TooltipPlacement.Bottom">
-            <Button Type="ButtonType.Default">Bottom</Button>
-        </Tooltip>
-        <Tooltip Title="Left tooltip message" Placement="TooltipPlacement.Left">
-            <Button Type="ButtonType.Default">Left</Button>
-        </Tooltip>
-        <Tooltip Title="Right tooltip message" Placement="TooltipPlacement.Right">
-            <Button Type="ButtonType.Default">Right</Button>
-        </Tooltip>
+        <div class="flex flex-wrap items-center gap-4">
+            <Tooltip Title="Top tooltip message" Placement="TooltipPlacement.Top">
+                <Button Type="ButtonType.Default">Top</Button>
+            </Tooltip>
+            <Tooltip Title="Bottom tooltip message" Placement="TooltipPlacement.Bottom">
+                <Button Type="ButtonType.Default">Bottom</Button>
+            </Tooltip>
+            <Tooltip Title="Left tooltip message" Placement="TooltipPlacement.Left">
+                <Button Type="ButtonType.Default">Left</Button>
+            </Tooltip>
+            <Tooltip Title="Right tooltip message" Placement="TooltipPlacement.Right">
+                <Button Type="ButtonType.Default">Right</Button>
+            </Tooltip>
+        </div>
         """;
 
     private const string _colorsCode = """
-        <Tooltip Title="Primary blue style" Color="#3b82f6">
-            <Button Type="ButtonType.Default">Blue Tooltip</Button>
-        </Tooltip>
-        <Tooltip Title="Success green style" Color="#10b981">
-            <Button Type="ButtonType.Default">Green Tooltip</Button>
-        </Tooltip>
-        <Tooltip Title="Danger red style" Color="#ef4444">
-            <Button Type="ButtonType.Default">Red Tooltip</Button>
-        </Tooltip>
+        <div class="flex flex-wrap items-center gap-4">
+            <Tooltip Title="Primary blue style" Color="#3b82f6">
+                <Button Type="ButtonType.Default">Blue Tooltip</Button>
+            </Tooltip>
+            <Tooltip Title="Success green style" Color="#10b981">
+                <Button Type="ButtonType.Default">Green Tooltip</Button>
+            </Tooltip>
+            <Tooltip Title="Danger red style" Color="#ef4444">
+                <Button Type="ButtonType.Default">Red Tooltip</Button>
+            </Tooltip>
+            <Tooltip Title="Purple accent style" Color="#8b5cf6">
+                <Button Type="ButtonType.Default">Purple Tooltip</Button>
+            </Tooltip>
+        </div>
         """;
-
-    private readonly ApiProp[] _props =
-    [
-        new("Title", "Text tooltip to display on hover.", "string?", "null"),
-        new("Placement", "The position of tooltip relative to target (Top, Bottom, Left, Right).", "TooltipPlacement", "TooltipPlacement.Top"),
-        new("Color", "Custom background color.", "string?", "null"),
-        new("ChildContent", "Target element that triggers the tooltip on hover.", "RenderFragment?", "null")
-    ];
 }

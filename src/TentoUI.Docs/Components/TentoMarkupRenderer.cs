@@ -107,10 +107,11 @@ public class TentoMarkupRenderer : ComponentBase
 
             var seq = 0;
 
-            // 1. Check if there is an interactive Drawer, Modal, or CommandPalette that lacks an opening trigger button
+            // 1. Check if there is an interactive Drawer, Modal, CommandPalette, or Tour that lacks an opening trigger button
             var hasOverlay = nodes.Any(n => n.TagName.Equals("Drawer", StringComparison.OrdinalIgnoreCase) ||
                                            n.TagName.Equals("Modal", StringComparison.OrdinalIgnoreCase) ||
-                                           n.TagName.Equals("CommandPalette", StringComparison.OrdinalIgnoreCase));
+                                           n.TagName.Equals("CommandPalette", StringComparison.OrdinalIgnoreCase) ||
+                                           n.TagName.Equals("Tour", StringComparison.OrdinalIgnoreCase));
             var hasButtonTrigger = nodes.Any(n => n.TagName.Equals("Button", StringComparison.OrdinalIgnoreCase));
 
             if (hasOverlay && !hasButtonTrigger && !_overlayOpen)
@@ -601,7 +602,6 @@ public class TentoMarkupRenderer : ComponentBase
                         var bVal = string.Equals(rawVal, "true", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(rawVal, "@true", StringComparison.OrdinalIgnoreCase) ||
                                    string.Equals(rawVal, "1", StringComparison.OrdinalIgnoreCase) ||
-                                   string.Equals(rawVal, attrKey, StringComparison.OrdinalIgnoreCase) ||
                                    string.IsNullOrEmpty(rawVal);
                         builder.AddAttribute(seq++, prop.Name, bVal);
                     }
@@ -724,6 +724,27 @@ public class TentoMarkupRenderer : ComponentBase
             {
                 _overlayOpen = false;
                 MessageService?.Success("Modal action confirmed!");
+                StateHasChanged();
+            }));
+        }
+        // 2b. Tour open state and interactive dismiss
+        else if (compType == typeof(Tour))
+        {
+            var isExplicitTrue = node.Attributes.TryGetValue("Open", out var oVal) &&
+                                 (string.Equals(oVal, "true", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(oVal, "1", StringComparison.OrdinalIgnoreCase));
+
+            builder.AddAttribute(seq++, "Open", isExplicitTrue || _overlayOpen);
+
+            builder.AddAttribute(seq++, "OnClose", EventCallback.Factory.Create(this, () =>
+            {
+                _overlayOpen = false;
+                StateHasChanged();
+            }));
+
+            builder.AddAttribute(seq++, "OpenChanged", EventCallback.Factory.Create<bool>(this, val =>
+            {
+                _overlayOpen = val;
                 StateHasChanged();
             }));
         }

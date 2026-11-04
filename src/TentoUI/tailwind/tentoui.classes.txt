@@ -42,6 +42,7 @@
 !CurrentPageItems.Any())
 !CurrentValue
 !CurrentValue)
+!Dashed)
 !Disabled
 !disabled)
 !Disabled)
@@ -98,6 +99,7 @@
 !ReferenceEquals(Property,
 !ShowFilterRow
 !ShowFilterRow)
+!Spin)
 !StartDate.HasValue
 !step.Disabled
 !string.Equals(e.Key,
@@ -153,6 +155,7 @@
 !string.IsNullOrEmpty(opt.Label))
 !string.IsNullOrEmpty(options.Key)
 !string.IsNullOrEmpty(options.Key))
+!string.IsNullOrEmpty(ResolvedSpinDuration))
 !string.IsNullOrEmpty(Src)
 !string.IsNullOrEmpty(step.Description))
 !string.IsNullOrEmpty(step.Icon))
@@ -200,6 +203,7 @@
 !string.IsNullOrWhiteSpace(col.Width))
 !string.IsNullOrWhiteSpace(error))
 !string.IsNullOrWhiteSpace(ErrorColor))
+!string.IsNullOrWhiteSpace(Field)
 !string.IsNullOrWhiteSpace(filterVal))
 !string.IsNullOrWhiteSpace(FontFamily))
 !string.IsNullOrWhiteSpace(GetColumnFilterValue(c)))
@@ -234,6 +238,7 @@
 !string.IsNullOrWhiteSpace(SearchText))
 !string.IsNullOrWhiteSpace(seg.ColorClass)
 !string.IsNullOrWhiteSpace(SegmentsString))
+!string.IsNullOrWhiteSpace(SpinDuration))
 !string.IsNullOrWhiteSpace(src)
 !string.IsNullOrWhiteSpace(Src))
 !string.IsNullOrWhiteSpace(style))
@@ -278,8 +283,10 @@
 @(_isCollapsed
 @(_isExpanded
 @(_isOpen
+@(_lastTriggeredTime
 @(_stepsOpen
 @(_strokes.Count
+@(_triggerCount
 @(_zoom.ToString(
 @(active
 @(Active
@@ -295,6 +302,7 @@
 @(Compact
 @(Count.Value
 @(CurrentValue
+@(Description
 @(Direction
 @(Disabled
 @(e
@@ -364,6 +372,7 @@
 @(Target
 @(Tip
 @(TipFormatter
+@(Tooltip
 @(Width
 @*
 @_activeStroke
@@ -394,6 +403,7 @@
 @_tabsContext
 @_titleId
 @_tooltipId
+@_triggerCount
 @_viewDate.ToString(
 @_zoom.ToString(CultureInfo.InvariantCulture)
 @Accept
@@ -606,7 +616,6 @@
 @field.Key
 @field.Label
 @file.Name
-@FilteredAndSortedItems.ToList()
 @FilteredItems.Count
 @FirstPanel
 @FirstPaneStyle
@@ -678,6 +687,7 @@
 @IconNames.Plus
 @IconNames.RefreshCw
 @IconNames.Search
+@IconNames.Sparkles
 @IconNames.Star
 @IconNames.Trash2
 @IconNames.Upload
@@ -721,6 +731,7 @@
 @LabelTemplate
 @Language
 @leftBg
+@LeftSegmentClass
 @line.NewContent
 @line.OldContent
 @lineNumber
@@ -771,6 +782,8 @@
 @onfocusin=
 @onfocusout=
 @oninput=
+@onkeydown:preventDefault=
+@onkeydown:stopPropagation=
 @onkeydown=
 @onmousedown:preventDefault=
 @onmouseenter=
@@ -838,6 +851,7 @@
 @ResolvedStroke
 @ResolveIconName()
 @rightBg
+@RightSegmentClass
 @rowClass
 @Rows
 @RowSelection
@@ -863,6 +877,7 @@
 @Size
 @slot.ToString(
 @slot.ToString(Format)
+@SortedItems.ToList()
 @src
 @Src
 @starIndex
@@ -898,6 +913,7 @@
 @ToggleOpen
 @TogglePasswordVisibility
 @ToolbarBtnClass
+@Tooltip
 @tooltipText
 @total
 @total.ToString(
@@ -917,12 +933,16 @@
 @ValueExpression
 @ValueStyle
 @ViewportStyle
+@VisibilityHeight
 @Width
 @WrapperClass
 -=
 -->
 -1
 -1)
+-1.275
+-1.275-1.275L12
+-1.275L21
 -1.51
 -1.51-1H3a2
 -1.51V3a2
@@ -931,6 +951,7 @@
 -1.82
 -1.82-.33
 -1.82.33l-.06.06a2
+-1.912
 -100)
 -11
 -11-8-11-8a18.45
@@ -969,6 +990,8 @@
 -5.94M9.9
 -6.219-8.56
 -7
+-7.07-7.07l-1.72
+-7.54-.54l-3
 -8
 -8-14a2
 -8V0C5.373
@@ -982,6 +1005,7 @@ A2
 a2.121
 a2.828
 a3
+a5
 A6
 a8
 a9
@@ -1084,7 +1108,6 @@ AddClass(marginY)
 AddClass(modeClass)
 AddClass(offset)
 AddClass(Orientation
-AddClass(orientationClass)
 AddClass(padding)
 AddClass(posClass)
 AddClass(selectedClass)
@@ -1200,6 +1223,7 @@ animate-pulse
 animate-spin
 animation-delay:150ms]
 animation-delay:300ms]
+animation-duration:
 Ant
 any
 anything
@@ -1225,6 +1249,7 @@ Are
 area
 Area,
 AreaPolygonPoints
+args)
 aria-atomic=
 aria-autocomplete=
 aria-busy=
@@ -1311,7 +1336,6 @@ Avatar)
 AvatarShape
 AvatarShape.Circle
 AvatarShape.Square
-AvatarSize.Default
 AvatarUrl
 await
 axis
@@ -1341,6 +1365,7 @@ BackgroundColor:
 background-image:
 background-repeat:
 Backspace
+BackTop
 badge
 BadgeColor
 Banner
@@ -1365,6 +1390,7 @@ Baseline).
 BaseTextColor
 baseTokens,
 be
+becomes
 before
 before:w-1/2
 before:w-full
@@ -1372,6 +1398,7 @@ behavior
 behind
 bell
 Bell
+beneath
 bestIdx
 between
 bg
@@ -1432,6 +1459,7 @@ bg-white/70
 bg-white/85
 bg-yellow-200
 BindConverter.TryConvertTo
+black)
 blank
 block
 Block
@@ -1495,6 +1523,7 @@ border-slate-300
 border-slate-700
 border-slate-700/50
 border-slate-800
+border-solid
 border-t
 border-t-0
 border-transparent
@@ -1546,6 +1575,7 @@ button
 Button
 Button,
 button.
+button:
 button>
 Button>
 ButtonHtmlType
@@ -1557,7 +1587,6 @@ ButtonShape
 ButtonShape.Circle
 ButtonShape.Default
 ButtonShape.Round
-ButtonSize.Small
 ButtonStyle
 ButtonText
 ButtonType
@@ -1607,6 +1636,7 @@ CanPrevMonth)
 CanPrevYear
 CanPrevYear)
 Capacity
+caption
 captured
 capturedCol
 capturedCol.MatchesFilter(item,
@@ -1881,6 +1911,7 @@ Color.StartsWith(
 Color.ToLowerInvariant()
 colorClass
 ColorClass
+color-mix(in
 ColorPrimary
 colors
 Colors
@@ -1974,7 +2005,6 @@ ComponentSize.Middle)
 ComponentSize.Small
 ComponentSize.Small)
 ComponentStatus
-ComponentStatus.Default)
 ComponentStatus.Error
 ComponentStatus.Error)
 ComponentStatus.None
@@ -2137,6 +2167,7 @@ copying.
 CopyLabel
 CopyLabel)
 CopyText
+corner
 count
 Count
 count)
@@ -2296,11 +2327,13 @@ dark:,
 dark:bg-amber-950/30
 dark:bg-amber-950/40
 dark:bg-blue-950/40
+dark:bg-emerald-950
 dark:bg-emerald-950/30
 dark:bg-emerald-950/40
 dark:bg-emerald-950/60
 dark:bg-primary-950
 dark:bg-primary-950/20
+dark:bg-primary-950/30
 dark:bg-primary-950/40
 dark:bg-primary-950/50
 dark:bg-primary-950/70
@@ -2486,6 +2519,7 @@ data-theme=
 data-tree-key=
 dataUrl
 data-value=
+data-visibility-height=
 date
 Date
 date)
@@ -2509,6 +2543,7 @@ DateTime(DateTime.Today.Year,
 DateTime.MaxValue.Date
 DateTime.MinValue
 DateTime.Now
+DateTime.Now.ToString(
 DateTime.Today
 DateTime.Today)
 DateTime.Today),
@@ -2671,9 +2706,8 @@ div>
 DividerBefore
 DividerOrientation
 DividerOrientation.Center
-DividerOrientation.Left
+DividerOrientation.Center)
 DividerOrientation.Left)
-DividerOrientation.Right
 DividerOrientation.Right)
 DividerType
 DividerType.Horizontal
@@ -3042,6 +3076,7 @@ false))
 false)))
 false,
 false.
+Fast
 feedback
 Feedback
 ff
@@ -3163,6 +3198,7 @@ firstRender)
 firstX
 fixed
 Fixed
+Fixed)
 fixedCls
 flatIndex
 flex
@@ -3207,6 +3243,7 @@ FloatButtonType
 FloatButtonType.Default
 FloatButtonType.Primary
 Floating
+focus,
 Focus,
 focus:border-amber-500
 focus:border-emerald-500
@@ -3227,7 +3264,6 @@ focus-visible:outline-none
 focus-visible:ring-2
 focus-visible:ring-offset-2
 focus-visible:ring-primary-500
-focus-visible:ring-primary-500/40
 focus-visible:ring-primary-500/50
 focus-visible:ring-red-500
 focus-within:border-primary-500
@@ -3360,6 +3396,7 @@ Generated
 Generates
 generator
 generator.CreateQrCode(Value,
+Geometry
 get
 GetAdjacentColumn(col.Key,
 GetAdjacentColumn(string
@@ -3661,6 +3698,7 @@ Helpful
 here
 h-full
 HH:mm
+HH:mm:ss
 hidden
 Hidden
 HideFooter
@@ -3691,6 +3729,7 @@ HourStep)
 hourVal
 Hover
 Hover,
+hover.
 hover:bg-black/10
 hover:bg-black/60
 hover:bg-black/80
@@ -3795,6 +3834,7 @@ IconNames.ChevronRight]
 IconNames.ChevronUp
 IconNames.ChevronUp]
 IconNames.Clock]
+IconNames.Close]
 IconNames.Copy)
 IconNames.Copy]
 IconNames.Download]
@@ -3817,6 +3857,7 @@ IconNames.Home]
 IconNames.Inbox]
 IconNames.Info
 IconNames.Info]
+IconNames.Link]
 IconNames.Loader]
 IconNames.Loader2
 IconNames.Loader2]
@@ -3831,6 +3872,7 @@ IconNames.RefreshCw]
 IconNames.Search
 IconNames.Search]
 IconNames.Settings]
+IconNames.Sparkles]
 IconNames.Star]
 IconNames.Sun]
 IconNames.Trash]
@@ -3848,6 +3890,10 @@ IconPosition.End)
 IconPosition.Start
 IconPosition.Start)
 IconSize
+IconSpinSpeed
+IconSpinSpeed.Fast
+IconSpinSpeed.Normal
+IconSpinSpeed.Slow
 IconTemplate
 Id
 id)
@@ -4102,6 +4148,7 @@ item.Danger
 item.Disabled
 item.Disabled)
 item.DividerBefore)
+item.GetType().GetProperty(Field,
 item.Keywords
 item.Keywords.Any(k
 item.LabelTemplate
@@ -4192,9 +4239,15 @@ l-.06.06a1.65
 l-.06-.06a1.65
 l.06.06a2
 l1.5-5.5L17
+l1.71-1.71
+l1.912-5.813a2
 L12
+L3
+l3-3a5
 l-4
 l4.64
+l5.813
+l-5.813-1.912a2
 L7.5
 l-8
 label
@@ -4225,6 +4278,7 @@ lastErrorLevel
 lastErrorLevel)
 lastProperty
 lastProperty))
+lastTriggeredTime
 lastValue
 lastX
 Layout
@@ -4249,6 +4303,7 @@ left-2
 left-4
 leftBg
 left-full
+LeftSegmentClass
 Length
 Length:
 LessThan
@@ -4346,8 +4401,11 @@ M,
 m.Id
 m-0
 M1
+M10
 M11
+m12
 M13.73
+M14
 M14.5
 M17
 M17.94
@@ -4360,6 +4418,7 @@ M21
 m21.73
 M22
 m3
+M3
 M3.51
 M4
 M5
@@ -4755,7 +4814,6 @@ mr-1
 -mr-1
 mr-1.5
 mr-2
-mr-4
 ms
 msg
 msg.ContentTemplate
@@ -4810,6 +4868,7 @@ Name=
 nameof(Icon.Name),
 namespace
 naming
+Native
 nav
 nav>
 Navigate
@@ -5037,6 +5096,7 @@ OnClear.HasDelegate)
 OnClear.InvokeAsync()
 OnClick
 OnClick.HasDelegate)
+OnClick.InvokeAsync(args)
 OnClick.InvokeAsync(e)
 OnClick=
 onClose
@@ -5246,7 +5306,6 @@ Or).
 Orange,
 Order
 Orientation
-orientationClass
 Original
 OTP
 OTPInput
@@ -5432,8 +5491,10 @@ percentage
 per-column
 Pick
 Picker
+pinned
 pixel
 pixel)
+pixels
 pixels.
 pl-2
 pl-3
@@ -5513,6 +5574,7 @@ Presets
 Presets)
 presets.
 Presets.Any())
+press
 press.
 prev
 prev)
@@ -5522,6 +5584,7 @@ prevCol
 prevCol.Key))
 prevCol.Title
 prevDisabled
+PreventDefault
 prevIcon
 prevIdx
 preview
@@ -5547,6 +5610,7 @@ primary
 Primary
 primary,
 Primary,
+Primary.
 PrimaryColor
 PrimaryColor:
 primaryHover
@@ -5569,6 +5633,8 @@ ProgressType.Line
 ProgressType.Line)
 prompt
 Prompt
+prop
+prop.GetValue(item)
 property
 Property
 Property(item)
@@ -5773,6 +5839,7 @@ RenderSpinnerContent()
 RenderTokenizedLine(string
 repeat
 Replace(
+replacing
 Required
 reset
 Reset
@@ -5791,6 +5858,7 @@ ResolvedMax
 ResolvedMin
 ResolvedSize(ComponentSize
 ResolvedSize(Size)
+ResolvedSpinDuration
 resolvedStatus
 ResolvedStep
 ResolvedStroke
@@ -5828,9 +5896,11 @@ right-2
 right-2.5
 right-4
 right-8
+right-8).
 rightBg
 right-click
 right-full
+RightSegmentClass
 ring-1
 ring-2
 ring-4
@@ -5958,10 +6028,11 @@ Schedule
 schedule:
 scope=
 screen
+Scroll
 ScrollHeight
 ScrollHeight=
 ScrollToTopAsync
-ScrollToTopAsync()
+ScrollToTopAsync(MouseEventArgs
 Scrollx,
 sealed
 search
@@ -6191,14 +6262,17 @@ shadow-sm
 shadow-xl
 shadow-xs
 Shape
+shape).
 shapeClass
 shape-rendering=
 shared
 Shared
 Shift
+Short
 Shortcut
 shortcut)
 Shortcut))
+shortcut...
 shortcut.Split(
 shortcuts
 Shorthand
@@ -6236,6 +6310,7 @@ ShowLegend
 ShowLine
 ShowLineNumbers
 ShowLineNumbers)
+shown
 ShowPagination
 showPassword
 showPassword)
@@ -6301,6 +6376,7 @@ slot)
 slot.Hour
 slot.Minute
 slots
+Slow,
 sm
 Sm
 Sm))
@@ -6419,7 +6495,6 @@ span>Go
 span>Markdown
 span>Mon
 span>No
-span>Press
 span>Preview
 span>Refresh
 span>Sat
@@ -6430,6 +6505,7 @@ span>to
 span>Tue
 span>Wed
 sparkles
+Sparkles
 sparkline
 sparkline.
 SparklineTrend
@@ -6445,9 +6521,11 @@ SparklineType.Line
 specifications
 Spin
 Spin)
+SpinDuration
 Spinner
 Spinning
 Spinning)
+SpinSpeed
 split
 Split
 Split(
@@ -6470,6 +6548,7 @@ SplitViewChanged
 SplitViewChanged.HasDelegate)
 SplitViewChanged.InvokeAsync(split)
 Square
+Square.
 src
 Src
 src)
@@ -6481,6 +6560,7 @@ SrcChanged
 SrcChanged.HasDelegate)
 SrcChanged.InvokeAsync(null)
 SrcChanged.InvokeAsync(Src)
+srgb,
 sr-only
 ss
 ss)
@@ -6718,6 +6798,7 @@ strong>
 struct
 structured
 Structured
+style
 Style
 style,
 style.Trim()
@@ -6789,6 +6870,7 @@ system
 System
 System.Collections.Generic.List
 System.Collections.IEnumerable
+System.Diagnostics.CodeAnalysis.NotNullWhen(false)]
 System.Globalization
 System.Globalization.CultureInfo.InvariantCulture)
 System.Globalization.CultureInfo.InvariantCulture))
@@ -6799,6 +6881,9 @@ System.IO.MemoryStream()
 System.Linq.Expressions
 System.Linq.Expressions.Expression
 System.Net.Http
+System.Reflection.BindingFlags.IgnoreCase)
+System.Reflection.BindingFlags.Instance
+System.Reflection.BindingFlags.Public
 System.Text
 System.Text.RegularExpressions
 System.Text.StringBuilder
@@ -6903,6 +6988,7 @@ template
 Template
 template(item))
 TemplateColumn
+tento-
 tento-affix
 tento-anchor
 tento-anchor-ink
@@ -7081,8 +7167,17 @@ tento-popover-content
 tento-popover-overlay
 tento-popover-title
 tento-popover-trigger
+--tento-primary-100:
+--tento-primary-200:
+--tento-primary-300:
+--tento-primary-400:
+--tento-primary-50:
 --tento-primary-500:
 --tento-primary-600:
+--tento-primary-700:
+--tento-primary-800:
+--tento-primary-900:
+--tento-primary-950:
 tento-progress
 tento-progress-bar
 tento-progress-circle
@@ -7240,6 +7335,7 @@ text-emerald-400
 text-emerald-500
 text-emerald-600
 text-emerald-700
+text-emerald-800
 text-emerald-900
 text-inherit
 text-left
@@ -7321,9 +7417,11 @@ theme.SurfaceBgColor
 theme.WarningColor
 themeClass
 themes.
+then
 this
 This
 this)
+threshold
 throw
 Thu
 Thumbnail
@@ -7458,6 +7556,7 @@ toolbar
 Toolbar
 ToolbarBtnClass
 tooltip
+Tooltip
 tooltipId
 TooltipPlacement
 TooltipPlacement.Bottom
@@ -7570,6 +7669,8 @@ trend
 Trend
 trigger
 Trigger
+triggerCount
+Triggered
 triggerIndex
 Trim().ToLowerInvariant()
 Trim().Trim(
@@ -7645,6 +7746,7 @@ typeof(TItem)
 typeof(TItem),
 typeof(TValue)
 typeof(TValue),
+typically
 Typing
 Typing)
 typography
@@ -7691,6 +7793,7 @@ UnregisterStep(this)
 UnregisterStep(TourStep
 Up,
 Up/Success,
+up-arrow
 Update(string
 updated
 updated.
@@ -7718,6 +7821,7 @@ URLs
 usableH
 usableW
 usage
+used
 user
 User
 users
@@ -7738,6 +7842,7 @@ v16a2
 v2
 V21a2
 v-2a4
+v4
 v4a2
 V4a2
 v5
@@ -7803,6 +7908,7 @@ ValueTuple
 var
 variables
 variant
+variant:
 variantClass
 variants
 Variants
@@ -7823,12 +7929,14 @@ viewDate
 viewDate.Month
 viewDate.Month,
 viewDate.Year
+viewport
 ViewportStyle
 virtual
 Virtualize
 Virtualize)
 Virtualize=
 visibility
+VisibilityHeight
 visible
 Visible
 visible)
@@ -7884,6 +7992,7 @@ w-8
 w-80
 w-9
 Wait,
+Waiting
 warning
 Warning
 Warning(string
@@ -7913,6 +8022,7 @@ whether
 Whether
 which
 while
+white)
 whitespace-nowrap
 whitespace-pre
 width

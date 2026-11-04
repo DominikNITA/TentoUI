@@ -2,19 +2,24 @@
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
-<PageTitle>FloatButton - TentoUI</PageTitle>
+<PageTitle>FloatButton &amp; BackTop - TentoUI</PageTitle>
 
 <div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">FloatButton</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">FloatButton &amp; BackTop</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A button that floats over page content to provide quick access to key contextual actions or scroll-to-top helpers.
+            Floating action buttons (<code class="font-mono">FloatButton</code>, <code class="font-mono">FloatButtonGroup</code>) and scroll-to-top helpers (<code class="font-mono">BackTop</code>) for quick contextual actions.
         </p>
     </div>
 
+    @* Interactive Playground *@
+    <PropsPlayground Title="FloatButton Interactive Playground"
+                     ComponentTag="FloatButton"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic FloatButton *@
-    <DemoCard Title="Basic FloatButton" Description="Circular floating button with an icon." Code="@_basicCode">
-        <div class="flex items-center gap-4">
+    <DemoCard Title="Basic FloatButton" Description="Circular floating action buttons in Default and Primary variants." Code="@_basicCode">
+        <div class="flex flex-wrap items-center gap-4">
             <FloatButton Type="FloatButtonType.Default"
                          Icon="@IconNames.HelpCircle"
                          Tooltip="Get Help"
@@ -27,8 +32,8 @@
     </DemoCard>
 
     @* Example 2: Square Shape with Description *@
-    <DemoCard Title="Square Shape with Description" Description="Square float buttons can display a label beneath the icon." Code="@_squareCode">
-        <div class="flex items-center gap-4">
+    <DemoCard Title="Square Shape with Description" Description="Square float buttons can display a short label beneath the icon." Code="@_squareCode">
+        <div class="flex flex-wrap items-center gap-4">
             <FloatButton Type="FloatButtonType.Primary"
                          Shape="FloatButtonShape.Square"
                          Icon="@IconNames.Copy"
@@ -40,21 +45,34 @@
         </div>
     </DemoCard>
 
-    @* Example 3: BackTop Helper *@
-    <DemoCard Title="BackTop Quick Action" Description="Dedicated back-to-top floating button for long document pages." Code="@_backTopCode">
-        <div class="flex items-center gap-4">
-            <BackTop VisibilityHeight="0" OnClick="@(() => MessageService.Success("Scrolled to top!"))" />
+    @* Example 3: BackTop Component *@
+    <DemoCard Title="BackTop (Scroll to Top)" Description="Smoothly scrolls the window back to the top. Supports Circle and Square shapes, Primary/Default styles, descriptions, and Fixed viewport pinning." Code="@_backTopCode">
+        <div class="flex flex-wrap items-center gap-4">
+            <BackTop Tooltip="Scroll to top" OnClick="@(() => MessageService.Success("Scrolled to top!"))" />
+            <BackTop Type="FloatButtonType.Primary" Tooltip="Back to top (Primary)" OnClick="@(() => MessageService.Success("Scrolled to top!"))" />
+            <BackTop Shape="FloatButtonShape.Square" Description="TOP" Tooltip="Scroll to top" OnClick="@(() => MessageService.Success("Scrolled to top!"))" />
         </div>
     </DemoCard>
 
-    @* API Reference Table *@
-    <ApiTable Title="FloatButton Properties" Properties="@_props" />
+    @* API Reference Tables *@
+    <ApiTable Title="FloatButton Properties" ComponentType="@typeof(FloatButton)" />
+    <ApiTable Title="BackTop Properties" ComponentType="@typeof(BackTop)" />
+    <ApiTable Title="FloatButtonGroup Properties" ComponentType="@typeof(FloatButtonGroup)" />
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FloatButtonType.Primary", DefaultValue = "FloatButtonType.Default", Options = ["FloatButtonType.Default", "FloatButtonType.Primary"] },
+        new() { Name = "Shape", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FloatButtonShape.Circle", DefaultValue = "FloatButtonShape.Circle", Options = ["FloatButtonShape.Circle", "FloatButtonShape.Square"] },
+        new() { Name = "Icon", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "plus", DefaultValue = "", Options = ["plus", "help-circle", "settings", "bell", "download", "arrow-up"] },
+        new() { Name = "Description", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "", DefaultValue = "" },
+        new() { Name = "Tooltip", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Quick Action", DefaultValue = "" }
+    ];
+
     private const string _basicCode = """
-        <FloatButton Type="FloatButtonType.Default" Icon="@IconNames.HelpCircle" Tooltip="Get Help" />
-        <FloatButton Type="FloatButtonType.Primary" Icon="@IconNames.Plus" Tooltip="Create New" />
+        <FloatButton Type="FloatButtonType.Default" Icon="@IconNames.HelpCircle" Tooltip="Get Help" OnClick="@(() => MessageService.Info("Help requested!"))" />
+        <FloatButton Type="FloatButtonType.Primary" Icon="@IconNames.Plus" Tooltip="Create New" OnClick="@(() => MessageService.Success("Created!"))" />
         """;
 
     private const string _squareCode = """
@@ -63,16 +81,8 @@
         """;
 
     private const string _backTopCode = """
-        <BackTop VisibilityHeight="300" />
+        <BackTop Tooltip="Scroll to top" OnClick="@(() => MessageService.Success("Scrolled to top!"))" />
+        <BackTop Type="FloatButtonType.Primary" Tooltip="Back to top (Primary)" />
+        <BackTop Shape="FloatButtonShape.Square" Description="TOP" />
         """;
-
-    private readonly ApiProp[] _props =
-    [
-        new("Type", "Button variant type: Default or Primary.", "FloatButtonType", "FloatButtonType.Default"),
-        new("Shape", "Shape of the button: Circle or Square.", "FloatButtonShape", "FloatButtonShape.Circle"),
-        new("Icon", "Lucide icon name string.", "string?", "null"),
-        new("Description", "Text description placed beneath the icon (Square only).", "string?", "null"),
-        new("Tooltip", "Floating tooltip message on hover.", "string?", "null"),
-        new("OnClick", "Callback executed on button click.", "EventCallback<MouseEventArgs>", "null")
-    ];
 }

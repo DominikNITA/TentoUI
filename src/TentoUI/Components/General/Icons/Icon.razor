@@ -26,6 +26,8 @@
     [Parameter] public object Size { get; set; } = 16;
     [Parameter] public string? Color { get; set; }
     [Parameter] public bool Spin { get; set; }
+    [Parameter] public IconSpinSpeed SpinSpeed { get; set; } = IconSpinSpeed.Normal;
+    [Parameter] public string? SpinDuration { get; set; }
     [Parameter] public double Rotate { get; set; }
     [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
@@ -34,6 +36,21 @@
     private string ResolvedStroke => !string.IsNullOrEmpty(Color) && !Color.StartsWith("text-") ? Color : "currentColor";
     private string SvgPathContent => LucideIcons.GetPath(Name);
 
+    private string? ResolvedSpinDuration
+    {
+        get
+        {
+            if (!Spin) return null;
+            if (!string.IsNullOrWhiteSpace(SpinDuration)) return SpinDuration;
+            return SpinSpeed switch
+            {
+                IconSpinSpeed.Slow => "2.5s",
+                IconSpinSpeed.Fast => "0.4s",
+                _ => null
+            };
+        }
+    }
+
     private string ComputedClass => new CssBuilder("tento-icon inline-block shrink-0")
         .AddClass(Color, !string.IsNullOrEmpty(Color) && Color.StartsWith("text-"))
         .AddClass("animate-spin", Spin)
@@ -41,6 +58,7 @@
         .Build();
 
     private string ComputedStyle => new StyleBuilder()
+        .AddStyle($"animation-duration: {ResolvedSpinDuration}", Spin && !string.IsNullOrEmpty(ResolvedSpinDuration))
         .AddStyle($"transform: rotate({Rotate}deg)", Rotate != 0)
         .AddStyle(Style)
         .Build();

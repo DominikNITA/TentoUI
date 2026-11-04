@@ -5,40 +5,37 @@
 
 <div class="max-w-5xl space-y-8">
     <div>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
-            <span>New in v1.1.0</span>
-        </div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Kbd &amp; HotkeyListener</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Tactile keyboard shortcut badges (<code class="font-mono">&lt;Kbd&gt;</code>) and focusable keyboard shortcut listeners (<code class="font-mono">&lt;HotkeyListener&gt;</code>).
         </p>
     </div>
 
-    <DemoCard Title="Keycap Badges &amp; Interactive Hotkey Listener" Description="Click the listener box and press Shift+K to trigger the callback." Code="@_kbdCode">
-        <div class="space-y-4">
-            <div class="flex flex-wrap items-center gap-4 text-sm text-slate-700 dark:text-slate-300">
-                <div class="flex items-center gap-2">
-                    <span>Command Palette:</span>
-                    <Kbd Keys="Ctrl+K" />
-                </div>
-                <div class="flex items-center gap-2">
-                    <span>Quick Save:</span>
-                    <Kbd Keys="Ctrl+Shift+S" />
-                </div>
-                <div class="flex items-center gap-2">
-                    <span>Mac Search:</span>
-                    <Kbd Keys="⌘+P" />
-                </div>
+    <DemoCard Title="Keyboard Shortcut Badges (Kbd)" Description="Each Kbd component splits a '+'-delimited chord into individual tactile keycaps. Displayed vertically below so each shortcut chord is distinct." Code="@_kbdCode">
+        <div class="flex flex-col gap-3 text-xs text-slate-700 dark:text-slate-300">
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Save File</span>
+                <Kbd Keys="Alt+S" />
             </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Run Diagnostics</span>
+                <Kbd Keys="Shift+K" />
+            </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Format Document</span>
+                <Kbd Keys="Shift+Alt+F" />
+            </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">macOS Quick Open</span>
+                <Kbd Keys="⌘+P" />
+            </div>
+        </div>
+    </DemoCard>
 
-            <HotkeyListener Shortcut="Shift+K"
-                            OnTrigger="s => _triggerCount++"
-                            Class="p-4 border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-                <div class="flex items-center justify-between">
-                    <span>Click here to focus, then press <Kbd Keys="Shift+K" /></span>
-                    <Tag Color="primary">Triggered @_triggerCount time(s)</Tag>
-                </div>
-            </HotkeyListener>
+    <DemoCard Title="Interactive HotkeyListener" Description="Click either listener box below to focus it, then press the displayed key combination (e.g. Alt+S or Shift+K) to trigger the action without conflicting with browser shortcuts." Code="@_hotkeyCode">
+        <div class="flex flex-col gap-3">
+            <HotkeyListener Shortcut="Alt+S" Description="Click here, then press shortcut to Save Draft:" />
+            <HotkeyListener Shortcut="Shift+K" Description="Click here, then press shortcut to Run Check:" />
         </div>
     </DemoCard>
 
@@ -47,10 +44,31 @@
 </div>
 
 @code {
-    private int _triggerCount;
-
     private const string _kbdCode = """
-        <Kbd Keys="Ctrl+Shift+P" />
-        <Kbd Keys="⌘+K" />
+        <div class="flex flex-col gap-3 text-xs">
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Save File</span>
+                <Kbd Keys="Alt+S" />
+            </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Run Diagnostics</span>
+                <Kbd Keys="Shift+K" />
+            </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">Format Document</span>
+                <Kbd Keys="Shift+Alt+F" />
+            </div>
+            <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <span class="font-medium">macOS Quick Open</span>
+                <Kbd Keys="⌘+P" />
+            </div>
+        </div>
+        """;
+
+    private const string _hotkeyCode = """
+        <div class="flex flex-col gap-3">
+            <HotkeyListener Shortcut="Alt+S" Description="Click here, then press shortcut to Save Draft:" />
+            <HotkeyListener Shortcut="Shift+K" Description="Click here, then press shortcut to Run Check:" />
+        </div>
         """;
 }

@@ -6,30 +6,57 @@ using TentoUI.Extensibility;
 namespace TentoUI.Docs.Services;
 
 /// <summary>
-/// Reflects <see cref="ParameterAttribute"/>, <see cref="SinceAttribute"/>, and <see cref="ObsoleteAttribute"/>
-/// metadata directly from TentoUI component types to prevent manual API documentation drift.
+/// Reflects <see cref="ParameterAttribute"/>, <see cref="SinceAttribute"/>, <see cref="ObsoleteAttribute"/>,
+/// and referenced enum/model types directly from TentoUI component types.
 /// </summary>
 public static class ComponentApiRegistry
 {
+    private static readonly Dictionary<string, Type> s_tentoTypesByName = typeof(Button).Assembly
+        .GetTypes()
+        .Where(t => t.IsPublic && !t.IsNested)
+        .GroupBy(t => t.Name.Split('`')[0], StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+    public static Type? ResolveComponentType(Type? explicitType, string? title)
+    {
+        if (explicitType != null)
+            return explicitType;
+
+        if (string.IsNullOrWhiteSpace(title))
+            return null;
+
+        var firstWord = title.Trim().Split([' ', '<', '/'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(firstWord) &&
+            s_tentoTypesByName.TryGetValue(firstWord, out var matched) &&
+            typeof(IComponent).IsAssignableFrom(matched))
+        {
+            return matched;
+        }
+
+        return null;
+    }
+
     public static IReadOnlyList<ApiTable.ApiProp> GetProperties(
         Type? componentType,
-        IEnumerable<ApiTable.ApiProp>? explicitProperties = null)
+        IEnumerable<ApiTable.ApiProp>? explicitProperties = null,
+        string? title = null)
     {
         var explicitList = explicitProperties?.ToList() ?? [];
-        if (componentType == null)
+        var resolvedType = ResolveComponentType(componentType, title);
+        if (resolvedType == null)
         {
             return explicitList;
         }
 
         var explicitByProp = explicitList.ToDictionary(p => p.Property, p => p, StringComparer.OrdinalIgnoreCase);
-        var classSince = componentType.GetCustomAttribute<SinceAttribute>()?.Version;
+        var classSince = resolvedType.GetCustomAttribute<SinceAttribute>()?.Version;
 
         object? defaultInstance = null;
-        if (!componentType.IsAbstract && !componentType.ContainsGenericParameters)
+        if (!resolvedType.IsAbstract && !resolvedType.ContainsGenericParameters)
         {
             try
             {
-                defaultInstance = Activator.CreateInstance(componentType);
+                defaultInstance = Activator.CreateInstance(resolvedType);
             }
             catch
             {
@@ -38,11 +65,11 @@ public static class ComponentApiRegistry
         }
 
         var reflected = new List<ApiTable.ApiProp>();
-        var props = componentType
+        var props = resolvedType
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.GetCustomAttribute<ParameterAttribute>() != null &&
                         !string.Equals(p.Name, "AdditionalAttributes", StringComparison.Ordinal))
-            .OrderBy(p => p.DeclaringType == componentType ? 0 : 1)
+            .OrderBy(p => p.DeclaringType == resolvedType ? 0 : 1)
             .ThenBy(p => p.Name);
 
         foreach (var prop in props)
@@ -95,6 +122,97 @@ public static class ComponentApiRegistry
         return reflected;
     }
 
+    public static IReadOnlyList<ApiTable.ApiTypeInfo> GetReferencedTypes(
+        Type? componentType,
+        IReadOnlyList<ApiTable.ApiProp> properties,
+        string? title = null)
+    {
+        var resolvedComponentType = ResolveComponentType(componentType, title);
+        var discoveredTypes = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+
+        if (resolvedComponentType != null)
+        {
+            var props = resolvedComponentType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.GetCustomAttribute<ParameterAttribute>() != null);
+
+            foreach (var prop in props)
+            {
+                CollectCustomTypes(prop.PropertyType, discoveredTypes);
+            }
+        }
+
+        foreach (var prop in properties)
+        {
+            var rawType = prop.Type.TrimEnd('?');
+            foreach (var token in rawType.Split(['<', '>', ',', ' ', '[', ']'], StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (s_tentoTypesByName.TryGetValue(token, out var t))
+                {
+                    CollectCustomTypes(t, discoveredTypes);
+                }
+            }
+        }
+
+        var result = new List<ApiTable.ApiTypeInfo>();
+        foreach (var (_, type) in discoveredTypes.OrderBy(kv => kv.Value.IsEnum ? 0 : 1).ThenBy(kv => kv.Key))
+        {
+            if (type.IsEnum)
+            {
+                var names = Enum.GetNames(type);
+                result.Add(new ApiTable.ApiTypeInfo(
+                    type.Name,
+                    "Enum",
+                    names.Select(n => $"{type.Name}.{n}").ToArray(),
+                    GetEnumDescription(type.Name)));
+            }
+            else if (type.Namespace?.StartsWith("TentoUI", StringComparison.Ordinal) == true &&
+                     !typeof(IComponent).IsAssignableFrom(type) &&
+                     !type.IsAbstract)
+            {
+                var pubProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Select(p => $"{p.Name}: {FormatTypeName(p.PropertyType)}")
+                    .ToArray();
+                if (pubProps.Length > 0)
+                {
+                    result.Add(new ApiTable.ApiTypeInfo(
+                        FormatTypeName(type),
+                        "Model",
+                        pubProps,
+                        $"Structured data model for {FormatTypeName(type)}."));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static void CollectCustomTypes(Type type, Dictionary<string, Type> bucket)
+    {
+        var underlying = Nullable.GetUnderlyingType(type) ?? type;
+        if (underlying.IsArray && underlying.GetElementType() is { } elemType)
+        {
+            CollectCustomTypes(elemType, bucket);
+            return;
+        }
+
+        if (underlying.IsGenericType)
+        {
+            foreach (var arg in underlying.GetGenericArguments())
+            {
+                CollectCustomTypes(arg, bucket);
+            }
+            return;
+        }
+
+        if (underlying.Namespace?.StartsWith("TentoUI", StringComparison.Ordinal) == true &&
+            !typeof(IComponent).IsAssignableFrom(underlying) &&
+            underlying != typeof(object))
+        {
+            bucket[underlying.Name] = underlying;
+        }
+    }
+
     public static string FormatTypeName(Type type)
     {
         var underlying = Nullable.GetUnderlyingType(type);
@@ -106,6 +224,7 @@ public static class ComponentApiRegistry
         if (type == typeof(string)) return "string";
         if (type == typeof(bool)) return "bool";
         if (type == typeof(int)) return "int";
+        if (type == typeof(float)) return "float";
         if (type == typeof(double)) return "double";
         if (type == typeof(decimal)) return "decimal";
         if (type == typeof(object)) return "object";
@@ -148,6 +267,26 @@ public static class ComponentApiRegistry
         "Size" => "Controls the component size scale (Small, Middle, Large).",
         "Value" => "Current bound value of the component.",
         "Placeholder" => "Placeholder text displayed when the input is empty.",
+        "IconPosition" => "Placement of the icon relative to the button label (Start or End).",
+        "IconName" => "Lucide icon identifier rendered inside the component.",
+        "SpinSpeed" => "Controls the rotation speed when Spin is enabled (Slow, Normal, Fast).",
+        "SpinDuration" => "Custom CSS animation duration for spinning icons (e.g. '1.5s', '400ms').",
         _ => $"Configures the {name} ({typeName}) parameter."
+    };
+
+    private static string GetEnumDescription(string enumName) => enumName switch
+    {
+        "ButtonType" => "Visual style variant of the button.",
+        "ButtonShape" => "Border radius geometry of the button.",
+        "ButtonHtmlType" => "Native HTML button type attribute.",
+        "IconPosition" => "Side of the button where the icon is placed.",
+        "ComponentSize" => "Standardized size scale across TentoUI components.",
+        "ComponentStatus" => "Validation status visual state.",
+        "FloatButtonType" => "Color variant of the floating action button.",
+        "FloatButtonShape" => "Geometry of the floating action button.",
+        "DividerType" => "Direction of the divider line.",
+        "DividerOrientation" => "Horizontal alignment of the divider title text.",
+        "IconSpinSpeed" => "Predefined rotation speed presets for spinning icons.",
+        _ => $"Allowed values for {enumName}."
     };
 }

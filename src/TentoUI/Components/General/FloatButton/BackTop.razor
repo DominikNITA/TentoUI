@@ -2,10 +2,11 @@
 @inject IJSRuntime JSRuntime
 @inherits TentoComponentBase
 
-<div class="tento-backtop fixed bottom-8 right-8 z-40" style="@Style" @attributes="AdditionalAttributes">
+<div class="@WrapperClass" style="@Style" data-visibility-height="@VisibilityHeight" @attributes="AdditionalAttributes">
     <button type="button"
+            title="@Tooltip"
             class="@ComputedClass"
-            aria-label="Back to top"
+            aria-label="@(Tooltip ?? Description ?? "Back to top")"
             @onclick="ScrollToTopAsync">
         @if (ChildContent != null)
         {
@@ -14,14 +15,56 @@
         else
         {
             <Icon Name="@IconNames.ArrowUp" Size="18" />
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <span class="text-[10px] leading-tight font-medium mt-0.5">@Description</span>
+            }
         }
     </button>
 </div>
 
 @code {
+    /// <summary>
+    /// Scroll height threshold in pixels after which the button becomes visible when Fixed is true.
+    /// </summary>
+    [Parameter] public int VisibilityHeight { get; set; } = 400;
+
+    /// <summary>
+    /// Visual style variant: Default or Primary.
+    /// </summary>
+    [Parameter] public FloatButtonType Type { get; set; } = FloatButtonType.Default;
+
+    /// <summary>
+    /// Geometry of the button: Circle or Square.
+    /// </summary>
+    [Parameter] public FloatButtonShape Shape { get; set; } = FloatButtonShape.Circle;
+
+    /// <summary>
+    /// Short caption displayed beneath the arrow icon (typically used with Square shape).
+    /// </summary>
+    [Parameter] public string? Description { get; set; }
+
+    /// <summary>
+    /// Native tooltip text shown on hover.
+    /// </summary>
+    [Parameter] public string? Tooltip { get; set; } = "Back to top";
+
+    /// <summary>
+    /// Whether the BackTop button is pinned to the viewport corner (fixed bottom-8 right-8).
+    /// </summary>
+    [Parameter] public bool Fixed { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the button is clicked.
+    /// </summary>
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    /// <summary>
+    /// Custom content replacing the default up-arrow icon.
+    /// </summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private async Task ScrollToTopAsync()
+    private async Task ScrollToTopAsync(MouseEventArgs args)
     {
         try
         {
@@ -31,9 +74,29 @@
         {
             // Fallback in test context where JS is mocked
         }
+
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(args);
+        }
     }
 
-    private string ComputedClass => new CssBuilder("w-11 h-11 rounded-full bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-transform hover:scale-105 active:scale-95")
-        .AddClass(Class)
+    private string WrapperClass => new CssBuilder("tento-backtop inline-flex")
+        .AddClass("fixed bottom-8 right-8 z-40", Fixed)
         .Build();
+
+    private string ComputedClass
+    {
+        get
+        {
+            var shapeClass = Shape == FloatButtonShape.Circle ? "rounded-full" : "rounded-lg";
+            var colorClass = Type == FloatButtonType.Primary
+                ? "bg-primary-500 hover:bg-primary-600 text-white shadow-primary-500/30"
+                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700";
+
+            return new CssBuilder($"w-11 h-11 shadow-lg flex flex-col items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer {shapeClass} {colorClass}")
+                .AddClass(Class)
+                .Build();
+        }
+    }
 }

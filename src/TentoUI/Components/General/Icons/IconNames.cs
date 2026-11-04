@@ -1,5 +1,12 @@
 namespace TentoUI;
 
+public enum IconSpinSpeed
+{
+    Slow,
+    Normal,
+    Fast
+}
+
 public static class IconNames
 {
     public const string Check = "check";
@@ -9,6 +16,7 @@ public static class IconNames
     public const string AlertTriangle = "alert-triangle";
     public const string Info = "info";
     public const string X = "x";
+    public const string Close = "close";
     public const string XCircle = "x-circle";
     public const string Loader = "loader";
     public const string Loader2 = "loader-2";
@@ -29,6 +37,7 @@ public static class IconNames
     public const string Trash = "trash";
     public const string Trash2 = "trash-2";
     public const string ExternalLink = "external-link";
+    public const string Link = "link";
     public const string Filter = "filter";
     public const string User = "user";
     public const string Calendar = "calendar";
@@ -41,6 +50,7 @@ public static class IconNames
     public const string RefreshCw = "refresh-cw";
     public const string HelpCircle = "help-circle";
     public const string Star = "star";
+    public const string Sparkles = "sparkles";
     public const string Upload = "upload";
     public const string Download = "download";
     public const string Inbox = "inbox";

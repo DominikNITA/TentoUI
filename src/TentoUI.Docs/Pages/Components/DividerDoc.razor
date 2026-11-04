@@ -7,27 +7,37 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Divider</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A divider line separates different content areas, supporting horizontal, vertical, dashed, and titled alignments.
+            A divider line separates different content areas, supporting horizontal, vertical, solid, dashed, and titled alignments.
         </p>
     </div>
 
+    @* Interactive Playground *@
+    <PropsPlayground Title="Divider Interactive Playground"
+                     ComponentTag="Divider"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Horizontal with Title *@
-    <DemoCard Title="Horizontal Divider with Title" Description="Dividers can contain center, left, or right-aligned titles." Code="@_titleCode">
-        <div class="space-y-4">
-            <p class="text-xs text-slate-500">Above the divider content region.</p>
+    <DemoCard Title="Horizontal Divider &amp; Title Orientations" Description="Dividers can be plain lines or contain center, left, or right-aligned titles." Code="@_titleCode">
+        <div class="w-full space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <p>Standard solid horizontal divider without label:</p>
+            <Divider />
+            <p>Centered section title:</p>
             <Divider Orientation="DividerOrientation.Center">Section Overview</Divider>
-            <p class="text-xs text-slate-500">Content placed between distinct sections.</p>
+            <p>Left-aligned section title:</p>
             <Divider Orientation="DividerOrientation.Left">Left Title</Divider>
-            <p class="text-xs text-slate-500">Section details continuation.</p>
+            <p>Right-aligned section title:</p>
+            <Divider Orientation="DividerOrientation.Right">Right Title</Divider>
         </div>
     </DemoCard>
 
     @* Example 2: Dashed Divider *@
-    <DemoCard Title="Dashed Divider" Description="Use dashed borders for subtle or secondary section breaks." Code="@_dashedCode">
-        <div class="space-y-4">
-            <p class="text-xs text-slate-500">Primary task instructions.</p>
+    <DemoCard Title="Dashed Divider" Description="Use Dashed='true' on both plain and titled dividers for secondary section breaks." Code="@_dashedCode">
+        <div class="w-full space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <p>Plain dashed horizontal line:</p>
+            <Divider Dashed="true" />
+            <p>Dashed horizontal line with centered title:</p>
             <Divider Dashed="true">Optional Configurations</Divider>
-            <p class="text-xs text-slate-500">Advanced environment parameters.</p>
+            <p>Advanced environment parameters.</p>
         </div>
     </DemoCard>
 
@@ -37,25 +47,44 @@
             <a href="#" class="hover:text-primary-600">Home</a>
             <Divider Type="DividerType.Vertical" />
             <a href="#" class="hover:text-primary-600">Settings</a>
-            <Divider Type="DividerType.Vertical" />
+            <Divider Type="DividerType.Vertical" Dashed="true" />
             <a href="#" class="hover:text-primary-600">Documentation</a>
         </div>
     </DemoCard>
 
     @* API Reference Table *@
-    <ApiTable Title="Divider Properties" Properties="@_props" />
+    <ApiTable Title="Divider Properties" ComponentType="@typeof(Divider)" />
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Section Header", DefaultValue = "" },
+        new() { Name = "Orientation", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "DividerOrientation.Center", DefaultValue = "DividerOrientation.Center", Options = ["DividerOrientation.Left", "DividerOrientation.Center", "DividerOrientation.Right"] },
+        new() { Name = "Dashed", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _titleCode = """
-        <p>Above the divider content region.</p>
-        <Divider Orientation="DividerOrientation.Center">Section Overview</Divider>
-        <p>Content placed between distinct sections.</p>
-        <Divider Orientation="DividerOrientation.Left">Left Title</Divider>
+        <div class="w-full space-y-2 text-xs">
+            <p>Standard solid horizontal divider without label:</p>
+            <Divider />
+            <p>Centered section title:</p>
+            <Divider Orientation="DividerOrientation.Center">Section Overview</Divider>
+            <p>Left-aligned section title:</p>
+            <Divider Orientation="DividerOrientation.Left">Left Title</Divider>
+            <p>Right-aligned section title:</p>
+            <Divider Orientation="DividerOrientation.Right">Right Title</Divider>
+        </div>
         """;
 
     private const string _dashedCode = """
-        <Divider Dashed="true">Optional Configurations</Divider>
+        <div class="w-full space-y-2 text-xs">
+            <p>Plain dashed horizontal line:</p>
+            <Divider Dashed="true" />
+            <p>Dashed horizontal line with centered title:</p>
+            <Divider Dashed="true">Optional Configurations</Divider>
+            <p>Advanced environment parameters.</p>
+        </div>
         """;
 
     private const string _verticalCode = """
@@ -63,16 +92,8 @@
             <a href="#">Home</a>
             <Divider Type="DividerType.Vertical" />
             <a href="#">Settings</a>
-            <Divider Type="DividerType.Vertical" />
+            <Divider Type="DividerType.Vertical" Dashed="true" />
             <a href="#">Documentation</a>
         </div>
         """;
-
-    private readonly ApiProp[] _props =
-    [
-        new("Type", "Direction of divider: Horizontal or Vertical.", "DividerType", "DividerType.Horizontal"),
-        new("Orientation", "Alignment of inner text: Left, Center, Right.", "DividerOrientation", "DividerOrientation.Center"),
-        new("Dashed", "Whether the divider line is dashed.", "bool", "false"),
-        new("ChildContent", "Inner label or text rendered in the middle of the divider.", "RenderFragment?", "null")
-    ];
 }

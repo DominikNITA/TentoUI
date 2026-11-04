@@ -3,21 +3,13 @@
 
 @if (Type == DividerType.Vertical)
 {
-    <div class="@ComputedVerticalClass" role="separator" style="@Style" @attributes="AdditionalAttributes"></div>
+    <div class="@ComputedVerticalClass" role="separator" aria-orientation="vertical" style="@Style" @attributes="AdditionalAttributes"></div>
 }
 else if (ChildContent != null || !string.IsNullOrEmpty(Title))
 {
-    <div class="@ComputedHorizontalWithTitleClass" role="separator" style="@Style" @attributes="AdditionalAttributes">
-        @if (Orientation == DividerOrientation.Center || Orientation == DividerOrientation.Right)
-        {
-            <span class="@(Orientation == DividerOrientation.Right ? "before:w-full border-t border-slate-300 flex-1 mr-4" : "before:w-1/2 border-t border-slate-300 flex-1 mr-4")"></span>
-        }
-        else
-        {
-            <span class="border-t border-slate-300 w-6 mr-4"></span>
-        }
-
-        <span class="tento-divider-inner-text text-sm font-medium text-slate-700 dark:text-slate-300">
+    <div class="@ComputedHorizontalWithTitleClass" role="separator" aria-orientation="horizontal" style="@Style" @attributes="AdditionalAttributes">
+        <div class="@LeftSegmentClass"></div>
+        <span class="tento-divider-inner-text shrink-0 px-3 text-sm font-medium text-slate-700 dark:text-slate-300">
             @if (ChildContent != null)
             {
                 @ChildContent
@@ -27,20 +19,12 @@ else if (ChildContent != null || !string.IsNullOrEmpty(Title))
                 @Title
             }
         </span>
-
-        @if (Orientation == DividerOrientation.Center || Orientation == DividerOrientation.Left)
-        {
-            <span class="@(Orientation == DividerOrientation.Left ? "after:w-full border-t border-slate-300 flex-1 ml-4" : "after:w-1/2 border-t border-slate-300 flex-1 ml-4")"></span>
-        }
-        else
-        {
-            <span class="border-t border-slate-300 w-6 ml-4"></span>
-        }
+        <div class="@RightSegmentClass"></div>
     </div>
 }
 else
 {
-    <div class="@ComputedHorizontalClass" role="separator" style="@Style" @attributes="AdditionalAttributes"></div>
+    <div class="@ComputedHorizontalClass" role="separator" aria-orientation="horizontal" style="@Style" @attributes="AdditionalAttributes"></div>
 }
 
 @code {
@@ -50,31 +34,36 @@ else
     [Parameter] public bool Dashed { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    private string ComputedVerticalClass => new CssBuilder("tento-divider inline-block border-l border-slate-300 h-4 mx-2 align-middle")
+    private string ComputedVerticalClass => new CssBuilder("tento-divider inline-block border-l border-slate-300 dark:border-slate-600 h-4 mx-2 align-middle")
         .AddClass("border-dashed", Dashed)
+        .AddClass("border-solid", !Dashed)
         .AddClass(Class)
         .Build();
 
-    private string ComputedHorizontalClass => new CssBuilder("tento-divider border-t border-slate-300 w-full my-4")
+    private string ComputedHorizontalClass => new CssBuilder("tento-divider border-t border-slate-300 dark:border-slate-700 w-full my-4 shrink-0")
         .AddClass("border-dashed", Dashed)
+        .AddClass("border-solid", !Dashed)
         .AddClass(Class)
         .Build();
 
-    private string ComputedHorizontalWithTitleClass
-    {
-        get
-        {
-            var orientationClass = Orientation switch
-            {
-                DividerOrientation.Left => "after:w-full",
-                DividerOrientation.Right => "before:w-full",
-                _ => "before:w-1/2 after:w-1/2"
-            };
+    private string LeftSegmentClass => new CssBuilder("border-t border-slate-300 dark:border-slate-700")
+        .AddClass("border-dashed", Dashed)
+        .AddClass("border-solid", !Dashed)
+        .AddClass("w-8 shrink-0", Orientation == DividerOrientation.Left)
+        .AddClass("flex-1", Orientation != DividerOrientation.Left)
+        .Build();
 
-            return new CssBuilder("tento-divider flex items-center my-4")
-                .AddClass(orientationClass)
-                .AddClass(Class)
-                .Build();
-        }
-    }
+    private string RightSegmentClass => new CssBuilder("border-t border-slate-300 dark:border-slate-700")
+        .AddClass("border-dashed", Dashed)
+        .AddClass("border-solid", !Dashed)
+        .AddClass("w-8 shrink-0", Orientation == DividerOrientation.Right)
+        .AddClass("flex-1", Orientation != DividerOrientation.Right)
+        .Build();
+
+    private string ComputedHorizontalWithTitleClass => new CssBuilder("tento-divider flex items-center w-full my-4")
+        .AddClass("before:w-1/2 after:w-1/2", Orientation == DividerOrientation.Center)
+        .AddClass("after:w-full", Orientation == DividerOrientation.Left)
+        .AddClass("before:w-full", Orientation == DividerOrientation.Right)
+        .AddClass(Class)
+        .Build();
 }

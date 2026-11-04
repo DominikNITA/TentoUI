@@ -1,6 +1,6 @@
 @namespace TentoUI
 @inherits TentoComponentBase
-@attribute [Since("1.1.0")]
+@attribute [Since("1.0.0")]
 
 <div id="@ElementId"
      tabindex="0"
@@ -8,6 +8,8 @@
      style="@Style"
      aria-keyshortcuts="@Shortcut"
      @onkeydown="HandleKeyDown"
+     @onkeydown:preventDefault="PreventDefault"
+     @onkeydown:stopPropagation="true"
      @attributes="AdditionalAttributes">
     @if (ChildContent is not null)
     {
@@ -15,20 +17,40 @@
     }
     else
     {
-        <div class="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
-            <span>Press</span>
-            <Kbd Keys="@Shortcut" />
+        <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 rounded-xl border border-dashed transition-colors @(_triggerCount > 0 ? "border-primary-500 bg-primary-50/40 dark:bg-primary-950/30" : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900")">
+            <div class="flex items-center gap-2.5 text-xs text-slate-700 dark:text-slate-200">
+                <Icon Name="@IconNames.Sparkles" Size="15" Class="text-primary-500 shrink-0" />
+                <span>@(Description ?? "Click here to focus, then press")</span>
+                <Kbd Keys="@Shortcut" />
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+                @if (_triggerCount > 0)
+                {
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        Triggered @_triggerCount× @(_lastTriggeredTime is not null ? $"({_lastTriggeredTime})" : "")
+                    </span>
+                }
+                else
+                {
+                    <span class="text-[11px] text-slate-400">Waiting for shortcut...</span>
+                }
+            </div>
         </div>
     }
 </div>
 
 @code {
-    [Parameter] public string Shortcut { get; set; } = "Ctrl+K";
+    private int _triggerCount;
+    private string? _lastTriggeredTime;
+
+    [Parameter] public string Shortcut { get; set; } = "Alt+S";
+    [Parameter] public string? Description { get; set; }
     [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool PreventDefault { get; set; } = true;
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public EventCallback<string> OnTrigger { get; set; }
 
-    private string ComputedClass => new CssBuilder("outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 rounded-lg")
+    private string ComputedClass => new CssBuilder("outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl cursor-pointer")
         .AddClass(Class)
         .Build();
 
@@ -39,6 +61,8 @@
 
         if (MatchesShortcut(e, Shortcut))
         {
+            _triggerCount++;
+            _lastTriggeredTime = DateTime.Now.ToString("HH:mm:ss");
             if (OnTrigger.HasDelegate)
                 await OnTrigger.InvokeAsync(Shortcut);
         }

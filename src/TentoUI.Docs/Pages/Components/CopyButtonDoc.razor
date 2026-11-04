@@ -5,14 +5,16 @@
 
 <div class="max-w-5xl space-y-8">
     <div>
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
-            <span>New in v1.1.0</span>
-        </div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">CopyButton</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             One-click clipboard copy button with transient checkmark confirmation and accessible live status feedback.
         </p>
     </div>
+
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="CopyButton Interactive Playground"
+                     ComponentTag="CopyButton"
+                     Controls="@_playgroundControls" />
 
     <DemoCard Title="Button Variants &amp; Sizes" Description="CopyButton supports all standard button variants, sizes, and icon-only modes." Code="@_basicCode">
         <div class="flex flex-wrap items-center gap-3">
@@ -27,6 +29,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Text", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "dotnet add package TentoUI", DefaultValue = "" },
+        new() { Name = "CopyLabel", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Copy Command", DefaultValue = "Copy" },
+        new() { Name = "CopiedLabel", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Copied!", DefaultValue = "Copied!" },
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ButtonType.Default", DefaultValue = "ButtonType.Default", Options = ["ButtonType.Default", "ButtonType.Primary", "ButtonType.Dashed", "ButtonType.Text", "ButtonType.Link"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "ShowLabel", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _basicCode = """
         <CopyButton Text="dotnet add package TentoUI" CopyLabel="Copy CLI Command" />
         <CopyButton Text="https://tentoui.dev" Type="ButtonType.Primary" CopyLabel="Copy URL" />

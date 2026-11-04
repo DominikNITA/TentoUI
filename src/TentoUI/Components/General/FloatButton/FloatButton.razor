@@ -5,9 +5,10 @@
 {
     <a href="@Href"
        target="@Target"
+       title="@Tooltip"
        class="@ComputedClass"
        style="@Style"
-       aria-label="@(AriaLabel ?? Description ?? "Floating action")"
+       aria-label="@(AriaLabel ?? Tooltip ?? Description ?? "Floating action")"
        @attributes="AdditionalAttributes">
         @RenderContent()
     </a>
@@ -15,9 +16,10 @@
 else
 {
     <button type="button"
+            title="@Tooltip"
             class="@ComputedClass"
             style="@Style"
-            aria-label="@(AriaLabel ?? Description ?? "Floating action")"
+            aria-label="@(AriaLabel ?? Tooltip ?? Description ?? "Floating action")"
             @onclick="OnClick"
             @attributes="AdditionalAttributes">
         @RenderContent()
@@ -30,6 +32,7 @@ else
     [Parameter] public string? Icon { get; set; }
     [Parameter] public RenderFragment? IconTemplate { get; set; }
     [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Tooltip { get; set; }
     [Parameter] public string? Href { get; set; }
     [Parameter] public string? Target { get; set; }
     [Parameter] public string? AriaLabel { get; set; }

@@ -5,11 +5,11 @@
 
 <PageTitle>Theming &amp; Dark Theme Variants - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Theming &amp; Dark Theme Variants</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Configure custom color palettes, independent dark theme color variants, and component design tokens using TentoConfigProvider.
+            Configure custom color palettes, independent dark theme color variants, and component design tokens using <code class="font-mono">TentoConfigProvider</code> and <code class="font-mono">TentoTheme</code>.
         </p>
     </div>
 
@@ -26,79 +26,85 @@
             </div>
         </div>
 
-        @* Live Dynamic Render Box *@
-        <div class="p-8 rounded-xl border transition-all duration-200 space-y-4"
-             style="@GetDemoInlineStyle()">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h4 class="font-bold text-base text-slate-900 dark:text-white">Live Themed Component Sandbox</h4>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                        Active Mode: <strong class="uppercase font-mono">@(_isDark ? "Dark Theme" : "Light Theme")</strong>
-                    </p>
+        @* Live Dynamic Render Box wrapped in TentoConfigProvider *@
+        <TentoConfigProvider Theme="@BuildSandboxTheme()" DarkMode="@_isDark">
+            <div class="p-8 rounded-xl border transition-all duration-200 space-y-4"
+                 style="@GetDemoInlineStyle()">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h4 class="font-bold text-base" style="color: var(--tento-text-base);">Live Themed Component Sandbox</h4>
+                        <p class="text-xs" style="color: var(--tento-text-muted);">
+                            Active Mode: <strong class="uppercase font-mono">@(_isDark ? "Dark Theme" : "Light Theme")</strong>
+                        </p>
+                    </div>
+                    <Badge Count="3">
+                        <Tag Color="primary">@(_isDark ? "Dark Palette Active" : "Light Palette Active")</Tag>
+                    </Badge>
                 </div>
-                <Tag Color="blue">@(_isDark ? "Dark Palette Active" : "Light Palette Active")</Tag>
-            </div>
 
-            <div class="flex items-center gap-3 flex-wrap">
-                <Button Type="ButtonType.Primary">Primary Action</Button>
-                <Button Type="ButtonType.Default">Default Button</Button>
-                <Button Type="ButtonType.Primary" Danger="true">Danger Action</Button>
-            </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <Button Type="ButtonType.Primary">Primary Action</Button>
+                    <Button Type="ButtonType.Default">Default Button</Button>
+                    <Button Type="ButtonType.Dashed">Dashed Button</Button>
+                    <Button Type="ButtonType.Primary" Danger="true">Danger Action</Button>
+                </div>
 
-            <div class="p-4 rounded-lg border text-xs space-y-1 bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800">
-                <div class="font-mono text-[11px] text-slate-500">
-                    Active --tento-primary-500: <strong class="text-slate-800 dark:text-slate-200 font-bold">@(_isDark ? _darkPrimary : _lightPrimary)</strong>
-                </div>
-                <div class="font-mono text-[11px] text-slate-500">
-                    Active --tento-bg-app: <strong class="text-slate-800 dark:text-slate-200 font-bold">@(_isDark ? _darkAppBg : _lightAppBg)</strong>
+                <div class="p-4 rounded-lg border text-xs space-y-1"
+                     style="background-color: var(--tento-bg-surface); border-color: var(--tento-border-base); color: var(--tento-text-muted);">
+                    <div class="font-mono text-[11px]">
+                        Active --tento-primary-500: <strong style="color: var(--tento-primary-500);" class="font-bold">@(_isDark ? _darkPrimary : _lightPrimary)</strong>
+                    </div>
+                    <div class="font-mono text-[11px]">
+                        Active --tento-bg-app: <strong style="color: var(--tento-text-base);" class="font-bold">@(_isDark ? _darkAppBg : _lightAppBg)</strong>
+                    </div>
                 </div>
             </div>
-        </div>
+        </TentoConfigProvider>
 
         @* Knobs for Light and Dark Variant Colors *@
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
             <div>
                 <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Light Primary Color</label>
                 <div class="flex items-center gap-2">
-                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_lightPrimary" />
-                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_lightPrimary" />
+                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_lightPrimary" @bind:event="oninput" />
+                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_lightPrimary" @bind:event="oninput" />
                 </div>
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Dark Primary Color</label>
                 <div class="flex items-center gap-2">
-                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_darkPrimary" />
-                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_darkPrimary" />
+                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_darkPrimary" @bind:event="oninput" />
+                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_darkPrimary" @bind:event="oninput" />
                 </div>
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Light App Background</label>
                 <div class="flex items-center gap-2">
-                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_lightAppBg" />
-                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_lightAppBg" />
+                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_lightAppBg" @bind:event="oninput" />
+                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_lightAppBg" @bind:event="oninput" />
                 </div>
             </div>
 
             <div>
                 <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1">Dark App Background</label>
                 <div class="flex items-center gap-2">
-                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_darkAppBg" />
-                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_darkAppBg" />
+                    <input type="color" class="w-8 h-8 rounded border cursor-pointer shrink-0" @bind="_darkAppBg" @bind:event="oninput" />
+                    <input type="text" class="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1.5 font-mono text-xs" @bind="_darkAppBg" @bind:event="oninput" />
                 </div>
             </div>
         </div>
     </div>
 
+    @* Complete Theme Parameters Reference Table *@
+    <ApiTable Title="TentoTheme &amp; CSS Token Parameters" Properties="@_themeProps" />
+
     @* Code Example: Setting Dark Variants in C# *@
     <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
         <div class="flex items-center justify-between">
             <h3 class="text-base font-bold text-slate-900 dark:text-white">Setting Dark Theme Variants in C#</h3>
-            <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
-                    @onclick="CopyCSharpCodeAsync">
-                <Icon Name="@IconNames.Copy" Size="12" /> Copy C#
-            </button>
+            <CopyButton Text="@_csharpCode" CopyLabel="Copy C#" Size="ComponentSize.Small" />
         </div>
         <p class="text-xs text-slate-500 leading-relaxed">
             Configure distinct colors for dark mode using either the structured <code class="font-mono">theme.Dark.*</code> object or direct <code class="font-mono">theme.Dark*</code> properties:
@@ -108,26 +114,6 @@
         </div>
     </div>
 
-    @* Design.md Callout Card *@
-    <div class="p-6 rounded-xl border border-green-200 dark:border-green-900/60 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 flex items-center justify-between flex-wrap gap-4">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    AUTOMATIC CONVERSION
-                </span>
-                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Transform Design.md files into Configs</h3>
-            </div>
-            <p class="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
-                Have a design system specified in <code class="font-mono">Design.md</code> with dark mode colors? TentoUI can automatically parse and convert it into C# themes, CSS variables, and <code class="font-mono">appsettings.json</code>.
-            </p>
-        </div>
-        <a href="overview/design-converter"
-           class="px-3.5 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors">
-            <span>Open Design.md Converter</span>
-            <Icon Name="@IconNames.ArrowRight" Size="13" />
-        </a>
-    </div>
-
     @* Declarative TentoConfigProvider *@
     <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
         <h3 class="text-base font-bold text-slate-900 dark:text-white">Declarative Theme Provider</h3>
@@ -135,7 +121,7 @@
             Wrap your main layout or page in <code class="font-mono">&lt;TentoConfigProvider&gt;</code> to customize primary colors, dark variants, border radii, and dark mode toggling:
         </p>
         <div class="p-4 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
-            <pre><code>&lt;TentoConfigProvider Theme="@@_theme" DarkMode="@@_isDark"&gt;
+            <pre><code>&lt;TentoConfigProvider Theme="@@_theme" DarkMode="@@_isDark" ComponentSize="ComponentSize.Middle"&gt;
     &lt;div class="min-h-screen bg-slate-50 dark:bg-slate-950"&gt;
         @@Body
     &lt;/div&gt;
@@ -151,18 +137,54 @@
     private string _lightAppBg = "#f8fafc";
     private string _darkAppBg = "#0b0f19";
 
+    private TentoTheme BuildSandboxTheme() => new()
+    {
+        PrimaryColor = _lightPrimary,
+        PrimaryHoverColor = _lightPrimary,
+        AppBgColor = _lightAppBg,
+        DarkMode = _isDark,
+        Dark = new DarkThemeOptions
+        {
+            PrimaryColor = _darkPrimary,
+            PrimaryHoverColor = _darkPrimary,
+            AppBgColor = _darkAppBg
+        }
+    };
+
     private string GetDemoInlineStyle()
     {
-        var primary = _isDark ? _darkPrimary : _lightPrimary;
         var bg = _isDark ? _darkAppBg : _lightAppBg;
-        return $"--tento-primary-500: {primary}; --tento-primary-600: {primary}; background-color: {bg};";
+        var border = _isDark ? "#1e293b" : "#e2e8f0";
+        return $"background-color: {bg}; border-color: {border};";
     }
+
+    private readonly ApiTable.ApiProp[] _themeProps =
+    [
+        new("PrimaryColor / ColorPrimary", "Primary brand color in Light Mode (maps to --tento-primary-500 and generates shades 50..950).", "string", "\"#3b82f6\""),
+        new("PrimaryHoverColor", "Primary hover/active brand color in Light Mode (maps to --tento-primary-600).", "string", "\"#2563eb\""),
+        new("AppBgColor", "Application page background in Light Mode (--tento-bg-app).", "string", "\"#f8fafc\""),
+        new("SurfaceBgColor", "Card, modal, and surface container background (--tento-bg-surface).", "string", "\"#ffffff\""),
+        new("SubtleBgColor", "Subtle secondary background for headers and striped rows (--tento-bg-subtle).", "string", "\"#f1f5f9\""),
+        new("BaseTextColor", "Primary body typography color (--tento-text-base).", "string", "\"#0f172a\""),
+        new("MutedTextColor", "Secondary/muted caption and label color (--tento-text-muted).", "string", "\"#64748b\""),
+        new("BaseBorderColor", "Default component border and divider color (--tento-border-base).", "string", "\"#e2e8f0\""),
+        new("SuccessColor", "Semantic success state color (--tento-success).", "string", "\"#10b981\""),
+        new("WarningColor", "Semantic warning state color (--tento-warning).", "string", "\"#f59e0b\""),
+        new("ErrorColor", "Semantic error/danger state color (--tento-error).", "string", "\"#ef4444\""),
+        new("InfoColor", "Semantic informational state color (--tento-info).", "string", "\"#0ea5e9\""),
+        new("BorderRadius", "Default medium border radius token (--tento-radius-md).", "string", "\"0.375rem\""),
+        new("FontFamily", "Optional custom font-family stack (--tento-font-family).", "string?", "null"),
+        new("DarkMode", "Enables dark theme palette and adds .dark / data-theme='dark'.", "bool", "false"),
+        new("Dark (DarkThemeOptions)", "Nested dark mode color overrides: Dark.PrimaryColor, Dark.PrimaryHoverColor, Dark.AppBgColor, Dark.SurfaceBgColor, Dark.SubtleBgColor, Dark.BaseTextColor, Dark.MutedTextColor, Dark.BaseBorderColor, Dark.SuccessColor, Dark.WarningColor, Dark.ErrorColor, Dark.InfoColor.", "DarkThemeOptions", "new()"),
+        new("CustomTokens", "Dictionary of arbitrary custom CSS variables (e.g. '--my-token': '#123456') emitted on TentoConfigProvider.", "Dictionary<string, string>", "{}")
+    ];
 
     private const string _csharpCode = """
         var theme = new TentoTheme
         {
             // Light / Default Theme
             PrimaryColor = "#2563eb",
+            PrimaryHoverColor = "#1d4ed8",
             AppBgColor = "#f8fafc",
             SurfaceBgColor = "#ffffff",
             BaseTextColor = "#0f172a",
@@ -171,6 +193,7 @@
             Dark =
             {
                 PrimaryColor = "#38bdf8",     // Lighter, high-contrast tint in dark mode
+                PrimaryHoverColor = "#0ea5e9",
                 AppBgColor = "#0b0f19",       // Custom dark background
                 SurfaceBgColor = "#111827",   // Custom dark card/surface background
                 BaseTextColor = "#f9fafb",    // High-readability light text
@@ -180,17 +203,4 @@
 
         builder.Services.AddTentoUI(theme);
         """;
-
-    private async Task CopyCSharpCodeAsync()
-    {
-        try
-        {
-            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _csharpCode.Trim());
-            MessageService.Success("C# theme code copied to clipboard!");
-        }
-        catch
-        {
-            MessageService.Info("Copied!");
-        }
-    }
 }

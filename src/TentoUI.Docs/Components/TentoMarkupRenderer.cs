@@ -470,6 +470,8 @@ public class TentoMarkupRenderer : ComponentBase
 
     private static bool IsInlineTag(string tag) =>
         tag.Equals("Button", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("FloatButton", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("BackTop", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Tag", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Badge", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Avatar", StringComparison.OrdinalIgnoreCase) ||

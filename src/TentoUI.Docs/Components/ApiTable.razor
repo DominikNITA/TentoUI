@@ -3,24 +3,24 @@
 @using TentoUI.Docs.Services
 @using TentoUI.Extensibility
 
-<div class="mt-8 space-y-3">
+<div class="mt-8 space-y-4">
     @if (!string.IsNullOrEmpty(Title))
     {
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>@Title</span>
                 <span class="text-xs font-normal text-slate-400">API Reference</span>
-                @if (!string.IsNullOrEmpty(EffectiveComponentSince))
+                @if (!string.IsNullOrEmpty(EffectiveComponentSince) && EffectiveComponentSince != "1.0.0")
                 {
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                         Added in v@(EffectiveComponentSince)
                     </span>
                 }
             </h3>
-            @if (ComponentType != null)
+            @if (ResolvedComponentType != null)
             {
                 <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500">
-                    Source-verified: @ComponentApiRegistry.FormatTypeName(ComponentType)
+                    Source-verified: @ComponentApiRegistry.FormatTypeName(ResolvedComponentType)
                 </span>
             }
         </div>
@@ -43,7 +43,7 @@
                         <td class="py-3 px-4 font-mono font-semibold text-primary-600 dark:text-primary-400">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span>@prop.Property</span>
-                                @if (!string.IsNullOrEmpty(prop.Since))
+                                @if (!string.IsNullOrEmpty(prop.Since) && prop.Since != "1.0.0")
                                 {
                                     <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                         v@(prop.Since)
@@ -51,7 +51,7 @@
                                 }
                                 @if (!string.IsNullOrEmpty(prop.Deprecated))
                                 {
-                                    <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                    <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-emerald-800">
                                         @prop.Deprecated
                                     </span>
                                 }
@@ -82,6 +82,56 @@
             </tbody>
         </table>
     </div>
+
+    @if (ResolvedTypes.Count > 0)
+    {
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div class="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                    Enums &amp; Associated Types
+                </span>
+                <span class="text-[11px] text-slate-400">@ResolvedTypes.Count type(s)</span>
+            </div>
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50/50 dark:bg-slate-800/30 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 text-[11px]">
+                    <tr>
+                        <th class="py-2.5 px-4 w-48">Type</th>
+                        <th class="py-2.5 px-4 w-24">Kind</th>
+                        <th class="py-2.5 px-4">Values / Members</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                    @foreach (var t in ResolvedTypes)
+                    {
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                            <td class="py-2.5 px-4 font-mono font-semibold text-purple-600 dark:text-purple-400 align-top">
+                                <div>@t.TypeName</div>
+                                @if (!string.IsNullOrWhiteSpace(t.Description))
+                                {
+                                    <div class="font-sans font-normal text-[11px] text-slate-400 mt-0.5">@t.Description</div>
+                                }
+                            </td>
+                            <td class="py-2.5 px-4 align-top">
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold @(t.Kind == "Enum" ? "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800" : "bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800")">
+                                    @t.Kind
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-4 align-top">
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach (var member in t.Members)
+                                    {
+                                        <code class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-mono text-[11px] border border-slate-200/70 dark:border-slate-700">
+                                            @member
+                                        </code>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @code {
@@ -93,14 +143,26 @@
         string? Since = null,
         string? Deprecated = null);
 
+    public record ApiTypeInfo(
+        string TypeName,
+        string Kind,
+        IReadOnlyList<string> Members,
+        string? Description = null);
+
     [Parameter] public string? Title { get; set; }
     [Parameter] public Type? ComponentType { get; set; }
     [Parameter] public string? Since { get; set; }
     [Parameter] public IEnumerable<ApiProp>? Properties { get; set; }
 
+    private Type? ResolvedComponentType =>
+        ComponentApiRegistry.ResolveComponentType(ComponentType, Title);
+
     private string? EffectiveComponentSince =>
-        Since ?? ComponentType?.GetCustomAttribute<SinceAttribute>()?.Version;
+        Since ?? ResolvedComponentType?.GetCustomAttribute<SinceAttribute>()?.Version;
 
     private IReadOnlyList<ApiProp> ResolvedProperties =>
-        ComponentApiRegistry.GetProperties(ComponentType, Properties);
+        ComponentApiRegistry.GetProperties(ComponentType, Properties, Title);
+
+    private IReadOnlyList<ApiTypeInfo> ResolvedTypes =>
+        ComponentApiRegistry.GetReferencedTypes(ComponentType, ResolvedProperties, Title);
 }

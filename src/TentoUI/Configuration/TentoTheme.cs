@@ -87,7 +87,18 @@ public class TentoTheme
             var info = Dark.InfoColor ?? InfoColor;
 
             if (!string.IsNullOrWhiteSpace(primary))
+            {
+                sb.Append($"--tento-primary-50: color-mix(in srgb, {primary} 12%, white); ");
+                sb.Append($"--tento-primary-100: color-mix(in srgb, {primary} 22%, white); ");
+                sb.Append($"--tento-primary-200: color-mix(in srgb, {primary} 38%, white); ");
+                sb.Append($"--tento-primary-300: color-mix(in srgb, {primary} 58%, white); ");
+                sb.Append($"--tento-primary-400: color-mix(in srgb, {primary} 78%, white); ");
                 sb.Append($"--tento-primary-500: {primary}; ");
+                sb.Append($"--tento-primary-700: color-mix(in srgb, {primary} 78%, black); ");
+                sb.Append($"--tento-primary-800: color-mix(in srgb, {primary} 62%, black); ");
+                sb.Append($"--tento-primary-900: color-mix(in srgb, {primary} 48%, black); ");
+                sb.Append($"--tento-primary-950: color-mix(in srgb, {primary} 30%, black); ");
+            }
             if (!string.IsNullOrWhiteSpace(primaryHover))
                 sb.Append($"--tento-primary-600: {primaryHover}; ");
             if (!string.IsNullOrWhiteSpace(success))
@@ -109,7 +120,18 @@ public class TentoTheme
             sb.Append($"--tento-border-base: {BaseBorderColor}; ");
 
             if (!string.IsNullOrWhiteSpace(PrimaryColor))
+            {
+                sb.Append($"--tento-primary-50: color-mix(in srgb, {PrimaryColor} 10%, white); ");
+                sb.Append($"--tento-primary-100: color-mix(in srgb, {PrimaryColor} 20%, white); ");
+                sb.Append($"--tento-primary-200: color-mix(in srgb, {PrimaryColor} 35%, white); ");
+                sb.Append($"--tento-primary-300: color-mix(in srgb, {PrimaryColor} 55%, white); ");
+                sb.Append($"--tento-primary-400: color-mix(in srgb, {PrimaryColor} 75%, white); ");
                 sb.Append($"--tento-primary-500: {PrimaryColor}; ");
+                sb.Append($"--tento-primary-700: color-mix(in srgb, {PrimaryColor} 78%, black); ");
+                sb.Append($"--tento-primary-800: color-mix(in srgb, {PrimaryColor} 62%, black); ");
+                sb.Append($"--tento-primary-900: color-mix(in srgb, {PrimaryColor} 48%, black); ");
+                sb.Append($"--tento-primary-950: color-mix(in srgb, {PrimaryColor} 30%, black); ");
+            }
             if (!string.IsNullOrWhiteSpace(PrimaryHoverColor))
                 sb.Append($"--tento-primary-600: {PrimaryHoverColor}; ");
             if (!string.IsNullOrWhiteSpace(SuccessColor))

@@ -1,5 +1,6 @@
 @page "/components/card"
 @namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
 
 <PageTitle>Card - TentoUI</PageTitle>
 
@@ -7,109 +8,219 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Card</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A flexible container for displaying structured content with title headers, action bars, and cover images.
+            A flexible container for displaying structured content with title headers, action bars, cover images, and KPI metric presentations.
         </p>
     </div>
 
     @* Example 1: Basic Card *@
     <DemoCard Title="Basic Card" Description="Card with title header, right-aligned extra action, and body content." Code="@_basicCode">
         <div class="max-w-md">
-            <Card Title="Default Size Card">
+            <Card Title="Project Overview">
                 <Extra>
-                    <a href="javascript:void(0)" class="text-xs text-primary-500 font-semibold hover:underline">More</a>
+                    <a href="javascript:void(0)" class="text-xs text-primary-500 font-semibold hover:underline">View details</a>
                 </Extra>
                 <ChildContent>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Card content line 1</p>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Card content line 2</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        TentoUI is an enterprise-grade Blazor design system powered by Tailwind CSS v4 and .NET 10.
+                    </p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <Tag Color="blue">v1.0.0</Tag>
+                        <Tag Color="green">Production Ready</Tag>
+                    </div>
                 </ChildContent>
             </Card>
         </div>
     </DemoCard>
 
-    @* Example 2: Hoverable Card *@
-    <DemoCard Title="Hoverable Card" Description="Hoverable cards elevate with a smooth shadow effect on mouse enter." Code="@_hoverCode">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-            <Card Title="Cloud Instance" Hoverable="true">
-                <p class="text-sm text-slate-600 dark:text-slate-400">CPU: 8 vCPU</p>
-                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Memory: 32 GB RAM</p>
-            </Card>
-            <Card Title="Database Cluster" Hoverable="true">
-                <p class="text-sm text-slate-600 dark:text-slate-400">Engine: PostgreSQL 16</p>
-                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Storage: 500 GB NVMe</p>
-            </Card>
-        </div>
-    </DemoCard>
-
-    @* Example 3: Card with Actions *@
-    <DemoCard Title="Card with Actions" Description="Includes interactive bottom action toolbar." Code="@_actionsCode">
+    @* Example 2: Card with Actions (Beautified) *@
+    <DemoCard Title="Card with Action Toolbar"
+              Description="Includes clean bottom action buttons distributed evenly across the card with visual dividers."
+              Code="@_actionsCode">
         <div class="max-w-md">
-            <Card Title="Project Management">
+            <Card Title="Sprint 42 Deliverables">
+                <Extra>
+                    <Tag Color="gold">In Progress</Tag>
+                </Extra>
                 <ChildContent>
                     <p class="text-sm text-slate-600 dark:text-slate-400">
-                        Sprint 42 deliverables are ready for review and deployment to staging.
+                        Feature branches merged: 14 PRs reviewed, all automated Testcontainers integration suites passing.
                     </p>
+                    <div class="mt-4 flex items-center justify-between text-xs text-slate-400 font-mono">
+                        <span>Due Date: Friday 18:00</span>
+                        <span>Assignee: Team Alpha</span>
+                    </div>
                 </ChildContent>
                 <Actions>
-                    <div class="flex items-center justify-around w-full py-2 text-xs font-medium text-slate-600 dark:text-slate-300">
-                        <button class="hover:text-primary-600">Edit</button>
-                        <span class="text-slate-200 dark:text-slate-700">|</span>
-                        <button class="hover:text-primary-600">Share</button>
-                        <span class="text-slate-200 dark:text-slate-700">|</span>
-                        <button class="hover:text-primary-600">Archive</button>
-                    </div>
+                    <button type="button"
+                            class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                            @onclick="@(() => MessageService.Info("Editing sprint details"))">
+                        <Icon Name="@IconNames.Edit" Size="14" />
+                        <span>Edit</span>
+                    </button>
+                    <button type="button"
+                            class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                            @onclick="@(() => MessageService.Success("Copied shareable link"))">
+                        <Icon Name="@IconNames.Upload" Size="14" />
+                        <span>Share</span>
+                    </button>
+                    <button type="button"
+                            class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                            @onclick="@(() => MessageService.Warning("Archived card"))">
+                        <Icon Name="@IconNames.Trash2" Size="14" />
+                        <span>Archive</span>
+                    </button>
                 </Actions>
             </Card>
         </div>
     </DemoCard>
 
-    <ApiTable Title="Card Properties" Properties="@_props" />
+    @* Example 3: KPI Metrics Card *@
+    <DemoCard Title="Metric KPI &amp; Statistics Card"
+              Description="Modern dashboard card featuring primary metric value, trend indicator, and icon badge."
+              Code="@_kpiCode">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+            <Card Hoverable="true">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Revenue</span>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">$142,850</div>
+                        <div class="flex items-center gap-1.5 mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            <Icon Name="@IconNames.ArrowUp" Size="12" />
+                            <span>+14.2% from last month</span>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950/60 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
+                        <Icon Name="@IconNames.Sparkles" Size="20" />
+                    </div>
+                </div>
+            </Card>
+
+            <Card Hoverable="true">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Deployments</span>
+                        <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">1,429</div>
+                        <div class="flex items-center gap-1.5 mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            <Icon Name="@IconNames.CheckCircle" Size="12" />
+                            <span>99.98% uptime SLA</span>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <Icon Name="@IconNames.Settings" Size="20" />
+                    </div>
+                </div>
+            </Card>
+        </div>
+    </DemoCard>
+
+    @* Example 4: Cover Image Card *@
+    <DemoCard Title="Cover Media &amp; Product Card"
+              Description="Visual showcase card with a media banner cover and compact badges."
+              Code="@_coverCode">
+        <div class="max-w-xs">
+            <Card Hoverable="true">
+                <Cover>
+                    <div class="h-36 bg-linear-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white">
+                        <div class="text-center">
+                            <Icon Name="@IconNames.Folder" Size="36" Class="mx-auto opacity-90 mb-1" />
+                            <span class="text-xs font-semibold tracking-wide uppercase">Design Assets</span>
+                        </div>
+                    </div>
+                </Cover>
+                <ChildContent>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-sm">TentoUI Component Kit</h4>
+                        <span class="text-xs font-semibold text-primary-600">$49</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Vector icons, token palettes, and production-ready Blazor WebAssembly components.
+                    </p>
+                </ChildContent>
+                <Actions>
+                    <button type="button"
+                            class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-xs font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-colors"
+                            @onclick="@(() => MessageService.Success("Added to collection"))">
+                        <Icon Name="@IconNames.Check" Size="14" />
+                        <span>Collect</span>
+                    </button>
+                    <button type="button"
+                            class="flex-1 py-2.5 flex items-center justify-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                            @onclick="@(() => MessageService.Info("Opening preview"))">
+                        <Icon Name="@IconNames.ExternalLink" Size="14" />
+                        <span>Preview</span>
+                    </button>
+                </Actions>
+            </Card>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Card Properties" ComponentType="@typeof(Card)" />
 </div>
 
 @code {
     private const string _basicCode = """
-        <Card Title="Default Size Card">
+        <Card Title="Project Overview">
             <Extra>
-                <a href="#" class="text-xs text-primary-500 font-semibold">More</a>
+                <a href="#" class="text-xs text-primary-500 font-semibold">View details</a>
             </Extra>
             <ChildContent>
-                <p class="text-sm text-slate-600">Card content line 1</p>
-                <p class="text-sm text-slate-600">Card content line 2</p>
+                <p class="text-sm text-slate-600">TentoUI is an enterprise-grade Blazor design system.</p>
             </ChildContent>
-        </Card>
-        """;
-
-    private const string _hoverCode = """
-        <Card Title="Cloud Instance" Hoverable="true">
-            <p class="text-sm text-slate-600">CPU: 8 vCPU</p>
-            <p class="text-sm text-slate-600">Memory: 32 GB RAM</p>
         </Card>
         """;
 
     private const string _actionsCode = """
-        <Card Title="Project Management">
+        <Card Title="Sprint 42 Deliverables">
             <ChildContent>
-                <p class="text-sm text-slate-600">Sprint 42 deliverables are ready for review.</p>
+                <p class="text-sm text-slate-600">14 PRs reviewed, all integration tests passing.</p>
             </ChildContent>
             <Actions>
-                <div class="flex justify-around py-2 text-xs">
-                    <button>Edit</button>
-                    <button>Share</button>
-                </div>
+                <button class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium hover:text-primary-600">
+                    <Icon Name="@IconNames.Edit" Size="14" />
+                    <span>Edit</span>
+                </button>
+                <button class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium hover:text-primary-600">
+                    <Icon Name="@IconNames.Upload" Size="14" />
+                    <span>Share</span>
+                </button>
+                <button class="flex-1 py-3 flex items-center justify-center gap-2 text-xs font-medium hover:text-rose-600">
+                    <Icon Name="@IconNames.Trash2" Size="14" />
+                    <span>Archive</span>
+                </button>
             </Actions>
         </Card>
         """;
 
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("Title", "Title text displayed in card header.", "string?", "null"),
-        new("TitleTemplate", "Custom template for card title header.", "RenderFragment?", "null"),
-        new("Extra", "Right-aligned content in the card header.", "RenderFragment?", "null"),
-        new("Cover", "Cover image rendered at the top of the card.", "RenderFragment?", "null"),
-        new("Actions", "Action buttons bar rendered at the bottom.", "RenderFragment?", "null"),
-        new("Bordered", "Whether to show border around the card.", "bool", "true"),
-        new("Hoverable", "Lift up on hover with elevated drop shadow.", "bool", "false"),
-        new("Loading", "Shows skeleton loading state inside card.", "bool", "false"),
-        new("Size", "Size scale of card (Small or Middle).", "ComponentSize?", "null"),
-        new("ChildContent", "Card body content.", "RenderFragment?", "null")
-    ];
+    private const string _kpiCode = """
+        <Card Hoverable="true">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase">Total Revenue</span>
+                    <div class="text-2xl font-bold mt-1">$142,850</div>
+                    <span class="text-xs font-semibold text-emerald-600">+14.2% from last month</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
+                    <Icon Name="@IconNames.Sparkles" Size="20" />
+                </div>
+            </div>
+        </Card>
+        """;
+
+    private const string _coverCode = """
+        <Card Hoverable="true">
+            <Cover>
+                <div class="h-36 bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    Design Assets
+                </div>
+            </Cover>
+            <ChildContent>
+                <h4 class="font-bold text-sm">TentoUI Component Kit</h4>
+                <p class="text-xs text-slate-500 mt-1">Vector icons and design tokens.</p>
+            </ChildContent>
+            <Actions>
+                <button class="flex-1 py-2.5 text-xs text-primary-600 font-medium">Collect</button>
+                <button class="flex-1 py-2.5 text-xs text-slate-600 font-medium">Preview</button>
+            </Actions>
+        </Card>
+        """;
 }

@@ -809,13 +809,16 @@ public class TentoMarkupRenderer : ComponentBase
         {
             if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
             {
-                var dummyData = new System.Collections.Generic.List<object>
-                {
-                    new { Id = 101, Name = "Alice Johnson", Department = "Engineering", Salary = 135000m, Active = true },
-                    new { Id = 102, Name = "Bob Smith", Department = "Product", Salary = 115000m, Active = true },
-                    new { Id = 103, Name = "Charlie Davis", Department = "Engineering", Salary = 145000m, Active = false },
-                    new { Id = 104, Name = "Diana Prince", Department = "Marketing", Salary = 95000m, Active = true }
-                };
+                var rowCount = compType == typeof(DataGridVirtual<object>) ? 1000 : 10;
+                var dummyData = Enumerable.Range(1, rowCount)
+                    .Select(i => (object)new
+                    {
+                        Id = 1000 + i,
+                        Name = $"Engineer #{i:D3}",
+                        Department = (i % 3 == 0) ? "Product" : (i % 2 == 0 ? "Design" : "Engineering"),
+                        Salary = 90000m + (i * 150m),
+                        Active = i % 5 != 0
+                    }).ToList();
                 builder.AddAttribute(seq++, "DataSource", (IEnumerable<object>)dummyData);
             }
         }

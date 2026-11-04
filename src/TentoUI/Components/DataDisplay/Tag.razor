@@ -50,15 +50,21 @@
 
     private string ComputeTagClass()
     {
-        var resolvedColor = Color ?? TagColor?.ToString();
+        var resolvedColor = (Color ?? TagColor?.ToString())?.Trim();
 
-        var colorClass = resolvedColor switch
+        var colorClass = resolvedColor?.ToLowerInvariant() switch
         {
-            "Success" => "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
-            "Warning" => "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
-            "Error" => "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800",
-            "Info" => "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800",
-            "Primary" => "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+            "success" or "green" => "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800",
+            "warning" or "gold" => "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800",
+            "error" or "red" => "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800",
+            "info" or "sky" => "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800",
+            "primary" or "blue" => "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800",
+            "purple" => "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800",
+            "cyan" => "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800",
+            "magenta" or "pink" => "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-950/40 dark:text-fuchsia-300 dark:border-fuchsia-800",
+            "orange" or "volcano" => "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800",
+            "lime" => "bg-lime-50 text-lime-700 border-lime-200 dark:bg-lime-950/40 dark:text-lime-300 dark:border-lime-800",
+            "geekblue" => "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800",
             _ => "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700"
         };
 
@@ -72,10 +78,14 @@
     {
         if (!string.IsNullOrEmpty(Color) && Color.StartsWith("#"))
         {
+            var hex = Color.Length == 4
+                ? $"#{Color[1]}{Color[1]}{Color[2]}{Color[2]}{Color[3]}{Color[3]}"
+                : Color;
+
             return new StyleBuilder()
-                .AddStyle("background-color", $"{Color}15")
-                .AddStyle("color", Color)
-                .AddStyle("border-color", $"{Color}40")
+                .AddStyle("background-color", $"{hex}1a")
+                .AddStyle("color", hex)
+                .AddStyle("border-color", $"{hex}4d")
                 .AddStyle(Style)
                 .Build();
         }

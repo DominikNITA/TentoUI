@@ -8,7 +8,7 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Table</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A flexible, typed table component supporting manual column declarations, custom cell templates, per-column sorting, multi-mode filtering, and built-in pagination.
+            A flexible, typed table component supporting manual column declarations, custom cell templates, per-column sorting, multi-mode filtering, row selection, backend loading, and built-in pagination.
         </p>
     </div>
 
@@ -68,7 +68,7 @@
                              Property="@(e => e.Active)"
                              Sortable="true"
                              Context="emp">
-                    <Tag Color="@(emp.Active ? "success" : "default")">
+                    <Tag Color="@(emp.Active ? "green" : "red")">
                         @(emp.Active ? "Active" : "Archived")
                     </Tag>
                 </TableColumn>
@@ -76,7 +76,93 @@
         </div>
     </DemoCard>
 
-    @* Demo 2: Simple Minimalist Table *@
+    @* Demo 2: Async Backend Data Fetching Simulation *@
+    <DemoCard Title="Simulated Backend Data Fetching &amp; Loading"
+              Description="Demonstrates spinner overlay while asynchronously fetching data from a remote endpoint with simulated latency."
+              Code="@_asyncCode">
+        <div class="w-full space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <Button Type="ButtonType.Primary"
+                            Size="ComponentSize.Small"
+                            Icon="@IconNames.RefreshCw"
+                            Loading="@_isLoadingBackend"
+                            OnClick="FetchBackendDataAsync">
+                        Refresh from Backend
+                    </Button>
+                    <span class="text-xs text-slate-500">
+                        @if (_isLoadingBackend)
+                        {
+                            <span class="text-primary-600 animate-pulse">Fetching records from API...</span>
+                        }
+                        else
+                        {
+                            <span>@_remoteData.Count live records fetched</span>
+                        }
+                    </span>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">Last updated: @_lastFetched.ToString("HH:mm:ss")</span>
+            </div>
+
+            <Table TItem="ServerOrder"
+                   DataSource="@_remoteData"
+                   Loading="@_isLoadingBackend"
+                   Bordered="true"
+                   Striped="true"
+                   Size="ComponentSize.Small">
+                <TableColumn TItem="ServerOrder" Title="Order #" Property="@(o => o.OrderNumber)" Sortable="true" />
+                <TableColumn TItem="ServerOrder" Title="Customer" Property="@(o => o.Customer)" Sortable="true" />
+                <TableColumn TItem="ServerOrder" Title="Items" Property="@(o => o.ItemCount)" Align="Align.Right" />
+                <TableColumn TItem="ServerOrder" Title="Total" Property="@(o => o.TotalAmount)" Format="C2" Align="Align.Right" Sortable="true" />
+                <TableColumn TItem="ServerOrder" Title="Status" Property="@(o => o.Status)" Context="o">
+                    <Tag Color="@(o.Status == "Completed" ? "green" : (o.Status == "Pending" ? "gold" : "blue"))">
+                        @o.Status
+                    </Tag>
+                </TableColumn>
+            </Table>
+        </div>
+    </DemoCard>
+
+    @* Demo 3: Multi-Row Selection *@
+    <DemoCard Title="Checkbox Multi-Row Selection"
+              Description="Select multiple table rows using checkbox controls with batch actions."
+              Code="@_selectionCode">
+        <div class="w-full space-y-3">
+            <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-xs">
+                <div>
+                    Selected: <strong class="text-primary-600 font-mono">@_selectedEmployees.Count</strong> of @_employees.Count records
+                </div>
+                <div class="flex items-center gap-2">
+                    <Button Type="ButtonType.Default"
+                            Size="ComponentSize.Small"
+                            Disabled="@(_selectedEmployees.Count == 0)"
+                            OnClick="@(() => MessageService.Success($"Exported {_selectedEmployees.Count} record(s)"))">
+                        Export Selected
+                    </Button>
+                    <Button Type="ButtonType.Primary"
+                            Danger="true"
+                            Size="ComponentSize.Small"
+                            Disabled="@(_selectedEmployees.Count == 0)"
+                            OnClick="@(() => MessageService.Warning($"Batch deleted {_selectedEmployees.Count} record(s)"))">
+                        Delete Selected
+                    </Button>
+                </div>
+            </div>
+
+            <Table TItem="EmployeeRecord"
+                   DataSource="@_employees.Take(5).ToList()"
+                   RowSelection="RowSelectionMode.Multiple"
+                   @bind-SelectedRows="_selectedEmployees"
+                   Bordered="true">
+                <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" Width="80px" />
+                <TableColumn TItem="EmployeeRecord" Title="Name" Property="@(e => e.Name)" />
+                <TableColumn TItem="EmployeeRecord" Title="Department" Property="@(e => e.Department)" />
+                <TableColumn TItem="EmployeeRecord" Title="Salary" Property="@(e => e.Salary)" Format="C0" Align="Align.Right" />
+            </Table>
+        </div>
+    </DemoCard>
+
+    @* Demo 4: Simple Minimalist Table *@
     <DemoCard Title="Simple Table"
               Description="Compact table layout with auto-generated headers, striped rows, and default alignment."
               Code="@_simpleTableCode">
@@ -85,22 +171,27 @@
                    DataSource="@_simpleEmployees"
                    Bordered="true"
                    Size="ComponentSize.Small">
-                <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" />
+                <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" Width="80px" />
                 <TableColumn TItem="EmployeeRecord" Title="Full Name" Property="@(e => e.Name)" />
                 <TableColumn TItem="EmployeeRecord" Title="Department" Property="@(e => e.Department)" />
             </Table>
         </div>
     </DemoCard>
 
-    <ApiTable Title="Table<TItem> Properties" Properties="@_tableProps" />
-    <ApiTable Title="TableColumn<TItem> Properties" Properties="@_columnProps" />
+    <ApiTable Title="Table<TItem> Properties" ComponentType="@typeof(Table<object>)" />
+    <ApiTable Title="TableColumn<TItem> Properties" ComponentType="@typeof(TableColumn<object>)" />
 </div>
 
 @code {
     private int _pageIndex = 1;
     private int _pageSize = 5;
+    private bool _isLoadingBackend;
+    private DateTime _lastFetched = DateTime.Now;
 
     public record EmployeeRecord(int Id, string Name, string Department, decimal Salary, bool Active);
+    public record ServerOrder(string OrderNumber, string Customer, int ItemCount, decimal TotalAmount, string Status);
+
+    private HashSet<EmployeeRecord> _selectedEmployees = new();
 
     private readonly ColumnFilterOption[] _deptOptions =
     [
@@ -110,25 +201,14 @@
         new("Sales", "Sales")
     ];
 
-    private readonly System.Collections.Generic.List<EmployeeRecord> _simpleEmployees =
+    private readonly List<EmployeeRecord> _simpleEmployees =
     [
         new(101, "Alice Johnson", "Engineering", 135000m, true),
         new(102, "Bob Smith", "Product", 115000m, true),
         new(103, "Charlie Davis", "Engineering", 145000m, false)
     ];
 
-    private const string _simpleTableCode = """
-        <Table TItem="EmployeeRecord"
-               DataSource="@employees"
-               Bordered="true"
-               Size="ComponentSize.Small">
-            <TableColumn TItem="EmployeeRecord" Title="ID" Property="@(e => e.Id)" />
-            <TableColumn TItem="EmployeeRecord" Title="Full Name" Property="@(e => e.Name)" />
-            <TableColumn TItem="EmployeeRecord" Title="Department" Property="@(e => e.Department)" />
-        </Table>
-        """;
-
-    private readonly System.Collections.Generic.List<EmployeeRecord> _employees =
+    private readonly List<EmployeeRecord> _employees =
     [
         new(101, "Alice Johnson", "Engineering", 135000m, true),
         new(102, "Bob Smith", "Product", 115000m, true),
@@ -136,91 +216,93 @@
         new(104, "Diana Prince", "Marketing", 95000m, true),
         new(105, "Evan Wright", "Engineering", 120000m, true),
         new(106, "Fiona Green", "Sales", 88000m, true),
-        new(107, "George Clark", "Sales", 92000m, false)
+        new(107, "George Clark", "Sales", 92000m, false),
+        new(108, "Hannah Montana", "Marketing", 104000m, true),
+        new(109, "Ian Malcolm", "Product", 132000m, true),
+        new(110, "Julia Roberts", "Engineering", 148000m, true),
+        new(111, "Kevin Bacon", "Sales", 91000m, false),
+        new(112, "Laura Croft", "Engineering", 138000m, true)
     ];
 
-    private const string _customTableCode = @"<Table TItem=""EmployeeRecord""
-       DataSource=""@_employees""
-       @bind-PageIndex=""_pageIndex""
-       @bind-PageSize=""_pageSize""
-       ShowSizeChanger=""true""
-       ShowQuickJumper=""true""
-       Striped=""true"">
-
-    <TableColumn TItem=""EmployeeRecord""
-                 Title=""Member""
-                 Property=""@(e => e.Name)""
-                 Sortable=""true""
-                 Filterable=""true""
-                 FilterPlaceholder=""Search name...""
-                 Context=""emp"">
-        <div class=""flex items-center gap-2.5"">
-            <Avatar Text=""@emp.Name[..1]"" Size=""ComponentSize.Small"" />
-            <div>
-                <span class=""font-semibold text-slate-900 dark:text-white block"">@emp.Name</span>
-                <span class=""text-[11px] text-slate-400"">ID: #@emp.Id</span>
-            </div>
-        </div>
-    </TableColumn>
-
-    <TableColumn TItem=""EmployeeRecord""
-                 Title=""Department""
-                 Property=""@(e => e.Department)""
-                 Sortable=""true""
-                 Filterable=""true""
-                 FilterMode=""ColumnFilterMode.Select""
-                 FilterOptions=""@_deptOptions"" />
-
-    <TableColumn TItem=""EmployeeRecord""
-                 Title=""Compensation""
-                 Property=""@(e => e.Salary)""
-                 Format=""C0""
-                 Align=""Align.Right""
-                 Sortable=""true""
-                 Filterable=""true""
-                 FilterPlaceholder=""Min salary...""
-                 FilterPredicate=""@((emp, q) => decimal.TryParse(q, out var min) && emp.Salary >= min)"" />
-
-    <TableColumn TItem=""EmployeeRecord""
-                 Title=""Status""
-                 Property=""@(e => e.Active)""
-                 Sortable=""true""
-                 Context=""emp"">
-        <Tag Color=""@(emp.Active ? TagColor.Success : TagColor.Default)"">
-            @(emp.Active ? ""Active"" : ""Archived"")
-        </Tag>
-    </TableColumn>
-</Table>";
-
-    private readonly ApiTable.ApiProp[] _tableProps =
+    private List<ServerOrder> _remoteData =
     [
-        new("DataSource", "The source data collection for table rows.", "IEnumerable<TItem>?", "null"),
-        new("PageIndex", "Current active page index (1-based, bindable via @bind-PageIndex).", "int", "1"),
-        new("PageSize", "Number of records displayed per page (bindable via @bind-PageSize).", "int", "10"),
-        new("Total", "Total count of records. If omitted, calculated from DataSource.", "int?", "null"),
-        new("Loading", "Displays a spinner overlay while data is being fetched.", "bool", "false"),
-        new("Bordered", "Whether to show outer and cell grid borders.", "bool", "false"),
-        new("Striped", "Whether alternating rows have zebra background shading.", "bool", "false"),
-        new("Size", "Table padding density (Small, Middle, Large).", "ComponentSize?", "null"),
-        new("ShowSizeChanger", "Display page size changer dropdown in pagination bar.", "bool", "false"),
-        new("ShowQuickJumper", "Display direct page number jump input.", "bool", "false"),
-        new("Columns", "TableColumn child declarations.", "RenderFragment?", "null"),
-        new("EmptyText", "Custom text shown when no rows match.", "string?", "'No Data'")
+        new("ORD-701", "Acme Corp", 3, 450.00m, "Completed"),
+        new("ORD-702", "Globex Inc", 12, 1890.50m, "Pending"),
+        new("ORD-703", "Soylent Corp", 1, 99.00m, "Completed"),
+        new("ORD-704", "Initech", 5, 620.25m, "Processing"),
+        new("ORD-705", "Umbrella LLC", 8, 1200.00m, "Completed")
     ];
 
-    private readonly ApiTable.ApiProp[] _columnProps =
-    [
-        new("Title", "Column header title text.", "string?", "null"),
-        new("Property", "Property accessor expression for sorting and auto-display.", "Expression<Func<TItem, object>>?", "null"),
-        new("Sortable", "Whether column can be sorted ascending/descending by clicking header.", "bool", "false"),
-        new("Filterable", "Whether column displays an interactive filter popup in header.", "bool", "false"),
-        new("FilterMode", "Filter popup interface: Text search or Select dropdown.", "ColumnFilterMode", "ColumnFilterMode.Text"),
-        new("FilterOptions", "Options array for Select filter mode.", "IEnumerable<ColumnFilterOption>?", "null"),
-        new("FilterPredicate", "Custom filter predicate lambda (item, query) => bool.", "Func<TItem, string, bool>?", "null"),
-        new("FilterPlaceholder", "Placeholder text for text filter input.", "string?", "'Filter...'"),
-        new("Format", "Standard .NET format string (e.g. 'C0', 'N2', 'yyyy-MM-dd').", "string?", "null"),
-        new("Align", "Text alignment: Left, Center, or Right.", "ColumnAlign", "ColumnAlign.Left"),
-        new("Width", "Fixed column width (e.g. '120px', '25%').", "string?", "null"),
-        new("ChildContent", "Custom cell template (accessible via Context='item').", "RenderFragment<TItem>?", "null")
-    ];
+    private async Task FetchBackendDataAsync()
+    {
+        _isLoadingBackend = true;
+        StateHasChanged();
+
+        await Task.Delay(600); // Simulate backend network latency
+
+        var rng = new Random();
+        _remoteData =
+        [
+            new($"ORD-{rng.Next(100, 999)}", "Stark Industries", rng.Next(1, 10), rng.Next(150, 3500), "Completed"),
+            new($"ORD-{rng.Next(100, 999)}", "Wayne Enterprises", rng.Next(2, 20), rng.Next(800, 7500), "Processing"),
+            new($"ORD-{rng.Next(100, 999)}", "Cyberdyne Systems", rng.Next(1, 5), rng.Next(90, 1200), "Pending"),
+            new($"ORD-{rng.Next(100, 999)}", "Massive Dynamic", rng.Next(3, 15), rng.Next(400, 4200), "Completed")
+        ];
+
+        _lastFetched = DateTime.Now;
+        _isLoadingBackend = false;
+        MessageService.Success("Refreshed latest dataset from server");
+    }
+
+    private const string _customTableCode = """
+        <Table TItem="EmployeeRecord"
+               DataSource="@employees"
+               @bind-PageIndex="pageIndex"
+               @bind-PageSize="pageSize"
+               ShowSizeChanger="true"
+               ShowQuickJumper="true"
+               Striped="true">
+            <TableColumn Title="Member" Property="e => e.Name" Sortable="true" Filterable="true" />
+            <TableColumn Title="Department" Property="e => e.Department" Sortable="true" Filterable="true" />
+            <TableColumn Title="Compensation" Property="e => e.Salary" Format="C0" Align="Align.Right" Sortable="true" />
+            <TableColumn Title="Status" Property="e => e.Active" Sortable="true" />
+        </Table>
+        """;
+
+    private const string _asyncCode = """
+        <Table TItem="ServerOrder"
+               DataSource="@remoteData"
+               Loading="@isLoading"
+               Bordered="true"
+               Striped="true">
+            <TableColumn Title="Order #" Property="o => o.OrderNumber" Sortable="true" />
+            <TableColumn Title="Customer" Property="o => o.Customer" Sortable="true" />
+            <TableColumn Title="Items" Property="o => o.ItemCount" Align="Align.Right" />
+            <TableColumn Title="Total" Property="o => o.TotalAmount" Format="C2" Align="Align.Right" />
+            <TableColumn Title="Status" Property="o => o.Status" />
+        </Table>
+        """;
+
+    private const string _selectionCode = """
+        <Table TItem="EmployeeRecord"
+               DataSource="@employees"
+               RowSelection="RowSelectionMode.Multiple"
+               @bind-SelectedRows="selectedEmployees"
+               Bordered="true">
+            <TableColumn Title="ID" Property="e => e.Id" Width="80px" />
+            <TableColumn Title="Name" Property="e => e.Name" />
+            <TableColumn Title="Department" Property="e => e.Department" />
+        </Table>
+        """;
+
+    private const string _simpleTableCode = """
+        <Table TItem="EmployeeRecord"
+               DataSource="@employees"
+               Bordered="true"
+               Size="ComponentSize.Small">
+            <TableColumn Title="ID" Property="e => e.Id" Width="80px" />
+            <TableColumn Title="Full Name" Property="e => e.Name" />
+            <TableColumn Title="Department" Property="e => e.Department" />
+        </Table>
+        """;
 }

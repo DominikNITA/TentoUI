@@ -8,15 +8,16 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Calendar</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Container displaying data in calendar form, supporting month navigation, day selection, and cell templates.
+            Container displaying date data in month grid form, supporting month navigation, day selection, event markers, custom cell templates, and ContextMenu integration.
         </p>
     </div>
 
     @* Example 1: Basic Calendar *@
     <DemoCard Title="Basic Calendar" Description="Full month grid view with two-way date binding and date click notification." Code="@_basicCode">
         <div class="max-w-xl mx-auto space-y-3">
-            <div class="text-xs text-slate-500 dark:text-slate-400">
-                Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedDate.ToString("yyyy-MM-dd")</strong>
+            <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+                <span>Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedDate.ToString("yyyy-MM-dd")</strong></span>
+                <span class="text-[11px] text-slate-400">Click any day to select</span>
             </div>
             <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <Calendar @bind-Value="_selectedDate"
@@ -25,35 +26,126 @@
         </div>
     </DemoCard>
 
-    @* Example 2: Static Month Display *@
-    <DemoCard Title="Stand-alone Month View" Description="Calendar container embedded cleanly inside dashboard cards." Code="@_embeddedCode">
-        <div class="max-w-md mx-auto">
+    @* Example 2: Event Schedule with Custom Cell Template *@
+    <DemoCard Title="Schedule &amp; Event Badges"
+              Description="Render event badges, meetings, and deadlines inside date cells using DateCellTemplate."
+              Code="@_eventsCode">
+        <div class="max-w-2xl mx-auto space-y-3">
             <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                <Calendar Value="@DateOnly.FromDateTime(DateTime.Today)" />
+                <Calendar Value="@_scheduleMonth">
+                    <DateCellTemplate Context="date">
+                        @if (_events.TryGetValue(date, out var items))
+                        {
+                            <div class="flex flex-col gap-1 mt-1">
+                                @foreach (var item in items)
+                                {
+                                    <span class="truncate px-1.5 py-0.5 rounded text-[10px] font-medium leading-tight @item.BadgeClass"
+                                          title="@item.Title">
+                                        @item.Title
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </DateCellTemplate>
+                </Calendar>
             </div>
         </div>
     </DemoCard>
 
-    <ApiTable Title="Calendar Properties" Properties="@_props" />
+    @* Example 3: ContextMenu Integration *@
+    <DemoCard Title="ContextMenu Integration"
+              Description="Right-click anywhere on the calendar container to trigger contextual date actions."
+              Code="@_contextCode">
+        <div class="max-w-xl mx-auto space-y-3">
+            <p class="text-xs text-slate-500">Right-click on the calendar below to open the contextual action menu.</p>
+            <ContextMenu Id="calendar-ctx" Items="@_calendarMenuItems" OnItemClick="HandleCalendarAction">
+                <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                    <Calendar @bind-Value="_contextDate" />
+                </div>
+            </ContextMenu>
+            <div class="text-xs text-slate-400 font-mono">Focused Date for Actions: @_contextDate.ToString("yyyy-MM-dd")</div>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Calendar Properties" ComponentType="@typeof(Calendar)" />
 </div>
 
 @code {
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
+    private DateOnly _contextDate = DateOnly.FromDateTime(DateTime.Today);
+    private DateOnly _scheduleMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+
+    private sealed record CalendarEvent(string Title, string BadgeClass);
+
+    private readonly Dictionary<DateOnly, List<CalendarEvent>> _events = new()
+    {
+        [DateOnly.FromDateTime(DateTime.Today)] =
+        [
+            new("Sprint Planning", "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"),
+            new("Team Standup", "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300")
+        ],
+        [DateOnly.FromDateTime(DateTime.Today.AddDays(2))] =
+        [
+            new("Release v1.0.1", "bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300")
+        ],
+        [DateOnly.FromDateTime(DateTime.Today.AddDays(5))] =
+        [
+            new("Client Demo", "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"),
+            new("Code Freeze", "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300")
+        ]
+    };
+
+    private readonly DropdownMenuItem[] _calendarMenuItems =
+    [
+        new("new-event", "Add New Event", Icon: IconNames.Plus),
+        new("agenda", "View Daily Agenda", Icon: IconNames.Calendar),
+        new("holiday", "Mark as Company Holiday", Icon: IconNames.Sparkles),
+        new("copy-date", "Copy Date", Icon: IconNames.Copy)
+    ];
+
+    private void HandleCalendarAction(string key)
+    {
+        switch (key)
+        {
+            case "new-event":
+                MessageService.Success($"Created new event for {_contextDate:yyyy-MM-dd}");
+                break;
+            case "agenda":
+                MessageService.Info($"Displaying agenda items for {_contextDate:yyyy-MM-dd}");
+                break;
+            case "holiday":
+                MessageService.Warning($"Marked {_contextDate:yyyy-MM-dd} as company holiday");
+                break;
+            case "copy-date":
+                MessageService.Success($"Copied date {_contextDate:yyyy-MM-dd} to clipboard");
+                break;
+        }
+    }
 
     private const string _basicCode = """
         <Calendar @bind-Value="selectedDate"
                   OnSelect="@(d => MessageService.Info($"Selected: {d:yyyy-MM-dd}"))" />
         """;
 
-    private const string _embeddedCode = """
-        <Calendar Value="@DateOnly.FromDateTime(DateTime.Today)" />
+    private const string _eventsCode = """
+        <Calendar Value="@today">
+            <DateCellTemplate Context="date">
+                @if (events.TryGetValue(date, out var items))
+                {
+                    @foreach (var item in items)
+                    {
+                        <span class="truncate px-1.5 py-0.5 rounded text-[10px] bg-blue-100 text-blue-700">
+                            @item.Title
+                        </span>
+                    }
+                }
+            </DateCellTemplate>
+        </Calendar>
         """;
 
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("Value", "Current selected date (bindable via @bind-Value).", "DateOnly", "DateTime.Today"),
-        new("Mode", "Display mode: Month or Year.", "CalendarMode", "CalendarMode.Month"),
-        new("OnSelect", "Callback triggered when a day cell is clicked.", "EventCallback<DateOnly>", "null"),
-        new("DateCellTemplate", "Custom cell renderer template.", "RenderFragment<DateOnly>?", "null")
-    ];
+    private const string _contextCode = """
+        <ContextMenu Id="calendar-ctx" Items="@calendarMenuItems" OnItemClick="HandleCalendarAction">
+            <Calendar @bind-Value="contextDate" />
+        </ContextMenu>
+        """;
 }

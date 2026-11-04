@@ -1,41 +1,74 @@
 @page "/components/tree"
 @namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
 
-<PageTitle>Tree &amp; Segmented - TentoUI</PageTitle>
+<PageTitle>Tree - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tree &amp; Segmented</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Tree</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Hierarchical tree view structures and segmented toggle switchers.
+            Hierarchical tree view component supporting expandable directories, multiple checkbox selection, real-time search filtering, connecting guide lines, and custom node selection.
         </p>
     </div>
 
-    <DemoCard Title="Segmented Switch" Description="Linear segmented control for switching views or modes." Code="@_segCode">
-        <div class="space-y-3">
-            <Segmented TValue="string"
-                       @bind-Value="_selectedView"
-                       Options="@_viewOptions" />
-            <p class="text-xs text-slate-500">Active View: <strong class="text-slate-900 dark:text-white">@_selectedView</strong></p>
+    @* Example 1: Basic Expandable Tree *@
+    <DemoCard Title="Basic Tree &amp; Node Selection"
+              Description="Expandable tree structure with click-to-select and active highlight."
+              Code="@_basicCode">
+        <div class="max-w-sm p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <Tree Data="@_treeData"
+                  @bind-SelectedKey="_selectedKey"
+                  OnSelect="@(key => MessageService.Info($"Selected node: {key}"))" />
+            <div class="text-xs text-slate-400 font-mono pt-2 border-t border-slate-100 dark:border-slate-800">
+                Active Selection: <strong class="text-primary-600 font-semibold">@(_selectedKey ?? "None")</strong>
+            </div>
         </div>
     </DemoCard>
 
-    <DemoCard Title="Checkable Tree" Description="Expandable file/folder tree with checkboxes and search." Code="@_treeCode">
-        <div class="w-72 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-            <Tree Data="@_treeData" Checkable="true" ShowSearch="true" />
+    @* Example 2: Checkable Tree *@
+    <DemoCard Title="Checkable Tree with Batch Selection"
+              Description="Includes checkbox controls for selecting single or multiple branches and leaves."
+              Code="@_checkableCode">
+        <div class="max-w-sm p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <Tree Data="@_roleTreeData"
+                  Checkable="true"
+                  @bind-CheckedKeys="_checkedKeys" />
+            <div class="text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
+                Checked permissions: <strong class="text-primary-600 font-mono">@_checkedKeys.Count</strong> item(s) selected
+                <div class="text-[11px] text-slate-400 font-mono mt-1 truncate">@string.Join(", ", _checkedKeys)</div>
+            </div>
         </div>
     </DemoCard>
+
+    @* Example 3: Searchable Tree *@
+    <DemoCard Title="Searchable Tree with Auto-Expand"
+              Description="Search input dynamically filters matching nodes and automatically expands ancestor folders."
+              Code="@_searchCode">
+        <div class="max-w-sm p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Tree Data="@_codebaseTree"
+                  ShowSearch="true"
+                  SearchPlaceholder="Type to filter files (e.g. razor, css)..." />
+        </div>
+    </DemoCard>
+
+    @* Example 4: Tree with Connecting Lines *@
+    <DemoCard Title="Connecting Guide Lines"
+              Description="Renders visual dashed tree connectors between parent branches and child nodes."
+              Code="@_linesCode">
+        <div class="max-w-sm p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <Tree Data="@_orgChartTree" ShowLine="true" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Tree Properties" ComponentType="@typeof(Tree)" />
+    <ApiTable Title="TreeNode Properties" ComponentType="@typeof(TreeNode)" />
+    <ApiTable Title="TreeDataNode Properties" ComponentType="@typeof(TreeDataNode)" />
 </div>
 
 @code {
-    private string _selectedView = "kanban";
-
-    private readonly SegmentedOption<string>[] _viewOptions =
-    [
-        new("kanban", "Kanban Board"),
-        new("list", "List View"),
-        new("gantt", "Timeline Gantt")
-    ];
+    private string? _selectedKey = "src/Components/Table.razor";
+    private HashSet<string> _checkedKeys = ["users.read", "roles.read"];
 
     private readonly TreeDataNode[] _treeData =
     [
@@ -44,16 +77,90 @@
             new("src/Components", "Components",
             [
                 new("src/Components/Table.razor", "Table.razor", isLeaf: true),
-                new("src/Components/Button.razor", "Button.razor", isLeaf: true)
+                new("src/Components/Button.razor", "Button.razor", isLeaf: true),
+                new("src/Components/Card.razor", "Card.razor", isLeaf: true),
+                new("src/Components/Tree.razor", "Tree.razor", isLeaf: true)
             ]),
             new("src/TentoUI.csproj", "TentoUI.csproj", isLeaf: true)
+        ]),
+        new("docs", "docs",
+        [
+            new("docs/getting-started.md", "getting-started.md", isLeaf: true),
+            new("docs/customization.md", "customization.md", isLeaf: true)
         ]),
         new("README.md", "README.md", isLeaf: true)
     ];
 
-    private const string _segCode = @"<Segmented TValue=""string""
-           @bind-Value=""_selectedView""
-           Options=""@_viewOptions"" />";
+    private readonly TreeDataNode[] _roleTreeData =
+    [
+        new("admin", "System Administration",
+        [
+            new("users.read", "Read Users", isLeaf: true),
+            new("users.write", "Write & Invite Users", isLeaf: true),
+            new("roles.read", "View Roles & Permissions", isLeaf: true)
+        ]),
+        new("billing", "Finance & Invoicing",
+        [
+            new("invoices.read", "View Invoices", isLeaf: true),
+            new("invoices.pay", "Process Payments", isLeaf: true)
+        ])
+    ];
 
-    private const string _treeCode = @"<Tree Data=""@_treeData"" Checkable=""true"" ShowSearch=""true"" />";
+    private readonly TreeDataNode[] _codebaseTree =
+    [
+        new("TentoUI", "TentoUI Core",
+        [
+            new("Components", "Components",
+            [
+                new("Input.razor", "Input.razor", isLeaf: true),
+                new("Select.razor", "Select.razor", isLeaf: true),
+                new("Modal.razor", "Modal.razor", isLeaf: true),
+                new("Tabs.razor", "Tabs.razor", isLeaf: true)
+            ]),
+            new("Styles", "Styles",
+            [
+                new("theme.css", "theme.css", isLeaf: true),
+                new("tokens.json", "tokens.json", isLeaf: true)
+            ])
+        ])
+    ];
+
+    private readonly TreeDataNode[] _orgChartTree =
+    [
+        new("ceo", "Executive Office",
+        [
+            new("cto", "Engineering Division",
+            [
+                new("frontend-lead", "Frontend Architecture", isLeaf: true),
+                new("backend-lead", "Cloud Infrastructure", isLeaf: true)
+            ]),
+            new("cpo", "Product & Design",
+            [
+                new("design-system", "Design Tokens", isLeaf: true),
+                new("user-research", "User Testing", isLeaf: true)
+            ])
+        ])
+    ];
+
+    private const string _basicCode = """
+        <Tree Data="@treeData"
+              @bind-SelectedKey="selectedKey"
+              OnSelect="@(key => MessageService.Info($"Selected: {key}"))" />
+        """;
+
+    private const string _checkableCode = """
+        <Tree Data="@roleTreeData"
+              Checkable="true"
+              @bind-CheckedKeys="checkedKeys" />
+        """;
+
+    private const string _searchCode = """
+        <Tree Data="@codebaseTree"
+              ShowSearch="true"
+              SearchPlaceholder="Filter files..." />
+        """;
+
+    private const string _linesCode = """
+        <Tree Data="@orgChartTree" ShowLine="true" />
+        """;
 }

@@ -453,11 +453,11 @@ public class TentoMarkupRenderer : ComponentBase
         if (val.StartsWith("@\"") && val.EndsWith("\""))
             return val[2..^1];
 
-        // Handle IconNames.X -> x
-        if (val.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
-            val = val[10..].ToLowerInvariant();
-        else if (val.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
-            val = val[11..].ToLowerInvariant();
+        // Handle IconNames.X -> resolve to canonical icon name
+        if (val.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
+            val = LucideIcons.ResolveIconName(val[11..]);
+        else if (val.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
+            val = LucideIcons.ResolveIconName(val[10..]);
 
         return val;
     }
@@ -799,14 +799,7 @@ public class TentoMarkupRenderer : ComponentBase
         {
             if (node.Attributes.TryGetValue("Name", out var nameVal))
             {
-                var cleanName = nameVal;
-                if (cleanName.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
-                    cleanName = cleanName[10..];
-                if (cleanName.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
-                    cleanName = cleanName[11..];
-                if (cleanName.StartsWith("@"))
-                    cleanName = cleanName[1..];
-                builder.AddAttribute(seq++, "Name", cleanName.ToLowerInvariant());
+                builder.AddAttribute(seq++, "Name", LucideIcons.ResolveIconName(nameVal));
             }
         }
         // 10. Table / DataGridVirtual dummy rows for typed data visualization
@@ -882,6 +875,21 @@ public class TentoMarkupRenderer : ComponentBase
                     new DropdownMenuItem("delete", "Delete Permanently", IconNames.Trash2, Danger: true, DividerBefore: true)
                 };
                 builder.AddAttribute(seq++, "Items", (IEnumerable<DropdownMenuItem>)sampleMenu);
+            }
+        }
+        // 12b. Dropdown default items when Overlay is not provided
+        else if (compType == typeof(Dropdown))
+        {
+            var hasOverlayChild = node.Children.Any(c => c.TagName.Equals("Overlay", StringComparison.OrdinalIgnoreCase));
+            if (!hasOverlayChild && (!node.Attributes.ContainsKey("Items") || node.Attributes["Items"].StartsWith("@")))
+            {
+                var sampleDropdown = new[]
+                {
+                    new DropdownMenuItem("profile", "Profile Settings", IconNames.User, Shortcut: "Ctrl+P"),
+                    new DropdownMenuItem("billing", "Workspace Settings", IconNames.Settings),
+                    new DropdownMenuItem("logout", "Delete Account", IconNames.Trash2, Danger: true, DividerBefore: true)
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<DropdownMenuItem>)sampleDropdown);
             }
         }
         // 13. KanbanBoard sample cards

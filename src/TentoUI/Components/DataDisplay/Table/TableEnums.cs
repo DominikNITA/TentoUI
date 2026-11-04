@@ -28,7 +28,7 @@ public enum ColumnFilterMode
     Custom
 }
 
-[Since("1.1.0")]
+[Since("1.0.0")]
 public enum ColumnFixed
 {
     None,
@@ -84,8 +84,8 @@ public abstract class ColumnBase<TItem> : ComponentBase, IDisposable
     [Parameter] public string? HeaderClass { get; set; }
     [Parameter] public string? CellClass { get; set; }
     [Parameter] public string? Format { get; set; }
-    [Parameter, Since("1.1.0")] public ColumnFixed Fixed { get; set; } = ColumnFixed.None;
-    [Parameter, Since("1.1.0")] public bool Resizable { get; set; }
+    [Parameter, Since("1.0.0")] public ColumnFixed Fixed { get; set; } = ColumnFixed.None;
+    [Parameter, Since("1.0.0")] public bool Resizable { get; set; }
 
     // Custom cell display
     [Parameter] public RenderFragment<TItem>? CellTemplate { get; set; }
@@ -215,7 +215,7 @@ public class PropertyColumn<TItem, TProp> : ColumnBase<TItem>
 public class TemplateColumn<TItem> : ColumnBase<TItem>
 {
     [Parameter] public Func<TItem, object?>? Property { get; set; }
-    [Parameter, Since("1.1.0")] public string? Field { get; set; }
+    [Parameter, Since("1.0.0")] public string? Field { get; set; }
 
     public override object? GetValue(TItem item)
     {

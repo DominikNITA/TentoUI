@@ -7,15 +7,115 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Flex</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Ant Design v5 declarative flexbox layout container supporting horizontal/vertical direction, justification, alignment, wrapping, and preset or custom pixel gaps.
+            CSS Flexbox layout container supporting horizontal/vertical orientation, main/cross-axis alignment, preset or custom gaps, and multi-line wrapping.
         </p>
     </div>
 
-    <DemoCard Title="Horizontal &amp; Justified Flex" Description="Use Gap, Justify, and Align to compose responsive toolbars and card rows." Code="@_flexCode">
-        <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Gap="FlexGap.Middle" Class="p-4 rounded-lg bg-slate-100 dark:bg-slate-800">
-            <Button Type="ButtonType.Primary">Primary Action</Button>
-            <Button>Secondary</Button>
-            <Tag TagColor="TagColor.Success">Ready</Tag>
+    <PropsPlayground Title="Flex Interactive Playground"
+                     ComponentTag="Flex"
+                     Controls="@_playgroundControls" />
+
+    <!-- 1. Direction: Horizontal vs Vertical -->
+    <DemoCard Title="Horizontal &amp; Vertical Direction"
+              Description="Use Vertical='false' (default) for row layouts and Vertical='true' for stacked column layouts."
+              Code="@_directionCode">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <div class="text-xs font-semibold text-slate-500">Horizontal (Vertical="false")</div>
+                <Flex Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-600 text-white text-xs font-bold">Item 1</div>
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-500 text-white text-xs font-bold">Item 2</div>
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-400 text-white text-xs font-bold">Item 3</div>
+                </Flex>
+            </div>
+            <div class="space-y-2">
+                <div class="text-xs font-semibold text-slate-500">Vertical (Vertical="true")</div>
+                <Flex Vertical="true" Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold">Row A</div>
+                    <div class="px-4 py-2 rounded-lg bg-indigo-500 text-white text-xs font-bold">Row B</div>
+                    <div class="px-4 py-2 rounded-lg bg-indigo-400 text-white text-xs font-bold">Row C</div>
+                </Flex>
+            </div>
+        </div>
+    </DemoCard>
+
+    <!-- 2. Justify & Align Combinations -->
+    <DemoCard Title="Justification &amp; Cross-Axis Alignment"
+              Description="Combine Justify (Start, Center, End, SpaceBetween, SpaceAround, SpaceEvenly) and Align (Start, Center, End, Stretch, Baseline) to position items."
+              Code="@_justifyCode">
+        <div class="space-y-4">
+            <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                    <Badge Status="BadgeStatus.Processing" />
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100">SpaceBetween + Align.Center</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Button Size="ComponentSize.Small">Cancel</Button>
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Deploy</Button>
+                </div>
+            </Flex>
+
+            <Flex Justify="FlexJustify.Center" Align="FlexAlign.Center" Gap="FlexGap.Middle" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div class="px-3 py-1.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered A</div>
+                <div class="px-3 py-2.5 rounded bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered B (Taller)</div>
+                <div class="px-3 py-1.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered C</div>
+            </Flex>
+
+            <Flex Justify="FlexJustify.SpaceEvenly" Align="FlexAlign.Center" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <Tag Color="TagColor.Blue">SpaceEvenly 1</Tag>
+                <Tag Color="TagColor.Purple">SpaceEvenly 2</Tag>
+                <Tag Color="TagColor.Cyan">SpaceEvenly 3</Tag>
+            </Flex>
+        </div>
+    </DemoCard>
+
+    <!-- 3. Gap Presets & Custom GapSize -->
+    <DemoCard Title="Gap Presets &amp; Custom GapSize"
+              Description="Use Gap (Small = 8px, Middle = 16px, Large = 24px) or specify any CSS GapSize (e.g. '28px', '1.75rem')."
+              Code="@_gapCode">
+        <div class="space-y-4">
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Gap="FlexGap.Small" (8px)</div>
+                <Flex Gap="FlexGap.Small">
+                    <Button Size="ComponentSize.Small">Small 1</Button>
+                    <Button Size="ComponentSize.Small">Small 2</Button>
+                    <Button Size="ComponentSize.Small">Small 3</Button>
+                </Flex>
+            </div>
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Gap="FlexGap.Large" (24px)</div>
+                <Flex Gap="FlexGap.Large">
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 1</Button>
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 2</Button>
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 3</Button>
+                </Flex>
+            </div>
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Custom GapSize="32" (32px)</div>
+                <Flex GapSize="32">
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                </Flex>
+            </div>
+        </div>
+    </DemoCard>
+
+    <!-- 4. Wrapping -->
+    <DemoCard Title="Multi-Line Flex Wrapping"
+              Description="Set Wrap='FlexWrap.Wrap' so items automatically flow onto new lines when horizontal space runs out."
+              Code="@_wrapCode">
+        <Flex Wrap="FlexWrap.Wrap" Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <Tag Color="TagColor.Blue">Blazor .NET 10</Tag>
+            <Tag Color="TagColor.Purple">Tailwind CSS v4</Tag>
+            <Tag Color="TagColor.Green">Zero JS Layout</Tag>
+            <Tag Color="TagColor.Orange">WCAG 2.1 AA</Tag>
+            <Tag Color="TagColor.Cyan">Design Tokens</Tag>
+            <Tag Color="TagColor.Red">Dark Mode Ready</Tag>
+            <Tag Color="TagColor.Blue">Responsive Flex</Tag>
+            <Tag Color="TagColor.Purple">Enterprise UI</Tag>
+            <Tag Color="TagColor.Green">SSR Compatible</Tag>
+            <Tag Color="TagColor.Orange">Interactive</Tag>
         </Flex>
     </DemoCard>
 
@@ -23,11 +123,106 @@
 </div>
 
 @code {
-    private const string _flexCode = """
-        <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Gap="FlexGap.Middle">
-            <Button Type="ButtonType.Primary">Primary Action</Button>
-            <Button>Secondary</Button>
-            <Tag TagColor="TagColor.Success">Ready</Tag>
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Vertical", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Justify", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FlexJustify.Start", DefaultValue = "FlexJustify.Start", Options = ["FlexJustify.Start", "FlexJustify.Center", "FlexJustify.End", "FlexJustify.SpaceBetween", "FlexJustify.SpaceAround", "FlexJustify.SpaceEvenly"] },
+        new() { Name = "Align", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FlexAlign.Center", DefaultValue = "FlexAlign.Stretch", Options = ["FlexAlign.Start", "FlexAlign.Center", "FlexAlign.End", "FlexAlign.Stretch", "FlexAlign.Baseline"] },
+        new() { Name = "Gap", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FlexGap.Middle", DefaultValue = "FlexGap.None", Options = ["FlexGap.None", "FlexGap.Small", "FlexGap.Middle", "FlexGap.Large"] },
+        new() { Name = "Wrap", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "FlexWrap.Wrap", DefaultValue = "FlexWrap.NoWrap", Options = ["FlexWrap.NoWrap", "FlexWrap.Wrap", "FlexWrap.WrapReverse"] },
+        new() { Name = "Class", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "w-full p-4 rounded-xl bg-slate-100 dark:bg-slate-800/60", DefaultValue = "" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button Type=\"ButtonType.Primary\">One</Button><Button>Two</Button><Button Type=\"ButtonType.Dashed\">Three</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
+    private const string _directionCode = """
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+                <div class="text-xs font-semibold text-slate-500">Horizontal (Vertical="false")</div>
+                <Flex Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-600 text-white text-xs font-bold">Item 1</div>
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-500 text-white text-xs font-bold">Item 2</div>
+                    <div class="px-4 py-2.5 rounded-lg bg-primary-400 text-white text-xs font-bold">Item 3</div>
+                </Flex>
+            </div>
+            <div class="space-y-2">
+                <div class="text-xs font-semibold text-slate-500">Vertical (Vertical="true")</div>
+                <Flex Vertical="true" Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold">Row A</div>
+                    <div class="px-4 py-2 rounded-lg bg-indigo-500 text-white text-xs font-bold">Row B</div>
+                    <div class="px-4 py-2 rounded-lg bg-indigo-400 text-white text-xs font-bold">Row C</div>
+                </Flex>
+            </div>
+        </div>
+        """;
+
+    private const string _justifyCode = """
+        <div class="space-y-4">
+            <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2">
+                    <Badge Status="BadgeStatus.Processing" />
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100">SpaceBetween + Align.Center</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Button Size="ComponentSize.Small">Cancel</Button>
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Deploy</Button>
+                </div>
+            </Flex>
+
+            <Flex Justify="FlexJustify.Center" Align="FlexAlign.Center" Gap="FlexGap.Middle" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <div class="px-3 py-1.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered A</div>
+                <div class="px-3 py-2.5 rounded bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered B (Taller)</div>
+                <div class="px-3 py-1.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">Centered C</div>
+            </Flex>
+
+            <Flex Justify="FlexJustify.SpaceEvenly" Align="FlexAlign.Center" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <Tag Color="TagColor.Blue">SpaceEvenly 1</Tag>
+                <Tag Color="TagColor.Purple">SpaceEvenly 2</Tag>
+                <Tag Color="TagColor.Cyan">SpaceEvenly 3</Tag>
+            </Flex>
+        </div>
+        """;
+
+    private const string _gapCode = """
+        <div class="space-y-4">
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Gap="FlexGap.Small" (8px)</div>
+                <Flex Gap="FlexGap.Small">
+                    <Button Size="ComponentSize.Small">Small 1</Button>
+                    <Button Size="ComponentSize.Small">Small 2</Button>
+                    <Button Size="ComponentSize.Small">Small 3</Button>
+                </Flex>
+            </div>
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Gap="FlexGap.Large" (24px)</div>
+                <Flex Gap="FlexGap.Large">
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 1</Button>
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 2</Button>
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary">Large 3</Button>
+                </Flex>
+            </div>
+            <div>
+                <div class="text-xs text-slate-400 mb-1.5">Custom GapSize="32" (32px)</div>
+                <Flex GapSize="32">
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                    <Tag Color="TagColor.Green">Custom 32px</Tag>
+                </Flex>
+            </div>
+        </div>
+        """;
+
+    private const string _wrapCode = """
+        <Flex Wrap="FlexWrap.Wrap" Gap="FlexGap.Small" Class="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            <Tag Color="TagColor.Blue">Blazor .NET 10</Tag>
+            <Tag Color="TagColor.Purple">Tailwind CSS v4</Tag>
+            <Tag Color="TagColor.Green">Zero JS Layout</Tag>
+            <Tag Color="TagColor.Orange">WCAG 2.1 AA</Tag>
+            <Tag Color="TagColor.Cyan">Design Tokens</Tag>
+            <Tag Color="TagColor.Red">Dark Mode Ready</Tag>
+            <Tag Color="TagColor.Blue">Responsive Flex</Tag>
+            <Tag Color="TagColor.Purple">Enterprise UI</Tag>
+            <Tag Color="TagColor.Green">SSR Compatible</Tag>
+            <Tag Color="TagColor.Orange">Interactive</Tag>
         </Flex>
         """;
 }

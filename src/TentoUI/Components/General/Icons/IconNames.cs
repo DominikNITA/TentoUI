@@ -1,5 +1,8 @@
+using TentoUI.Extensibility;
+
 namespace TentoUI;
 
+[Since("1.0.1")]
 public enum IconSpinSpeed
 {
     Slow,

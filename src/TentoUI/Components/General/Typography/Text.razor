@@ -60,12 +60,12 @@
     [Parameter] public bool Underline { get; set; }
     [Parameter] public bool Delete { get; set; }
     [Parameter] public bool Disabled { get; set; }
-    [Parameter, Since("1.1.0")] public bool Copyable { get; set; }
-    [Parameter, Since("1.1.0")] public string? CopyText { get; set; }
-    [Parameter, Since("1.1.0")] public EventCallback<string> OnCopy { get; set; }
-    [Parameter, Since("1.1.0")] public bool Editable { get; set; }
-    [Parameter, Since("1.1.0")] public string? EditText { get; set; }
-    [Parameter, Since("1.1.0")] public EventCallback<string> EditTextChanged { get; set; }
+    [Parameter, Since("1.0.0")] public bool Copyable { get; set; }
+    [Parameter, Since("1.0.0")] public string? CopyText { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<string> OnCopy { get; set; }
+    [Parameter, Since("1.0.0")] public bool Editable { get; set; }
+    [Parameter, Since("1.0.0")] public string? EditText { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<string> EditTextChanged { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private bool _copied;

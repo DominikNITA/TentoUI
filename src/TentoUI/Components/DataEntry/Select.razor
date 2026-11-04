@@ -32,7 +32,7 @@
                         @if (!IsDisabled)
                         {
                             <button type="button" class="hover:text-red-500 p-0.5 ml-1" @onclick:stopPropagation="true" @onclick="@(() => RemoveItem(item))">
-                                <Icon Name="IconNames.X" Size="10" />
+                                <Icon Name="@IconNames.X" Size="10" />
                             </button>
                         }
                     </span>
@@ -60,7 +60,7 @@
                     &times;
                 </span>
             }
-            <Icon Name="IconNames.ChevronDown" Size="14" Class="@($"text-slate-400 transition-transform {_arrowTransformClass}")" />
+            <Icon Name="@IconNames.ChevronDown" Size="14" Class="@($"text-slate-400 transition-transform {_arrowTransformClass}")" />
         </div>
     </div>
 
@@ -118,7 +118,7 @@
                         </span>
                         @if (isSelected)
                         {
-                            <Icon Name="IconNames.Check" Size="14" Class="text-primary-500 ml-2 shrink-0" />
+                            <Icon Name="@IconNames.Check" Size="14" Class="text-primary-500 ml-2 shrink-0" />
                         }
                     </div>
                 }

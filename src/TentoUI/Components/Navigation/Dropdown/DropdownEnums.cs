@@ -22,4 +22,5 @@ public record DropdownMenuItem(
     string? Icon = null,
     bool Disabled = false,
     bool Danger = false,
-    bool DividerBefore = false);
+    bool DividerBefore = false,
+    string? Shortcut = null);

@@ -14,19 +14,19 @@
             @switch (msg.Type)
             {
                 case MessageType.Success:
-                    <Icon Name="IconNames.CheckCircle" Class="text-emerald-500" Size="18" />
+                    <Icon Name="@IconNames.CheckCircle" Class="text-emerald-500" Size="18" />
                     break;
                 case MessageType.Warning:
-                    <Icon Name="IconNames.AlertTriangle" Class="text-amber-500" Size="18" />
+                    <Icon Name="@IconNames.AlertTriangle" Class="text-amber-500" Size="18" />
                     break;
                 case MessageType.Error:
-                    <Icon Name="IconNames.XCircle" Class="text-rose-500" Size="18" />
+                    <Icon Name="@IconNames.XCircle" Class="text-rose-500" Size="18" />
                     break;
                 case MessageType.Loading:
-                    <Icon Name="IconNames.Loader2" Class="text-primary-500 animate-spin" Size="18" />
+                    <Icon Name="@IconNames.Loader2" Class="text-primary-500 animate-spin" Size="18" />
                     break;
                 default:
-                    <Icon Name="IconNames.Info" Class="text-sky-500" Size="18" />
+                    <Icon Name="@IconNames.Info" Class="text-sky-500" Size="18" />
                     break;
             }
 

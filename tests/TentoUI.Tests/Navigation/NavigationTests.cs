@@ -124,4 +124,35 @@ public class NavigationTests : TestContext
 
         cut.FindAll("[role='tab']")[1].GetAttribute("aria-selected").Should().Be("true");
     }
+
+    [Fact]
+    public void Tabs_MultipleRendersWithDynamicContent_DoesNotCauseInfiniteLoop()
+    {
+        var counter = 0;
+        var cut = RenderComponent<Tabs>(parameters => parameters
+            .Add(p => p.ActiveKey, "1")
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<TabPane>(0);
+                builder.AddAttribute(1, "Key", "1");
+                builder.AddAttribute(2, "Tab", "Tab One");
+                builder.AddAttribute(3, "ChildContent", (RenderFragment)(b => b.AddContent(4, $"Render count: {++counter}")));
+                builder.CloseComponent();
+
+                builder.OpenComponent<TabPane>(5);
+                builder.AddAttribute(6, "Key", "2");
+                builder.AddAttribute(7, "Tab", "Tab Two");
+                builder.AddAttribute(8, "ChildContent", (RenderFragment)(b => b.AddContent(9, "Static content")));
+                builder.CloseComponent();
+            }));
+
+        // Re-render multiple times
+        for (var i = 0; i < 5; i++)
+        {
+            cut.SetParametersAndRender(parameters => parameters
+                .Add(p => p.ActiveKey, i % 2 == 0 ? "1" : "2"));
+        }
+
+        cut.FindAll("[role='tab']").Should().HaveCount(2);
+    }
 }

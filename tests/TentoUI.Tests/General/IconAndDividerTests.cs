@@ -17,6 +17,34 @@ public class IconAndDividerTests : TestContext
         svg.InnerHtml.Should().Contain("path");
     }
 
+    [Theory]
+    [InlineData("chevron-down")]
+    [InlineData("ChevronDown")]
+    [InlineData("chevrondown")]
+    [InlineData("IconNames.ChevronDown")]
+    [InlineData("@IconNames.ChevronDown")]
+    [InlineData("refresh-cw")]
+    [InlineData("RefreshCw")]
+    [InlineData("refreshcw")]
+    [InlineData("IconNames.RefreshCw")]
+    [InlineData("loader-2")]
+    [InlineData("Loader2")]
+    [InlineData("loader2")]
+    [InlineData("IconNames.Loader2")]
+    [InlineData("x")]
+    [InlineData("X")]
+    [InlineData("IconNames.X")]
+    [InlineData("@IconNames.X")]
+    public void Icon_ResolvesVariationsWithoutFallbackCircle(string iconName)
+    {
+        var cut = RenderComponent<Icon>(parameters => parameters
+            .Add(p => p.Name, iconName));
+
+        var svg = cut.Find("svg");
+        // Must NOT render fallback circle
+        svg.InnerHtml.Should().NotContain("r=\"10\"");
+    }
+
     [Fact]
     public void Icon_WithSpin_AddsAnimateSpinClass()
     {

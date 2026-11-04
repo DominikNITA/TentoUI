@@ -369,14 +369,32 @@ public class V11ComponentsAndDocsTests : TestContext
     {
         var props = ComponentApiRegistry.GetProperties(typeof(Sparkline));
         props.Should().NotBeEmpty();
-        props.Should().Contain(p => p.Property == "Values" && p.Since == "1.1.0");
+        props.Should().Contain(p => p.Property == "Values" && p.Since == "1.0.0");
         props.Should().Contain(p => p.Property == "Type" && p.Default == "SparklineType.Line");
+
+        var commandItemProps = ComponentApiRegistry.GetProperties(typeof(CommandItem));
+        commandItemProps.Should().Contain(p => p.Property == "Key");
+        commandItemProps.Should().Contain(p => p.Property == "Title");
+        commandItemProps.Should().Contain(p => p.Property == "Category" && p.Default == "null");
+
+        var dropdownItemProps = ComponentApiRegistry.GetProperties(typeof(DropdownMenuItem));
+        dropdownItemProps.Should().Contain(p => p.Property == "Key");
+        dropdownItemProps.Should().Contain(p => p.Property == "Danger" && p.Default == "false");
+
+        var iconProps = ComponentApiRegistry.GetProperties(typeof(Icon));
+        iconProps.Should().Contain(p => p.Property == "SpinSpeed" && p.Since == "1.0.1");
+        iconProps.Should().Contain(p => p.Property == "SpinDuration" && p.Since == "1.0.1");
+
+        var iconCut = RenderComponent<ApiTable>(p => p
+            .Add(x => x.Title, "Icon Properties")
+            .Add(x => x.ComponentType, typeof(Icon)));
+        iconCut.Markup.Should().Contain("v1.0.1");
 
         var cut = RenderComponent<ApiTable>(p => p
             .Add(x => x.Title, "Sparkline API")
             .Add(x => x.ComponentType, typeof(Sparkline)));
 
-        cut.Markup.Should().Contain("Added in v1.1.0");
+        cut.Markup.Should().NotContain("v1.1.0");
         cut.Markup.Should().Contain("Source-verified: Sparkline");
     }
 
@@ -604,5 +622,14 @@ public class V11ComponentsAndDocsTests : TestContext
 
         hotkeyCut.Find("[tabindex='0']").KeyDown(new KeyboardEventArgs { Key = "s", CtrlKey = true });
         triggered.Should().Be("Ctrl+S");
+    }
+
+    [Fact]
+    public void TabsDoc_RendersSmoothlyWithoutInfiniteLoop()
+    {
+        var cut = RenderComponent<TentoUI.Docs.Pages.Components.TabsDoc>();
+        cut.Markup.Should().Contain("Tabs");
+        cut.Markup.Should().Contain("General Profile");
+        cut.Markup.Should().Contain("Content of Tab Pane 1");
     }
 }

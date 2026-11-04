@@ -10,7 +10,7 @@
             <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>@Title</span>
                 <span class="text-xs font-normal text-slate-400">API Reference</span>
-                @if (!string.IsNullOrEmpty(EffectiveComponentSince) && EffectiveComponentSince != "1.0.0")
+                @if (!string.IsNullOrEmpty(EffectiveComponentSince) && EffectiveComponentSince != "1.0.0" && EffectiveComponentSince != "1.1.0")
                 {
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
                         Added in v@(EffectiveComponentSince)
@@ -43,7 +43,7 @@
                         <td class="py-3 px-4 font-mono font-semibold text-primary-600 dark:text-primary-400">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span>@prop.Property</span>
-                                @if (!string.IsNullOrEmpty(prop.Since) && prop.Since != "1.0.0")
+                                @if (!string.IsNullOrEmpty(prop.Since) && prop.Since != "1.0.0" && prop.Since != "1.1.0")
                                 {
                                     <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                         v@(prop.Since)
@@ -88,7 +88,7 @@
         <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
             <div class="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                    Enums &amp; Associated Types
+                    Enums
                 </span>
                 <span class="text-[11px] text-slate-400">@ResolvedTypes.Count type(s)</span>
             </div>

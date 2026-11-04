@@ -8,28 +8,47 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Dropdown</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            A dropdown menu triggered by hover or click, positioning a floating contextual overlay next to its trigger.
+            A contextual overlay menu triggered by click or hover, supporting structured DropdownMenuItem models or custom Overlay content.
         </p>
     </div>
 
-    @* Example 1: Basic Click Dropdown *@
-    <DemoCard Title="Click Trigger Dropdown" Description="Standard button that opens a contextual action list on click." Code="@_clickCode">
-        <div class="p-4 flex items-center justify-center">
-            <Dropdown Text="Options Menu" Trigger="DropdownTrigger.Click" Placement="DropdownPlacement.BottomLeft">
+    <PropsPlayground Title="Dropdown Interactive Playground"
+                     ComponentTag="Dropdown"
+                     Controls="@_playgroundControls" />
+
+    <!-- Structured Items Dropdown -->
+    <DemoCard Title="Structured Menu Items"
+              Description="Bind a collection of DropdownMenuItem records with icons, shortcuts, dividers, and destructive actions."
+              Code="@_itemsCode">
+        <div class="h-36 flex items-start gap-4">
+            <Dropdown Text="Account Actions"
+                      Items="@_menuItems"
+                      OnItemClick="@(key => MessageService.Info($"Selected action: {key}"))" />
+        </div>
+    </DemoCard>
+
+    <!-- Custom Overlay Dropdown -->
+    <DemoCard Title="Custom Overlay Content"
+              Description="Use the Overlay RenderFragment for custom menu items inside the dropdown container."
+              Code="@_clickCode">
+        <div class="h-36 flex items-start">
+            <Dropdown Trigger="DropdownTrigger.Click">
+                <ChildContent>
+                    <Button Type="ButtonType.Default" IconName="@IconNames.ChevronDown" IconPosition="IconPosition.End">
+                        Workspace Menu
+                    </Button>
+                </ChildContent>
                 <Overlay>
-                    <div class="py-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
-                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                @onclick="@(() => HandleSelect("Export PDF"))">
-                            Export as PDF
+                    <div class="w-48">
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.User" Size="14" /> Profile
                         </button>
-                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                @onclick="@(() => HandleSelect("Export CSV"))">
-                            Export as CSV
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.Settings" Size="14" /> Settings
                         </button>
-                        <div class="h-px bg-slate-100 dark:bg-slate-800 my-1"></div>
-                        <button type="button" class="w-full text-left px-3 py-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                                @onclick="@(() => HandleSelect("Archive"))">
-                            Archive Record
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.Trash2" Size="14" /> Delete Workspace
                         </button>
                     </div>
                 </Overlay>
@@ -37,66 +56,79 @@
         </div>
     </DemoCard>
 
-    @* Example 2: Hover Trigger *@
-    <DemoCard Title="Hover Trigger Dropdown" Description="Expands immediately when hovering over the trigger element." Code="@_hoverCode">
-        <div class="p-4 flex items-center justify-center">
-            <Dropdown Text="Hover for Actions" Trigger="DropdownTrigger.Hover" Placement="DropdownPlacement.BottomLeft">
-                <Overlay>
-                    <div class="py-1 w-40 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
-                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                @onclick="@(() => HandleSelect("Quick Edit"))">
-                            Quick Edit
-                        </button>
-                        <button type="button" class="w-full text-left px-3 py-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                @onclick="@(() => HandleSelect("Duplicate"))">
-                            Duplicate
-                        </button>
-                    </div>
-                </Overlay>
-            </Dropdown>
+    <!-- Hover Trigger & Placement -->
+    <DemoCard Title="Hover Trigger &amp; Placement"
+              Description="Open the dropdown on mouse hover and customize the overlay placement."
+              Code="@_hoverCode">
+        <div class="h-36 flex items-start gap-4">
+            <Dropdown Trigger="DropdownTrigger.Hover"
+                      Placement="DropdownPlacement.BottomLeft"
+                      Text="Hover Me"
+                      Items="@_menuItems" />
+            <Dropdown Trigger="DropdownTrigger.Click"
+                      Placement="DropdownPlacement.BottomRight"
+                      Text="Bottom Right"
+                      Items="@_menuItems" />
         </div>
     </DemoCard>
 
-    <ApiTable Title="Dropdown Properties" Properties="@_props" />
+    <ApiTable Title="Dropdown Properties" ComponentType="@typeof(Dropdown)" />
+
+    <ApiTable Title="DropdownMenuItem Properties" ComponentType="@typeof(DropdownMenuItem)" />
 </div>
 
 @code {
-    private void HandleSelect(string action)
-    {
-        MessageService.Success($"Selected: {action}");
-    }
+    private readonly DropdownMenuItem[] _menuItems =
+    [
+        new("profile", "Profile Settings", IconNames.User, Shortcut: "Ctrl+P"),
+        new("billing", "Workspace Settings", IconNames.Settings),
+        new("logout", "Delete Account", IconNames.Trash2, Danger: true, DividerBefore: true)
+    ];
+
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Text", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Account Actions", DefaultValue = "" },
+        new() { Name = "Trigger", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "DropdownTrigger.Click", DefaultValue = "DropdownTrigger.Click", Options = ["DropdownTrigger.Click", "DropdownTrigger.Hover"] },
+        new() { Name = "Placement", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "DropdownPlacement.BottomLeft", DefaultValue = "DropdownPlacement.BottomLeft", Options = ["DropdownPlacement.BottomLeft", "DropdownPlacement.BottomCenter", "DropdownPlacement.BottomRight", "DropdownPlacement.TopLeft"] },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
+    private const string _itemsCode = """
+        <div class="h-36 flex items-start gap-4">
+            <Dropdown Text="Account Actions" Items="@_menuItems" />
+        </div>
+        """;
 
     private const string _clickCode = """
-        <Dropdown Text="Options Menu" Trigger="DropdownTrigger.Click">
-            <Overlay>
-                <div class="py-1 w-48 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200">
-                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Export as PDF</button>
-                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Export as CSV</button>
-                    <div class="h-px bg-slate-100 my-1"></div>
-                    <button class="w-full text-left px-3 py-1.5 text-rose-500">Archive</button>
-                </div>
-            </Overlay>
-        </Dropdown>
+        <div class="h-36 flex items-start">
+            <Dropdown Trigger="DropdownTrigger.Click">
+                <ChildContent>
+                    <Button Type="ButtonType.Default" IconName="@IconNames.ChevronDown" IconPosition="IconPosition.End">
+                        Workspace Menu
+                    </Button>
+                </ChildContent>
+                <Overlay>
+                    <div class="w-48">
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.User" Size="14" /> Profile
+                        </button>
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.Settings" Size="14" /> Settings
+                        </button>
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+                        <button type="button" class="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2 border-0">
+                            <Icon Name="@IconNames.LogOut" Size="14" /> Logout
+                        </button>
+                    </div>
+                </Overlay>
+            </Dropdown>
+        </div>
         """;
 
     private const string _hoverCode = """
-        <Dropdown Text="Hover for Actions" Trigger="DropdownTrigger.Hover">
-            <Overlay>
-                <div class="py-1 w-40 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200">
-                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Quick Edit</button>
-                    <button class="w-full text-left px-3 py-1.5 hover:bg-slate-100">Duplicate</button>
-                </div>
-            </Overlay>
-        </Dropdown>
+        <div class="h-36 flex items-start gap-4">
+            <Dropdown Trigger="DropdownTrigger.Hover" Placement="DropdownPlacement.BottomLeft" Text="Hover Me" Items="@_menuItems" />
+            <Dropdown Trigger="DropdownTrigger.Click" Placement="DropdownPlacement.BottomRight" Text="Bottom Right" Items="@_menuItems" />
+        </div>
         """;
-
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("Text", "Label for default button trigger.", "string?", "null"),
-        new("Trigger", "Event triggering the overlay: Click or Hover.", "DropdownTrigger", "DropdownTrigger.Hover"),
-        new("Placement", "Placement position relative to trigger (BottomLeft, BottomRight, TopLeft, TopRight).", "DropdownPlacement", "DropdownPlacement.BottomLeft"),
-        new("Disabled", "Whether dropdown interaction is disabled.", "bool", "false"),
-        new("Overlay", "Dropdown popup content template.", "RenderFragment?", "null"),
-        new("ChildContent", "Custom trigger element template.", "RenderFragment?", "null")
-    ];
 }

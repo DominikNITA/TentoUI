@@ -335,9 +335,9 @@
     [Parameter] public bool Compact { get; set; }
     [Parameter] public bool ShowFilterRow { get; set; } = true;
     [Parameter] public string? SearchText { get; set; }
-    [Parameter, Since("1.1.0")] public bool Virtualize { get; set; }
-    [Parameter, Since("1.1.0")] public float ItemSize { get; set; } = 44f;
-    [Parameter, Since("1.1.0")] public string? ScrollHeight { get; set; }
+    [Parameter, Since("1.0.0")] public bool Virtualize { get; set; }
+    [Parameter, Since("1.0.0")] public float ItemSize { get; set; } = 44f;
+    [Parameter, Since("1.0.0")] public string? ScrollHeight { get; set; }
 
     // Pagination parameters
     [Parameter] public int PageSize { get; set; } = 10;

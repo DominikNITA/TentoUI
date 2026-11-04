@@ -1,5 +1,6 @@
 @namespace TentoUI
 @inherits TentoComponentBase
+@using TentoUI.Extensibility
 
 <svg xmlns="http://www.w3.org/2000/svg"
      width="@RenderSize"
@@ -26,8 +27,8 @@
     [Parameter] public object Size { get; set; } = 16;
     [Parameter] public string? Color { get; set; }
     [Parameter] public bool Spin { get; set; }
-    [Parameter] public IconSpinSpeed SpinSpeed { get; set; } = IconSpinSpeed.Normal;
-    [Parameter] public string? SpinDuration { get; set; }
+    [Parameter, Since("1.0.1")] public IconSpinSpeed SpinSpeed { get; set; } = IconSpinSpeed.Normal;
+    [Parameter, Since("1.0.1")] public string? SpinDuration { get; set; }
     [Parameter] public double Rotate { get; set; }
     [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }

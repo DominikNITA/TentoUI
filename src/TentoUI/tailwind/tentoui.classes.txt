@@ -51,6 +51,7 @@
 !enabledPanes.Any())
 !EqualityComparer
 !ExpandedKeys.Remove(key))
+!f.IsInitOnly
 !FilteredItems.Any())
 !Ghost)
 !HideFooter)
@@ -76,6 +77,7 @@
 !isLast)
 !IsLast)
 !IsLeaf)
+!IsOpen)
 !isOptDisabled)
 !isSel
 !isSelected
@@ -558,6 +560,7 @@
 @ContentTemplate
 @CopiedLabel
 @Cover
+@CssClass
 @current
 @currentFilter
 @CurrentHex
@@ -636,6 +639,7 @@
 @GetIconClass()
 @GetIconName()
 @GetIconSize()
+@GetItemClass(item)
 @GetLabel(item)
 @GetLabel(SelectedItem)
 @GetSpinnerPixelSize()
@@ -663,6 +667,7 @@
 @Icon
 @iconModuleSize
 @iconName
+@IconNames.
 @IconNames.AlertCircle
 @IconNames.AlertTriangle
 @IconNames.ArrowLeft
@@ -678,8 +683,10 @@
 @IconNames.Copy
 @IconNames.Edit2
 @IconNames.Eye
+@IconNames.EyeOff
 @IconNames.File
 @IconNames.Filter
+@IconNames.HelpCircle
 @IconNames.Inbox
 @IconNames.Info
 @IconNames.Loader2
@@ -1459,6 +1466,8 @@ bg-white/70
 bg-white/85
 bg-yellow-200
 BindConverter.TryConvertTo
+BindingFlags.FlattenHierarchy)
+BindingFlags.Static
 black)
 blank
 block
@@ -1631,6 +1640,8 @@ CanNextMonth
 CanNextMonth)
 CanNextYear
 CanNextYear)
+canonical
+canonical))
 CanPrevMonth
 CanPrevMonth)
 CanPrevYear
@@ -1682,6 +1693,8 @@ centerX
 centerY
 ch
 ch.ToString())
+changed
+changed)
 ChangeEventArgs
 ChangeOnSelect
 ChangeOnSelect)
@@ -1753,6 +1766,7 @@ checkedSet.Contains(item.Key)
 checkedSet.Remove(item.Key)
 checkedSet.Remove(key)
 CheckIfRequired()
+chevrondown
 chevron-down
 ChevronDown
 chevron-left
@@ -1765,7 +1779,6 @@ child
 Child
 ChildContainerClass
 ChildContent
-ChildContent)
 ChildContent=
 children
 Children
@@ -1798,6 +1811,13 @@ class=
 Class=
 classVal
 classVal)
+clean
+clean.Replace(
+clean.StartsWith(
+clean.ToLowerInvariant()
+clean[1..]
+clean[10..]
+clean[11..]
 cleanKey
 cleanKey)
 clear
@@ -2117,6 +2137,7 @@ const
 constant)
 constant.Value
 ConstantExpression
+constValue
 container
 Container
 container.
@@ -2135,12 +2156,10 @@ context)
 context.Id
 context.ValidateStatus
 Context=
-ContextMenu
 continue
 ContinueWith(t
 control
 Control
-Controlled
 Controls
 controls.
 convention.
@@ -2153,6 +2172,7 @@ converted
 converted)
 Converts
 ConvertStringToValue(string
+coordinates
 copied
 Copied
 Copied!
@@ -2206,6 +2226,7 @@ CssBuilder
 CssBuilder(
 CssBuilder()
 CssBuilder(string
+CssClass
 Ctrl
 cts
 cts.Token)
@@ -2381,7 +2402,6 @@ dark:hover:bg-primary-950/60
 dark:hover:bg-red-950/30
 dark:hover:bg-slate-700
 dark:hover:bg-slate-700/50
-dark:hover:bg-slate-700/60
 dark:hover:bg-slate-800
 dark:hover:bg-slate-800/50
 dark:hover:bg-slate-800/60
@@ -2695,6 +2715,7 @@ disabled=
 Disabled=
 disabledClass
 Disables
+Discover
 Dislike
 display
 displayed
@@ -2797,6 +2818,8 @@ durationSeconds.Value
 e)
 e))
 e,
+e.ClientX
+e.ClientY
 e.File
 e.FileCount
 e.g.
@@ -2809,7 +2832,6 @@ e.OffsetX
 e.OffsetX.ToString(
 e.OffsetY
 e.OffsetY.ToString(
-e.ShiftKey
 e.Value
 e2e8f0
 ea5e9
@@ -2985,10 +3007,10 @@ errors.Count
 Esc
 ESC
 Escape
+etc.)
 event
 EventCallback
 events
-events.
 every
 Every
 everyMinutes
@@ -3047,10 +3069,11 @@ F(p.Y)
 F(pts[
 F(pts[0].X)
 f.ContentType,
+f.FieldType
+f.IsLiteral
 f.Name,
 f.Size
 f.Size,
-F10
 f172a
 f1f5f9
 F2
@@ -3085,6 +3108,7 @@ ffffff
 field
 -field
 Field
+field.Name
 field/value
 FieldId
 fieldIdentifier
@@ -3099,6 +3123,7 @@ fieldName
 fieldName)
 fields
 Fields
+fields)
 fieldset
 fieldset>
 file
@@ -3349,7 +3374,6 @@ FormLayout.Vertical)
 found
 found.
 Fr
-fragment
 fragment.
 frequency
 Fri
@@ -3414,6 +3438,7 @@ GetDescription(item)
 GetDescription(TItem
 GetEffectiveSegments()
 GetEffectiveSuggestions()
+GetFields(BindingFlags.Public
 GetFilterValue(item)
 GetFilterValue(TItem
 GetHashCode().ToString(CultureInfo.InvariantCulture))
@@ -3423,6 +3448,7 @@ GetIconClass()
 GetIconName()
 GetIconSize()
 GetInitials()
+GetItemClass(DropdownMenuItem
 GetItemsForColumn(col.Key)
 GetItemsForColumn(string
 GetKeyParts()
@@ -3535,6 +3561,8 @@ H9a1.65
 Handle
 HandleBackdropClickAsync
 HandleBackdropClickAsync()
+HandleBackdropContextMenuAsync
+HandleBackdropContextMenuAsync(MouseEventArgs
 HandleBlur
 HandleBlur()
 HandleCancel
@@ -3589,6 +3617,7 @@ HandleInputChange
 HandleInputChange(ChangeEventArgs
 HandleInvalidSubmit(EditContext
 HandleItemClickAsync(DropdownMenuItem
+HandleItemClickAsync(item)
 HandleItemClickAsync(item))
 HandleKeyDown
 HandleKeyDown(KeyboardEventArgs
@@ -3805,10 +3834,11 @@ iconName
 IconName
 iconName)
 IconName)
+iconName.Trim()
 IconNames
+IconNames.
 IconNames.AlertCircle
 IconNames.AlertCircle]
-IconNames.AlertTriangle
 IconNames.AlertTriangle,
 IconNames.AlertTriangle]
 IconNames.ArrowDown]
@@ -3819,7 +3849,6 @@ IconNames.Bell]
 IconNames.Calendar]
 IconNames.Check
 IconNames.Check]
-IconNames.CheckCircle
 IconNames.CheckCircle,
 IconNames.CheckCircle]
 IconNames.CheckCircle2,
@@ -3841,9 +3870,7 @@ IconNames.Download]
 IconNames.Edit]
 IconNames.Edit2]
 IconNames.ExternalLink]
-IconNames.Eye
 IconNames.Eye]
-IconNames.EyeOff
 IconNames.EyeOff]
 IconNames.File)
 IconNames.File]
@@ -3851,7 +3878,6 @@ IconNames.Filter]
 IconNames.Folder
 IconNames.Folder)
 IconNames.Folder]
-IconNames.HelpCircle
 IconNames.HelpCircle]
 IconNames.Home]
 IconNames.Inbox]
@@ -3859,17 +3885,14 @@ IconNames.Info
 IconNames.Info]
 IconNames.Link]
 IconNames.Loader]
-IconNames.Loader2
 IconNames.Loader2]
 IconNames.Menu]
 IconNames.Minus]
 IconNames.Moon]
 IconNames.MoreHorizontal]
 IconNames.MoreVertical]
-IconNames.Plus
 IconNames.Plus]
 IconNames.RefreshCw]
-IconNames.Search
 IconNames.Search]
 IconNames.Settings]
 IconNames.Sparkles]
@@ -3879,9 +3902,7 @@ IconNames.Trash]
 IconNames.Trash2]
 IconNames.Upload]
 IconNames.User]
-IconNames.X
 IconNames.X]
-IconNames.XCircle
 IconNames.XCircle,
 IconNames.XCircle]
 iconPos
@@ -3899,6 +3920,7 @@ Id
 id)
 id,
 id=
+identifier
 IDisposable
 idx
 idx)
@@ -3962,6 +3984,7 @@ Ink
 Inline
 inline-block
 inline-flex
+inner
 INotificationService
 INotificationService,
 in-progress
@@ -4183,6 +4206,7 @@ ItemSize=
 items-start
 items-stretch
 ItemTemplate
+its
 j--)
 j]
 j],
@@ -4213,11 +4237,13 @@ KanbanColumnDefinition>
 kbd
 Kbd
 kbd>
+kebab-case,
 keep
 key
 Key
 Key!
 key)
+Key)
 key,
 Key,
 key.StartsWith(
@@ -4367,7 +4393,6 @@ listbox
 Listbox
 listboxId
 list-decimal
-listens
 list-inside
 listitem
 list-none
@@ -4394,7 +4419,9 @@ lsaquo
 lt
 ltr
 Ltr,
+Lucide
 LucideIcons
+LucideIcons()
 LucideIcons.GetPath(Name)
 m)
 M,
@@ -4508,7 +4535,6 @@ Math.Max(1e-6,
 Math.Max(2,
 Math.Max(2.0,
 Math.Max(4,
-Math.Max(8,
 Math.Max(dp[i
 Math.Min(_highlightIndex
 Math.Min(3.0,
@@ -4596,7 +4622,6 @@ MentionOption>
 mentions
 menu
 Menu
-menu.
 menuContext
 MenuContext
 menuContext.Collapsed
@@ -4710,7 +4735,6 @@ MinuteStep)
 minVal
 minVal)
 min-w-[1.5rem]
-min-w-[10rem]
 min-w-[11rem]
 min-w-[12rem]
 min-w-[130px]
@@ -4862,10 +4886,12 @@ name
 Name
 Name)
 name,
+name.
 Name:
 name=
 Name=
 nameof(Icon.Name),
+names.
 namespace
 naming
 Native
@@ -4943,6 +4969,7 @@ node.Title
 node.Title.Contains(_searchTerm,
 nodes)
 nodes,
+noHyphens
 none
 None
 None,
@@ -4957,6 +4984,7 @@ NormalizedOptions
 NormalizedOptions.Where(o
 not
 Not
+notation
 Note:
 Notes
 Nothing
@@ -5148,6 +5176,9 @@ OnOk
 OnOk.HasDelegate)
 OnOk.InvokeAsync()
 OnOk=
+OnOpenChange
+OnOpenChange.InvokeAsync(false)
+OnOpenChange.InvokeAsync(true)
 OnParametersSet()
 OnPressEnter
 OnPressEnter.HasDelegate)
@@ -5245,7 +5276,6 @@ OpenKeysChanged.HasDelegate)
 OpenKeysChanged.InvokeAsync(_menuContext.OpenKeys)
 OpenPreview
 OpenPreview()
-opens.
 Operand
 operator
 Operator
@@ -5320,7 +5350,6 @@ overflow-visible
 overflow-x-auto
 overflow-x-hidden
 overflow-y-auto
-overlay
 Overlay
 override
 overrides.
@@ -5472,6 +5501,7 @@ parts
 parts)
 parts.Count
 parts.Length
+PascalCase,
 password
 Password,
 past
@@ -5560,6 +5590,7 @@ prefix
 Prefix
 prefix,
 Prefix]
+prefixed,
 prefixes
 Prefixes
 presentation
@@ -5742,6 +5773,8 @@ rawLine.Length
 rawLine.TakeWhile(char.IsWhiteSpace).Count()
 rawLine.TrimEnd()
 rawLine.TrimStart().Length
+rawName)
+rawName.Trim()
 rawStyle,
 rawValue
 readers.
@@ -5840,6 +5873,7 @@ RenderTokenizedLine(string
 repeat
 Replace(
 replacing
+repositions
 Required
 reset
 Reset
@@ -5848,6 +5882,7 @@ ResetAfterDelayAsync(ResetDelayMs)
 ResetAutoplay()
 ResetDelayMs
 resetting.
+Resilient
 Resizable
 Resize
 resize-none
@@ -5865,9 +5900,11 @@ ResolvedStroke
 ResolvedTheme
 ResolvedTrend
 ResolveIconName()
+ResolveIconName(string
 ResolveModal(Guid
 ResolveModal(instance.Id,
 ResolveModal(ModalInstance
+Resolves
 ResolveStepStatus(index,
 ResolveStepStatus(int
 ResolveStrokeClass(double
@@ -5885,6 +5922,7 @@ ResultStatus.Success
 ResultStatus.Warning
 return
 returning
+Returns
 rgba(100,
 right
 Right
@@ -5898,7 +5936,7 @@ right-4
 right-8
 right-8).
 rightBg
-right-click
+Right-clicking
 right-full
 RightSegmentClass
 ring-1
@@ -6000,6 +6038,22 @@ s)
 s))
 s*
 s.Value))
+s_allVariants
+s_allVariants.TryGetValue(clean,
+s_allVariants.TryGetValue(normalized,
+s_allVariants[
+s_allVariants[fieldName.ToLowerInvariant()]
+s_allVariants[fieldName]
+s_allVariants[k.Replace(
+s_allVariants[k]
+s_canonicalNames
+s_canonicalNames.TryGetValue(clean,
+s_canonicalNames.TryGetValue(noHyphens,
+s_canonicalNames[
+s_canonicalNames[fieldName.ToLowerInvariant()]
+s_canonicalNames[fieldName]
+s_canonicalNames[k.Replace(
+s_canonicalNames[k]
 s4-8
 Sa
 sample
@@ -6060,6 +6114,7 @@ section
 section>
 secVal
 see
+Seed
 seg
 seg.ColorClass
 seg.Label
@@ -6666,6 +6721,7 @@ Stretch,
 string
 string(chars).TrimEnd()
 string)
+string)field.GetRawConstantValue()!
 string,
 string.Empty
 string.Empty)
@@ -6719,6 +6775,7 @@ string.IsNullOrWhiteSpace(error)
 string.IsNullOrWhiteSpace(expr))
 string.IsNullOrWhiteSpace(filterText))
 string.IsNullOrWhiteSpace(font)
+string.IsNullOrWhiteSpace(iconName))
 string.IsNullOrWhiteSpace(input))
 string.IsNullOrWhiteSpace(Keys))
 string.IsNullOrWhiteSpace(Label)
@@ -6729,6 +6786,7 @@ string.IsNullOrWhiteSpace(name)
 string.IsNullOrWhiteSpace(onPrimary)
 string.IsNullOrWhiteSpace(primary)
 string.IsNullOrWhiteSpace(radius)
+string.IsNullOrWhiteSpace(rawName))
 string.IsNullOrWhiteSpace(sb)
 string.IsNullOrWhiteSpace(search)
 string.IsNullOrWhiteSpace(Shortcut))
@@ -6859,11 +6917,13 @@ surface-bg
 SurfaceBgColor
 svg
 SVG
+svg))
 svg>
 SvgPathContent
 svgPathData
 SvgPaths
-SvgPaths.TryGetValue(iconName,
+SvgPaths)
+SvgPaths.TryGetValue(constValue,
 switch
 SyncElementId()
 system
@@ -6881,6 +6941,7 @@ System.IO.MemoryStream()
 System.Linq.Expressions
 System.Linq.Expressions.Expression
 System.Net.Http
+System.Reflection
 System.Reflection.BindingFlags.IgnoreCase)
 System.Reflection.BindingFlags.Instance
 System.Reflection.BindingFlags.Public
@@ -6892,6 +6953,7 @@ System:35,Apps:25,Media:15
 tab
 tab-
 Tab
+Tab)
 Tab,
 TabBarExtraContent
 TabEditEventArgs
@@ -7741,6 +7803,7 @@ typed.
 typeof(decimal)
 typeof(double)
 typeof(float)
+typeof(IconNames)
 typeof(string))
 typeof(TItem)
 typeof(TItem),
@@ -7776,6 +7839,7 @@ Underline)
 Undo
 UndoStroke
 UndoStroke()
+un-hyphenated
 Unified
 Unit
 UnregisterItem(DescriptionsItem
@@ -8016,6 +8080,7 @@ when
 whenever
 where
 WHERE
+Where(f
 Where(o
 Where(x
 whether

@@ -8,20 +8,26 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">CommandPalette</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Spotlight-style global command menu (Ctrl+K) with grouped actions, keyboard arrow navigation, and instant filtering.
+            Keyboard-first spotlight command launcher with live search filtering, grouped actions, and arrow-key navigation.
         </p>
     </div>
 
-    <DemoCard Title="Interactive Command Palette" Description="Click the button to launch the spotlight command palette modal." Code="@_cmdCode">
-        <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
-            Open Command Palette (Ctrl+K)
-        </Button>
-        <CommandPalette @bind-Open="_open"
-                        Items="@_commands"
-                        OnSelect="@(item => MessageService.Success($"Executed: {item.Title}"))" />
+    <DemoCard Title="Spotlight Command Launcher"
+              Description="Click the button to open the command palette, filter by keyword, and navigate with ArrowUp / ArrowDown / Enter."
+              Code="@_paletteCode">
+        <div class="space-y-3">
+            <Button Type="ButtonType.Primary" IconName="@IconNames.Search" OnClick="@(() => _open = true)">
+                Open Command Palette
+            </Button>
+            <CommandPalette @bind-Open="_open"
+                            Items="@_commands"
+                            OnSelect="@OnSelectCommand" />
+        </div>
     </DemoCard>
 
     <ApiTable Title="CommandPalette Properties" ComponentType="@typeof(CommandPalette)" />
+
+    <ApiTable Title="CommandItem Properties" ComponentType="@typeof(CommandItem)" />
 </div>
 
 @code {
@@ -29,15 +35,24 @@
 
     private readonly CommandItem[] _commands =
     [
-        new("new-proj", "Create New Project", "Workspace", "Scaffold a .NET 10 application", IconNames.Plus, "Ctrl+N"),
-        new("deploy", "Deploy to Production", "Operations", "Trigger GitHub Actions workflow", IconNames.Upload, "Ctrl+D"),
-        new("dark-mode", "Toggle Dark Theme", "Appearance", "Switch color palette", IconNames.Moon, "Ctrl+J")
+        new("new-project", "Create New Project", "Workspace", "Initialize a new .NET 10 solution", IconNames.Plus, "Ctrl+N"),
+        new("search-docs", "Search Documentation", "Navigation", "Jump to any component API table", IconNames.Search, "Ctrl+K"),
+        new("toggle-theme", "Toggle Dark Mode", "Appearance", "Switch between light and dark themes", IconNames.Moon, "Ctrl+J"),
+        new("export-tokens", "Export Tailwind Theme", "Developer", "Download tentoui.theme.css tokens", IconNames.Download, "Ctrl+E")
     ];
 
-    private const string _cmdCode = """
-        <Button Type="ButtonType.Primary" OnClick="@(() => _open = true)">
-            Open Command Palette (Ctrl+K)
+    private void OnSelectCommand(CommandItem item)
+    {
+        MessageService.Success($"Executed command: {item.Title}");
+    }
+
+    private const string _paletteCode = """
+        <Button Type="ButtonType.Primary" IconName="@IconNames.Search" OnClick="@(() => _open = true)">
+            Open Command Palette
         </Button>
-        <CommandPalette @bind-Open="_open" Placeholder="Type a command or search..." />
+
+        <CommandPalette @bind-Open="_open"
+                        Items="@_commands"
+                        OnSelect="@(cmd => MessageService.Success($"Executed: {cmd.Title}"))" />
         """;
 }

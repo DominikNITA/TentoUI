@@ -1,5 +1,6 @@
 @namespace TentoUI
 @inherits TentoComponentBase
+@implements IDisposable
 
 <CascadingValue Value="@_tabsContext" IsFixed="true">
     <div class="@ComputedContainerClass" style="@Style" @attributes="AdditionalAttributes">
@@ -49,7 +50,7 @@
                         <span class="ml-2 hover:text-red-500 rounded p-0.5"
                               @onclick:stopPropagation="true"
                               @onclick="@(() => RemoveTabAsync(paneKey))">
-                            <Icon Name="IconNames.X" Size="12" />
+                            <Icon Name="@IconNames.X" Size="12" />
                         </span>
                     }
                 </button>
@@ -61,7 +62,7 @@
                         class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 border border-dashed border-slate-300 dark:border-slate-700 rounded text-xs self-center"
                         aria-label="Add tab"
                         @onclick="AddTabAsync">
-                    <Icon Name="IconNames.Plus" Size="14" />
+                    <Icon Name="@IconNames.Plus" Size="14" />
                 </button>
             }
 
@@ -111,10 +112,17 @@
             _tabsContext.ActiveKey = DefaultActiveKey;
         }
 
-        _tabsContext.OnStateChange += async () =>
-        {
-            await InvokeAsync(StateHasChanged);
-        };
+        _tabsContext.OnStateChange += HandleStateChange;
+    }
+
+    private void HandleStateChange()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        _tabsContext.OnStateChange -= HandleStateChange;
     }
 
     protected override void OnParametersSet()

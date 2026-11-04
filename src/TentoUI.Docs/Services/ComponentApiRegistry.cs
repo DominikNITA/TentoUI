@@ -7,7 +7,7 @@ namespace TentoUI.Docs.Services;
 
 /// <summary>
 /// Reflects <see cref="ParameterAttribute"/>, <see cref="SinceAttribute"/>, <see cref="ObsoleteAttribute"/>,
-/// and referenced enum/model types directly from TentoUI component types.
+/// public record/model properties, and referenced enum types directly from TentoUI types.
 /// </summary>
 public static class ComponentApiRegistry
 {
@@ -28,7 +28,7 @@ public static class ComponentApiRegistry
         var firstWord = title.Trim().Split([' ', '<', '/'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(firstWord) &&
             s_tentoTypesByName.TryGetValue(firstWord, out var matched) &&
-            typeof(IComponent).IsAssignableFrom(matched))
+            !matched.IsEnum)
         {
             return matched;
         }
@@ -50,6 +50,7 @@ public static class ComponentApiRegistry
 
         var explicitByProp = explicitList.ToDictionary(p => p.Property, p => p, StringComparer.OrdinalIgnoreCase);
         var classSince = resolvedType.GetCustomAttribute<SinceAttribute>()?.Version;
+        var isComponent = typeof(IComponent).IsAssignableFrom(resolvedType);
 
         object? defaultInstance = null;
         if (!resolvedType.IsAbstract && !resolvedType.ContainsGenericParameters)
@@ -60,17 +61,38 @@ public static class ComponentApiRegistry
             }
             catch
             {
-                // Ignore if no parameterless constructor
+                // Ignore if no parameterless constructor (e.g. positional records)
+            }
+        }
+
+        // Map constructor parameter defaults for positional records/models (e.g. CommandItem, DropdownMenuItem)
+        var ctorDefaults = new Dictionary<string, ParameterInfo>(StringComparer.OrdinalIgnoreCase);
+        if (!isComponent)
+        {
+            var primaryCtor = resolvedType
+                .GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                .OrderByDescending(c => c.GetParameters().Length)
+                .FirstOrDefault();
+
+            if (primaryCtor != null)
+            {
+                foreach (var param in primaryCtor.GetParameters())
+                {
+                    if (!string.IsNullOrEmpty(param.Name))
+                    {
+                        ctorDefaults[param.Name] = param;
+                    }
+                }
             }
         }
 
         var reflected = new List<ApiTable.ApiProp>();
         var props = resolvedType
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.GetCustomAttribute<ParameterAttribute>() != null &&
+            .Where(p => (!isComponent || p.GetCustomAttribute<ParameterAttribute>() != null) &&
                         !string.Equals(p.Name, "AdditionalAttributes", StringComparison.Ordinal))
             .OrderBy(p => p.DeclaringType == resolvedType ? 0 : 1)
-            .ThenBy(p => p.Name);
+            .ThenBy(p => isComponent ? p.Name : string.Empty);
 
         foreach (var prop in props)
         {
@@ -101,7 +123,7 @@ public static class ComponentApiRegistry
             else
             {
                 var typeName = FormatTypeName(prop.PropertyType);
-                var defaultVal = FormatDefaultValue(prop, defaultInstance);
+                var defaultVal = FormatDefaultValue(prop, defaultInstance, ctorDefaults);
                 var desc = GenerateDescription(prop.Name, typeName);
                 reflected.Add(new ApiTable.ApiProp(
                     prop.Name,
@@ -132,9 +154,10 @@ public static class ComponentApiRegistry
 
         if (resolvedComponentType != null)
         {
+            var isComponent = typeof(IComponent).IsAssignableFrom(resolvedComponentType);
             var props = resolvedComponentType
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.GetCustomAttribute<ParameterAttribute>() != null);
+                .Where(p => !isComponent || p.GetCustomAttribute<ParameterAttribute>() != null);
 
             foreach (var prop in props)
             {
@@ -155,7 +178,7 @@ public static class ComponentApiRegistry
         }
 
         var result = new List<ApiTable.ApiTypeInfo>();
-        foreach (var (_, type) in discoveredTypes.OrderBy(kv => kv.Value.IsEnum ? 0 : 1).ThenBy(kv => kv.Key))
+        foreach (var (_, type) in discoveredTypes.OrderBy(kv => kv.Key))
         {
             if (type.IsEnum)
             {
@@ -165,22 +188,6 @@ public static class ComponentApiRegistry
                     "Enum",
                     names.Select(n => $"{type.Name}.{n}").ToArray(),
                     GetEnumDescription(type.Name)));
-            }
-            else if (type.Namespace?.StartsWith("TentoUI", StringComparison.Ordinal) == true &&
-                     !typeof(IComponent).IsAssignableFrom(type) &&
-                     !type.IsAbstract)
-            {
-                var pubProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Select(p => $"{p.Name}: {FormatTypeName(p.PropertyType)}")
-                    .ToArray();
-                if (pubProps.Length > 0)
-                {
-                    result.Add(new ApiTable.ApiTypeInfo(
-                        FormatTypeName(type),
-                        "Model",
-                        pubProps,
-                        $"Structured data model for {FormatTypeName(type)}."));
-                }
             }
         }
 
@@ -239,22 +246,43 @@ public static class ComponentApiRegistry
         return type.Name;
     }
 
-    private static string? FormatDefaultValue(PropertyInfo prop, object? instance)
+    private static string? FormatDefaultValue(
+        PropertyInfo prop,
+        object? instance,
+        Dictionary<string, ParameterInfo> ctorDefaults)
     {
-        if (instance == null) return null;
-        try
+        if (instance != null)
         {
-            var val = prop.GetValue(instance);
-            if (val == null) return "null";
-            if (val is bool b) return b ? "true" : "false";
-            if (val is string s) return string.IsNullOrEmpty(s) ? "\"\"" : $"\"{s}\"";
-            if (val.GetType().IsEnum) return $"{val.GetType().Name}.{val}";
-            if (val is ValueType && !val.GetType().Name.StartsWith("EventCallback", StringComparison.Ordinal))
+            try
             {
-                return Convert.ToString(val, System.Globalization.CultureInfo.InvariantCulture);
+                var val = prop.GetValue(instance);
+                return FormatRawDefaultValue(val);
             }
+            catch { }
         }
-        catch { }
+
+        if (ctorDefaults.TryGetValue(prop.Name, out var ctorParam))
+        {
+            if (ctorParam.HasDefaultValue)
+            {
+                return FormatRawDefaultValue(ctorParam.DefaultValue);
+            }
+            return "(required)";
+        }
+
+        return null;
+    }
+
+    private static string? FormatRawDefaultValue(object? val)
+    {
+        if (val == null) return "null";
+        if (val is bool b) return b ? "true" : "false";
+        if (val is string s) return string.IsNullOrEmpty(s) ? "\"\"" : $"\"{s}\"";
+        if (val.GetType().IsEnum) return $"{val.GetType().Name}.{val}";
+        if (val is ValueType && !val.GetType().Name.StartsWith("EventCallback", StringComparison.Ordinal))
+        {
+            return Convert.ToString(val, System.Globalization.CultureInfo.InvariantCulture);
+        }
         return null;
     }
 
@@ -271,6 +299,38 @@ public static class ComponentApiRegistry
         "IconName" => "Lucide icon identifier rendered inside the component.",
         "SpinSpeed" => "Controls the rotation speed when Spin is enabled (Slow, Normal, Fast).",
         "SpinDuration" => "Custom CSS animation duration for spinning icons (e.g. '1.5s', '400ms').",
+        "Key" => "Unique identifier for the item passed to selection callbacks.",
+        "Label" => "Display text rendered for the item.",
+        "Group" => "Category group header under which the item is organized.",
+        "Description" => "Secondary descriptive text displayed alongside the primary label.",
+        "Icon" => "Optional Lucide icon name rendered before the item label.",
+        "Shortcut" => "Keyboard shortcut hint badge displayed on the right side of the item.",
+        "Danger" => "Applies destructive red styling to indicate a dangerous action.",
+        "DividerBefore" => "Renders a horizontal separator line immediately above this item.",
+        "Vertical" => "Stacks flex children vertically (flex-col) when true, or horizontally (flex-row) when false.",
+        "Justify" => "Controls alignment of flex items along the main axis.",
+        "Align" => "Controls alignment of flex items along the cross axis.",
+        "Wrap" => "Controls whether flex items wrap onto multiple lines.",
+        "Gap" => "Predefined spacing scale between flex children (None, Small, Middle, Large).",
+        "GapSize" => "Custom CSS gap value (e.g. '12px', '1.5rem') that overrides the preset Gap.",
+        "Gutter" => "Horizontal spacing between grid columns in pixels.",
+        "VerticalGutter" => "Vertical spacing between wrapped grid rows in pixels.",
+        "Span" => "Number of columns (1–24) the column spans across the row.",
+        "Offset" => "Number of columns (0–23) to offset the column from the left.",
+        "Order" => "Flex order index controlling visual column ordering.",
+        "Xs" => "Column span on extra-small viewports (<576px).",
+        "Sm" => "Column span on small viewports (≥576px).",
+        "Md" => "Column span on medium viewports (≥768px).",
+        "Lg" => "Column span on large viewports (≥992px).",
+        "Xl" => "Column span on extra-large viewports (≥1200px).",
+        "Xxl" => "Column span on 2XL viewports (≥1600px).",
+        "OffsetTop" => "Distance in pixels from the top of the scrolling container before sticking.",
+        "OffsetBottom" => "Distance in pixels from the bottom of the scrolling container before sticking.",
+        "Affix" => "Wraps the anchor navigation in a sticky container when true.",
+        "ShowInkInFixed" => "Displays the active indicator bar along the anchor rail.",
+        "Href" => "Target URL or section hash selector (e.g. '#section-1').",
+        "Title" => "Primary text title displayed for the element.",
+        "Target" => "HTML anchor target attribute (e.g. '_blank').",
         _ => $"Configures the {name} ({typeName}) parameter."
     };
 
@@ -287,6 +347,14 @@ public static class ComponentApiRegistry
         "DividerType" => "Direction of the divider line.",
         "DividerOrientation" => "Horizontal alignment of the divider title text.",
         "IconSpinSpeed" => "Predefined rotation speed presets for spinning icons.",
+        "FlexJustify" => "Main-axis distribution of children inside Flex or Row.",
+        "FlexAlign" => "Cross-axis alignment of children inside Flex or Row.",
+        "FlexWrap" => "Line wrapping behavior of flex children.",
+        "FlexGap" => "Preset gap spacing scale between flex children.",
+        "RowJustify" => "Horizontal alignment of columns inside a 24-column Row.",
+        "RowAlign" => "Vertical alignment of columns inside a 24-column Row.",
+        "DropdownTrigger" => "User interaction that opens the dropdown menu.",
+        "DropdownPlacement" => "Preferred placement of the dropdown overlay relative to the trigger.",
         _ => $"Allowed values for {enumName}."
     };
 }

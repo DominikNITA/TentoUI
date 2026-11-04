@@ -67,12 +67,12 @@
     [Parameter] public bool Ellipsis { get; set; }
     [Parameter] public int Rows { get; set; } = 1;
     [Parameter] public bool Strong { get; set; }
-    [Parameter, Since("1.1.0")] public bool Copyable { get; set; }
-    [Parameter, Since("1.1.0")] public string? CopyText { get; set; }
-    [Parameter, Since("1.1.0")] public EventCallback<string> OnCopy { get; set; }
-    [Parameter, Since("1.1.0")] public bool Editable { get; set; }
-    [Parameter, Since("1.1.0")] public string? EditText { get; set; }
-    [Parameter, Since("1.1.0")] public EventCallback<string> EditTextChanged { get; set; }
+    [Parameter, Since("1.0.0")] public bool Copyable { get; set; }
+    [Parameter, Since("1.0.0")] public string? CopyText { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<string> OnCopy { get; set; }
+    [Parameter, Since("1.0.0")] public bool Editable { get; set; }
+    [Parameter, Since("1.0.0")] public string? EditText { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<string> EditTextChanged { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     private bool _copied;

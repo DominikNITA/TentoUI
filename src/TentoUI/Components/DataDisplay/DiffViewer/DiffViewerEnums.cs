@@ -1,6 +1,6 @@
 namespace TentoUI;
 
-[Since("1.1.0")]
+[Since("1.0.0")]
 public enum DiffLineType
 {
     Unchanged,
@@ -8,7 +8,7 @@ public enum DiffLineType
     Removed
 }
 
-[Since("1.1.0")]
+[Since("1.0.0")]
 public sealed record DiffLine(
     DiffLineType Type,
     int? OldLineNumber,

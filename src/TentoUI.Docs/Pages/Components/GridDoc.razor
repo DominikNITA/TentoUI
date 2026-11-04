@@ -1,66 +1,170 @@
 @page "/components/grid"
+@page "/v1.0/components/grid"
+@page "/v0.9/components/grid"
+@page "/next/components/grid"
 @namespace TentoUI.Docs.Pages.Components
 
-<PageTitle>Grid &amp; Space - TentoUI</PageTitle>
+<PageTitle>Grid - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="space-y-8 max-w-5xl">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Grid &amp; Space</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            24-column responsive grid layout based on Flexbox and uniform Spacing containers.
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Grid</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+            24-column responsive Flexbox grid system (<code class="font-mono text-primary-600 dark:text-primary-400">Row</code> and <code class="font-mono text-primary-600 dark:text-primary-400">Col</code>) with horizontal/vertical gutters, column offsets, alignment, and viewport breakpoints.
         </p>
     </div>
 
-    <DemoCard Title="24-Column Grid" Description="Standard AntDesign 24-column division using Row and Col with gutter spacing." Code="@_gridCode">
-        <Row Gutter="16" Class="w-full">
-            <Col Span="12">
-                <div class="p-3 text-center rounded bg-primary-100 dark:bg-primary-950/60 text-primary-700 dark:text-primary-300 font-semibold text-xs">
-                    col-12 (50%)
-                </div>
-            </Col>
-            <Col Span="12">
-                <div class="p-3 text-center rounded bg-primary-200 dark:bg-primary-900/60 text-primary-800 dark:text-primary-200 font-semibold text-xs">
-                    col-12 (50%)
-                </div>
-            </Col>
-        </Row>
+    <!-- 1. Basic 24-Column Grid -->
+    <DemoCard Title="24-Column Grid System"
+              Description="Divide rows into up to 24 proportional columns using Span (e.g., 24, 12+12, 8+8+8, 6+6+6+6)."
+              Code="@_basicGridCode">
+        <div class="space-y-3 text-center text-xs font-bold text-white">
+            <Row Gutter="12">
+                <Col Span="24"><div class="bg-primary-600 py-2.5 rounded-lg">col-24 (100%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="12"><div class="bg-primary-500 py-2.5 rounded-lg">col-12 (50%)</div></Col>
+                <Col Span="12"><div class="bg-primary-600 py-2.5 rounded-lg">col-12 (50%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="8"><div class="bg-primary-500 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+                <Col Span="8"><div class="bg-primary-600 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+                <Col Span="8"><div class="bg-primary-500 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="6"><div class="bg-primary-600 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-500 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-600 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-500 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+            </Row>
+        </div>
+    </DemoCard>
 
-        <Row Gutter="16" Class="w-full mt-3">
-            <Col Span="8">
-                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
-                    col-8 (33%)
-                </div>
-            </Col>
-            <Col Span="8">
-                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
-                    col-8 (33%)
-                </div>
-            </Col>
-            <Col Span="8">
-                <div class="p-3 text-center rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs">
-                    col-8 (33%)
-                </div>
-            </Col>
+    <!-- 2. Horizontal & Vertical Gutter -->
+    <DemoCard Title="Horizontal &amp; Vertical Gutter"
+              Description="Use Gutter for horizontal column spacing and VerticalGutter for vertical spacing when columns wrap onto multiple lines."
+              Code="@_gutterCode">
+        <Row Gutter="16" VerticalGutter="16" Class="text-center text-xs font-semibold text-white">
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6 (Row 2)</div></Col>
         </Row>
     </DemoCard>
 
-    <DemoCard Title="Space Container" Description="Set uniform spacing between inline or vertical child components." Code="@_spaceCode">
-        <Space Size="16" Wrap="true">
-            <Button Type="ButtonType.Primary">Button 1</Button>
-            <Button Type="ButtonType.Default">Button 2</Button>
-            <Button Type="ButtonType.Dashed">Button 3</Button>
-        </Space>
+    <!-- 3. Column Offset -->
+    <DemoCard Title="Column Offset"
+              Description="Shift columns to the right using Offset (in 24-column units)."
+              Code="@_offsetCode">
+        <div class="space-y-3 text-center text-xs font-semibold text-white">
+            <Row Gutter="12">
+                <Col Span="8"><div class="bg-emerald-600 py-2.5 rounded-lg">col-8</div></Col>
+                <Col Span="8" Offset="8"><div class="bg-emerald-500 py-2.5 rounded-lg">col-8 offset-8</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="6" Offset="6"><div class="bg-emerald-500 py-2.5 rounded-lg">col-6 offset-6</div></Col>
+                <Col Span="6" Offset="6"><div class="bg-emerald-600 py-2.5 rounded-lg">col-6 offset-6</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="12" Offset="6"><div class="bg-emerald-600 py-2.5 rounded-lg">col-12 offset-6 (Centered)</div></Col>
+            </Row>
+        </div>
     </DemoCard>
+
+    <!-- 4. Flex Alignment & Responsive Breakpoints -->
+    <DemoCard Title="Row Alignment &amp; Responsive Breakpoints"
+              Description="Align columns along the main and cross axes with Justify and Align, or set responsive spans via Xs, Sm, Md, Lg, Xl."
+              Code="@_responsiveCode">
+        <div class="space-y-4 text-center text-xs font-semibold text-white">
+            <Row Gutter="12" Justify="RowJustify.SpaceBetween" Align="RowAlign.Middle" Class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+                <Col Span="6"><div class="bg-sky-600 py-2 rounded-lg">col-6 (Short)</div></Col>
+                <Col Span="6"><div class="bg-sky-500 py-5 rounded-lg">col-6 (Tall)</div></Col>
+                <Col Span="6"><div class="bg-sky-600 py-3 rounded-lg">col-6 (Medium)</div></Col>
+            </Row>
+            <Row Gutter="12" VerticalGutter="12">
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-600 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-500 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-600 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="24" Lg="6"><div class="bg-purple-500 py-2.5 rounded-lg">Xs=24 Sm=12 Md=24 Lg=6</div></Col>
+            </Row>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Row Properties" ComponentType="@typeof(Row)" />
+
+    <ApiTable Title="Col Properties" ComponentType="@typeof(Col)" />
 </div>
 
 @code {
-    private const string _gridCode = @"<Row Gutter=""16"">
-    <Col Span=""12"">col-12</Col>
-    <Col Span=""12"">col-12</Col>
-</Row>";
+    private const string _basicGridCode = """
+        <div class="space-y-3 text-center text-xs font-bold text-white">
+            <Row Gutter="12">
+                <Col Span="24"><div class="bg-primary-600 py-2.5 rounded-lg">col-24 (100%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="12"><div class="bg-primary-500 py-2.5 rounded-lg">col-12 (50%)</div></Col>
+                <Col Span="12"><div class="bg-primary-600 py-2.5 rounded-lg">col-12 (50%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="8"><div class="bg-primary-500 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+                <Col Span="8"><div class="bg-primary-600 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+                <Col Span="8"><div class="bg-primary-500 py-2.5 rounded-lg">col-8 (33.3%)</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="6"><div class="bg-primary-600 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-500 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-600 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+                <Col Span="6"><div class="bg-primary-500 py-2.5 rounded-lg">col-6 (25%)</div></Col>
+            </Row>
+        </div>
+        """;
 
-    private const string _spaceCode = @"<Space Size=""16"" Wrap=""true"">
-    <Button Type=""ButtonType.Primary"">Button 1</Button>
-    <Button Type=""ButtonType.Default"">Button 2</Button>
-</Space>";
+    private const string _gutterCode = """
+        <Row Gutter="16" VerticalGutter="16" Class="text-center text-xs font-semibold text-white">
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-600 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+            <Col Span="6"><div class="bg-indigo-500 py-3 rounded-lg">col-6 (Row 2)</div></Col>
+        </Row>
+        """;
+
+    private const string _offsetCode = """
+        <div class="space-y-3 text-center text-xs font-semibold text-white">
+            <Row Gutter="12">
+                <Col Span="8"><div class="bg-emerald-600 py-2.5 rounded-lg">col-8</div></Col>
+                <Col Span="8" Offset="8"><div class="bg-emerald-500 py-2.5 rounded-lg">col-8 offset-8</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="6" Offset="6"><div class="bg-emerald-500 py-2.5 rounded-lg">col-6 offset-6</div></Col>
+                <Col Span="6" Offset="6"><div class="bg-emerald-600 py-2.5 rounded-lg">col-6 offset-6</div></Col>
+            </Row>
+            <Row Gutter="12">
+                <Col Span="12" Offset="6"><div class="bg-emerald-600 py-2.5 rounded-lg">col-12 offset-6 (Centered)</div></Col>
+            </Row>
+        </div>
+        """;
+
+    private const string _responsiveCode = """
+        <div class="space-y-4 text-center text-xs font-semibold text-white">
+            <Row Gutter="12" Justify="RowJustify.SpaceBetween" Align="RowAlign.Middle" Class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+                <Col Span="6"><div class="bg-sky-600 py-2 rounded-lg">col-6 (Short)</div></Col>
+                <Col Span="6"><div class="bg-sky-500 py-5 rounded-lg">col-6 (Tall)</div></Col>
+                <Col Span="6"><div class="bg-sky-600 py-3 rounded-lg">col-6 (Medium)</div></Col>
+            </Row>
+            <Row Gutter="12" VerticalGutter="12">
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-600 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-500 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="8" Lg="6"><div class="bg-purple-600 py-2.5 rounded-lg">Xs=24 Sm=12 Md=8 Lg=6</div></Col>
+                <Col Xs="24" Sm="12" Md="24" Lg="6"><div class="bg-purple-500 py-2.5 rounded-lg">Xs=24 Sm=12 Md=24 Lg=6</div></Col>
+            </Row>
+        </div>
+        """;
 }

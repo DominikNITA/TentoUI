@@ -7,52 +7,165 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Affix</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Pins an element or toolbar to a fixed position at the top or bottom of the viewport during page scrolling.
+            Pins toolbars, status banners, or action bars to a fixed offset inside their scrolling viewport so key actions remain visible while scrolling long content.
         </p>
     </div>
 
-    @* Example 1: Basic Affix (Top Offset) *@
-    <DemoCard Title="Affix Top Offset" Description="Fixes an action button when scrolling beyond the specified pixel offset." Code="@_topCode">
-        <div class="p-4">
-            <Affix OffsetTop="20">
-                <Button Type="ButtonType.Primary">
-                    Pinned Button (OffsetTop: 20px)
-                </Button>
+    <!-- 1. Top Affix Toolbar inside Scrollable Container -->
+    <DemoCard Title="Sticky Top Toolbar (Scroll Inside Container)"
+              Description="Scroll down inside the viewport below — the Affix toolbar stays pinned 12px from the top edge."
+              Code="@_topAffixCode">
+        <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-4">
+            <div class="text-xs text-slate-400">Scroll down to see the toolbar stick to the top...</div>
+
+            <Affix OffsetTop="8">
+                <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-primary-200 dark:border-primary-800 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <Badge Status="BadgeStatus.Processing" />
+                        <span class="text-xs font-bold text-slate-800 dark:text-white">Pinned Document Toolbar (OffsetTop="8")</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Button Size="ComponentSize.Small">Discard</Button>
+                        <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Publish Changes</Button>
+                    </div>
+                </div>
+            </Affix>
+
+            <div class="space-y-3 pt-2">
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">1. Executive Summary</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        As you scroll through this container, the Affix header remains anchored at the top with a subtle backdrop blur and elevation shadow.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">2. Architecture Overview</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Affix uses native CSS sticky positioning with configurable OffsetTop or OffsetBottom pixel thresholds, eliminating scroll jitter.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">3. Token Integration</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Combine Affix with Card, Flex, or Button groups to keep bulk-action bars accessible across long data tables or forms.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">4. Performance Benchmarks</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Zero JavaScript scroll listeners are required for standard sticky behavior, ensuring 60fps scrolling on both desktop and mobile.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </DemoCard>
+
+    <!-- 2. Bottom Affix Action Bar -->
+    <DemoCard Title="Sticky Bottom Action Bar (OffsetBottom)"
+              Description="Use OffsetBottom to pin a summary or bulk-action bar to the bottom edge of a scrollable container."
+              Code="@_bottomAffixCode">
+        <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-3">
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1042 — Enterprise License</div>
+                <p class="text-xs text-slate-500 mt-1">25 seats • Annual billing • Priority SLA included</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1043 — Cloud Runner Add-on</div>
+                <p class="text-xs text-slate-500 mt-1">Dedicated build agents • EU-Central region</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1044 — Security Audit Pack</div>
+                <p class="text-xs text-slate-500 mt-1">Automated SAST &amp; dependency scanning</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1045 — Custom SSO Connector</div>
+                <p class="text-xs text-slate-500 mt-1">SAML 2.0 + OIDC enterprise directory sync</p>
+            </div>
+
+            <Affix OffsetBottom="8">
+                <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-slate-900 text-white shadow-lg">
+                    <span class="text-xs font-semibold">4 items selected • Total: $2,480.00</span>
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Approve Selected</Button>
+                </div>
             </Affix>
         </div>
     </DemoCard>
 
-    @* Example 2: Affix Bottom *@
-    <DemoCard Title="Affix Bottom Offset" Description="Fixes a floating status bar near the bottom of the visible viewport." Code="@_bottomCode">
-        <div class="p-4">
-            <Affix OffsetBottom="20">
-                <Button Type="ButtonType.Default">
-                    Pinned to Bottom (OffsetBottom: 20px)
-                </Button>
-            </Affix>
-        </div>
-    </DemoCard>
-
-    <ApiTable Title="Affix Properties" Properties="@_props" />
+    <ApiTable Title="Affix Properties" ComponentType="@typeof(Affix)" />
 </div>
 
 @code {
-    private const string _topCode = """
-        <Affix OffsetTop="20">
-            <Button Type="ButtonType.Primary">Pinned Button (OffsetTop: 20px)</Button>
-        </Affix>
+    private const string _topAffixCode = """
+        <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-4">
+            <div class="text-xs text-slate-400">Scroll down to see the toolbar stick to the top...</div>
+
+            <Affix OffsetTop="8">
+                <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-primary-200 dark:border-primary-800 shadow-md">
+                    <div class="flex items-center gap-2">
+                        <Badge Status="BadgeStatus.Processing" />
+                        <span class="text-xs font-bold text-slate-800 dark:text-white">Pinned Document Toolbar (OffsetTop="8")</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <Button Size="ComponentSize.Small">Discard</Button>
+                        <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Publish Changes</Button>
+                    </div>
+                </div>
+            </Affix>
+
+            <div class="space-y-3 pt-2">
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">1. Executive Summary</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        As you scroll through this container, the Affix header remains anchored at the top with a subtle backdrop blur and elevation shadow.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">2. Architecture Overview</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Affix uses native CSS sticky positioning with configurable OffsetTop or OffsetBottom pixel thresholds, eliminating scroll jitter.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">3. Token Integration</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Combine Affix with Card, Flex, or Button groups to keep bulk-action bars accessible across long data tables or forms.
+                    </p>
+                </div>
+                <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">4. Performance Benchmarks</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Zero JavaScript scroll listeners are required for standard sticky behavior, ensuring 60fps scrolling on both desktop and mobile.
+                    </p>
+                </div>
+            </div>
+        </div>
         """;
 
-    private const string _bottomCode = """
-        <Affix OffsetBottom="20">
-            <Button Type="ButtonType.Default">Pinned to Bottom (OffsetBottom: 20px)</Button>
-        </Affix>
-        """;
+    private const string _bottomAffixCode = """
+        <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-3">
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1042 — Enterprise License</div>
+                <p class="text-xs text-slate-500 mt-1">25 seats • Annual billing • Priority SLA included</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1043 — Cloud Runner Add-on</div>
+                <p class="text-xs text-slate-500 mt-1">Dedicated build agents • EU-Central region</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1044 — Security Audit Pack</div>
+                <p class="text-xs text-slate-500 mt-1">Automated SAST &amp; dependency scanning</p>
+            </div>
+            <div class="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Order #1045 — Custom SSO Connector</div>
+                <p class="text-xs text-slate-500 mt-1">SAML 2.0 + OIDC enterprise directory sync</p>
+            </div>
 
-    private readonly ApiProp[] _props =
-    [
-        new("OffsetTop", "Pixels from top of viewport to trigger sticky affix.", "int?", "0"),
-        new("OffsetBottom", "Pixels from bottom of viewport to trigger sticky affix.", "int?", "null"),
-        new("ChildContent", "Element to affix.", "RenderFragment?", "null")
-    ];
+            <Affix OffsetBottom="8">
+                <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-slate-900 text-white shadow-lg">
+                    <span class="text-xs font-semibold">4 items selected • Total: $2,480.00</span>
+                    <Button Type="ButtonType.Primary" Size="ComponentSize.Small">Approve Selected</Button>
+                </div>
+            </Affix>
+        </div>
+        """;
 }

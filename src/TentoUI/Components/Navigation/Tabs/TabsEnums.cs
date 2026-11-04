@@ -45,6 +45,11 @@ public class TabsContext
     public void RegisterPane(TabPaneInfo pane)
     {
         var existing = _panes.FirstOrDefault(p => p.Key == pane.Key);
+        if (existing == pane)
+        {
+            return;
+        }
+
         if (existing != null)
         {
             _panes.Remove(existing);

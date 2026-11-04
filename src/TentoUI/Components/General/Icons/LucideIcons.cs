@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace TentoUI;
 
 public static class LucideIcons
@@ -58,9 +60,93 @@ public static class LucideIcons
         [IconNames.Folder] = "<path d=\"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z\"></path>"
     };
 
-    public static string GetPath(string iconName)
+    private static readonly Dictionary<string, string> s_allVariants = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string> s_canonicalNames = new(StringComparer.OrdinalIgnoreCase);
+
+    static LucideIcons()
     {
-        if (SvgPaths.TryGetValue(iconName, out var path))
+        // 1. Seed base paths
+        foreach (var (k, v) in SvgPaths)
+        {
+            s_allVariants[k] = v;
+            s_allVariants[k.Replace("-", "")] = v;
+            s_canonicalNames[k] = k;
+            s_canonicalNames[k.Replace("-", "")] = k;
+        }
+
+        // 2. Discover and register all fields from IconNames (PascalCase, prefixed, etc.)
+        var fields = typeof(IconNames)
+            .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+            .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string));
+
+        foreach (var field in fields)
+        {
+            var fieldName = field.Name;
+            var constValue = (string)field.GetRawConstantValue()!;
+
+            if (SvgPaths.TryGetValue(constValue, out var svg))
+            {
+                s_allVariants[fieldName] = svg;
+                s_allVariants[$"IconNames.{fieldName}"] = svg;
+                s_allVariants[$"@IconNames.{fieldName}"] = svg;
+                s_allVariants[fieldName.ToLowerInvariant()] = svg;
+
+                s_canonicalNames[fieldName] = constValue;
+                s_canonicalNames[$"IconNames.{fieldName}"] = constValue;
+                s_canonicalNames[$"@IconNames.{fieldName}"] = constValue;
+                s_canonicalNames[fieldName.ToLowerInvariant()] = constValue;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resolves an icon name from any notation (e.g. "IconNames.ChevronDown", "ChevronDown", "chevrondown", "chevron-down")
+    /// to its canonical Lucide icon identifier (e.g. "chevron-down").
+    /// </summary>
+    public static string ResolveIconName(string? rawName)
+    {
+        if (string.IsNullOrWhiteSpace(rawName)) return string.Empty;
+        var clean = rawName.Trim();
+
+        if (clean.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
+            clean = clean[11..];
+        else if (clean.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
+            clean = clean[10..];
+        else if (clean.StartsWith("@", StringComparison.Ordinal))
+            clean = clean[1..];
+
+        if (s_canonicalNames.TryGetValue(clean, out var canonical))
+            return canonical;
+
+        var noHyphens = clean.Replace("-", "").Replace("_", "");
+        if (s_canonicalNames.TryGetValue(noHyphens, out canonical))
+            return canonical;
+
+        return clean.ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Returns the SVG inner elements for the given icon name.
+    /// Resilient to prefixed, PascalCase, kebab-case, or un-hyphenated names.
+    /// </summary>
+    public static string GetPath(string? iconName)
+    {
+        if (string.IsNullOrWhiteSpace(iconName))
+            return "<circle cx=\"12\" cy=\"12\" r=\"10\"></circle>";
+
+        var clean = iconName.Trim();
+        if (clean.StartsWith("@IconNames.", StringComparison.OrdinalIgnoreCase))
+            clean = clean[11..];
+        else if (clean.StartsWith("IconNames.", StringComparison.OrdinalIgnoreCase))
+            clean = clean[10..];
+        else if (clean.StartsWith("@", StringComparison.Ordinal))
+            clean = clean[1..];
+
+        if (s_allVariants.TryGetValue(clean, out var path))
+            return path;
+
+        var normalized = clean.Replace("-", "").Replace("_", "");
+        if (s_allVariants.TryGetValue(normalized, out path))
             return path;
 
         // Fallback placeholder circle

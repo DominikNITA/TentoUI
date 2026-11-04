@@ -1,6 +1,6 @@
 namespace TentoUI;
 
-[Since("1.1.0")]
+[Since("1.0.0")]
 public enum GaugeStatus
 {
     Default,
@@ -9,7 +9,7 @@ public enum GaugeStatus
     Error
 }
 
-[Since("1.1.0")]
+[Since("1.0.0")]
 public sealed record MeterSegment(
     string Label,
     double Value,

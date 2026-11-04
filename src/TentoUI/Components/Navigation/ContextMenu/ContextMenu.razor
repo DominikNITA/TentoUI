@@ -1,23 +1,27 @@
 @namespace TentoUI
 @inherits TentoComponentBase
-@attribute [Since("1.1.0")]
+@using TentoUI.Extensibility
+@using Microsoft.AspNetCore.Components.Web
 
-<div class="@ComputedWrapperClass"
+<div class="@CssClass"
      style="@Style"
-     tabindex="0"
      @oncontextmenu="HandleContextMenuAsync"
      @oncontextmenu:preventDefault="true"
-     @onkeydown="HandleKeyDownAsync"
      @attributes="AdditionalAttributes">
     @ChildContent
 
-    @if (IsOpen && !Disabled)
+    @if (IsOpen)
     {
-        <div class="fixed inset-0 z-40" @onclick="CloseAsync"></div>
+        <div class="fixed inset-0 z-40"
+             @onclick="CloseAsync"
+             @oncontextmenu="HandleBackdropContextMenuAsync"
+             @oncontextmenu:preventDefault="true"></div>
         <div role="menu"
-             aria-label="Context menu"
-             class="tento-context-menu absolute z-50 min-w-[11rem] py-1 rounded-lg shadow-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none"
-             style="@($"left: {_x}px; top: {_y}px;")">
+             tabindex="-1"
+             aria-label="@AriaLabel"
+             style="@($"left: {_x}px; top: {_y}px;")"
+             @onkeydown="HandleKeyDownAsync"
+             class="tento-context-menu fixed z-50 min-w-[12rem] py-1 rounded-lg shadow-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none">
             @if (Overlay != null)
             {
                 @Overlay
@@ -26,22 +30,27 @@
             {
                 @foreach (var item in Items)
                 {
-                    if (item.DividerBefore)
+                    @if (item.DividerBefore)
                     {
-                        <div class="my-1 border-t border-slate-200 dark:border-slate-700" role="separator"></div>
+                        <div role="separator" class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
                     }
                     <button type="button"
                             role="menuitem"
                             disabled="@item.Disabled"
                             data-menu-key="@item.Key"
-                            class="@ComputeMenuItemClass(item)"
-                            @onclick="@(() => HandleItemClickAsync(item))"
-                            @onclick:stopPropagation="true">
-                        @if (!string.IsNullOrEmpty(item.Icon))
+                            @onclick="() => HandleItemClickAsync(item)"
+                            class="@GetItemClass(item)">
+                        <span class="flex items-center gap-2">
+                            @if (!string.IsNullOrEmpty(item.Icon))
+                            {
+                                <Icon Name="@item.Icon" Size="14" />
+                            }
+                            <span>@item.Label</span>
+                        </span>
+                        @if (!string.IsNullOrEmpty(item.Shortcut))
                         {
-                            <Icon Name="@item.Icon" Size="14" />
+                            <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500 ml-4">@item.Shortcut</span>
                         }
-                        <span>@item.Label</span>
                     </button>
                 }
             }
@@ -50,99 +59,73 @@
 </div>
 
 @code {
-    /// <summary>
-    /// Target content region that listens for right-click context menu events.
-    /// </summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter, Since("1.0.0")] public RenderFragment? Overlay { get; set; }
+    [Parameter, Since("1.0.0")] public IEnumerable<DropdownMenuItem>? Items { get; set; }
+    [Parameter, Since("1.0.0")] public string AriaLabel { get; set; } = "Context menu";
+    [Parameter, Since("1.0.0")] public bool Disabled { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<string> OnItemClick { get; set; }
+    [Parameter, Since("1.0.0")] public EventCallback<bool> OnOpenChange { get; set; }
 
-    /// <summary>
-    /// Custom menu overlay fragment when not using <see cref="Items"/>.
-    /// </summary>
-    [Parameter] public RenderFragment? Overlay { get; set; }
+    public bool IsOpen { get; private set; }
 
-    /// <summary>
-    /// Menu items displayed when the context menu opens.
-    /// </summary>
-    [Parameter] public IEnumerable<DropdownMenuItem>? Items { get; set; }
+    private double _x = 24;
+    private double _y = 24;
 
-    /// <summary>
-    /// Disables the context menu trigger when true.
-    /// </summary>
-    [Parameter] public bool Disabled { get; set; }
+    private string CssClass => new CssBuilder("tento-context-menu-trigger relative")
+        .AddClass(Class)
+        .Build();
 
-    /// <summary>
-    /// Controlled open state of the context menu.
-    /// </summary>
-    [Parameter] public bool Open { get; set; }
-
-    /// <summary>
-    /// Callback invoked when the open state changes.
-    /// </summary>
-    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
-
-    /// <summary>
-    /// Callback invoked with the selected item key when an item is clicked.
-    /// </summary>
-    [Parameter] public EventCallback<string> OnItemClick { get; set; }
-
-    private bool _internalOpen;
-    private double _x = 16;
-    private double _y = 16;
-
-    private bool IsOpen => OpenChanged.HasDelegate ? Open : (_internalOpen || Open);
-
-    private async Task SetOpenAsync(bool value)
-    {
-        if (Disabled) return;
-        _internalOpen = value;
-        Open = value;
-        if (OpenChanged.HasDelegate)
-        {
-            await OpenChanged.InvokeAsync(value);
-        }
-    }
+    private static string GetItemClass(DropdownMenuItem item) =>
+        new CssBuilder("tento-context-menu-item w-full text-left px-3 py-1.5 text-sm flex items-center justify-between gap-2 border-0 outline-none rounded-none transition-colors")
+            .AddClass("text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30", item.Danger && !item.Disabled)
+            .AddClass("text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800", !item.Danger && !item.Disabled)
+            .AddClass("opacity-50 cursor-not-allowed text-slate-400 dark:text-slate-600", item.Disabled)
+            .Build();
 
     private async Task HandleContextMenuAsync(MouseEventArgs e)
     {
         if (Disabled) return;
-        _x = Math.Max(8, e.OffsetX > 0 ? e.OffsetX : 24);
-        _y = Math.Max(8, e.OffsetY > 0 ? e.OffsetY : 24);
-        await SetOpenAsync(true);
+
+        _x = e.ClientX > 0 ? e.ClientX : (e.OffsetX > 0 ? e.OffsetX : 24);
+        _y = e.ClientY > 0 ? e.ClientY : (e.OffsetY > 0 ? e.OffsetY : 24);
+        IsOpen = true;
+        await OnOpenChange.InvokeAsync(true);
     }
 
-    private async Task CloseAsync() => await SetOpenAsync(false);
-
-    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    private async Task HandleBackdropContextMenuAsync(MouseEventArgs e)
     {
-        if (e.Key == "Escape" && IsOpen)
-        {
-            await CloseAsync();
-        }
-        else if ((e.Key == "ContextMenu" || (e.ShiftKey && e.Key == "F10")) && !Disabled)
-        {
-            _x = 24;
-            _y = 24;
-            await SetOpenAsync(!IsOpen);
-        }
+        // Right-clicking while open repositions the context menu to the new cursor coordinates
+        _x = e.ClientX > 0 ? e.ClientX : 24;
+        _y = e.ClientY > 0 ? e.ClientY : 24;
+        StateHasChanged();
+        await Task.CompletedTask;
     }
 
     private async Task HandleItemClickAsync(DropdownMenuItem item)
     {
         if (item.Disabled) return;
+
         if (OnItemClick.HasDelegate)
         {
             await OnItemClick.InvokeAsync(item.Key);
         }
-        await SetOpenAsync(false);
+
+        await CloseAsync();
     }
 
-    private string ComputedWrapperClass => new CssBuilder("tento-context-menu-trigger relative block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-md")
-        .AddClass(Class)
-        .Build();
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseAsync();
+        }
+    }
 
-    private static string ComputeMenuItemClass(DropdownMenuItem item) => new CssBuilder("tento-context-menu-item w-full px-3 py-2 text-xs flex items-center gap-2 text-left transition-colors")
-        .AddClass("text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30", item.Danger && !item.Disabled)
-        .AddClass("text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800", !item.Danger && !item.Disabled)
-        .AddClass("opacity-40 cursor-not-allowed text-slate-400", item.Disabled)
-        .Build();
+    public async Task CloseAsync()
+    {
+        if (!IsOpen) return;
+        IsOpen = false;
+        await OnOpenChange.InvokeAsync(false);
+    }
 }

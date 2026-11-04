@@ -32,21 +32,18 @@
     protected override void OnParametersSet()
     {
         if (_paneInfo == null) return;
-        if (_paneInfo.Key != Key ||
-            _paneInfo.Tab != Tab ||
-            _paneInfo.Disabled != Disabled ||
-            _paneInfo.Closable != Closable ||
-            _paneInfo.TabTemplate != TabTemplate ||
-            _paneInfo.Icon != Icon ||
-            _paneInfo.Content != ChildContent)
+        var changed = false;
+        if (_paneInfo.Key != Key) { _paneInfo.Key = Key; changed = true; }
+        if (_paneInfo.Tab != Tab) { _paneInfo.Tab = Tab; changed = true; }
+        if (_paneInfo.Disabled != Disabled) { _paneInfo.Disabled = Disabled; changed = true; }
+        if (_paneInfo.Closable != Closable) { _paneInfo.Closable = Closable; changed = true; }
+
+        _paneInfo.TabTemplate = TabTemplate;
+        _paneInfo.Icon = Icon;
+        _paneInfo.Content = ChildContent;
+
+        if (changed)
         {
-            _paneInfo.Key = Key;
-            _paneInfo.Tab = Tab;
-            _paneInfo.TabTemplate = TabTemplate;
-            _paneInfo.Icon = Icon;
-            _paneInfo.Disabled = Disabled;
-            _paneInfo.Closable = Closable;
-            _paneInfo.Content = ChildContent;
             TabsContext?.NotifyPaneUpdated();
         }
     }

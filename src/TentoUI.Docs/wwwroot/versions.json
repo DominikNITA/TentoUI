@@ -1,13 +1,23 @@
 [
   {
-    "version": "1.0.0",
-    "label": "v1.0.0",
-    "path": "/v1.0/",
+    "version": "1.0.1",
+    "label": "v1.0.1",
+    "path": "/",
     "isLatest": true,
     "isPreview": false,
     "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Current patch release (Icon spin speed, ContextMenu & docs enhancements)"
+  },
+  {
+    "version": "1.0.0",
+    "label": "v1.0.0",
+    "path": "/v1.0/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
     "releaseDate": "October 2026",
-    "notes": "Production General Availability (Current)"
+    "notes": "Production General Availability"
   },
   {
     "version": "1.1.0-preview",
@@ -17,7 +27,7 @@
     "isPreview": true,
     "isLegacy": false,
     "releaseDate": "November 2026",
-    "notes": "Next release with 12 new components & interactive tooling"
+    "notes": "Upcoming feature preview"
   },
   {
     "version": "0.9.0",

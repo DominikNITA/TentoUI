@@ -1,0 +1,140 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div id="@ElementId"
+     class="@ComputedClass"
+     style="@Style"
+     role="article"
+     aria-label="@($"Message from {Author ?? (Placement == ChatPlacement.End ? "User" : "Assistant")}")"
+     @attributes="AdditionalAttributes">
+    <div class="shrink-0">
+        <Avatar Text="@(GetInitials())" Src="@Avatar" Size="ComponentSize.Middle" Class="@(Placement == ChatPlacement.End ? "bg-primary-600 text-white" : "bg-slate-800 dark:bg-slate-700 text-white")" />
+    </div>
+
+    <div class="flex flex-col max-w-[80%] @(Placement == ChatPlacement.End ? "items-end" : "items-start")">
+        <div class="flex items-center gap-2 mb-1 text-xs text-slate-500 dark:text-slate-400">
+            @if (!string.IsNullOrWhiteSpace(Author))
+            {
+                <span class="font-semibold text-slate-700 dark:text-slate-200">@Author</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Timestamp))
+            {
+                <span>@Timestamp</span>
+            }
+        </div>
+
+        @if (ReasoningSteps is { Count: > 0 })
+        {
+            <div class="mb-2 w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/60 text-xs overflow-hidden">
+                <button type="button"
+                        class="w-full flex items-center justify-between px-3 py-1.5 font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+                        aria-expanded="@(_stepsOpen ? "true" : "false")"
+                        @onclick="() => _stepsOpen = !_stepsOpen">
+                    <span class="inline-flex items-center gap-1.5">
+                        <Icon Name="sparkles" Class="w-3.5 h-3.5 text-primary-500" />
+                        <span>Thought process (@ReasoningSteps.Count steps)</span>
+                    </span>
+                    <Icon Name="@(_stepsOpen ? "chevron-up" : "chevron-down")" Class="w-3.5 h-3.5" />
+                </button>
+                @if (_stepsOpen)
+                {
+                    <ol class="px-3 py-2 border-t border-slate-200 dark:border-slate-800 space-y-1 text-slate-600 dark:text-slate-400 list-decimal list-inside">
+                        @foreach (var step in ReasoningSteps)
+                        {
+                            <li>@step</li>
+                        }
+                    </ol>
+                }
+            </div>
+        }
+
+        <div class="@BubbleClass">
+            @if (Typing)
+            {
+                <div class="inline-flex items-center gap-1.5 py-1 px-1" aria-label="Typing indicator">
+                    <span class="w-2 h-2 rounded-full bg-current opacity-60 animate-bounce"></span>
+                    <span class="w-2 h-2 rounded-full bg-current opacity-60 animate-bounce [animation-delay:150ms]"></span>
+                    <span class="w-2 h-2 rounded-full bg-current opacity-60 animate-bounce [animation-delay:300ms]"></span>
+                </div>
+            }
+            else if (ChildContent is not null)
+            {
+                @ChildContent
+            }
+            else
+            {
+                <span>@Message</span>
+            }
+
+            @if (Streaming && !Typing)
+            {
+                <span class="inline-block w-1.5 h-4 ml-1 align-middle bg-primary-500 animate-pulse" aria-hidden="true"></span>
+            }
+        </div>
+
+        @if (ShowActions && !Typing)
+        {
+            <div class="flex items-center gap-1 mt-1 text-slate-400">
+                @if (!string.IsNullOrWhiteSpace(Message))
+                {
+                    <CopyButton Text="@Message" Size="ComponentSize.Small" Type="ButtonType.Text" />
+                }
+                <button type="button"
+                        class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer @(Feedback == ChatFeedback.Like ? "text-emerald-600 dark:text-emerald-400" : "hover:text-slate-600")"
+                        aria-label="Helpful"
+                        @onclick="() => HandleFeedback(ChatFeedback.Like)">
+                    <Icon Name="check" Class="w-3.5 h-3.5" />
+                </button>
+                <button type="button"
+                        class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer @(Feedback == ChatFeedback.Dislike ? "text-rose-600 dark:text-rose-400" : "hover:text-slate-600")"
+                        aria-label="Not helpful"
+                        @onclick="() => HandleFeedback(ChatFeedback.Dislike)">
+                    <Icon Name="close" Class="w-3.5 h-3.5" />
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _stepsOpen;
+
+    [Parameter] public string? Author { get; set; }
+    [Parameter] public string? Avatar { get; set; }
+    [Parameter] public string? Timestamp { get; set; }
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public ChatPlacement Placement { get; set; } = ChatPlacement.Start;
+    [Parameter] public bool Typing { get; set; }
+    [Parameter] public bool Streaming { get; set; }
+    [Parameter] public bool ShowActions { get; set; }
+    [Parameter] public IReadOnlyList<string>? ReasoningSteps { get; set; }
+    [Parameter] public ChatFeedback Feedback { get; set; } = ChatFeedback.None;
+    [Parameter] public EventCallback<ChatFeedback> OnFeedback { get; set; }
+
+    private string ComputedClass => new CssBuilder("flex gap-3 w-full")
+        .AddClass("flex-row-reverse", Placement == ChatPlacement.End)
+        .AddClass(Class)
+        .Build();
+
+    private string BubbleClass => new CssBuilder("px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-2xs")
+        .AddClass("bg-primary-600 text-white rounded-tr-xs", Placement == ChatPlacement.End)
+        .AddClass("bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-tl-xs", Placement == ChatPlacement.Start)
+        .Build();
+
+    private string GetInitials()
+    {
+        if (string.IsNullOrWhiteSpace(Author))
+            return Placement == ChatPlacement.End ? "U" : "AI";
+
+        return Author[..1].ToUpperInvariant();
+    }
+
+    private async Task HandleFeedback(ChatFeedback value)
+    {
+        Feedback = Feedback == value ? ChatFeedback.None : value;
+        if (OnFeedback.HasDelegate)
+            await OnFeedback.InvokeAsync(Feedback);
+    }
+}

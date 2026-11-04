@@ -1,12 +1,13 @@
-name: Deploy TentoUI Docs to GitHub Pages
+name: Deploy TentoUI Multi-Version Docs to GitHub Pages
 
 on:
   push:
     branches: [ master, main ]
+    tags: [ 'v*.*.*' ]
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,25 +24,87 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET 10 SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup Node.js & Tailwind CSS v4
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Minified Tailwind CSS & LLM Bundles
+        shell: pwsh
+        run: |
+          ./scripts/generate-tentoui-classes.ps1
+          ./scripts/generate-llms-txt.ps1
+          Push-Location src/TentoUI.Docs
+          npm ci
+          npm run css:build
+          Pop-Location
+
       - name: Publish Blazor WASM Docs
         run: |
           dotnet publish src/TentoUI.Docs/TentoUI.Docs.csproj -c Release -o output/wwwroot
 
-      - name: Configure for GitHub Pages (NoJekyll and Base Path)
+      - name: Assemble Multi-Version Site Structure (latest, next, vX.Y, versions.json)
         run: |
+          mkdir -p site-root
+          # Fetch existing gh-pages history if available so previous version folders are preserved
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages --depth=1
+            git archive origin/gh-pages | tar -x -C site-root || true
+          fi
+
+          # Determine base path: "/" if using a custom domain (CNAME exists), otherwise "/<repo-name>/"
+          REPO_NAME="${{ github.event.repository.name }}"
+          BASE_PATH="/$REPO_NAME"
+          if [ -f "output/wwwroot/wwwroot/CNAME" ]; then
+            BASE_PATH=""
+          fi
+
+          # Always copy current build to root for default entry and /next/
+          cp -r output/wwwroot/wwwroot/* site-root/
+          sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/\" />|g" site-root/index.html || true
+
+          mkdir -p site-root/next
+          cp -r output/wwwroot/wwwroot/* site-root/next/
+          sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/next/\" />|g" site-root/next/index.html || true
+
+          # If triggered by a release tag (e.g. v1.0.0), publish into /v1.0/ and /latest/
+          REF_NAME="${{ github.ref_name }}"
+          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+ ]]; then
+            MAJOR_MINOR=$(echo "$REF_NAME" | grep -oE '^v[0-9]+\.[0-9]+')
+            mkdir -p "site-root/$MAJOR_MINOR"
+            cp -r output/wwwroot/wwwroot/* "site-root/$MAJOR_MINOR/"
+            sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/$MAJOR_MINOR/\" />|g" "site-root/$MAJOR_MINOR/index.html" || true
+
+            mkdir -p site-root/latest
+            cp -r output/wwwroot/wwwroot/* site-root/latest/
+            sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/latest/\" />|g" site-root/latest/index.html || true
+          else
+            # Ensure /v1.0/ and /latest/ exist on initial deployment
+            if [ ! -d "site-root/v1.0" ]; then
+              mkdir -p site-root/v1.0
+              cp -r output/wwwroot/wwwroot/* site-root/v1.0/
+              sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/v1.0/\" />|g" site-root/v1.0/index.html || true
+            fi
+            mkdir -p site-root/latest
+            cp -r output/wwwroot/wwwroot/* site-root/latest/
+            sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/latest/\" />|g" site-root/latest/index.html || true
+          fi
+
           # Prevent GitHub Pages from ignoring files beginning with underscore (_framework, _content)
-          touch output/wwwroot/wwwroot/.nojekyll
+          touch site-root/.nojekyll
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: output/wwwroot/wwwroot
+          path: site-root
 
       - name: Deploy to GitHub Pages
         id: deployment

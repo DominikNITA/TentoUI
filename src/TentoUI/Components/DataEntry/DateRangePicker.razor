@@ -1,0 +1,304 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div class="tento-daterangepicker relative inline-flex items-center w-full"
+     @onkeydown="HandleKeyDownAsync"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+    <div role="group"
+         aria-label="Date range selector"
+         aria-expanded="@(_isOpen ? "true" : "false")"
+         class="@ComputeWrapperClass()"
+         @onclick="ToggleOpen">
+        <span class="text-slate-400 mr-2 inline-flex items-center shrink-0">
+            <Icon Name="@IconNames.Calendar" Size="15" />
+        </span>
+
+        <input type="text"
+               value="@FormattedStart"
+               placeholder="@PlaceholderStart"
+               disabled="@Disabled"
+               readonly="true"
+               aria-label="Start date"
+               class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none cursor-pointer" />
+
+        <span class="mx-2 text-slate-400 text-xs select-none" aria-hidden="true">→</span>
+
+        <input type="text"
+               value="@FormattedEnd"
+               placeholder="@PlaceholderEnd"
+               disabled="@Disabled"
+               readonly="true"
+               aria-label="End date"
+               class="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none cursor-pointer" />
+
+        @if (AllowClear && (StartDate.HasValue || EndDate.HasValue) && !Disabled)
+        {
+            <button type="button"
+                    aria-label="Clear date range"
+                    class="ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 shrink-0"
+                    @onclick:stopPropagation="true"
+                    @onclick="ClearRangeAsync">
+                <Icon Name="@IconNames.X" Size="14" />
+            </button>
+        }
+    </div>
+
+    @if (_isOpen && !Disabled)
+    {
+        <div class="fixed inset-0 z-40" @onclick="Close"></div>
+        <div role="dialog"
+             aria-modal="true"
+             aria-label="Date Range Calendar"
+             class="tento-daterangepicker-popover absolute left-0 top-full mt-1 z-50 flex flex-col sm:flex-row bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+            @if (ShowPresets)
+            {
+                <div class="tento-daterangepicker-presets border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-800 p-2.5 flex sm:flex-col gap-1 bg-slate-50/60 dark:bg-slate-950/40 min-w-[130px]">
+                    <div class="hidden sm:block px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Presets
+                    </div>
+                    @foreach (var preset in EffectivePresets)
+                    {
+                        <button type="button"
+                                class="text-left px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-primary-950/50 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                @onclick="@(() => ApplyPresetAsync(preset))">
+                            @preset.Label
+                        </button>
+                    }
+                </div>
+            }
+
+            <div class="p-4 w-72">
+                @* Month Navigation Header *@
+                <div class="flex items-center justify-between mb-3">
+                    <button type="button"
+                            aria-label="Previous month"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            @onclick="PrevMonth">
+                        <Icon Name="@IconNames.ChevronLeft" Size="15" />
+                    </button>
+                    <div class="text-sm font-semibold text-slate-800 dark:text-slate-100 select-none">
+                        @_viewDate.ToString("MMMM yyyy")
+                    </div>
+                    <button type="button"
+                            aria-label="Next month"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                            @onclick="NextMonth">
+                        <Icon Name="@IconNames.ChevronRight" Size="15" />
+                    </button>
+                </div>
+
+                @* Weekday Header *@
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-400 mb-1" role="row">
+                    <span role="columnheader">Su</span>
+                    <span role="columnheader">Mo</span>
+                    <span role="columnheader">Tu</span>
+                    <span role="columnheader">We</span>
+                    <span role="columnheader">Th</span>
+                    <span role="columnheader">Fr</span>
+                    <span role="columnheader">Sa</span>
+                </div>
+
+                @* Calendar Grid *@
+                <div class="grid grid-cols-7 gap-1" role="grid">
+                    @foreach (var day in CalendarDays)
+                    {
+                        var isCurrentMonth = day.Month == _viewDate.Month;
+                        var isEndpoint = (StartDate.HasValue && day.Date == StartDate.Value.Date) ||
+                                         (EndDate.HasValue && day.Date == EndDate.Value.Date);
+                        var isInRange = StartDate.HasValue && EndDate.HasValue &&
+                                        day.Date > StartDate.Value.Date && day.Date < EndDate.Value.Date;
+                        <button type="button"
+                                role="gridcell"
+                                aria-selected="@(isEndpoint || isInRange ? "true" : "false")"
+                                class="@ComputeDayClass(isCurrentMonth, isEndpoint, isInRange)"
+                                @onclick="@(() => SelectDayAsync(day))">
+                            @day.Day
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Selected start date of the range.
+    /// </summary>
+    [Parameter] public DateTime? StartDate { get; set; }
+
+    /// <summary>
+    /// Callback invoked when <see cref="StartDate"/> changes.
+    /// </summary>
+    [Parameter] public EventCallback<DateTime?> StartDateChanged { get; set; }
+
+    /// <summary>
+    /// Selected end date of the range.
+    /// </summary>
+    [Parameter] public DateTime? EndDate { get; set; }
+
+    /// <summary>
+    /// Callback invoked when <see cref="EndDate"/> changes.
+    /// </summary>
+    [Parameter] public EventCallback<DateTime?> EndDateChanged { get; set; }
+
+    /// <summary>
+    /// Callback invoked with the complete <see cref="DateRange"/> whenever the range is updated.
+    /// </summary>
+    [Parameter] public EventCallback<DateRange> OnRangeChange { get; set; }
+
+    /// <summary>
+    /// Date display format string (defaults to "yyyy-MM-dd").
+    /// </summary>
+    [Parameter] public string Format { get; set; } = "yyyy-MM-dd";
+
+    /// <summary>
+    /// Placeholder for the start date input.
+    /// </summary>
+    [Parameter] public string PlaceholderStart { get; set; } = "Start date";
+
+    /// <summary>
+    /// Placeholder for the end date input.
+    /// </summary>
+    [Parameter] public string PlaceholderEnd { get; set; } = "End date";
+
+    /// <summary>
+    /// Shows a clear button when a date range is selected.
+    /// </summary>
+    [Parameter] public bool AllowClear { get; set; } = true;
+
+    /// <summary>
+    /// Shows quick range presets sidebar in the popup.
+    /// </summary>
+    [Parameter] public bool ShowPresets { get; set; } = true;
+
+    /// <summary>
+    /// Custom range presets overriding the default quick presets.
+    /// </summary>
+    [Parameter] public IEnumerable<DateRangePreset>? Presets { get; set; }
+
+    /// <summary>
+    /// Disables user interaction when true.
+    /// </summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    private bool _isOpen;
+    private bool _selectingEnd;
+    private DateTime _viewDate = DateTime.Today;
+
+    private string FormattedStart => StartDate.HasValue ? StartDate.Value.ToString(Format) : string.Empty;
+    private string FormattedEnd => EndDate.HasValue ? EndDate.Value.ToString(Format) : string.Empty;
+
+    private IReadOnlyList<DateRangePreset> EffectivePresets => Presets?.ToList() ??
+    [
+        new("Today", DateTime.Today, DateTime.Today),
+        new("Last 7 Days", DateTime.Today.AddDays(-6), DateTime.Today),
+        new("Last 30 Days", DateTime.Today.AddDays(-29), DateTime.Today),
+        new("This Month", new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1), DateTime.Today)
+    ];
+
+    private void ToggleOpen()
+    {
+        if (Disabled) return;
+        _isOpen = !_isOpen;
+        if (_isOpen && StartDate.HasValue)
+        {
+            _viewDate = StartDate.Value;
+        }
+    }
+
+    private void Close() => _isOpen = false;
+
+    private void PrevMonth()
+    {
+        if (_viewDate.Year > 1 || _viewDate.Month > 1)
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddMonths(-1);
+    }
+
+    private void NextMonth()
+    {
+        if (_viewDate.Year < 9999 || _viewDate.Month < 12)
+            _viewDate = new DateTime(_viewDate.Year, _viewDate.Month, 1).AddMonths(1);
+    }
+
+    private async Task SelectDayAsync(DateTime day)
+    {
+        if (!_selectingEnd || !StartDate.HasValue || day.Date < StartDate.Value.Date)
+        {
+            StartDate = day.Date;
+            EndDate = null;
+            _selectingEnd = true;
+            await NotifyRangeAsync();
+        }
+        else
+        {
+            EndDate = day.Date;
+            _selectingEnd = false;
+            _isOpen = false;
+            await NotifyRangeAsync();
+        }
+    }
+
+    private async Task ApplyPresetAsync(DateRangePreset preset)
+    {
+        StartDate = preset.Start.Date;
+        EndDate = preset.End.Date;
+        _viewDate = StartDate.Value;
+        _selectingEnd = false;
+        _isOpen = false;
+        await NotifyRangeAsync();
+    }
+
+    private async Task ClearRangeAsync()
+    {
+        StartDate = null;
+        EndDate = null;
+        _selectingEnd = false;
+        await NotifyRangeAsync();
+    }
+
+    private async Task NotifyRangeAsync()
+    {
+        if (StartDateChanged.HasDelegate) await StartDateChanged.InvokeAsync(StartDate);
+        if (EndDateChanged.HasDelegate) await EndDateChanged.InvokeAsync(EndDate);
+        if (OnRangeChange.HasDelegate) await OnRangeChange.InvokeAsync(new DateRange(StartDate, EndDate));
+    }
+
+    private Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") _isOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private IEnumerable<DateTime> CalendarDays
+    {
+        get
+        {
+            var firstDay = new DateTime(_viewDate.Year, _viewDate.Month, 1);
+            var startOffset = (int)firstDay.DayOfWeek;
+            var startDate = (_viewDate.Year == 1 && _viewDate.Month == 1)
+                ? DateTime.MinValue
+                : firstDay.AddDays(-startOffset);
+            var maxDays = (int)(DateTime.MaxValue.Date - startDate).TotalDays;
+            var count = Math.Min(42, maxDays + 1);
+            for (var i = 0; i < count; i++)
+            {
+                yield return startDate.AddDays(i);
+            }
+        }
+    }
+
+    private string ComputeWrapperClass() => new CssBuilder("flex items-center w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1.5 shadow-sm min-h-[38px] cursor-pointer transition-all hover:border-primary-500")
+        .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", Disabled)
+        .AddClass(Class)
+        .Build();
+
+    private static string ComputeDayClass(bool isCurrentMonth, bool isEndpoint, bool isInRange) => new CssBuilder("h-8 w-8 text-xs rounded-md flex items-center justify-center font-medium transition-colors select-none")
+        .AddClass("bg-primary-500 text-white font-bold", isEndpoint)
+        .AddClass("bg-primary-100 dark:bg-primary-950/70 text-primary-700 dark:text-primary-300", isInRange && !isEndpoint)
+        .AddClass("text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800", isCurrentMonth && !isEndpoint && !isInRange)
+        .AddClass("text-slate-300 dark:text-slate-600", !isCurrentMonth && !isEndpoint && !isInRange)
+        .Build();
+}

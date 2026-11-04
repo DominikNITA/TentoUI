@@ -1,0 +1,210 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+@using System.Globalization
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    <svg role="img"
+         aria-label="@AriaLabel"
+         width="@Width"
+         height="@Height"
+         viewBox="@($"0 0 {Width} {Height}")"
+         class="@ComputedStrokeTextClass">
+        @if (Points.Count > 0)
+        {
+            @if (Type == SparklineType.Bar)
+            {
+                var count = Points.Count;
+                var gap = 2.0;
+                var barWidth = Math.Max(2.0, (Width - (gap * (count - 1))) / count);
+                @for (var i = 0; i < count; i++)
+                {
+                    var p = Points[i];
+                    var barHeight = Math.Max(2.0, Height - p.Y - 2);
+                    var x = i * (barWidth + gap);
+                    var y = Height - barHeight - 1;
+                    <rect x="@F(x)"
+                          y="@F(y)"
+                          width="@F(barWidth)"
+                          height="@F(barHeight)"
+                          rx="1.5"
+                          fill="currentColor"
+                          class="opacity-85 hover:opacity-100 transition-opacity" />
+                }
+            }
+            else
+            {
+                @if (Type == SparklineType.Area || ShowArea)
+                {
+                    <polygon points="@AreaPolygonPoints"
+                             fill="currentColor"
+                             class="opacity-15" />
+                }
+                <polyline fill="none"
+                          stroke="currentColor"
+                          stroke-width="@F(StrokeWidth)"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          points="@PolylinePoints" />
+                @if (ShowDots)
+                {
+                    @foreach (var pt in Points)
+                    {
+                        <circle cx="@F(pt.X)"
+                                cy="@F(pt.Y)"
+                                r="@F(StrokeWidth + 1)"
+                                fill="currentColor" />
+                    }
+                }
+            }
+        }
+    </svg>
+</div>
+
+@code {
+    /// <summary>
+    /// Visualization style: Line, Area, or Bar.
+    /// </summary>
+    [Parameter] public SparklineType Type { get; set; } = SparklineType.Line;
+
+    /// <summary>
+    /// Numeric data points rendered in the sparkline.
+    /// </summary>
+    [Parameter] public IEnumerable<double>? Data { get; set; }
+
+    /// <summary>
+    /// Comma-separated numeric values string (e.g. "12, 19, 15, 28, 24, 36").
+    /// </summary>
+    [Parameter] public string? Values { get; set; }
+
+    /// <summary>
+    /// Semantic color trend (Auto, Up/Success, Down/Error, Neutral/Primary).
+    /// </summary>
+    [Parameter] public SparklineTrend Trend { get; set; } = SparklineTrend.Auto;
+
+    /// <summary>
+    /// SVG width in pixels.
+    /// </summary>
+    [Parameter] public int Width { get; set; } = 120;
+
+    /// <summary>
+    /// SVG height in pixels.
+    /// </summary>
+    [Parameter] public int Height { get; set; } = 36;
+
+    /// <summary>
+    /// Line stroke width in pixels.
+    /// </summary>
+    [Parameter] public double StrokeWidth { get; set; } = 2.0;
+
+    /// <summary>
+    /// Renders data point circles along the line when true.
+    /// </summary>
+    [Parameter] public bool ShowDots { get; set; }
+
+    /// <summary>
+    /// Fills the area under the line when true.
+    /// </summary>
+    [Parameter] public bool ShowArea { get; set; }
+
+    /// <summary>
+    /// Accessible label describing the sparkline metric.
+    /// </summary>
+    [Parameter] public string AriaLabel { get; set; } = "Metric trend sparkline";
+
+    private record struct Point2D(double X, double Y);
+
+    private IReadOnlyList<double> EffectiveValues
+    {
+        get
+        {
+            if (Data != null)
+            {
+                var list = Data.ToList();
+                if (list.Count > 0) return list;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Values))
+            {
+                var parsed = new System.Collections.Generic.List<double>();
+                foreach (var part in Values.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                {
+                    if (double.TryParse(part, NumberStyles.Any, CultureInfo.InvariantCulture, out var v))
+                    {
+                        parsed.Add(v);
+                    }
+                }
+                if (parsed.Count > 0) return parsed;
+            }
+
+            return [12, 18, 15, 26, 22, 34, 42];
+        }
+    }
+
+    private IReadOnlyList<Point2D> Points
+    {
+        get
+        {
+            var vals = EffectiveValues;
+            if (vals.Count == 0) return [];
+
+            var min = vals.Min();
+            var max = vals.Max();
+            var range = Math.Max(0.0001, max - min);
+            var pad = 4.0;
+            var usableW = Math.Max(1.0, Width - pad * 2);
+            var usableH = Math.Max(1.0, Height - pad * 2);
+
+            var pts = new System.Collections.Generic.List<Point2D>(vals.Count);
+            for (var i = 0; i < vals.Count; i++)
+            {
+                var x = vals.Count == 1 ? Width / 2.0 : pad + (i / (double)(vals.Count - 1)) * usableW;
+                var normalized = (vals[i] - min) / range;
+                var y = pad + (1.0 - normalized) * usableH;
+                pts.Add(new Point2D(x, y));
+            }
+            return pts;
+        }
+    }
+
+    private string PolylinePoints => string.Join(" ", Points.Select(p => $"{F(p.X)},{F(p.Y)}"));
+
+    private string AreaPolygonPoints
+    {
+        get
+        {
+            var pts = Points;
+            if (pts.Count == 0) return string.Empty;
+            var firstX = F(pts[0].X);
+            var lastX = F(pts[^1].X);
+            var bottomY = F(Height - 2);
+            return $"{firstX},{bottomY} {PolylinePoints} {lastX},{bottomY}";
+        }
+    }
+
+    private static string F(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private SparklineTrend ResolvedTrend
+    {
+        get
+        {
+            if (Trend != SparklineTrend.Auto) return Trend;
+            var vals = EffectiveValues;
+            if (vals.Count < 2) return SparklineTrend.Neutral;
+            if (vals[^1] > vals[0]) return SparklineTrend.Up;
+            if (vals[^1] < vals[0]) return SparklineTrend.Down;
+            return SparklineTrend.Neutral;
+        }
+    }
+
+    private string ComputedStrokeTextClass => ResolvedTrend switch
+    {
+        SparklineTrend.Up => "text-emerald-500 dark:text-emerald-400",
+        SparklineTrend.Down => "text-red-500 dark:text-red-400",
+        _ => "text-primary-500 dark:text-primary-400"
+    };
+
+    private string ComputedWrapperClass => new CssBuilder("tento-sparkline inline-flex items-center")
+        .AddClass(Class)
+        .Build();
+}

@@ -1,0 +1,36 @@
+@page "/components/markdown-editor"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>MarkdownEditor - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">MarkdownEditor</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Rich Markdown authoring input with formatting toolbar, Write / Preview / Split view modes, and live word &amp; character counters.
+        </p>
+    </div>
+
+    <DemoCard Title="Interactive Split-View Markdown Editor" Description="@("Supports two-way @bind-Value and EditForm validation via TentoInputBase.")" Code="@_mdCode">
+        <MarkdownEditor @bind-Value="_content" @bind-Mode="_mode" Rows="7" />
+    </DemoCard>
+
+    <ApiTable Title="MarkdownEditor Properties" ComponentType="@typeof(MarkdownEditor)" />
+</div>
+
+@code {
+    private MarkdownEditorMode _mode = MarkdownEditorMode.Split;
+    private string? _content = """
+        # Release Notes v1.1.0
+        - Added **CodeBlock** and **DiffViewer** components
+        - Introduced **MarkdownEditor** with live split preview
+        > Built for .NET 10 and Tailwind CSS v4
+        """;
+
+    private const string _mdCode = """
+        <MarkdownEditor Mode="MarkdownEditorMode.Split" Rows="6" Value="# Hello TentoUI" />
+        """;
+}

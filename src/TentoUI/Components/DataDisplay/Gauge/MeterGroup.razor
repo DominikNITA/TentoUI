@@ -1,0 +1,112 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+@using System.Globalization
+
+@{
+    var segments = GetEffectiveSegments();
+    var sum = segments.Sum(s => Math.Max(0, s.Value));
+    var total = TotalCapacity > 0 ? TotalCapacity : Math.Max(100, sum);
+}
+
+<div id="@ElementId"
+     class="@ComputedClass"
+     style="@Style"
+     role="meter"
+     aria-valuemin="0"
+     aria-valuemax="@total"
+     aria-valuenow="@sum"
+     aria-label="@(Label ?? "Resource usage meter")"
+     @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrWhiteSpace(Label) || ShowSummary)
+    {
+        <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-semibold text-slate-700 dark:text-slate-200">@(Label ?? "Capacity")</span>
+            @if (ShowSummary)
+            {
+                <span class="text-slate-500 dark:text-slate-400 tabular-nums">@sum.ToString("0.#", CultureInfo.InvariantCulture) / @total.ToString("0.#", CultureInfo.InvariantCulture) @Unit</span>
+            }
+        </div>
+    }
+
+    <div class="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex gap-0.5 p-0.5">
+        @for (var i = 0; i < segments.Count; i++)
+        {
+            var seg = segments[i];
+            var pct = Math.Clamp(seg.Value / total * 100.0, 0, 100);
+            var color = !string.IsNullOrWhiteSpace(seg.ColorClass) ? seg.ColorClass : DefaultColors[i % DefaultColors.Length];
+            <div class="h-full first:rounded-l-full last:rounded-r-full transition-all duration-300 @color"
+                 style="width: @(pct.ToString("0.##", CultureInfo.InvariantCulture))%"
+                 title="@($"{seg.Label}: {seg.Value}{Unit}")"></div>
+        }
+    </div>
+
+    @if (ShowLegend && segments.Count > 0)
+    {
+        <div class="flex flex-wrap items-center gap-4 mt-2.5 text-xs text-slate-600 dark:text-slate-300">
+            @for (var i = 0; i < segments.Count; i++)
+            {
+                var seg = segments[i];
+                var color = !string.IsNullOrWhiteSpace(seg.ColorClass) ? seg.ColorClass : DefaultColors[i % DefaultColors.Length];
+                <div class="inline-flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-xs @color"></span>
+                    <span>@seg.Label</span>
+                    <span class="font-semibold text-slate-900 dark:text-white tabular-nums">(@seg.Value.ToString("0.#", CultureInfo.InvariantCulture)@Unit)</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly string[] DefaultColors =
+    [
+        "bg-primary-500",
+        "bg-emerald-500",
+        "bg-amber-500",
+        "bg-purple-500",
+        "bg-rose-500"
+    ];
+
+    [Parameter] public IReadOnlyList<MeterSegment>? Segments { get; set; }
+    /// <summary>
+    /// Shorthand string format: "System:35,Apps:25,Media:15".
+    /// </summary>
+    [Parameter] public string? SegmentsString { get; set; }
+    [Parameter] public double TotalCapacity { get; set; } = 100;
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Unit { get; set; } = "GB";
+    [Parameter] public bool ShowLegend { get; set; } = true;
+    [Parameter] public bool ShowSummary { get; set; } = true;
+
+    private string ComputedClass => new CssBuilder("w-full")
+        .AddClass(Class)
+        .Build();
+
+    private IReadOnlyList<MeterSegment> GetEffectiveSegments()
+    {
+        if (Segments is { Count: > 0 })
+            return Segments;
+
+        if (!string.IsNullOrWhiteSpace(SegmentsString))
+        {
+            var list = new List<MeterSegment>();
+            foreach (var item in SegmentsString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                var parts = item.Split(':', StringSplitOptions.TrimEntries);
+                if (parts.Length >= 2 && double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var val))
+                {
+                    list.Add(new MeterSegment(parts[0], val));
+                }
+            }
+            return list;
+        }
+
+        return
+        [
+            new MeterSegment("Compute", 42),
+            new MeterSegment("Storage", 24),
+            new MeterSegment("Cache", 12)
+        ];
+    }
+}

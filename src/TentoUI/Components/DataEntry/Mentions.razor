@@ -1,0 +1,308 @@
+@namespace TentoUI
+@inherits TentoInputBase<string?>
+@attribute [Since("1.1.0")]
+
+<div class="@ComputedWrapperClass" style="@Style" @onkeydown="HandleKeyDownAsync">
+    <div class="relative flex items-center w-full">
+        @if (Rows > 1)
+        {
+            <textarea id="@ElementId"
+                      rows="@Rows"
+                      value="@CurrentValueAsString"
+                      placeholder="@Placeholder"
+                      disabled="@IsDisabled"
+                      readonly="@ReadOnly"
+                      role="combobox"
+                      aria-expanded="@(_isOpen ? "true" : "false")"
+                      aria-controls="@_listboxId"
+                      aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+                      aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+                      class="@ComputeInputClass()"
+                      @oninput="HandleInputAsync"
+                      @attributes="AdditionalAttributes"></textarea>
+        }
+        else
+        {
+            <input id="@ElementId"
+                   type="text"
+                   value="@CurrentValueAsString"
+                   placeholder="@Placeholder"
+                   disabled="@IsDisabled"
+                   readonly="@ReadOnly"
+                   role="combobox"
+                   aria-expanded="@(_isOpen ? "true" : "false")"
+                   aria-controls="@_listboxId"
+                   aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+                   aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+                   class="@ComputeInputClass()"
+                   @oninput="HandleInputAsync"
+                   @attributes="AdditionalAttributes" />
+        }
+
+        @if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
+        {
+            <button type="button"
+                    aria-label="Clear mentions"
+                    class="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+                    @onclick="ClearAsync">
+                <Icon Name="@IconNames.X" Size="14" />
+            </button>
+        }
+    </div>
+
+    @if (_isOpen && FilteredOptions.Count > 0)
+    {
+        <ul id="@_listboxId"
+            role="listbox"
+            aria-label="Mention suggestions"
+            class="tento-mentions-dropdown absolute left-0 top-full mt-1 z-50 w-64 max-h-56 overflow-y-auto py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl">
+            @for (var i = 0; i < FilteredOptions.Count; i++)
+            {
+                var idx = i;
+                var opt = FilteredOptions[i];
+                var isHighlighted = idx == _highlightedIndex;
+                <li role="option"
+                    aria-selected="@(isHighlighted ? "true" : "false")"
+                    data-mention-value="@opt.Value"
+                    class="@ComputeOptionClass(isHighlighted, opt.Disabled)"
+                    @onmouseenter="@(() => _highlightedIndex = idx)"
+                    @onclick="@(() => SelectOptionAsync(opt))">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 text-[10px] font-bold flex items-center justify-center shrink-0">
+                            @(opt.EffectiveLabel.Length > 0 ? char.ToUpperInvariant(opt.EffectiveLabel[0]).ToString() : "@")
+                        </span>
+                        <div class="min-w-0">
+                            <div class="text-xs font-medium truncate">@opt.EffectiveLabel</div>
+                            @if (!string.IsNullOrEmpty(opt.Description))
+                            {
+                                <div class="text-[10px] text-slate-400 truncate">@opt.Description</div>
+                            }
+                        </div>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Structured mention options displayed when a trigger prefix is typed.
+    /// </summary>
+    [Parameter] public IEnumerable<MentionOption>? Options { get; set; }
+
+    /// <summary>
+    /// Comma-separated list of simple mention handles (e.g. "alice, bob, charlie").
+    /// </summary>
+    [Parameter] public string? OptionsString { get; set; }
+
+    /// <summary>
+    /// Trigger character prefix that activates the suggestion popup (defaults to "@").
+    /// </summary>
+    [Parameter] public string Prefix { get; set; } = "@";
+
+    /// <summary>
+    /// Optional multiple trigger prefixes (e.g. ["@", "#"]).
+    /// </summary>
+    [Parameter] public string[]? Prefixes { get; set; }
+
+    /// <summary>
+    /// Number of text rows. Renders a single-line input when 1, or a textarea when greater than 1.
+    /// </summary>
+    [Parameter] public int Rows { get; set; } = 1;
+
+    /// <summary>
+    /// Input placeholder text.
+    /// </summary>
+    [Parameter] public string? Placeholder { get; set; } = "Type @ to mention someone...";
+
+    /// <summary>
+    /// Shows a clear button when text is non-empty.
+    /// </summary>
+    [Parameter] public bool AllowClear { get; set; }
+
+    /// <summary>
+    /// Callback invoked when a mention option is chosen from the popup.
+    /// </summary>
+    [Parameter] public EventCallback<MentionOption> OnSelect { get; set; }
+
+    private readonly string _listboxId = $"tento-mentions-listbox-{Guid.NewGuid():N}";
+    private bool _isOpen;
+    private string _activePrefix = "@";
+    private string _query = string.Empty;
+    private int _triggerIndex = -1;
+    private int _highlightedIndex;
+
+    private IReadOnlyList<MentionOption> AllOptions
+    {
+        get
+        {
+            if (Options != null) return Options.ToList();
+            if (!string.IsNullOrWhiteSpace(OptionsString))
+            {
+                return OptionsString
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => new MentionOption(s, s))
+                    .ToList();
+            }
+            return
+            [
+                new("dominik", "Dominik (Lead)"),
+                new("sarah", "Sarah (Design)"),
+                new("alex", "Alex (Platform)"),
+                new("elena", "Elena (QA)")
+            ];
+        }
+    }
+
+    private IReadOnlyList<MentionOption> FilteredOptions
+    {
+        get
+        {
+            var all = AllOptions;
+            if (string.IsNullOrWhiteSpace(_query)) return all;
+            return all.Where(o =>
+                o.Value.Contains(_query, StringComparison.OrdinalIgnoreCase) ||
+                o.EffectiveLabel.Contains(_query, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
+    private string[] EffectivePrefixes => (Prefixes is { Length: > 0 }) ? Prefixes : [Prefix];
+
+    private Task HandleInputAsync(ChangeEventArgs e)
+    {
+        var text = e.Value?.ToString() ?? string.Empty;
+        CurrentValueAsString = text;
+        DetectTrigger(text);
+        return Task.CompletedTask;
+    }
+
+    private void DetectTrigger(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            _isOpen = false;
+            return;
+        }
+
+        int bestIdx = -1;
+        string matchedPrefix = Prefix;
+
+        foreach (var p in EffectivePrefixes)
+        {
+            if (string.IsNullOrEmpty(p)) continue;
+            var idx = text.LastIndexOf(p, StringComparison.Ordinal);
+            if (idx > bestIdx && (idx == 0 || char.IsWhiteSpace(text[idx - 1])))
+            {
+                var candidateQuery = text[(idx + p.Length)..];
+                if (!candidateQuery.Any(char.IsWhiteSpace))
+                {
+                    bestIdx = idx;
+                    matchedPrefix = p;
+                }
+            }
+        }
+
+        if (bestIdx >= 0)
+        {
+            _triggerIndex = bestIdx;
+            _activePrefix = matchedPrefix;
+            _query = text[(bestIdx + matchedPrefix.Length)..];
+            _isOpen = true;
+            _highlightedIndex = 0;
+        }
+        else
+        {
+            _isOpen = false;
+        }
+    }
+
+    private async Task SelectOptionAsync(MentionOption option)
+    {
+        if (option.Disabled) return;
+
+        var current = CurrentValue ?? string.Empty;
+        if (_triggerIndex >= 0 && _triggerIndex <= current.Length)
+        {
+            var before = current[.._triggerIndex];
+            CurrentValueAsString = $"{before}{_activePrefix}{option.Value} ";
+        }
+        else
+        {
+            CurrentValueAsString = $"{current}{_activePrefix}{option.Value} ";
+        }
+
+        _isOpen = false;
+        if (OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(option);
+        }
+    }
+
+    private Task ClearAsync()
+    {
+        CurrentValueAsString = string.Empty;
+        _isOpen = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (!_isOpen) return;
+
+        var opts = FilteredOptions;
+        if (e.Key == "Escape")
+        {
+            _isOpen = false;
+        }
+        else if (e.Key == "ArrowDown" && opts.Count > 0)
+        {
+            _highlightedIndex = (_highlightedIndex + 1) % opts.Count;
+        }
+        else if (e.Key == "ArrowUp" && opts.Count > 0)
+        {
+            _highlightedIndex = (_highlightedIndex - 1 + opts.Count) % opts.Count;
+        }
+        else if (e.Key == "Enter" && opts.Count > 0)
+        {
+            if (_highlightedIndex >= 0 && _highlightedIndex < opts.Count)
+            {
+                await SelectOptionAsync(opts[_highlightedIndex]);
+            }
+        }
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string? result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-mentions relative w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeInputClass()
+    {
+        var size = ResolvedSize(Size);
+        var sizeClass = size switch
+        {
+            ComponentSize.Small => "px-2.5 py-1 text-xs",
+            ComponentSize.Large => "px-4 py-2.5 text-base",
+            _ => "px-3 py-1.5 text-sm"
+        };
+
+        return new CssBuilder("tento-mentions-input w-full rounded-md border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-colors")
+            .AddClass(sizeClass)
+            .AddClass(GetStatusBorderClass())
+            .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
+            .Build();
+    }
+
+    private static string ComputeOptionClass(bool isHighlighted, bool isDisabled) => new CssBuilder("tento-mentions-option px-3 py-1.5 cursor-pointer transition-colors")
+        .AddClass("bg-primary-50 dark:bg-primary-950/50 text-primary-700 dark:text-primary-300", isHighlighted && !isDisabled)
+        .AddClass("text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800", !isHighlighted && !isDisabled)
+        .AddClass("opacity-40 cursor-not-allowed", isDisabled)
+        .Build();
+}

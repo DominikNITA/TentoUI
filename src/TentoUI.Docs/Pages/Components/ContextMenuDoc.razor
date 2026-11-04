@@ -1,0 +1,44 @@
+@page "/components/context-menu"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>ContextMenu - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">ContextMenu</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Right-click floating menu region supporting keyboard ContextMenu / Shift+F10 triggers, icons, dividers, and destructive actions.
+        </p>
+    </div>
+
+    <DemoCard Title="Right-Click Context Region" Description="Right-click anywhere inside the dashed target box (or focus and press Shift+F10)." Code="@_ctxCode">
+        <ContextMenu Items="@_menuItems" OnItemClick="@(key => MessageService.Info($"Selected context action: {key}"))">
+            <div class="p-8 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-100/60 dark:bg-slate-900/50 text-center text-xs text-slate-500 dark:text-slate-400 select-none">
+                Right-click anywhere in this zone to open the ContextMenu
+            </div>
+        </ContextMenu>
+    </DemoCard>
+
+    <ApiTable Title="ContextMenu Properties" ComponentType="@typeof(ContextMenu)" />
+</div>
+
+@code {
+    private readonly DropdownMenuItem[] _menuItems =
+    [
+        new("copy", "Copy Selection", IconNames.Copy),
+        new("edit", "Rename File", IconNames.Edit2),
+        new("delete", "Delete Item", IconNames.Trash2, Danger: true, DividerBefore: true)
+    ];
+
+    private const string _ctxCode = """
+        <ContextMenu>
+            <div class="p-8 rounded-xl border-2 border-dashed border-slate-300 text-center text-xs text-slate-500">
+                Right-click anywhere in this zone to open the ContextMenu
+            </div>
+        </ContextMenu>
+        """;
+}

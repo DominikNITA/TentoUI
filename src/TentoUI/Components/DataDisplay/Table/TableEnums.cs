@@ -28,6 +28,14 @@ public enum ColumnFilterMode
     Custom
 }
 
+[Since("1.1.0")]
+public enum ColumnFixed
+{
+    None,
+    Left,
+    Right
+}
+
 public record ColumnFilterOption(string Label, string Value);
 
 public record TableQueryState(
@@ -76,6 +84,8 @@ public abstract class ColumnBase<TItem> : ComponentBase, IDisposable
     [Parameter] public string? HeaderClass { get; set; }
     [Parameter] public string? CellClass { get; set; }
     [Parameter] public string? Format { get; set; }
+    [Parameter, Since("1.1.0")] public ColumnFixed Fixed { get; set; } = ColumnFixed.None;
+    [Parameter, Since("1.1.0")] public bool Resizable { get; set; }
 
     // Custom cell display
     [Parameter] public RenderFragment<TItem>? CellTemplate { get; set; }
@@ -205,10 +215,16 @@ public class PropertyColumn<TItem, TProp> : ColumnBase<TItem>
 public class TemplateColumn<TItem> : ColumnBase<TItem>
 {
     [Parameter] public Func<TItem, object?>? Property { get; set; }
+    [Parameter, Since("1.1.0")] public string? Field { get; set; }
 
     public override object? GetValue(TItem item)
     {
         if (Property != null && item != null) return Property(item);
+        if (!string.IsNullOrWhiteSpace(Field) && item != null)
+        {
+            var prop = item.GetType().GetProperty(Field, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase);
+            if (prop != null) return prop.GetValue(item);
+        }
         if (SortBy != null && item != null) return SortBy(item);
         if (FilterBy != null && item != null) return FilterBy(item);
         return null;
@@ -233,7 +249,7 @@ public class TemplateColumn<TItem> : ColumnBase<TItem>
 
 /// <summary>
 /// Unified manual column component allowing users to define how a column is displayed
-/// (via <see cref="Property"/>, <see cref="ColumnBase{TItem}.Format"/>, or custom <see cref="ColumnBase{TItem}.ChildContent"/> / <see cref="ColumnBase{TItem}.CellTemplate"/>)
+/// (via <see cref="TemplateColumn{TItem}.Property"/>, <see cref="ColumnBase{TItem}.Format"/>, or custom <see cref="ColumnBase{TItem}.ChildContent"/> / <see cref="ColumnBase{TItem}.CellTemplate"/>)
 /// and whether the table is sortable or filterable by this column.
 /// </summary>
 public class TableColumn<TItem> : TemplateColumn<TItem>

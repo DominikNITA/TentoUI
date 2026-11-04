@@ -6,7 +6,7 @@
         <div class="relative">
             <input type="text"
                    value="@_searchTerm"
-                   placeholder="Search 65+ components..."
+                   placeholder="Search 75+ components..."
                    class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                    @oninput="@(e => _searchTerm = e.Value?.ToString() ?? string.Empty)" />
             <Icon Name="@IconNames.Search" Size="14" Class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -50,7 +50,7 @@
     public record NavItem(string Label, string Href, string? Tag = null);
     public record NavSection(string Title, NavItem[] Items);
 
-    private readonly NavSection[] _sections =
+    public static readonly NavSection[] AllSections =
     [
         new("Overview",
         [
@@ -71,22 +71,28 @@
         new("General",
         [
             new("Button", "components/button"),
+            new("CopyButton", "components/copy-button", "New"),
             new("FloatButton", "components/float-button"),
             new("Icon", "components/icon"),
+            new("Kbd & Hotkeys", "components/kbd", "New"),
             new("Typography", "components/typography"),
             new("Divider", "components/divider")
         ]),
         new("Layout",
         [
+            new("Flex", "components/flex", "New"),
             new("Grid", "components/grid"),
             new("Layout", "components/layout"),
-            new("Space", "components/space")
+            new("Space", "components/space"),
+            new("Splitter", "components/splitter", "New")
         ]),
         new("Navigation",
         [
             new("Affix", "components/affix"),
             new("Anchor", "components/anchor"),
             new("Breadcrumb", "components/breadcrumb"),
+            new("CommandPalette", "components/command-palette", "New"),
+            new("ContextMenu", "components/context-menu", "New"),
             new("Dropdown", "components/dropdown"),
             new("Menu", "components/menu"),
             new("Pagination", "components/pagination"),
@@ -96,20 +102,29 @@
         new("Data Entry",
         [
             new("AutoComplete", "components/autocomplete"),
+            new("AvatarUpload", "components/avatar-upload", "New"),
             new("Cascader", "components/cascader"),
             new("Checkbox", "components/checkbox"),
             new("ColorPicker", "components/color-picker"),
+            new("CronBuilder", "components/cron-builder", "New"),
             new("DatePicker", "components/date-picker"),
+            new("DateRangePicker", "components/date-range-picker", "New"),
+            new("FilterBuilder", "components/filter-builder", "New"),
             new("Form", "components/form"),
             new("Input", "components/input"),
             new("InputNumber", "components/input-number"),
+            new("MarkdownEditor", "components/markdown-editor", "New"),
+            new("Mentions", "components/mentions", "New"),
+            new("OTPInput", "components/otp-input", "New"),
             new("Radio", "components/radio"),
             new("Rate", "components/rate"),
             new("Select", "components/select"),
+            new("SignaturePad", "components/signature-pad", "New"),
             new("Slider", "components/slider"),
             new("Switch", "components/switch"),
             new("TextArea", "components/textarea"),
             new("TimePicker", "components/time-picker"),
+            new("TimeRangePicker", "components/time-range-picker", "New"),
             new("Transfer", "components/transfer"),
             new("TreeSelect", "components/tree-select"),
             new("Upload", "components/upload")
@@ -121,14 +136,22 @@
             new("Calendar", "components/calendar"),
             new("Card", "components/card"),
             new("Carousel", "components/carousel"),
+            new("Chat & PromptInput", "components/chat", "AI"),
+            new("CodeBlock", "components/code-block", "New"),
             new("Collapse", "components/collapse"),
+            new("DataGridVirtual", "components/datagrid-virtual", "New"),
             new("Descriptions", "components/descriptions"),
+            new("DiffViewer", "components/diff-viewer", "New"),
             new("Empty", "components/empty"),
+            new("Gauge & MeterGroup", "components/gauge", "New"),
             new("Image", "components/image"),
+            new("ImagePreviewGroup", "components/image-preview-group", "New"),
+            new("KanbanBoard", "components/kanban", "New"),
             new("List", "components/list"),
             new("Popover", "components/popover"),
             new("QRCode", "components/qrcode"),
             new("Segmented", "components/segmented"),
+            new("Sparkline", "components/sparkline", "New"),
             new("Statistic", "components/statistic"),
             new("Table", "components/table", "Popular"),
             new("Tag", "components/tag"),
@@ -157,8 +180,8 @@
     {
         get
         {
-            if (string.IsNullOrWhiteSpace(_searchTerm)) return _sections;
-            return _sections
+            if (string.IsNullOrWhiteSpace(_searchTerm)) return AllSections;
+            return AllSections
                 .Select(s => new NavSection(s.Title, s.Items.Where(i => i.Label.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase)).ToArray()))
                 .Where(s => s.Items.Length > 0);
         }

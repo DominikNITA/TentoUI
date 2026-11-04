@@ -1,0 +1,161 @@
+@namespace TentoUI
+@inherits TentoInputBase<string?>
+@attribute [Since("1.1.0")]
+
+<div id="@ElementId"
+     role="group"
+     aria-label="@AriaLabel"
+     aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+     aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+     class="@ComputedWrapperClass"
+     style="@Style"
+     @attributes="AdditionalAttributes">
+    @for (var i = 0; i < EffectiveLength; i++)
+    {
+        var index = i;
+        if (ShowSeparator && index > 0 && index == EffectiveLength / 2)
+        {
+            <span class="tento-otp-separator text-slate-400 dark:text-slate-500 font-bold select-none px-0.5" aria-hidden="true">
+                @Separator
+            </span>
+        }
+        <input type="@(Mask ? "password" : "text")"
+               inputmode="numeric"
+               maxlength="@EffectiveLength"
+               disabled="@IsDisabled"
+               readonly="@ReadOnly"
+               value="@GetCharAt(index)"
+               aria-label="@($"Digit {index + 1} of {EffectiveLength}")"
+               data-otp-index="@index"
+               class="@ComputeSlotClass()"
+               @oninput="@(e => HandleSlotInputAsync(index, e))"
+               @onkeydown="@(e => HandleSlotKeyDownAsync(index, e))" />
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Number of verification character slots (clamped between 1 and 12, defaults to 6).
+    /// </summary>
+    [Parameter] public int Length { get; set; } = 6;
+
+    /// <summary>
+    /// Masks entered characters as password dots when true.
+    /// </summary>
+    [Parameter] public bool Mask { get; set; }
+
+    /// <summary>
+    /// Renders a visual separator in the middle of the OTP slots when true.
+    /// </summary>
+    [Parameter] public bool ShowSeparator { get; set; }
+
+    /// <summary>
+    /// Separator character displayed when <see cref="ShowSeparator"/> is true.
+    /// </summary>
+    [Parameter] public string Separator { get; set; } = "-";
+
+    /// <summary>
+    /// Accessible group label for screen readers.
+    /// </summary>
+    [Parameter] public string AriaLabel { get; set; } = "One-time verification code";
+
+    /// <summary>
+    /// Callback invoked as soon as all slots are filled.
+    /// </summary>
+    [Parameter] public EventCallback<string> OnComplete { get; set; }
+
+    private int EffectiveLength => Math.Clamp(Length, 1, 12);
+
+    private string GetCharAt(int index)
+    {
+        var val = CurrentValue ?? string.Empty;
+        return index >= 0 && index < val.Length && val[index] != ' '
+            ? val[index].ToString()
+            : string.Empty;
+    }
+
+    private async Task HandleSlotInputAsync(int index, ChangeEventArgs e)
+    {
+        if (IsDisabled || ReadOnly) return;
+
+        var raw = e.Value?.ToString() ?? string.Empty;
+        var chars = new char[EffectiveLength];
+        var existing = CurrentValue ?? string.Empty;
+        for (var i = 0; i < EffectiveLength; i++)
+        {
+            chars[i] = i < existing.Length ? existing[i] : ' ';
+        }
+
+        if (string.IsNullOrEmpty(raw))
+        {
+            chars[index] = ' ';
+        }
+        else if (raw.Length > 1)
+        {
+            // Handle multi-character paste into a slot
+            var paste = raw.Trim();
+            for (var p = 0; p < paste.Length && (index + p) < EffectiveLength; p++)
+            {
+                chars[index + p] = paste[p];
+            }
+        }
+        else
+        {
+            chars[index] = raw[0];
+        }
+
+        var updated = new string(chars).TrimEnd();
+        CurrentValueAsString = updated;
+
+        var trimmedComplete = updated.Replace(" ", "");
+        if (trimmedComplete.Length == EffectiveLength && OnComplete.HasDelegate)
+        {
+            await OnComplete.InvokeAsync(trimmedComplete);
+        }
+    }
+
+    private Task HandleSlotKeyDownAsync(int index, KeyboardEventArgs e)
+    {
+        if (IsDisabled || ReadOnly) return Task.CompletedTask;
+
+        if (e.Key == "Backspace")
+        {
+            var chars = (CurrentValue ?? string.Empty).PadRight(EffectiveLength).ToCharArray();
+            if (index >= 0 && index < chars.Length)
+            {
+                chars[index] = ' ';
+                CurrentValueAsString = new string(chars).TrimEnd();
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string? result, out string validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = string.Empty;
+        return true;
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-otp-input inline-flex items-center gap-2")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputeSlotClass()
+    {
+        var size = ResolvedSize(Size);
+        var sizeClass = size switch
+        {
+            ComponentSize.Small => "w-8 h-8 text-xs",
+            ComponentSize.Large => "w-12 h-12 text-lg",
+            _ => "w-10 h-10 text-sm"
+        };
+
+        return new CssBuilder("tento-otp-slot text-center font-mono font-bold rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500")
+            .AddClass(sizeClass)
+            .AddClass(GetStatusBorderClass())
+            .AddClass("opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800", IsDisabled)
+            .Build();
+    }
+}

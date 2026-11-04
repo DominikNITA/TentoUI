@@ -4,8 +4,10 @@
 
 ## Overview
 - Framework: .NET 10 Blazor (InteractiveServer, InteractiveWebAssembly, InteractiveAuto)
-- Styling: Tailwind CSS v4 CSS-first engine with `@theme` bridge and design tokens
-- Component Catalog: 65+ components (General, Layout, Navigation, Data Entry, Data Display, Feedback)
+- Styling: Tailwind CSS v4 CSS-first engine with `@theme` bridge and design tokens (`--tento-*`)
+- Component Catalog: 75+ components (General, Layout, Navigation, Data Entry, Data Display, Feedback)
+- Full LLM Reference: `/llms-full.txt`
+- Version Manifest: `/versions.json`
 
 ## Quick Start
 ```bash
@@ -55,10 +57,10 @@ dotnet msbuild -t:TentoUIInstallSkills
 This unpacks `tentoui-components` and `tentoui-tailwind-setup` skills for AI agents.
 
 ## Core Component Types & References
-- Buttons: Button, FloatButton, BackTop
-- Typography: Title, Text, Paragraph, Link
-- Layout: Grid (Row, Col), Layout (Header, Sider, Content, Footer), Space, Divider
-- Navigation: Menu, Dropdown, Tabs, Pagination, Steps, Breadcrumb, Anchor, Affix
-- Data Entry: Input, InputNumber, TextArea, Select, AutoComplete, Checkbox, Radio, Switch, DatePicker, TimePicker, ColorPicker, Slider, Rate, Upload, Transfer, Cascader, TreeSelect, Form
-- Data Display: Table, Card, List, Descriptions, Tree, Collapse, Carousel, Image, Calendar, Badge, Avatar, Tag, Statistic, QRCode, Segmented, Watermark, Empty, Popover, Tooltip
+- Buttons & Shortcuts: Button, CopyButton, FloatButton, FloatButtonGroup, BackTop, Kbd, HotkeyListener
+- Typography: Title, Text (Copyable, Editable, Keyboard, Code), Paragraph, Link
+- Layout: Flex, Splitter (SplitterPanel), Grid (Row, Col), Layout (Header, Sider, Content, Footer), Space, Divider
+- Navigation: CommandPalette, ContextMenu, Menu, Dropdown, Tabs, Pagination, Steps, Breadcrumb, Anchor, Affix
+- Data Entry: Input, InputNumber (NumberInput), TextArea, MarkdownEditor, Mentions, OTPInput (InputOTP), PromptInput, CronBuilder, SignaturePad, AvatarUpload, Select, AutoComplete, Checkbox, Radio, Switch, DatePicker, DateRangePicker, TimePicker, TimeRangePicker, ColorPicker, Slider, Rate, Upload, Transfer, Cascader, TreeSelect, FilterBuilder, Form (FormItem)
+- Data Display: Table, DataGridVirtual, KanbanBoard, Sparkline, Gauge, MeterGroup, CodeBlock, DiffViewer, ChatBubble, Card, List (ListView), Descriptions, Tree, Collapse, Carousel, Image, ImagePreviewGroup, Calendar, Badge, Avatar, Tag, Statistic, QRCode, Segmented, Watermark, Empty, Popover, Tooltip
 - Feedback: Modal, Drawer, Alert, Message, Notification, Popconfirm, Progress, Result, Skeleton, Spin, Tour

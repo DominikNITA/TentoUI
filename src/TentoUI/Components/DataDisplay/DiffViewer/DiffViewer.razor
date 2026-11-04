@@ -1,0 +1,198 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+@{
+    var diffLines = ComputeDiff();
+    var addedCount = diffLines.Count(d => d.Type == DiffLineType.Added);
+    var removedCount = diffLines.Count(d => d.Type == DiffLineType.Removed);
+}
+
+<div id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 text-xs">
+        <div class="flex items-center gap-3">
+            <span class="font-mono font-semibold text-slate-700 dark:text-slate-200">
+                @(OldTitle ?? "Original") → @(NewTitle ?? "Modified")
+            </span>
+            <span class="inline-flex items-center gap-1.5 font-mono">
+                <span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-semibold" aria-label="Added lines">+@addedCount</span>
+                <span class="px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 font-semibold" aria-label="Removed lines">-@removedCount</span>
+            </span>
+        </div>
+
+        @if (AllowModeSwitch)
+        {
+            <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-white dark:bg-slate-800" role="group" aria-label="Diff view mode">
+                <button type="button"
+                        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer @(SplitView ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700")"
+                        @onclick="() => SetSplitView(true)">
+                    Split
+                </button>
+                <button type="button"
+                        class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer @(!SplitView ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700")"
+                        @onclick="() => SetSplitView(false)">
+                    Unified
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="overflow-x-auto font-mono text-xs leading-relaxed bg-white dark:bg-slate-950">
+        @if (SplitView)
+        {
+            <table class="w-full border-collapse table-fixed" aria-label="Side-by-side diff">
+                <tbody>
+                    @foreach (var line in diffLines)
+                    {
+                        var leftBg = line.Type == DiffLineType.Removed
+                            ? "bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200"
+                            : "text-slate-700 dark:text-slate-300";
+                        var rightBg = line.Type == DiffLineType.Added
+                            ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200"
+                            : "text-slate-700 dark:text-slate-300";
+                        <tr class="border-b border-slate-100 dark:border-slate-900">
+                            @if (ShowLineNumbers)
+                            {
+                                <td class="w-10 px-2 py-1 text-right select-none text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800">
+                                    @(line.OldLineNumber?.ToString() ?? "")
+                                </td>
+                            }
+                            <td class="w-1/2 px-3 py-1 whitespace-pre overflow-x-auto border-r border-slate-200 dark:border-slate-800 @leftBg">
+                                @if (line.OldContent is not null)
+                                {
+                                    <span class="select-none mr-2 text-slate-400">@(line.Type == DiffLineType.Removed ? "-" : " ")</span>@line.OldContent
+                                }
+                            </td>
+                            @if (ShowLineNumbers)
+                            {
+                                <td class="w-10 px-2 py-1 text-right select-none text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800">
+                                    @(line.NewLineNumber?.ToString() ?? "")
+                                </td>
+                            }
+                            <td class="w-1/2 px-3 py-1 whitespace-pre overflow-x-auto @rightBg">
+                                @if (line.NewContent is not null)
+                                {
+                                    <span class="select-none mr-2 text-slate-400">@(line.Type == DiffLineType.Added ? "+" : " ")</span>@line.NewContent
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <table class="w-full border-collapse" aria-label="Unified diff">
+                <tbody>
+                    @foreach (var line in diffLines)
+                    {
+                        var rowClass = line.Type switch
+                        {
+                            DiffLineType.Added => "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200",
+                            DiffLineType.Removed => "bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-200",
+                            _ => "text-slate-700 dark:text-slate-300"
+                        };
+                        var prefix = line.Type switch
+                        {
+                            DiffLineType.Added => "+",
+                            DiffLineType.Removed => "-",
+                            _ => " "
+                        };
+                        var content = line.Type == DiffLineType.Removed ? line.OldContent : line.NewContent;
+                        <tr class="border-b border-slate-100 dark:border-slate-900 @rowClass">
+                            @if (ShowLineNumbers)
+                            {
+                                <td class="w-10 px-2 py-1 text-right select-none text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800">
+                                    @(line.OldLineNumber?.ToString() ?? "")
+                                </td>
+                                <td class="w-10 px-2 py-1 text-right select-none text-slate-400 bg-slate-50/70 dark:bg-slate-900/50 border-r border-slate-200 dark:border-slate-800">
+                                    @(line.NewLineNumber?.ToString() ?? "")
+                                </td>
+                            }
+                            <td class="px-3 py-1 whitespace-pre">
+                                <span class="select-none mr-2 font-bold">@prefix</span>@content
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? OldText { get; set; }
+    [Parameter] public string? NewText { get; set; }
+    [Parameter] public string? OldTitle { get; set; } = "Original";
+    [Parameter] public string? NewTitle { get; set; } = "Modified";
+    [Parameter] public bool SplitView { get; set; } = true;
+    [Parameter] public EventCallback<bool> SplitViewChanged { get; set; }
+    [Parameter] public bool ShowLineNumbers { get; set; } = true;
+    [Parameter] public bool AllowModeSwitch { get; set; } = true;
+
+    private string ComputedClass => new CssBuilder("rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs")
+        .AddClass(Class)
+        .Build();
+
+    private async Task SetSplitView(bool split)
+    {
+        SplitView = split;
+        if (SplitViewChanged.HasDelegate)
+            await SplitViewChanged.InvokeAsync(split);
+    }
+
+    private List<DiffLine> ComputeDiff()
+    {
+        var oldLines = (OldText ?? string.Empty).Replace("\r\n", "\n").Split('\n');
+        var newLines = (NewText ?? string.Empty).Replace("\r\n", "\n").Split('\n');
+
+        var m = oldLines.Length;
+        var n = newLines.Length;
+        var dp = new int[m + 1, n + 1];
+
+        for (var i = m - 1; i >= 0; i--)
+        {
+            for (var j = n - 1; j >= 0; j--)
+            {
+                if (string.Equals(oldLines[i], newLines[j], StringComparison.Ordinal))
+                    dp[i, j] = 1 + dp[i + 1, j + 1];
+                else
+                    dp[i, j] = Math.Max(dp[i + 1, j], dp[i, j + 1]);
+            }
+        }
+
+        var result = new List<DiffLine>();
+        int x = 0, y = 0, oldNum = 1, newNum = 1;
+        while (x < m && y < n)
+        {
+            if (string.Equals(oldLines[x], newLines[y], StringComparison.Ordinal))
+            {
+                result.Add(new DiffLine(DiffLineType.Unchanged, oldNum++, newNum++, oldLines[x], newLines[y]));
+                x++;
+                y++;
+            }
+            else if (dp[x + 1, y] >= dp[x, y + 1])
+            {
+                result.Add(new DiffLine(DiffLineType.Removed, oldNum++, null, oldLines[x], null));
+                x++;
+            }
+            else
+            {
+                result.Add(new DiffLine(DiffLineType.Added, null, newNum++, null, newLines[y]));
+                y++;
+            }
+        }
+
+        while (x < m)
+        {
+            result.Add(new DiffLine(DiffLineType.Removed, oldNum++, null, oldLines[x++], null));
+        }
+
+        while (y < n)
+        {
+            result.Add(new DiffLine(DiffLineType.Added, null, newNum++, null, newLines[y++]));
+        }
+
+        return result;
+    }
+}

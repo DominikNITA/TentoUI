@@ -1,0 +1,36 @@
+@page "/components/time-range-picker"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>TimeRangePicker - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">TimeRangePicker</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Dual-column start and end time range selector with configurable minute steps and quick business-hours shortcut.
+        </p>
+    </div>
+
+    <DemoCard Title="Shift &amp; Schedule Window" Description="Select start and end times with 30-minute intervals." Code="@_timeRangeCode">
+        <div class="max-w-sm">
+            <TimeRangePicker @bind-StartTime="_start"
+                             @bind-EndTime="_end"
+                             MinuteStep="30"
+                             AllowClear="true" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="TimeRangePicker Properties" ComponentType="@typeof(TimeRangePicker)" />
+</div>
+
+@code {
+    private TimeOnly? _start = new(9, 0);
+    private TimeOnly? _end = new(17, 0);
+
+    private const string _timeRangeCode = """
+        <TimeRangePicker MinuteStep="30" AllowClear="true" />
+        """;
+}

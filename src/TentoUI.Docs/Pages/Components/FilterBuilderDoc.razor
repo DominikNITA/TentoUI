@@ -1,0 +1,30 @@
+@page "/components/filter-builder"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>FilterBuilder - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">FilterBuilder</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Structured multi-condition query builder with AND/OR logical operators that outputs filter dictionaries directly compatible with Table&lt;TItem&gt;.
+        </p>
+    </div>
+
+    <DemoCard Title="Interactive Query Builder" Description="Add, modify, or remove filter conditions and apply them to your data view." Code="@_filterCode">
+        <FilterBuilder Title="Employee Directory Filters"
+                       OnApply="@(filters => MessageService.Success($"Applied {filters.Count} active filter(s)"))" />
+    </DemoCard>
+
+    <ApiTable Title="FilterBuilder Properties" ComponentType="@typeof(FilterBuilder)" />
+</div>
+
+@code {
+    private const string _filterCode = """
+        <FilterBuilder Title="Employee Directory Filters" ShowApplyButton="true" />
+        """;
+}

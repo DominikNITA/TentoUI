@@ -1,0 +1,63 @@
+@page "/components/chat"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>ChatBubble &amp; PromptInput - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0 • Ant Design X Pattern</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">ChatBubble &amp; PromptInput</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            AI copilot conversation primitives featuring collapsible reasoning steps, streaming indicators, feedback actions, and prompt suggestion chips.
+        </p>
+    </div>
+
+    <DemoCard Title="Interactive AI Copilot Conversation" Description="Send a message or click a suggestion chip to append to the conversation thread." Code="@_chatCode">
+        <div class="space-y-4">
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-4 max-h-96 overflow-y-auto">
+                @foreach (var msg in _messages)
+                {
+                    <ChatBubble Author="@msg.Author"
+                                Timestamp="@msg.Time"
+                                Placement="@msg.Placement"
+                                Message="@msg.Text"
+                                ReasoningSteps="@msg.Steps"
+                                ShowActions="@(msg.Placement == ChatPlacement.Start)" />
+                }
+            </div>
+
+            <PromptInput SuggestionsString="Summarize Q3 metrics,Generate C# CQRS handler,Audit WCAG contrast"
+                         OnSubmit="HandlePromptSubmit" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="ChatBubble Properties" ComponentType="@typeof(ChatBubble)" />
+    <ApiTable Title="PromptInput Properties" ComponentType="@typeof(PromptInput)" />
+</div>
+
+@code {
+    private sealed record ChatEntry(string Author, string Time, ChatPlacement Placement, string Text, IReadOnlyList<string>? Steps = null);
+
+    private readonly List<ChatEntry> _messages =
+    [
+        new("You", "09:41 AM", ChatPlacement.End, "How do I enable virtualized rows in TentoUI Table?"),
+        new("Tento Copilot", "09:41 AM", ChatPlacement.Start,
+            "Set Virtualize=\"true\" and ScrollHeight=\"420px\" on <Table>, or use the <DataGridVirtual> component directly.",
+            ["Searched TentoUI.Table parameters", "Verified Virtualize & ItemSize properties"])
+    ];
+
+    private void HandlePromptSubmit(string prompt)
+    {
+        _messages.Add(new("You", DateTime.Now.ToString("hh:mm tt"), ChatPlacement.End, prompt));
+        _messages.Add(new("Tento Copilot", DateTime.Now.ToString("hh:mm tt"), ChatPlacement.Start,
+            $"Processed request: \"{prompt}\". All TentoUI v1.1 components are ready!",
+            ["Parsed user prompt", "Generated response"]));
+    }
+
+    private const string _chatCode = """
+        <ChatBubble Author="Tento Copilot" Timestamp="09:41 AM" Message="Hello! How can I help you build with TentoUI today?" ShowActions="true" />
+        <PromptInput SuggestionsString="Summarize metrics,Generate C# handler" />
+        """;
+}

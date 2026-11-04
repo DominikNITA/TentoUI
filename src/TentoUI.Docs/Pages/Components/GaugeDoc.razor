@@ -1,0 +1,46 @@
+@page "/components/gauge"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Gauge &amp; MeterGroup - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Gauge &amp; MeterGroup</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Radial SVG gauges and multi-segment stacked capacity meters for telemetry, storage quotas, and health dashboards.
+        </p>
+    </div>
+
+    <DemoCard Title="Semi-Circular Radial Gauges" Description="Automatically colors thresholds (Healthy < 65%, Warning 65–85%, Critical >= 85%) or accepts explicit GaugeStatus." Code="@_gaugeCode">
+        <div class="flex flex-wrap items-center justify-around gap-6">
+            <Gauge Value="42" Label="CPU Load" Unit="%" />
+            <Gauge Value="74" Label="Memory Pressure" Unit="%" />
+            <Gauge Value="92" Label="Disk Saturation" Unit="%" />
+        </div>
+    </DemoCard>
+
+    <DemoCard Title="Multi-Segment MeterGroup" Description="Stacked proportional bar with legend for multi-category resource usage." Code="@_meterCode">
+        <MeterGroup Label="Cluster Storage Allocation"
+                    TotalCapacity="100"
+                    Unit="GB"
+                    SegmentsString="Database:42,Media Assets:28,Backups:14,Logs:6" />
+    </DemoCard>
+
+    <ApiTable Title="Gauge Properties" ComponentType="@typeof(Gauge)" />
+    <ApiTable Title="MeterGroup Properties" ComponentType="@typeof(MeterGroup)" />
+</div>
+
+@code {
+    private const string _gaugeCode = """
+        <Gauge Value="42" Label="CPU Load" Unit="%" />
+        <Gauge Value="74" Label="Memory Pressure" Unit="%" />
+        <Gauge Value="92" Label="Disk Saturation" Unit="%" />
+        """;
+
+    private const string _meterCode = """
+        <MeterGroup Label="Cluster Storage Allocation" TotalCapacity="100" Unit="GB" SegmentsString="Database:42,Media:28,Backups:14" />
+        """;
+}

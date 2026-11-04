@@ -58,16 +58,22 @@ Authoritative guide for building, styling, and wrapping TentoUI Blazor component
 ## API & Component Catalog Reference
 
 ### 1. General & Layout
-- `Button`: Primary, Default, Dashed, Text, Link variants; `Danger`, `Loading`, `Disabled`, `Size`, `Shape`, `Icon`, `HtmlType`.
+- `Button`: Primary, Default, Dashed, Text, Link variants; `Danger`, `Loading`, `Disabled`, `Size`, `Shape`, `IconName` (or child `<Icon Name="..." />`), `IconTemplate`, `HtmlType`.
+- `CopyButton`: One-click clipboard copy button with `Text`, `CopyLabel`, `CopiedLabel`, `ShowLabel`, `Type`, `Size`, transient checkmark feedback, and `OnCopy` callback.
 - `FloatButton`, `FloatButtonGroup`, `BackTop`: Corner floating action button (FAB) supporting shapes (`Circle`, `Square`), types (`Default`, `Primary`), tooltips, badges, stacked groups, and smooth window scroll-to-top.
-- `Typography`: `Title` (Level 1-5), `Text` (Type: Secondary, Success, Warning, Danger, Disabled, Mark, Code, Bold), `Paragraph`, `Link`.
+- `Typography`: `Title` (Level 1-5), `Text` (Type: Secondary, Success, Warning, Danger, Disabled, Mark, Code, Keyboard, Italic, Strong, `Copyable`, `Editable`), `Paragraph` (`Ellipsis`, `Rows`, `Copyable`, `Editable`), `Link`.
 - `Icon`: Embedded Lucide SVGs via `IconNames`, scalable `Size`, color inheritance, `Spin` rotation, accessible `AriaLabel`.
+- `Kbd` & `HotkeyListener`: Tactile keyboard shortcut badges (`<Kbd Keys="Ctrl+Shift+P" />`) and focusable keyboard shortcut listeners (`<HotkeyListener Shortcut="Ctrl+K" OnTrigger="..." />`).
 - `Divider`: Horizontal or Vertical, optional title text with `Orientation` (Left, Center, Right), dashed style.
+- `Flex`: Declarative flexbox container supporting `Vertical`, `Wrap` (`NoWrap`, `Wrap`, `WrapReverse`), `Justify`, `Align`, `Gap` (`None`, `Small`, `Middle`, `Large`), and custom `GapSize`.
+- `Splitter` & `SplitterPanel`: Resizable horizontal/vertical split panes with keyboard arrow adjustments, `Min`/`Max` bounds, and `Collapsible` toggle.
 - `Layout`, `Header`, `Sider`, `Content`, `Footer`: Flexbox responsive layout with collapsible sidebar, trigger, and breakpoint listener.
 - `Row` & `Col`: 24-column grid system with `Gutter` (horizontal/vertical tuple), `Justify`, `Align`, and responsive span breakpoints (`Xs`, `Sm`, `Md`, `Lg`, `Xl`, `Xxl`).
 - `Space`: Direction (`Horizontal`, `Vertical`), `Size` (`Small`, `Middle`, `Large`, or custom px), `Align`, `Wrap`.
 
 ### 2. Navigation
+- `CommandPalette`: Spotlight-style global command menu (`Ctrl+K`) with grouped `CommandItem` entries, keyboard navigation, shortcut badges, and `OnSelect` callback.
+- `ContextMenu`: Right-click (`@oncontextmenu` and `Shift+F10`) floating context menu supporting `DropdownMenuItem` items or custom `Overlay`.
 - `Menu`: Modes (`Horizontal`, `Vertical`, `Inline`), Themes (`Light`, `Dark`), `SelectedKey`, `OpenKeys`, collapsible sidebar integration.
 - `MenuItem`, `SubMenu`, `MenuGroup`, `MenuDivider`: Hierarchical navigation items with icon slots and selection callbacks.
 - `Breadcrumb` & `BreadcrumbItem`: Semantic navigation breadcrumbs with customizable separators and route links.
@@ -98,14 +104,30 @@ Authoritative guide for building, styling, and wrapping TentoUI Blazor component
 - `Slider`: Range slider with `Min`, `Max`, `Step`, `Marks` dictionary, `ShowValue`, and `TipFormatter`.
 - `Rate`: Star rating selector with `Count`, `AllowClear`, `Tooltips`, custom `Character`, and `ReadOnly`/`Disabled` states.
 - `DatePicker`: Accessible date input with calendar picker popup, format strings, and keyboard shortcuts.
+- `DateRangePicker`: Start and end date range selector with quick range presets (`Today`, `Last 7 Days`, `Last 30 Days`, `This Month`) and calendar range highlighting.
+- `TimeRangePicker`: Dual-column start and end time range selector with configurable `MinuteStep` and quick business-hours shortcut.
+- `Mentions`: Input or multi-line textarea with `@` / `#` trigger suggestion popups (`MentionOption` or `OptionsString`).
+- `OTPInput` / `InputOTP`: Segmented one-time verification code input with configurable `Length`, `Mask`, `ShowSeparator`, paste handling, and `OnComplete` callback.
+- `FilterBuilder`: Multi-condition query filter builder with `AND`/`OR` operators and `ToTableFilters()` integration for `Table<TItem>`.
+- `MarkdownEditor`: Rich Markdown authoring input with formatting toolbar, `Write`/`Preview`/`Split` modes, and word/character counters.
+- `CronBuilder`: Visual 5-field cron schedule expression builder (`Minutes`, `Hourly`, `Daily`, `Weekly`, `Monthly`, `Custom`) with human-readable schedule summary.
+- `SignaturePad`: Vector SVG digital signature capture pad supporting mouse/touch/pen strokes, `Undo`, `Clear`, and SVG data-URI export.
+- `AvatarUpload`: Profile picture uploader with circular/square framing, zoom slider (`1.0x`–`2.5x`), 90° rotation, and instant data-URI preview.
+- `PromptInput`: AI copilot prompt input with suggestion chips (`Suggestions`, `SuggestionsString`), `Enter` submission, and loading/stop state.
 - `Upload`: File selector and drag-and-drop dropzone (`DragDrop="true"`) wrapping Blazor `InputFile` with file list management and size validation.
 
 ### 4. Data Display
 - `Card` & `CardGrid`: Structured container with title, extra action slot, cover image, and card grid layouts.
-- `Table<TItem>`: Customizable data table with manual column definitions (`TableColumn<TItem>`, `Column<TItem>`, `PropertyColumn<TItem, TProp>`, `TemplateColumn<TItem>`), custom cell templates (`CellTemplate` / `ChildContent`) and `Format` strings, per-column sorting (`Sortable`, `SortBy`, `CustomSorter`, `DefaultSortOrder`), per-column filtering (`Filterable`, `FilterMode`, `FilterOptions`, `FilterBy`, `FilterPredicate`, `FilterTemplate`), pagination (`ShowSizeChanger`, `PageSizeOptions`, `ShowQuickJumper`, `TotalCount`, `OnQueryChange`), expandable rows (`ExpandedRowTemplate`), and row selection.
+- `Table<TItem>` & `DataGridVirtual<TItem>`: Customizable data table with manual column definitions (`TableColumn<TItem>`, `Column<TItem>`, `PropertyColumn<TItem, TProp>`, `TemplateColumn<TItem>`), virtualized scrolling (`Virtualize="true"`, `ItemSize`, `ScrollHeight`), sticky columns (`Fixed="ColumnFixed.Left"` / `Right`), resizable headers (`Resizable="true"`), sorting, filtering, pagination, expandable rows, and row selection.
+- `CodeBlock`: Syntax-highlighted code block with line numbers, line range highlighting (`HighlightLines="2,4-6"`), collapsible body, and embedded `CopyButton`.
+- `DiffViewer`: Side-by-side (`SplitView="true"`) and unified diff comparison viewer with `+N` / `-M` change stats.
+- `Gauge` & `MeterGroup`: Semi-circular radial SVG gauge (`role="meter"`) with threshold colors and multi-segment stacked capacity bar (`MeterGroup`) with legend.
+- `ChatBubble`: AI/Copilot conversation message bubble (`Placement`, `Author`, `Avatar`, `Typing`, `Streaming`, collapsible `ReasoningSteps`, and copy/feedback actions).
+- `KanbanBoard<TItem>`: Multi-column Kanban workflow board with drag-and-drop, accessible card movement buttons, WIP limits (`MaxItems`), and custom `CardTemplate`.
+- `Sparkline`: Pure-SVG inline trend chart (`Line`, `Area`, `Bar`) with automatic semantic trend coloring (`Up`, `Down`, `Neutral`).
 - `Segmented`: Pill segmented control with smooth selection state, icons, disabled items, and block full-width layout.
 - `Carousel` & `CarouselPanel`: Banner slideshow with autoplay, autoplay speed, dot navigation positions, and next/prev arrows.
-- `Image`: Image viewer with hover preview mask and full-screen preview modal supporting Zoom In/Out, Rotate, and Close.
+- `Image` & `ImagePreviewGroup`: Image viewer with hover preview mask, full-screen preview modal supporting Zoom/Rotate, and multi-image lightbox gallery navigation.
 - `Tree` & `TreeNode`: Hierarchical collapsible tree view with checkable nodes, folder/file icons, and real-time search filtering.
 - `Calendar`: Full-month calendar grid view with month/year navigation, weekday headers, and custom `DateCellTemplate`.
 - `QRCode`: SVG QR code display with size, color, background, and loading/expired status states with refresh callback.

@@ -12,7 +12,7 @@
         @if (Preview && !_failed)
         {
             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white text-xs font-medium gap-1.5"
-                 @onclick="@(() => _isPreviewOpen = true)">
+                 @onclick="OpenPreview">
                 <Icon Name="@IconNames.Eye" Size="16" />
                 <span>Preview</span>
             </div>
@@ -68,6 +68,8 @@
 </div>
 
 @code {
+    [CascadingParameter] private ImagePreviewGroup? PreviewGroup { get; set; }
+
     [Parameter] public string? Src { get; set; }
     [Parameter] public string? Alt { get; set; }
     [Parameter] public string? Fallback { get; set; }
@@ -79,6 +81,26 @@
     private bool _isPreviewOpen;
     private double _zoom = 1.0;
     private int _rotate = 0;
+
+    protected override void OnParametersSet()
+    {
+        if (Preview && !string.IsNullOrWhiteSpace(Src))
+        {
+            PreviewGroup?.RegisterImage(Src);
+        }
+    }
+
+    private void OpenPreview()
+    {
+        if (PreviewGroup != null)
+        {
+            PreviewGroup.OpenAt(Src);
+        }
+        else
+        {
+            _isPreviewOpen = true;
+        }
+    }
 
     private void ClosePreview()
     {

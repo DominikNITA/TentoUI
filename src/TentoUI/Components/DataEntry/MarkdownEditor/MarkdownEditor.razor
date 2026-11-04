@@ -1,0 +1,210 @@
+@namespace TentoUI
+@inherits TentoInputBase<string?>
+@attribute [Since("1.1.0")]
+
+<div id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-1" role="toolbar" aria-label="Markdown formatting toolbar">
+            <button type="button" class="@ToolbarBtnClass" title="Bold" aria-label="Bold" disabled="@Disabled" @onclick='() => InsertFormatting("**", "**", "bold text")'>
+                <span class="font-bold">B</span>
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Italic" aria-label="Italic" disabled="@Disabled" @onclick='() => InsertFormatting("*", "*", "italic text")'>
+                <span class="italic">I</span>
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Heading" aria-label="Heading" disabled="@Disabled" @onclick='() => InsertFormatting("### ", "", "Heading")'>
+                <span class="font-semibold">H</span>
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Code" aria-label="Code" disabled="@Disabled" @onclick='() => InsertFormatting("`", "`", "code")'>
+                <span class="font-mono">&lt;/&gt;</span>
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Link" aria-label="Link" disabled="@Disabled" @onclick='() => InsertFormatting("[", "](https://)", "link")'>
+                <Icon Name="link" Class="w-3.5 h-3.5" />
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Bullet List" aria-label="Bullet List" disabled="@Disabled" @onclick='() => InsertFormatting("\n- ", "", "List item")'>
+                <span>• List</span>
+            </button>
+            <button type="button" class="@ToolbarBtnClass" title="Quote" aria-label="Quote" disabled="@Disabled" @onclick='() => InsertFormatting("\n> ", "", "Quote")'>
+                <span>❝</span>
+            </button>
+        </div>
+
+        <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-white dark:bg-slate-800" role="tablist" aria-label="Editor view mode">
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(Mode == MarkdownEditorMode.Write ? "true" : "false")"
+                    class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer @(Mode == MarkdownEditorMode.Write ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700")"
+                    @onclick="() => SetMode(MarkdownEditorMode.Write)">
+                Write
+            </button>
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(Mode == MarkdownEditorMode.Preview ? "true" : "false")"
+                    class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer @(Mode == MarkdownEditorMode.Preview ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700")"
+                    @onclick="() => SetMode(MarkdownEditorMode.Preview)">
+                Preview
+            </button>
+            <button type="button"
+                    role="tab"
+                    aria-selected="@(Mode == MarkdownEditorMode.Split ? "true" : "false")"
+                    class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer @(Mode == MarkdownEditorMode.Split ? "bg-primary-600 text-white" : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700")"
+                    @onclick="() => SetMode(MarkdownEditorMode.Split)">
+                Split
+            </button>
+        </div>
+    </div>
+
+    <div class="grid @(Mode == MarkdownEditorMode.Split ? "grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800" : "grid-cols-1") bg-white dark:bg-slate-950">
+        @if (Mode is MarkdownEditorMode.Write or MarkdownEditorMode.Split)
+        {
+            <textarea class="w-full p-4 text-sm font-mono bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none resize-y"
+                      rows="@Rows"
+                      placeholder="@Placeholder"
+                      disabled="@Disabled"
+                      readonly="@ReadOnly"
+                      aria-label="@(Placeholder ?? "Markdown content")"
+                      aria-invalid="@(EffectiveStatus == ComponentStatus.Error ? "true" : "false")"
+                      aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
+                      value="@CurrentValueAsString"
+                      @oninput="OnTextInput"></textarea>
+        }
+
+        @if (Mode is MarkdownEditorMode.Preview or MarkdownEditorMode.Split)
+        {
+            <div class="p-4 prose prose-sm dark:prose-invert max-w-none min-h-[160px] text-slate-800 dark:text-slate-200 space-y-2"
+                 aria-label="Markdown preview">
+                @RenderMarkdownPreview(CurrentValue)
+            </div>
+        }
+    </div>
+
+    @if (ShowFooter)
+    {
+        <div class="flex items-center justify-between px-3 py-1.5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+            <span>Markdown supported</span>
+            <span>@GetWordCount() words • @(CurrentValue?.Length ?? 0) chars</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Placeholder { get; set; } = "Write markdown content...";
+    [Parameter] public int Rows { get; set; } = 8;
+    [Parameter] public MarkdownEditorMode Mode { get; set; } = MarkdownEditorMode.Write;
+    [Parameter] public EventCallback<MarkdownEditorMode> ModeChanged { get; set; }
+    [Parameter] public bool ShowFooter { get; set; } = true;
+
+    private string ToolbarBtnClass => "px-2 py-1 rounded text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50";
+
+    private string ComputedClass => new CssBuilder("rounded-xl border overflow-hidden transition-colors")
+        .AddClass("border-slate-200 dark:border-slate-800 focus-within:border-primary-500", EffectiveStatus == ComponentStatus.None)
+        .AddClass("border-rose-500 dark:border-rose-500", EffectiveStatus == ComponentStatus.Error)
+        .AddClass("border-amber-500 dark:border-amber-500", EffectiveStatus == ComponentStatus.Warning)
+        .AddClass(Class)
+        .Build();
+
+    private void OnTextInput(ChangeEventArgs e)
+    {
+        CurrentValueAsString = e.Value?.ToString();
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string? result, [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+        return true;
+    }
+
+    private void InsertFormatting(string prefix, string suffix, string sample)
+    {
+        if (Disabled || ReadOnly)
+            return;
+
+        var current = CurrentValue ?? string.Empty;
+        CurrentValueAsString = $"{current}{prefix}{sample}{suffix}";
+    }
+
+    private async Task SetMode(MarkdownEditorMode mode)
+    {
+        Mode = mode;
+        if (ModeChanged.HasDelegate)
+            await ModeChanged.InvokeAsync(mode);
+    }
+
+    private int GetWordCount()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentValue))
+            return 0;
+
+        return CurrentValue.Split([' ', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+    private RenderFragment RenderMarkdownPreview(string? markdown) => builder =>
+    {
+        if (string.IsNullOrWhiteSpace(markdown))
+        {
+            builder.OpenElement(0, "p");
+            builder.AddAttribute(1, "class", "text-slate-400 italic text-sm");
+            builder.AddContent(2, "Nothing to preview yet.");
+            builder.CloseElement();
+            return;
+        }
+
+        var seq = 0;
+        var lines = markdown.Replace("\r\n", "\n").Split('\n');
+        foreach (var line in lines)
+        {
+            var trimmed = line.Trim();
+            if (string.IsNullOrEmpty(trimmed))
+                continue;
+
+            if (trimmed.StartsWith("### "))
+            {
+                builder.OpenElement(seq++, "h3");
+                builder.AddAttribute(seq++, "class", "text-base font-bold text-slate-900 dark:text-white");
+                builder.AddContent(seq++, trimmed[4..]);
+                builder.CloseElement();
+            }
+            else if (trimmed.StartsWith("## "))
+            {
+                builder.OpenElement(seq++, "h2");
+                builder.AddAttribute(seq++, "class", "text-lg font-bold text-slate-900 dark:text-white");
+                builder.AddContent(seq++, trimmed[3..]);
+                builder.CloseElement();
+            }
+            else if (trimmed.StartsWith("# "))
+            {
+                builder.OpenElement(seq++, "h1");
+                builder.AddAttribute(seq++, "class", "text-xl font-bold text-slate-900 dark:text-white");
+                builder.AddContent(seq++, trimmed[2..]);
+                builder.CloseElement();
+            }
+            else if (trimmed.StartsWith("- ") || trimmed.StartsWith("* "))
+            {
+                builder.OpenElement(seq++, "div");
+                builder.AddAttribute(seq++, "class", "flex items-start gap-2 text-sm");
+                builder.OpenElement(seq++, "span");
+                builder.AddAttribute(seq++, "class", "text-primary-500 font-bold");
+                builder.AddContent(seq++, "•");
+                builder.CloseElement();
+                builder.OpenElement(seq++, "span");
+                builder.AddContent(seq++, trimmed[2..]);
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+            else if (trimmed.StartsWith("> "))
+            {
+                builder.OpenElement(seq++, "blockquote");
+                builder.AddAttribute(seq++, "class", "pl-3 border-l-3 border-primary-500 italic text-slate-600 dark:text-slate-400 text-sm");
+                builder.AddContent(seq++, trimmed[2..]);
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(seq++, "p");
+                builder.AddAttribute(seq++, "class", "text-sm leading-relaxed");
+                builder.AddContent(seq++, trimmed);
+                builder.CloseElement();
+            }
+        }
+    };
+}

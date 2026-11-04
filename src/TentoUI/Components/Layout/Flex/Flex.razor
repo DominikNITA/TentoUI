@@ -1,0 +1,104 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div class="@ComputedClass" style="@ComputedStyle" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>
+    /// Stacks flex items vertically (flex-col) when true, or horizontally (flex-row) when false.
+    /// </summary>
+    [Parameter] public bool Vertical { get; set; }
+
+    /// <summary>
+    /// Controls how flex items wrap within the container (NoWrap, Wrap, WrapReverse).
+    /// </summary>
+    [Parameter] public FlexWrap Wrap { get; set; } = FlexWrap.NoWrap;
+
+    /// <summary>
+    /// Defines alignment along the main axis (Start, End, Center, SpaceBetween, SpaceAround, SpaceEvenly).
+    /// </summary>
+    [Parameter] public FlexJustify Justify { get; set; } = FlexJustify.Start;
+
+    /// <summary>
+    /// Defines alignment along the cross axis (Start, Center, End, Stretch, Baseline).
+    /// </summary>
+    [Parameter] public FlexAlign Align { get; set; } = FlexAlign.Stretch;
+
+    /// <summary>
+    /// Preset spacing gap between flex items (None, Small, Middle, Large).
+    /// </summary>
+    [Parameter] public FlexGap Gap { get; set; } = FlexGap.None;
+
+    /// <summary>
+    /// Custom pixel gap overriding the preset Gap when greater than zero.
+    /// </summary>
+    [Parameter] public int? GapSize { get; set; }
+
+    /// <summary>
+    /// Renders an inline-flex container instead of block flex when true.
+    /// </summary>
+    [Parameter] public bool Inline { get; set; }
+
+    /// <summary>
+    /// Child elements rendered inside the flex container.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var wrapClass = Wrap switch
+            {
+                FlexWrap.Wrap => "flex-wrap",
+                FlexWrap.WrapReverse => "flex-wrap-reverse",
+                _ => "flex-nowrap"
+            };
+
+            var justifyClass = Justify switch
+            {
+                FlexJustify.End => "justify-end",
+                FlexJustify.Center => "justify-center",
+                FlexJustify.SpaceBetween => "justify-between",
+                FlexJustify.SpaceAround => "justify-around",
+                FlexJustify.SpaceEvenly => "justify-evenly",
+                _ => "justify-start"
+            };
+
+            var alignClass = Align switch
+            {
+                FlexAlign.Start => "items-start",
+                FlexAlign.Center => "items-center",
+                FlexAlign.End => "items-end",
+                FlexAlign.Baseline => "items-baseline",
+                _ => "items-stretch"
+            };
+
+            var gapClass = GapSize.HasValue ? "" : Gap switch
+            {
+                FlexGap.Small => "gap-2",
+                FlexGap.Middle => "gap-4",
+                FlexGap.Large => "gap-6",
+                _ => ""
+            };
+
+            return new CssBuilder("tento-flex")
+                .AddClass(Inline ? "inline-flex" : "flex")
+                .AddClass(Vertical ? "flex-col" : "flex-row")
+                .AddClass(wrapClass)
+                .AddClass(justifyClass)
+                .AddClass(alignClass)
+                .AddClass(gapClass)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+
+    private string ComputedStyle => new StyleBuilder()
+        .AddStyle("gap", $"{GapSize}px", GapSize.HasValue)
+        .AddStyle(Style)
+        .Build();
+}

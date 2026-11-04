@@ -9,6 +9,8 @@
     
     <!-- Razor Settings -->
     <AddRazorSupportForMvc>false</AddRazorSupportForMvc>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     
     <!-- Package Metadata -->
     <PackageId>TentoUI</PackageId>
@@ -17,6 +19,7 @@
     <Description>AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS for .NET 10.</Description>
     <PackageTags>blazor;antdesign;tailwind;components;ui;net10</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +33,7 @@
 
   <!-- Tailwind integration assets: theme bridge + class manifest, synced into consumers by build/TentoUI.targets -->
   <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="tailwind\**\*" Pack="true" PackagePath="tailwind\" />
     <None Include="build\TentoUI.targets" Pack="true" PackagePath="build\;buildTransitive\" />
     <!-- AI agent skills shipped with the package; installed on demand by the TentoUIInstallSkills target -->

@@ -59,6 +59,8 @@ public class TentoMarkupRenderer : ComponentBase
         s_componentMap["ListView"] = typeof(ListView<string>);
         s_componentMap["Table"] = typeof(Table<object>);
         s_componentMap["TableColumn"] = typeof(TableColumn<object>);
+        s_componentMap["DataGridVirtual"] = typeof(DataGridVirtual<object>);
+        s_componentMap["KanbanBoard"] = typeof(KanbanBoard<KanbanCardItem>);
 
         // 3. Precache parameter properties for fast runtime resolution
         foreach (var (_, type) in s_componentMap)
@@ -105,9 +107,10 @@ public class TentoMarkupRenderer : ComponentBase
 
             var seq = 0;
 
-            // 1. Check if there is an interactive Drawer or Modal that lacks an opening trigger button
+            // 1. Check if there is an interactive Drawer, Modal, or CommandPalette that lacks an opening trigger button
             var hasOverlay = nodes.Any(n => n.TagName.Equals("Drawer", StringComparison.OrdinalIgnoreCase) ||
-                                           n.TagName.Equals("Modal", StringComparison.OrdinalIgnoreCase));
+                                           n.TagName.Equals("Modal", StringComparison.OrdinalIgnoreCase) ||
+                                           n.TagName.Equals("CommandPalette", StringComparison.OrdinalIgnoreCase));
             var hasButtonTrigger = nodes.Any(n => n.TagName.Equals("Button", StringComparison.OrdinalIgnoreCase));
 
             if (hasOverlay && !hasButtonTrigger && !_overlayOpen)
@@ -475,7 +478,11 @@ public class TentoMarkupRenderer : ComponentBase
         tag.Equals("ColorPicker", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Icon", StringComparison.OrdinalIgnoreCase) ||
         tag.Equals("Text", StringComparison.OrdinalIgnoreCase) ||
-        tag.Equals("Link", StringComparison.OrdinalIgnoreCase);
+        tag.Equals("Link", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("CopyButton", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("Sparkline", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("Kbd", StringComparison.OrdinalIgnoreCase) ||
+        tag.Equals("Gauge", StringComparison.OrdinalIgnoreCase);
 
     private void RenderNode(MarkupNode node, RenderTreeBuilder builder, ref int seq)
     {
@@ -800,8 +807,8 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Name", cleanName.ToLowerInvariant());
             }
         }
-        // 10. Table dummy rows for typed data visualization
-        else if (compType == typeof(Table<object>))
+        // 10. Table / DataGridVirtual dummy rows for typed data visualization
+        else if (compType == typeof(Table<object>) || compType == typeof(DataGridVirtual<object>))
         {
             if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
             {
@@ -813,6 +820,80 @@ public class TentoMarkupRenderer : ComponentBase
                     new { Id = 104, Name = "Diana Prince", Department = "Marketing", Salary = 95000m, Active = true }
                 };
                 builder.AddAttribute(seq++, "DataSource", (IEnumerable<object>)dummyData);
+            }
+        }
+        // 10b. CodeBlock default code snippet
+        else if (compType == typeof(CodeBlock))
+        {
+            if (!node.Attributes.ContainsKey("Code") || node.Attributes["Code"].StartsWith("@"))
+            {
+                var sampleCode = "public record UserDto(Guid Id, string Name, string Role);\n\npublic async Task<UserDto> GetUserAsync(Guid id)\n{\n    return await _repo.FindByIdAsync(id);\n}";
+                builder.AddAttribute(seq++, "Code", sampleCode);
+            }
+        }
+        // 10c. DiffViewer default old/new text
+        else if (compType == typeof(DiffViewer))
+        {
+            if (!node.Attributes.ContainsKey("OldText") || node.Attributes["OldText"].StartsWith("@"))
+            {
+                builder.AddAttribute(seq++, "OldText", "public class OrderService\n{\n    public decimal TaxRate => 0.19m;\n}");
+            }
+            if (!node.Attributes.ContainsKey("NewText") || node.Attributes["NewText"].StartsWith("@"))
+            {
+                builder.AddAttribute(seq++, "NewText", "public class OrderService\n{\n    public decimal TaxRate => 0.21m;\n    public bool IsEuVat => true;\n}");
+            }
+        }
+        // 11. CommandPalette open state and sample commands
+        else if (compType == typeof(CommandPalette))
+        {
+            var isExplicitTrue = node.Attributes.TryGetValue("Open", out var cpVal) &&
+                                 (string.Equals(cpVal, "true", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(cpVal, "1", StringComparison.OrdinalIgnoreCase));
+
+            builder.AddAttribute(seq++, "Open", isExplicitTrue || _overlayOpen);
+            builder.AddAttribute(seq++, "OpenChanged", EventCallback.Factory.Create<bool>(this, val =>
+            {
+                _overlayOpen = val;
+                StateHasChanged();
+            }));
+
+            if (!node.Attributes.ContainsKey("Items") || node.Attributes["Items"].StartsWith("@"))
+            {
+                var sampleCommands = new[]
+                {
+                    new CommandItem("new-project", "Create New Project", "Workspace", "Initialize a new .NET 10 solution", IconNames.Plus, "Ctrl+N"),
+                    new CommandItem("search-docs", "Search Documentation", "Navigation", "Jump to any component reference", IconNames.Search, "Ctrl+K"),
+                    new CommandItem("theme-toggle", "Toggle Dark Mode", "Appearance", "Switch between light and dark themes", IconNames.Moon, "Ctrl+J")
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<CommandItem>)sampleCommands);
+            }
+        }
+        // 12. ContextMenu default items
+        else if (compType == typeof(ContextMenu))
+        {
+            if (!node.Attributes.ContainsKey("Items") || node.Attributes["Items"].StartsWith("@"))
+            {
+                var sampleMenu = new[]
+                {
+                    new DropdownMenuItem("copy", "Copy Selection", IconNames.Copy),
+                    new DropdownMenuItem("edit", "Rename Item", IconNames.Edit2),
+                    new DropdownMenuItem("delete", "Delete Permanently", IconNames.Trash2, Danger: true, DividerBefore: true)
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<DropdownMenuItem>)sampleMenu);
+            }
+        }
+        // 13. KanbanBoard sample cards
+        else if (compType == typeof(KanbanBoard<KanbanCardItem>))
+        {
+            if (!node.Attributes.ContainsKey("Items") || node.Attributes["Items"].StartsWith("@"))
+            {
+                var sampleCards = new System.Collections.Generic.List<KanbanCardItem>
+                {
+                    new() { Id = "k1", Title = "Design token audit", Description = "Verify --tento-* CSS custom properties", ColumnKey = "todo", Tag = "Design" },
+                    new() { Id = "k2", Title = "Implement CommandPalette", Description = "Keyboard Ctrl+K spotlight search", ColumnKey = "in-progress", Tag = "Feature" },
+                    new() { Id = "k3", Title = "WCAG 2.1 AA verification", Description = "All bUnit accessibility contracts green", ColumnKey = "done", Tag = "QA" }
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<KanbanCardItem>)sampleCards);
             }
         }
     }

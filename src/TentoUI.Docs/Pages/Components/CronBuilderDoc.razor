@@ -1,0 +1,35 @@
+@page "/components/cron-builder"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>CronBuilder - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">CronBuilder</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Visual 5-field cron expression generator and human-readable schedule preview for background jobs and recurring pipelines.
+        </p>
+    </div>
+
+    <DemoCard Title="Interactive Cron Schedule Builder" Description="Switch tabs between Minutes, Hourly, Daily, Weekly, Monthly, or Custom cron expressions." Code="@_cronCode">
+        <div class="space-y-3">
+            <CronBuilder @bind-Value="_cron" />
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+                Bound Cron Value: <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-primary-600 dark:text-primary-400">@_cron</code>
+            </div>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="CronBuilder Properties" ComponentType="@typeof(CronBuilder)" />
+</div>
+
+@code {
+    private string? _cron = "0 9 * * 1,2,3,4,5";
+
+    private const string _cronCode = """
+        <CronBuilder Value="0 9 * * *" />
+        """;
+}

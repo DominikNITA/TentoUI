@@ -1,0 +1,59 @@
+@page "/components/diff-viewer"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>DiffViewer - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">DiffViewer</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Side-by-side (split) and unified diff comparison viewer for audit logs, configuration changes, and code reviews.
+        </p>
+    </div>
+
+    <DemoCard Title="Split &amp; Unified Diff Comparison" Description="Switch interactively between side-by-side and unified diff modes with automatic +N / -M line statistics." Code="@_diffDemo">
+        <DiffViewer OldTitle="appsettings.Production.json (v1.0)"
+                    NewTitle="appsettings.Production.json (v1.1)"
+                    OldText="@_oldConfig"
+                    NewText="@_newConfig"
+                    @bind-SplitView="_split" />
+    </DemoCard>
+
+    <ApiTable Title="DiffViewer Properties" ComponentType="@typeof(DiffViewer)" />
+</div>
+
+@code {
+    private bool _split = true;
+
+    private const string _oldConfig = """
+        {
+          "ConnectionStrings": {
+            "Postgres": "Host=db;Port=5432;Database=tento"
+          },
+          "Caching": {
+            "Enabled": false,
+            "TtlSeconds": 60
+          }
+        }
+        """;
+
+    private const string _newConfig = """
+        {
+          "ConnectionStrings": {
+            "Postgres": "Host=db-cluster;Port=5432;Database=tento;Pooling=true"
+          },
+          "Caching": {
+            "Enabled": true,
+            "TtlSeconds": 300,
+            "Provider": "HybridCache"
+          }
+        }
+        """;
+
+    private const string _diffDemo = """
+        <DiffViewer OldTitle="v1.0" NewTitle="v1.1" SplitView="true" />
+        """;
+}

@@ -1,0 +1,30 @@
+@page "/components/avatar-upload"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>AvatarUpload - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">AvatarUpload</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Profile picture uploader with circular/square framing, interactive zoom slider, 90° rotation, and instant data-URL preview.
+        </p>
+    </div>
+
+    <DemoCard Title="Avatar Upload with Zoom &amp; Rotate Crop Controls" Description="Upload a new image or adjust zoom and rotation on the current profile photo." Code="@_avatarUploadCode">
+        <AvatarUpload @bind-Src="_avatarSrc" Size="104" ShowCropControls="true" />
+    </DemoCard>
+
+    <ApiTable Title="AvatarUpload Properties" ComponentType="@typeof(AvatarUpload)" />
+</div>
+
+@code {
+    private string? _avatarSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&auto=format&fit=crop&q=80";
+
+    private const string _avatarUploadCode = """
+        <AvatarUpload Src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&auto=format&fit=crop&q=80" Size="96" ShowCropControls="true" />
+        """;
+}

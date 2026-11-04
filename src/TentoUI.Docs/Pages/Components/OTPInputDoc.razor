@@ -1,0 +1,38 @@
+@page "/components/otp-input"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>OTPInput - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">OTPInput / InputOTP</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Segmented one-time passcode verification input supporting clipboard paste, visual separators, and masked PIN entry.
+        </p>
+    </div>
+
+    <DemoCard Title="6-Digit Verification &amp; Masked PIN" Description="Supports automatic multi-digit paste and completion callbacks." Code="@_otpCode">
+        <div class="space-y-4">
+            <OTPInput @bind-Value="_code"
+                      Length="6"
+                      ShowSeparator="true"
+                      OnComplete="@(c => MessageService.Success($"Code verified: {c}"))" />
+            <OTPInput Value="4829" Length="4" Mask="true" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="OTPInput Properties" ComponentType="@typeof(OTPInput)" />
+</div>
+
+@code {
+    private string? _code = "128940";
+
+    private const string _otpCode = """
+        <OTPInput Value="128940" Length="6" ShowSeparator="true" />
+        <OTPInput Value="4829" Length="4" Mask="true" />
+        """;
+}

@@ -1,0 +1,258 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+@if (Open)
+{
+    <div class="tento-command-palette-root fixed inset-0 z-50 flex items-start justify-center pt-[12vh] px-4 bg-black/50 backdrop-blur-xs"
+         role="dialog"
+         aria-modal="true"
+         aria-label="@AriaLabel"
+         @onclick="HandleBackdropClickAsync"
+         @onkeydown="HandleKeyDownAsync">
+        <div class="@ComputedClass"
+             style="@Style"
+             @onclick:stopPropagation="true"
+             @attributes="AdditionalAttributes">
+            @* Search Input Bar *@
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+                <Icon Name="@IconNames.Search" Size="16" Class="text-slate-400 shrink-0" />
+                <input type="text"
+                       role="combobox"
+                       aria-expanded="true"
+                       aria-controls="@($"{_listboxId}")"
+                       aria-autocomplete="list"
+                       value="@_searchQuery"
+                       placeholder="@Placeholder"
+                       class="tento-command-palette-input flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+                       @oninput="HandleSearchInput" />
+                @if (!string.IsNullOrEmpty(_searchQuery))
+                {
+                    <button type="button"
+                            aria-label="Clear search"
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded"
+                            @onclick="ClearSearch">
+                        <Icon Name="@IconNames.X" Size="14" />
+                    </button>
+                }
+                <kbd class="px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+                    ESC
+                </kbd>
+            </div>
+
+            @* Results Listbox *@
+            <div id="@_listboxId"
+                 role="listbox"
+                 aria-label="Commands"
+                 class="max-h-80 overflow-y-auto p-2 space-y-3">
+                @{
+                    var filtered = FilteredItems;
+                }
+                @if (filtered.Count == 0)
+                {
+                    <div class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                        @EmptyText
+                    </div>
+                }
+                else
+                {
+                    var flatIndex = 0;
+                    foreach (var group in filtered.GroupBy(i => i.Category ?? "Commands"))
+                    {
+                        <div class="space-y-1">
+                            <div class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                @group.Key
+                            </div>
+                            @foreach (var item in group)
+                            {
+                                var currentIndex = flatIndex++;
+                                var isHighlighted = currentIndex == _highlightedIndex;
+                                <button type="button"
+                                        role="option"
+                                        aria-selected="@(isHighlighted ? "true" : "false")"
+                                        disabled="@item.Disabled"
+                                        data-command-key="@item.Key"
+                                        class="@ComputeItemClass(isHighlighted, item.Disabled)"
+                                        @onmouseenter="@(() => _highlightedIndex = currentIndex)"
+                                        @onclick="@(() => SelectItemAsync(item))">
+                                    <div class="flex items-center gap-2.5 min-w-0">
+                                        @if (!string.IsNullOrEmpty(item.Icon))
+                                        {
+                                            <Icon Name="@item.Icon" Size="15" Class="@(isHighlighted ? "text-primary-600 dark:text-primary-400 shrink-0" : "text-slate-400 shrink-0")" />
+                                        }
+                                        <div class="min-w-0 text-left">
+                                            <div class="font-medium text-xs truncate">@item.Title</div>
+                                            @if (!string.IsNullOrEmpty(item.Subtitle))
+                                            {
+                                                <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">@item.Subtitle</div>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.Shortcut))
+                                    {
+                                        <kbd class="ml-2 px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shrink-0">
+                                            @item.Shortcut
+                                        </kbd>
+                                    }
+                                </button>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            @* Footer Hints *@
+            <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-between text-[11px] text-slate-400">
+                <div class="flex items-center gap-3">
+                    <span><kbd class="font-mono font-semibold">↑↓</kbd> Navigate</span>
+                    <span><kbd class="font-mono font-semibold">↵</kbd> Select</span>
+                    <span><kbd class="font-mono font-semibold">Esc</kbd> Close</span>
+                </div>
+                <span>@FilteredItems.Count command(s)</span>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Controls whether the command palette modal is visible.
+    /// </summary>
+    [Parameter] public bool Open { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the open state changes.
+    /// </summary>
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>
+    /// Collection of command items available for search and execution.
+    /// </summary>
+    [Parameter] public IEnumerable<CommandItem>? Items { get; set; }
+
+    /// <summary>
+    /// Placeholder text displayed inside the search input.
+    /// </summary>
+    [Parameter] public string Placeholder { get; set; } = "Type a command or search...";
+
+    /// <summary>
+    /// Text displayed when no command matches the search query.
+    /// </summary>
+    [Parameter] public string EmptyText { get; set; } = "No matching commands found.";
+
+    /// <summary>
+    /// Accessible label for the command palette dialog.
+    /// </summary>
+    [Parameter] public string AriaLabel { get; set; } = "Command Palette";
+
+    /// <summary>
+    /// Callback invoked when a command item is selected.
+    /// </summary>
+    [Parameter] public EventCallback<CommandItem> OnSelect { get; set; }
+
+    /// <summary>
+    /// Whether clicking the backdrop closes the command palette.
+    /// </summary>
+    [Parameter] public bool MaskClosable { get; set; } = true;
+
+    private readonly string _listboxId = $"tento-cmd-listbox-{Guid.NewGuid():N}";
+    private string _searchQuery = string.Empty;
+    private int _highlightedIndex;
+
+    private IReadOnlyList<CommandItem> FilteredItems
+    {
+        get
+        {
+            var source = Items ?? Enumerable.Empty<CommandItem>();
+            if (string.IsNullOrWhiteSpace(_searchQuery))
+            {
+                return source.ToList();
+            }
+
+            var q = _searchQuery.Trim();
+            return source.Where(item =>
+                item.Title.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                (item.Category != null && item.Category.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (item.Subtitle != null && item.Subtitle.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (item.Keywords != null && item.Keywords.Any(k => k.Contains(q, StringComparison.OrdinalIgnoreCase)))
+            ).ToList();
+        }
+    }
+
+    private void HandleSearchInput(ChangeEventArgs e)
+    {
+        _searchQuery = e.Value?.ToString() ?? string.Empty;
+        _highlightedIndex = 0;
+    }
+
+    private void ClearSearch()
+    {
+        _searchQuery = string.Empty;
+        _highlightedIndex = 0;
+    }
+
+    private async Task HandleBackdropClickAsync()
+    {
+        if (MaskClosable)
+        {
+            await CloseAsync();
+        }
+    }
+
+    private async Task CloseAsync()
+    {
+        Open = false;
+        if (OpenChanged.HasDelegate)
+        {
+            await OpenChanged.InvokeAsync(false);
+        }
+    }
+
+    private async Task SelectItemAsync(CommandItem item)
+    {
+        if (item.Disabled) return;
+        if (OnSelect.HasDelegate)
+        {
+            await OnSelect.InvokeAsync(item);
+        }
+        await CloseAsync();
+    }
+
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await CloseAsync();
+            return;
+        }
+
+        var items = FilteredItems;
+        if (items.Count == 0) return;
+
+        if (e.Key == "ArrowDown")
+        {
+            _highlightedIndex = (_highlightedIndex + 1) % items.Count;
+        }
+        else if (e.Key == "ArrowUp")
+        {
+            _highlightedIndex = (_highlightedIndex - 1 + items.Count) % items.Count;
+        }
+        else if (e.Key == "Enter")
+        {
+            if (_highlightedIndex >= 0 && _highlightedIndex < items.Count)
+            {
+                await SelectItemAsync(items[_highlightedIndex]);
+            }
+        }
+    }
+
+    private string ComputedClass => new CssBuilder("tento-command-palette w-full max-w-xl rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden")
+        .AddClass(Class)
+        .Build();
+
+    private static string ComputeItemClass(bool isHighlighted, bool isDisabled) => new CssBuilder("tento-command-item w-full px-3 py-2 rounded-lg flex items-center justify-between transition-colors")
+        .AddClass("bg-primary-50 dark:bg-primary-950/50 text-primary-700 dark:text-primary-300", isHighlighted && !isDisabled)
+        .AddClass("text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60", !isHighlighted && !isDisabled)
+        .AddClass("opacity-40 cursor-not-allowed", isDisabled)
+        .Build();
+}

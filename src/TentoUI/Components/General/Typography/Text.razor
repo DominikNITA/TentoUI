@@ -1,19 +1,122 @@
 @namespace TentoUI
 @inherits TentoComponentBase
+@inject IJSRuntime JSRuntime
 
 <span class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
-    @RenderContent()
+    @if (Editable && _isEditing)
+    {
+        <span class="tento-typography-edit-inline inline-flex items-center gap-1">
+            <input type="text"
+                   value="@_editBuffer"
+                   aria-label="Edit text"
+                   class="px-2 py-0.5 text-sm rounded border border-primary-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                   @oninput="@(e => _editBuffer = e.Value?.ToString() ?? string.Empty)"
+                   @onkeydown="HandleEditKeyDownAsync" />
+            <button type="button"
+                    aria-label="Save edit"
+                    class="p-1 text-emerald-600 hover:text-emerald-700 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    @onclick="CommitEditAsync">
+                <Icon Name="@IconNames.Check" Size="14" />
+            </button>
+            <button type="button"
+                    aria-label="Cancel edit"
+                    class="p-1 text-slate-400 hover:text-slate-600 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                    @onclick="CancelEdit">
+                <Icon Name="@IconNames.X" Size="14" />
+            </button>
+        </span>
+    }
+    else
+    {
+        @RenderContent()
+        @if (Editable && !Disabled)
+        {
+            <button type="button"
+                    aria-label="Edit text"
+                    class="tento-typography-edit-btn ml-1.5 inline-flex items-center text-slate-400 hover:text-primary-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                    @onclick="StartEdit">
+                <Icon Name="@IconNames.Edit2" Size="13" />
+            </button>
+        }
+        @if (Copyable && !Disabled)
+        {
+            <button type="button"
+                    aria-label="@(_copied ? "Copied" : "Copy text")"
+                    class="tento-typography-copy-btn ml-1.5 inline-flex items-center text-slate-400 hover:text-primary-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded"
+                    @onclick="HandleCopyAsync">
+                <Icon Name="@(_copied ? IconNames.Check : IconNames.Copy)" Size="13" Class="@(_copied ? "text-emerald-500" : "")" />
+            </button>
+        }
+    }
 </span>
 
 @code {
     [Parameter] public TypographyType Type { get; set; } = TypographyType.Default;
     [Parameter] public bool Strong { get; set; }
+    [Parameter] public bool Italic { get; set; }
     [Parameter] public bool Code { get; set; }
+    [Parameter] public bool Keyboard { get; set; }
     [Parameter] public bool Mark { get; set; }
     [Parameter] public bool Underline { get; set; }
     [Parameter] public bool Delete { get; set; }
     [Parameter] public bool Disabled { get; set; }
+    [Parameter, Since("1.1.0")] public bool Copyable { get; set; }
+    [Parameter, Since("1.1.0")] public string? CopyText { get; set; }
+    [Parameter, Since("1.1.0")] public EventCallback<string> OnCopy { get; set; }
+    [Parameter, Since("1.1.0")] public bool Editable { get; set; }
+    [Parameter, Since("1.1.0")] public string? EditText { get; set; }
+    [Parameter, Since("1.1.0")] public EventCallback<string> EditTextChanged { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _copied;
+    private bool _isEditing;
+    private string _editBuffer = string.Empty;
+
+    private void StartEdit()
+    {
+        _editBuffer = EditText ?? string.Empty;
+        _isEditing = true;
+    }
+
+    private void CancelEdit() => _isEditing = false;
+
+    private async Task CommitEditAsync()
+    {
+        _isEditing = false;
+        EditText = _editBuffer;
+        if (EditTextChanged.HasDelegate)
+        {
+            await EditTextChanged.InvokeAsync(_editBuffer);
+        }
+    }
+
+    private async Task HandleEditKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CommitEditAsync();
+        }
+        else if (e.Key == "Escape")
+        {
+            CancelEdit();
+        }
+    }
+
+    private async Task HandleCopyAsync()
+    {
+        var text = CopyText ?? EditText ?? string.Empty;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        }
+        catch { }
+
+        _copied = true;
+        if (OnCopy.HasDelegate)
+        {
+            await OnCopy.InvokeAsync(text);
+        }
+    }
 
     private string ComputedClass
     {
@@ -82,6 +185,29 @@
                 b.OpenElement(0, "code");
                 b.AddAttribute(1, "class", "bg-slate-100 rounded px-1 text-sm font-mono");
                 b.AddContent(2, prev);
+                b.CloseElement();
+            };
+        }
+
+        if (Keyboard)
+        {
+            var prev = current;
+            current = b =>
+            {
+                b.OpenElement(0, "kbd");
+                b.AddAttribute(1, "class", "px-1.5 py-0.5 text-xs font-mono font-semibold bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded shadow-2xs");
+                b.AddContent(2, prev);
+                b.CloseElement();
+            };
+        }
+
+        if (Italic)
+        {
+            var prev = current;
+            current = b =>
+            {
+                b.OpenElement(0, "i");
+                b.AddContent(1, prev);
                 b.CloseElement();
             };
         }

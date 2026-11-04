@@ -1,5 +1,7 @@
 @namespace TentoUI.Docs.Components
 @inject VersionService VersionService
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
 @inject IMessageService MessageService
 @implements IDisposable
 
@@ -16,18 +18,22 @@
 
     @if (_isOpen)
     {
-        <div class="absolute left-0 sm:right-0 sm:left-auto mt-2 w-72 origin-top-right rounded-xl bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-slate-200 dark:border-slate-800 py-2 z-50 focus:outline-none divide-y divide-slate-100 dark:divide-slate-800">
-            <div class="px-3 py-1.5">
+        <div class="absolute left-0 sm:right-0 sm:left-auto mt-2 w-76 origin-top-right rounded-xl bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-slate-200 dark:border-slate-800 py-2 z-50 focus:outline-none divide-y divide-slate-100 dark:divide-slate-800">
+            <div class="px-3 py-1.5 flex items-center justify-between">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     Documentation Versions
                 </span>
+                <span class="text-[10px] font-mono text-slate-400">versions.json</span>
             </div>
 
             <div class="py-1">
                 @foreach (var v in VersionService.AvailableVersions)
                 {
-                    var isSelected = v == VersionService.CurrentVersion;
+                    var isSelected = v.Version == VersionService.CurrentVersion.Version;
+                    var targetRoute = VersionService.GetVersionRoute(v, NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
                     <button type="button"
+                            data-version="@v.Version"
+                            data-target-route="@targetRoute"
                             class="w-full text-left px-3 py-2 flex items-start justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors @(isSelected ? "bg-primary-50/60 dark:bg-primary-950/30" : "")"
                             @onclick="@(() => SelectVersion(v))">
                         <div>
@@ -47,11 +53,18 @@
                                         Preview
                                     </span>
                                 }
+                                else if (v.IsLegacy)
+                                {
+                                    <span class="px-1.5 py-0.2 text-[9px] font-bold rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                        Legacy
+                                    </span>
+                                }
                             </div>
                             @if (!string.IsNullOrEmpty(v.Notes))
                             {
                                 <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">@v.Notes</p>
                             }
+                            <p class="text-[10px] font-mono text-slate-400 mt-0.5">@targetRoute</p>
                         </div>
                         @if (isSelected)
                         {
@@ -76,9 +89,10 @@
 @code {
     private bool _isOpen;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         VersionService.OnVersionChanged += StateHasChanged;
+        await VersionService.LoadVersionsAsync(HttpClient, NavigationManager.Uri);
     }
 
     private void ToggleDropdown()
@@ -89,8 +103,10 @@
     private void SelectVersion(DocVersion version)
     {
         _isOpen = false;
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        var targetRoute = VersionService.GetVersionRoute(version, relativePath);
         VersionService.SetVersion(version);
-        MessageService.Success($"Switched to documentation context for {version.Label}");
+        MessageService.Success($"Switched to {version.Label} ({targetRoute})");
     }
 
     public void Dispose()

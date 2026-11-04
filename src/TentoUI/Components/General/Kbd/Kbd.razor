@@ -1,0 +1,45 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+@{
+    var parts = GetKeyParts();
+}
+
+<span id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @if (parts.Count > 0)
+    {
+        @for (var i = 0; i < parts.Count; i++)
+        {
+            <kbd class="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-b-2 border-slate-300 dark:border-slate-700 rounded shadow-2xs">@parts[i]</kbd>
+            @if (i < parts.Count - 1)
+            {
+                <span class="text-[10px] text-slate-400 mx-0.5 select-none">+</span>
+            }
+        }
+    }
+    else if (ChildContent is not null)
+    {
+        <kbd class="inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 text-[11px] font-mono font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-b-2 border-slate-300 dark:border-slate-700 rounded shadow-2xs">@ChildContent</kbd>
+    }
+</span>
+
+@code {
+    /// <summary>
+    /// Plus-separated key chord, e.g., "Ctrl+Shift+P" or "⌘+K".
+    /// </summary>
+    [Parameter] public string? Keys { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ComputedClass => new CssBuilder("inline-flex items-center align-baseline")
+        .AddClass(Class)
+        .Build();
+
+    private IReadOnlyList<string> GetKeyParts()
+    {
+        if (string.IsNullOrWhiteSpace(Keys))
+            return [];
+
+        return Keys.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    }
+}

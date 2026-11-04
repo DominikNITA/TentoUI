@@ -1,0 +1,45 @@
+@namespace TentoUI
+@typeparam TItem
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<Table TItem="TItem"
+       DataSource="@DataSource"
+       Columns="@Columns"
+       ChildContent="@ChildContent"
+       HeaderToolbar="@HeaderToolbar"
+       Bordered="@Bordered"
+       Striped="@Striped"
+       Compact="@Compact"
+       Loading="@Loading"
+       ShowFilterRow="@ShowFilterRow"
+       SearchText="@SearchText"
+       Virtualize="true"
+       ItemSize="@ItemSize"
+       ScrollHeight="@ScrollHeight"
+       RowSelection="@RowSelection"
+       SelectedRows="@SelectedRows"
+       SelectedRowsChanged="@SelectedRowsChanged"
+       OnRowClick="@OnRowClick"
+       Class="@Class"
+       Style="@Style"
+       @attributes="AdditionalAttributes" />
+
+@code {
+    [Parameter] public IEnumerable<TItem>? DataSource { get; set; }
+    [Parameter] public RenderFragment? Columns { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderToolbar { get; set; }
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public bool Bordered { get; set; }
+    [Parameter] public bool Striped { get; set; }
+    [Parameter] public bool Compact { get; set; } = true;
+    [Parameter] public bool ShowFilterRow { get; set; }
+    [Parameter] public string? SearchText { get; set; }
+    [Parameter] public float ItemSize { get; set; } = 44f;
+    [Parameter] public string ScrollHeight { get; set; } = "420px";
+    [Parameter] public RowSelectionMode RowSelection { get; set; } = RowSelectionMode.None;
+    [Parameter] public HashSet<TItem> SelectedRows { get; set; } = new();
+    [Parameter] public EventCallback<HashSet<TItem>> SelectedRowsChanged { get; set; }
+    [Parameter] public EventCallback<TItem> OnRowClick { get; set; }
+}

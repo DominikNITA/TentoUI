@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Button Interactive Playground"
+                     ComponentTag="Button"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Button Types *@
     <DemoCard Title="Button Types" Description="5 basic types: Primary, Default, Dashed, Link, and Text." Code="@_typesCode">
         <div class="flex flex-wrap items-center gap-3">
@@ -67,11 +72,23 @@
     </DemoCard>
 
     @* API Reference Table *@
-    <ApiTable Title="Button Properties" Properties="@_buttonProps" />
+    <ApiTable Title="Button Properties" ComponentType="@typeof(Button)" Properties="@_buttonProps" />
 </div>
 
 @code {
     private bool _asyncLoading;
+
+    private readonly System.Collections.Generic.List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Label", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Primary Action", IsChildContent = true },
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ButtonType.Primary", DefaultValue = "ButtonType.Default", Options = ["ButtonType.Default", "ButtonType.Primary", "ButtonType.Dashed", "ButtonType.Text", "ButtonType.Link"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Shape", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ButtonShape.Default", DefaultValue = "ButtonShape.Default", Options = ["ButtonShape.Default", "ButtonShape.Round", "ButtonShape.Circle"] },
+        new() { Name = "Danger", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Loading", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Block", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
 
     private async Task SimulateAsyncActionAsync()
     {

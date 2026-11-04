@@ -1,0 +1,63 @@
+name: Pack & Publish TentoUI to NuGet
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version to publish (e.g., 1.0.0)'
+        required: false
+        default: '1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-nuget:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Regenerate Tailwind Candidate Manifest
+        shell: pwsh
+        run: ./scripts/generate-tentoui-classes.ps1
+
+      - name: Run Unit & Accessibility Tests
+        run: dotnet test tests/TentoUI.Tests/TentoUI.Tests.csproj -c Release
+
+      - name: Resolve Version
+        id: vars
+        run: |
+          if [[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Pack TentoUI NuGet Package (.nupkg + .snupkg)
+        run: |
+          dotnet pack src/TentoUI/TentoUI.csproj \
+            -c Release \
+            -p:PackageVersion=${{ steps.vars.outputs.version }} \
+            -p:IncludeSymbols=true \
+            -p:SymbolPackageFormat=snupkg \
+            -o ./artifacts
+
+      - name: Push Package to NuGet.org
+        if: env.NUGET_API_KEY != ''
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

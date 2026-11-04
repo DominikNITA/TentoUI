@@ -1,0 +1,155 @@
+@namespace TentoUI.Docs.Components
+@inject IJSRuntime JSRuntime
+@inject IMessageService MessageService
+
+<div class="tento-props-playground rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden my-6">
+    @* Header *@
+    <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                Interactive
+            </span>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">@Title</h3>
+        </div>
+        <button type="button"
+                class="px-2.5 py-1 rounded text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 inline-flex items-center gap-1.5 transition-colors"
+                @onclick="CopySnippetAsync">
+            <Icon Name="@IconNames.Copy" Size="13" />
+            <span>Copy Snippet</span>
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
+        @* Live Preview Stage *@
+        <div class="lg:col-span-7 p-8 flex flex-col items-center justify-center min-h-[180px] bg-slate-50/40 dark:bg-slate-950/40">
+            <TentoMarkupRenderer @key="GeneratedMarkup" Markup="@GeneratedMarkup" />
+        </div>
+
+        @* Controls Panel *@
+        <div class="lg:col-span-5 p-4 space-y-3 bg-white dark:bg-slate-900">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Parameters
+            </div>
+            @if (Controls != null)
+            {
+                @foreach (var ctrl in Controls)
+                {
+                    <div class="flex items-center justify-between gap-3 py-1">
+                        <label class="text-xs font-mono font-medium text-slate-700 dark:text-slate-300">
+                            @ctrl.Name
+                        </label>
+                        @if (ctrl.Kind == PlaygroundControlKind.Boolean)
+                        {
+                            <Switch Checked="@(string.Equals(ctrl.CurrentValue, "true", StringComparison.OrdinalIgnoreCase))"
+                                    CheckedChanged="@(val => UpdateControl(ctrl, val ? "true" : "false"))" />
+                        }
+                        else if (ctrl.Kind == PlaygroundControlKind.Select && ctrl.Options != null)
+                        {
+                            <select aria-label="@ctrl.Name"
+                                    value="@ctrl.CurrentValue"
+                                    class="px-2.5 py-1 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-primary-500"
+                                    @onchange="@(e => UpdateControl(ctrl, e.Value?.ToString() ?? string.Empty))">
+                                @foreach (var opt in ctrl.Options)
+                                {
+                                    <option value="@opt">@opt</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <input type="text"
+                                   aria-label="@ctrl.Name"
+                                   value="@ctrl.CurrentValue"
+                                   class="px-2.5 py-1 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 w-36 focus:outline-none focus:border-primary-500"
+                                   @oninput="@(e => UpdateControl(ctrl, e.Value?.ToString() ?? string.Empty))" />
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    @* Generated Markup Bar *@
+    <div class="px-4 py-2.5 bg-slate-950 border-t border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto">
+        <code>@GeneratedMarkup</code>
+    </div>
+</div>
+
+@code {
+    public enum PlaygroundControlKind
+    {
+        Boolean,
+        Select,
+        Text
+    }
+
+    public class PlaygroundControl
+    {
+        public string Name { get; set; } = string.Empty;
+        public PlaygroundControlKind Kind { get; set; }
+        public string CurrentValue { get; set; } = string.Empty;
+        public string DefaultValue { get; set; } = string.Empty;
+        public string[]? Options { get; set; }
+        public bool IsChildContent { get; set; }
+    }
+
+    [Parameter] public string Title { get; set; } = "Interactive Props Playground";
+    [Parameter] public string ComponentTag { get; set; } = "Button";
+    [Parameter] public System.Collections.Generic.List<PlaygroundControl>? Controls { get; set; }
+
+    public string GeneratedMarkup
+    {
+        get
+        {
+            if (Controls == null || Controls.Count == 0)
+            {
+                return $"<{ComponentTag} />";
+            }
+
+            var attrs = new System.Collections.Generic.List<string>();
+            string? childText = null;
+
+            foreach (var c in Controls)
+            {
+                if (c.IsChildContent)
+                {
+                    childText = c.CurrentValue;
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(c.CurrentValue) ||
+                    string.Equals(c.CurrentValue, c.DefaultValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                attrs.Add($"{c.Name}=\"{c.CurrentValue}\"");
+            }
+
+            var attrSegment = attrs.Count > 0 ? " " + string.Join(" ", attrs) : string.Empty;
+            if (!string.IsNullOrEmpty(childText))
+            {
+                return $"<{ComponentTag}{attrSegment}>{childText}</{ComponentTag}>";
+            }
+
+            return $"<{ComponentTag}{attrSegment} />";
+        }
+    }
+
+    private void UpdateControl(PlaygroundControl ctrl, string val)
+    {
+        ctrl.CurrentValue = val;
+        StateHasChanged();
+    }
+
+    private async Task CopySnippetAsync()
+    {
+        var code = GeneratedMarkup;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", code);
+        }
+        catch { }
+        MessageService.Success("Playground Razor snippet copied!");
+    }
+}

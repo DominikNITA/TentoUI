@@ -1,0 +1,90 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+@using System.Globalization
+
+@{
+    var range = Math.Max(1e-6, Max - Min);
+    var clamped = Math.Clamp(Value, Min, Max);
+    var ratio = (clamped - Min) / range;
+    var radius = 42.0;
+    var circumference = Math.PI * radius;
+    var dashOffset = circumference * (1.0 - ratio);
+    var strokeClass = ResolveStrokeClass(ratio);
+}
+
+<div id="@ElementId"
+     class="@ComputedClass"
+     style="@Style"
+     role="meter"
+     aria-valuemin="@Min"
+     aria-valuemax="@Max"
+     aria-valuenow="@clamped"
+     aria-label="@(Label ?? "Gauge meter")"
+     @attributes="AdditionalAttributes">
+    <div class="relative inline-flex flex-col items-center">
+        <svg width="@Size" height="@(Size * 0.62)" viewBox="0 0 100 62" class="overflow-visible">
+            <path d="M 8 54 A 42 42 0 0 1 92 54"
+                  fill="none"
+                  stroke-width="@StrokeWidth"
+                  stroke-linecap="round"
+                  class="stroke-slate-200 dark:stroke-slate-800" />
+            <path d="M 8 54 A 42 42 0 0 1 92 54"
+                  fill="none"
+                  stroke-width="@StrokeWidth"
+                  stroke-linecap="round"
+                  stroke-dasharray="@circumference.ToString("F2", CultureInfo.InvariantCulture)"
+                  stroke-dashoffset="@dashOffset.ToString("F2", CultureInfo.InvariantCulture)"
+                  class="transition-all duration-500 @strokeClass" />
+        </svg>
+
+        <div class=" -mt-7 text-center">
+            <div class="text-xl font-bold text-slate-900 dark:text-white tabular-nums">
+                @clamped.ToString("0.#", CultureInfo.InvariantCulture)<span class="text-xs font-medium text-slate-500 dark:text-slate-400 ml-0.5">@Unit</span>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Label))
+            {
+                <div class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">@Label</div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public double Value { get; set; } = 68;
+    [Parameter] public double Min { get; set; } = 0;
+    [Parameter] public double Max { get; set; } = 100;
+    [Parameter] public string? Unit { get; set; } = "%";
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public int Size { get; set; } = 160;
+    [Parameter] public int StrokeWidth { get; set; } = 10;
+    [Parameter] public GaugeStatus Status { get; set; } = GaugeStatus.Default;
+    [Parameter] public bool AutoThresholdColor { get; set; } = true;
+
+    private string ComputedClass => new CssBuilder("inline-flex flex-col items-center justify-center p-2")
+        .AddClass(Class)
+        .Build();
+
+    private string ResolveStrokeClass(double ratio)
+    {
+        if (Status != GaugeStatus.Default)
+        {
+            return Status switch
+            {
+                GaugeStatus.Success => "stroke-emerald-500",
+                GaugeStatus.Warning => "stroke-amber-500",
+                GaugeStatus.Error => "stroke-rose-500",
+                _ => "stroke-primary-600"
+            };
+        }
+
+        if (AutoThresholdColor)
+        {
+            if (ratio >= 0.85) return "stroke-rose-500";
+            if (ratio >= 0.65) return "stroke-amber-500";
+            return "stroke-emerald-500";
+        }
+
+        return "stroke-primary-600";
+    }
+}

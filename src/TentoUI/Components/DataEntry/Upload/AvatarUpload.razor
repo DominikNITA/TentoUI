@@ -1,0 +1,122 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+@using System.Globalization
+@using Microsoft.AspNetCore.Components.Forms
+
+<div id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="relative inline-flex items-center justify-center group">
+        <div class="overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-primary-500 transition-colors bg-slate-50 dark:bg-slate-900 flex items-center justify-center @(Shape == AvatarShape.Circle ? "rounded-full" : "rounded-2xl")"
+             style="width: @(Size)px; height: @(Size)px;">
+            @if (!string.IsNullOrWhiteSpace(Src))
+            {
+                <img src="@Src"
+                     alt="@(Alt ?? "Uploaded avatar")"
+                     class="w-full h-full object-cover transition-transform duration-200"
+                     style="@ImageTransformStyle" />
+            }
+            else
+            {
+                <div class="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                    <Icon Name="user" Class="w-6 h-6 mb-1" />
+                    <span class="text-[11px] font-medium">@Placeholder</span>
+                </div>
+            }
+        </div>
+
+        <label class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-primary-600 text-white shadow-md flex items-center justify-center cursor-pointer hover:bg-primary-700 transition-colors"
+               title="Choose image"
+               aria-label="Choose avatar image">
+            <Icon Name="upload" Class="w-3.5 h-3.5" />
+            <InputFile OnChange="HandleFileSelected" accept="@Accept" class="sr-only" disabled="@Disabled" />
+        </label>
+    </div>
+
+    @if (ShowCropControls && !string.IsNullOrWhiteSpace(Src))
+    {
+        <div class="flex flex-wrap items-center gap-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Zoom</span>
+                <input type="range"
+                       min="1"
+                       max="2.5"
+                       step="0.1"
+                       value="@_zoom.ToString(CultureInfo.InvariantCulture)"
+                       aria-label="Avatar zoom"
+                       class="w-24 accent-primary-600 cursor-pointer"
+                       @oninput="OnZoomInput" />
+                <span class="tabular-nums text-slate-600 dark:text-slate-300 w-9">@(_zoom.ToString("0.0", CultureInfo.InvariantCulture))x</span>
+            </div>
+
+            <Button Type="ButtonType.Default" Size="ComponentSize.Small" OnClick="RotateRight">
+                Rotate 90°
+            </Button>
+
+            <Button Type="ButtonType.Text" Size="ComponentSize.Small" OnClick="ClearAvatar">
+                Remove
+            </Button>
+        </div>
+    }
+</div>
+
+@code {
+    private double _zoom = 1.0;
+    private int _rotation = 0;
+
+    [Parameter] public string? Src { get; set; }
+    [Parameter] public EventCallback<string?> SrcChanged { get; set; }
+    [Parameter] public string? Alt { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Upload";
+    [Parameter] public AvatarShape Shape { get; set; } = AvatarShape.Circle;
+    [Parameter] public int Size { get; set; } = 96;
+    [Parameter] public string Accept { get; set; } = "image/*";
+    [Parameter] public long MaxFileSize { get; set; } = 5 * 1024 * 1024;
+    [Parameter] public bool ShowCropControls { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+
+    private string ComputedClass => new CssBuilder("inline-flex flex-col items-start gap-3")
+        .AddClass(Class)
+        .Build();
+
+    private string ImageTransformStyle =>
+        $"transform: scale({_zoom.ToString("0.##", CultureInfo.InvariantCulture)}) rotate({_rotation}deg);";
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        if (Disabled || e.FileCount == 0)
+            return;
+
+        var file = e.File;
+        await using var stream = file.OpenReadStream(MaxFileSize);
+        using var ms = new System.IO.MemoryStream();
+        await stream.CopyToAsync(ms);
+        var base64 = Convert.ToBase64String(ms.ToArray());
+        var dataUrl = $"data:{file.ContentType};base64,{base64}";
+
+        _zoom = 1.0;
+        _rotation = 0;
+        Src = dataUrl;
+        if (SrcChanged.HasDelegate)
+            await SrcChanged.InvokeAsync(Src);
+    }
+
+    private void OnZoomInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var z))
+            _zoom = Math.Clamp(z, 1.0, 2.5);
+    }
+
+    private void RotateRight()
+    {
+        _rotation = (_rotation + 90) % 360;
+    }
+
+    private async Task ClearAvatar()
+    {
+        Src = null;
+        _zoom = 1.0;
+        _rotation = 0;
+        if (SrcChanged.HasDelegate)
+            await SrcChanged.InvokeAsync(null);
+    }
+}

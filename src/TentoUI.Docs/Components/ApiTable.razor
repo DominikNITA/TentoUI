@@ -1,12 +1,29 @@
 @namespace TentoUI.Docs.Components
+@using System.Reflection
+@using TentoUI.Docs.Services
+@using TentoUI.Extensibility
 
 <div class="mt-8 space-y-3">
     @if (!string.IsNullOrEmpty(Title))
     {
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>@Title</span>
-            <span class="text-xs font-normal text-slate-400">API Reference</span>
-        </h3>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>@Title</span>
+                <span class="text-xs font-normal text-slate-400">API Reference</span>
+                @if (!string.IsNullOrEmpty(EffectiveComponentSince))
+                {
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                        Added in v@(EffectiveComponentSince)
+                    </span>
+                }
+            </h3>
+            @if (ComponentType != null)
+            {
+                <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+                    Source-verified: @ComponentApiRegistry.FormatTypeName(ComponentType)
+                </span>
+            }
+        </div>
     }
 
     <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
@@ -20,36 +37,47 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 font-normal text-slate-700 dark:text-slate-300">
-                @if (Properties != null)
+                @foreach (var prop in ResolvedProperties)
                 {
-                    @foreach (var prop in Properties)
-                    {
-                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                            <td class="py-3 px-4 font-mono font-semibold text-primary-600 dark:text-primary-400">
-                                @prop.Property
-                            </td>
-                            <td class="py-3 px-4 leading-relaxed max-w-md">
-                                @prop.Description
-                            </td>
-                            <td class="py-3 px-4 font-mono text-purple-600 dark:text-purple-400">
-                                <span class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px]">
-                                    @prop.Type
-                                </span>
-                            </td>
-                            <td class="py-3 px-4 font-mono text-slate-500 dark:text-slate-400">
-                                @if (!string.IsNullOrEmpty(prop.Default))
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td class="py-3 px-4 font-mono font-semibold text-primary-600 dark:text-primary-400">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span>@prop.Property</span>
+                                @if (!string.IsNullOrEmpty(prop.Since))
                                 {
-                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
-                                        @prop.Default
+                                    <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                        v@(prop.Since)
                                     </span>
                                 }
-                                else
+                                @if (!string.IsNullOrEmpty(prop.Deprecated))
                                 {
-                                    <span class="text-slate-300 dark:text-slate-600">-</span>
+                                    <span class="px-1.5 py-0.2 rounded-full font-sans text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                        @prop.Deprecated
+                                    </span>
                                 }
-                            </td>
-                        </tr>
-                    }
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 leading-relaxed max-w-md">
+                            @prop.Description
+                        </td>
+                        <td class="py-3 px-4 font-mono text-purple-600 dark:text-purple-400">
+                            <span class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px]">
+                                @prop.Type
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 font-mono text-slate-500 dark:text-slate-400">
+                            @if (!string.IsNullOrEmpty(prop.Default))
+                            {
+                                <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
+                                    @prop.Default
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-slate-300 dark:text-slate-600">-</span>
+                            }
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -57,8 +85,22 @@
 </div>
 
 @code {
-    public record ApiProp(string Property, string Description, string Type, string? Default = null);
+    public record ApiProp(
+        string Property,
+        string Description,
+        string Type,
+        string? Default = null,
+        string? Since = null,
+        string? Deprecated = null);
 
     [Parameter] public string? Title { get; set; }
+    [Parameter] public Type? ComponentType { get; set; }
+    [Parameter] public string? Since { get; set; }
     [Parameter] public IEnumerable<ApiProp>? Properties { get; set; }
+
+    private string? EffectiveComponentSince =>
+        Since ?? ComponentType?.GetCustomAttribute<SinceAttribute>()?.Version;
+
+    private IReadOnlyList<ApiProp> ResolvedProperties =>
+        ComponentApiRegistry.GetProperties(ComponentType, Properties);
 }

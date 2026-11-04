@@ -1,0 +1,45 @@
+@page "/components/code-block"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>CodeBlock - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">CodeBlock</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Syntax-highlighted code viewer with line numbers, highlighted line ranges, collapsible body, and one-click clipboard copy.
+        </p>
+    </div>
+
+    <DemoCard Title="Syntax Highlighting &amp; Line Highlighting" Description="Highlight key lines using comma-separated numbers or ranges (e.g. '2,4-6')." Code="@_codeDemo">
+        <CodeBlock Title="Program.cs"
+                   Language="csharp"
+                   HighlightLines="3,5-6"
+                   Collapsible="true"
+                   Code="@_sampleSnippet" />
+    </DemoCard>
+
+    <ApiTable Title="CodeBlock Properties" ComponentType="@typeof(CodeBlock)" />
+</div>
+
+@code {
+    private const string _sampleSnippet = """
+        using TentoUI;
+
+        var builder = WebApplication.CreateBuilder(args);
+        // Register TentoUI services
+        builder.Services.AddTentoUI();
+        var app = builder.Build();
+        app.Run();
+        """;
+
+    private const string _codeDemo = """
+        <CodeBlock Title="Program.cs"
+                   Language="csharp"
+                   HighlightLines="2,4-5"
+                   Collapsible="true" />
+        """;
+}

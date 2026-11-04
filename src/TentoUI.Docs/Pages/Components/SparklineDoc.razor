@@ -1,0 +1,49 @@
+@page "/components/sparkline"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Sparkline - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Sparkline</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Pure-SVG inline trend visualization supporting line, area, and bar charts with automatic semantic trend coloring.
+        </p>
+    </div>
+
+    <DemoCard Title="Line, Area &amp; Bar Sparklines" Description="Zero-JS SVG sparklines ideal for KPI Statistic cards and Table cells." Code="@_sparkCode">
+        <div class="flex flex-wrap items-center gap-8">
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+                <Statistic Title="MRR Growth" Value="48200">
+                    <Prefix>$</Prefix>
+                </Statistic>
+                <Sparkline Type="SparklineType.Area" Values="18, 24, 21, 32, 38, 45, 58" ShowDots="true" />
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+                <Statistic Title="Error Rate" Value="0.42">
+                    <Suffix>%</Suffix>
+                </Statistic>
+                <Sparkline Type="SparklineType.Line" Values="42, 35, 38, 29, 20, 14, 9" Trend="SparklineTrend.Down" />
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
+                <Statistic Title="Daily Deploys" Value="24" />
+                <Sparkline Type="SparklineType.Bar" Values="12, 19, 15, 28, 22, 30, 24" Trend="SparklineTrend.Neutral" />
+            </div>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Sparkline Properties" ComponentType="@typeof(Sparkline)" />
+</div>
+
+@code {
+    private const string _sparkCode = """
+        <Sparkline Type="SparklineType.Area" Values="18, 24, 21, 32, 38, 45, 58" ShowDots="true" />
+        <Sparkline Type="SparklineType.Line" Values="42, 35, 38, 29, 20, 14, 9" Trend="SparklineTrend.Down" />
+        <Sparkline Type="SparklineType.Bar" Values="12, 19, 15, 28, 22, 30, 24" Trend="SparklineTrend.Neutral" />
+        """;
+}

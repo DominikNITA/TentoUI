@@ -46,9 +46,10 @@
         </div>
     }
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto @( !string.IsNullOrWhiteSpace(ScrollHeight) || Virtualize ? "overflow-y-auto" : "" )"
+         style="@ComputeScrollViewportStyle()">
         <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm text-left">
-            <thead class="bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider @( !string.IsNullOrWhiteSpace(ScrollHeight) || Virtualize ? "sticky top-0 z-20" : "" )">
                 <tr>
                     @if (ExpandedRowTemplate != null)
                     {
@@ -128,6 +129,13 @@
                                 }
                             </div>
 
+                            @if (col.Resizable)
+                            {
+                                <span class="tento-table-resize-handle absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary-500/50 transition-colors"
+                                      title="Resize column"
+                                      @onclick:stopPropagation="true"></span>
+                            }
+
                             @if (col.Filterable && !ShowFilterRow && _openFilterColumn == col)
                             {
                                 <div class="tento-table-filter-popover mt-2 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded shadow-lg normal-case font-normal"
@@ -191,6 +199,37 @@
                             }
                         </td>
                     </tr>
+                }
+                else if (Virtualize)
+                {
+                    <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize Items="@SortedItems.ToList()" Context="item" ItemSize="@ItemSize">
+                        @{
+                            var isSelected = SelectedRows.Contains(item);
+                        }
+                        <tr class="@ComputeRowClass(isSelected, 1)"
+                            @onclick="@(() => HandleRowClickAsync(item))">
+                            @if (ExpandedRowTemplate != null)
+                            {
+                                <td class="tento-table-expand-cell px-3 py-3 text-center"></td>
+                            }
+                            @if (RowSelection != RowSelectionMode.None)
+                            {
+                                <td class="tento-table-selection-cell px-4 py-3 text-center" @onclick:stopPropagation="true">
+                                    <input type="@(RowSelection == RowSelectionMode.Multiple ? "checkbox" : "radio")"
+                                           name="@($"table-sel-{ElementId}")"
+                                           checked="@isSelected"
+                                           class="rounded border-slate-300 text-primary-500 focus:ring-primary-500 w-4 h-4 cursor-pointer"
+                                           @onchange="@(() => ToggleSelectRow(item))" />
+                                </td>
+                            }
+                            @foreach (var col in VisibleColumns)
+                            {
+                                <td class="@ComputeCellClass(col)" style="@ComputeColumnStyle(col)">
+                                    @col.RenderCell(item)
+                                </td>
+                            }
+                        </tr>
+                    </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
                 }
                 else
                 {
@@ -296,6 +335,9 @@
     [Parameter] public bool Compact { get; set; }
     [Parameter] public bool ShowFilterRow { get; set; } = true;
     [Parameter] public string? SearchText { get; set; }
+    [Parameter, Since("1.1.0")] public bool Virtualize { get; set; }
+    [Parameter, Since("1.1.0")] public float ItemSize { get; set; } = 44f;
+    [Parameter, Since("1.1.0")] public string? ScrollHeight { get; set; }
 
     // Pagination parameters
     [Parameter] public int PageSize { get; set; } = 10;
@@ -323,7 +365,6 @@
     private SortDirection _sortDirection = SortDirection.None;
     private ColumnBase<TItem>? _openFilterColumn;
     private bool _defaultSortApplied;
-    private readonly string ElementId = Guid.NewGuid().ToString("N");
 
     public IReadOnlyList<ColumnBase<TItem>> RegisteredColumns => _columns;
     private IReadOnlyList<ColumnBase<TItem>> VisibleColumns => _columns.Where(c => c.Visible).ToList();
@@ -799,6 +840,15 @@
         .AddClass(Class)
         .Build();
 
+    private string? ComputeScrollViewportStyle()
+    {
+        if (!string.IsNullOrWhiteSpace(ScrollHeight))
+            return $"max-height: {ScrollHeight};";
+        if (Virtualize)
+            return "max-height: 420px;";
+        return null;
+    }
+
     private string? ComputeColumnStyle(ColumnBase<TItem> col)
     {
         var sb = new StyleBuilder()
@@ -820,9 +870,16 @@
         var cursor = col.Sortable ? "cursor-pointer select-none" : "";
         var padding = Compact ? "px-3 py-2" : "px-6 py-3";
         var border = Bordered ? "border-x border-slate-200 dark:border-slate-700 first:border-l-0 last:border-r-0" : "";
+        var fixedCls = col.Fixed switch
+        {
+            ColumnFixed.Left => "sticky left-0 z-10 bg-slate-50 dark:bg-slate-800",
+            ColumnFixed.Right => "sticky right-0 z-10 bg-slate-50 dark:bg-slate-800",
+            _ => ""
+        };
 
-        return new CssBuilder($"{padding} {align} {cursor}")
+        return new CssBuilder($"relative {padding} {align} {cursor}")
             .AddClass(border, Bordered)
+            .AddClass(fixedCls, col.Fixed != ColumnFixed.None)
             .AddClass(col.HeaderClass)
             .Build();
     }
@@ -836,10 +893,17 @@
             _ => "text-left"
         };
         var padding = Compact ? "px-3 py-2" : "px-6 py-4";
+        var fixedCls = col.Fixed switch
+        {
+            ColumnFixed.Left => "sticky left-0 z-10 bg-white dark:bg-slate-900",
+            ColumnFixed.Right => "sticky right-0 z-10 bg-white dark:bg-slate-900",
+            _ => ""
+        };
 
         return new CssBuilder($"{padding} {align}")
             .AddClass("border-x border-slate-200 dark:border-slate-700 first:border-l-0 last:border-r-0", Bordered)
             .AddClass("truncate max-w-xs", col.Ellipsis)
+            .AddClass(fixedCls, col.Fixed != ColumnFixed.None)
             .AddClass(col.CellClass)
             .Build();
     }

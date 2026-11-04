@@ -1,0 +1,153 @@
+@namespace TentoUI
+@inherits TentoInputBase<string?>
+@attribute [Since("1.1.0")]
+@using System.Globalization
+
+<div id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    <div class="relative select-none touch-none bg-white dark:bg-slate-950"
+         style="height: @(Height)px;">
+        <svg class="w-full h-full cursor-crosshair"
+             viewBox="0 0 @Width @Height"
+             preserveAspectRatio="none"
+             role="img"
+             aria-label="@(Placeholder ?? "Signature pad")"
+             @onpointerdown="HandlePointerDown"
+             @onpointermove="HandlePointerMove"
+             @onpointerup="HandlePointerUp"
+             @onpointerleave="HandlePointerUp">
+            <line x1="24" y1="@(Height - 28)" x2="@(Width - 24)" y2="@(Height - 28)"
+                  class="stroke-slate-200 dark:stroke-slate-800" stroke-dasharray="4 4" stroke-width="1" />
+            @foreach (var path in _strokes)
+            {
+                <path d="@path"
+                      fill="none"
+                      stroke-width="@StrokeWidth"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="stroke-slate-900 dark:stroke-slate-100" />
+            }
+            @if (!string.IsNullOrEmpty(_activeStroke))
+            {
+                <path d="@_activeStroke"
+                      fill="none"
+                      stroke-width="@StrokeWidth"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="stroke-primary-600 dark:stroke-primary-400" />
+            }
+        </svg>
+
+        @if (_strokes.Count == 0 && string.IsNullOrEmpty(_activeStroke))
+        {
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">
+                @(Placeholder ?? "Sign here using mouse or touch")
+            </div>
+        }
+    </div>
+
+    <div class="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-xs">
+        <span class="text-slate-500 dark:text-slate-400">
+            @(_strokes.Count == 0 ? "No signature captured" : $"{_strokes.Count} stroke(s) recorded")
+        </span>
+        <div class="flex items-center gap-1.5">
+            <Button Type="ButtonType.Default" Size="ComponentSize.Small" Disabled="@(Disabled || _strokes.Count == 0)" OnClick="UndoStroke">
+                Undo
+            </Button>
+            <Button Type="ButtonType.Default" Size="ComponentSize.Small" Disabled="@(Disabled || _strokes.Count == 0)" OnClick="ClearSignature">
+                Clear
+            </Button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly List<string> _strokes = [];
+    private string? _activeStroke;
+    private bool _isDrawing;
+
+    [Parameter] public int Width { get; set; } = 480;
+    [Parameter] public int Height { get; set; } = 160;
+    [Parameter] public int StrokeWidth { get; set; } = 2;
+    [Parameter] public string? Placeholder { get; set; } = "Sign here using mouse or touch";
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private string ComputedClass => new CssBuilder("rounded-xl border overflow-hidden shadow-2xs")
+        .AddClass("border-slate-200 dark:border-slate-800", EffectiveStatus == ComponentStatus.None)
+        .AddClass("border-rose-500", EffectiveStatus == ComponentStatus.Error)
+        .AddClass("opacity-60 pointer-events-none", Disabled)
+        .AddClass(Class)
+        .Build();
+
+    private void HandlePointerDown(PointerEventArgs e)
+    {
+        if (Disabled || ReadOnly)
+            return;
+
+        _isDrawing = true;
+        var x = e.OffsetX.ToString("0.#", CultureInfo.InvariantCulture);
+        var y = e.OffsetY.ToString("0.#", CultureInfo.InvariantCulture);
+        _activeStroke = $"M {x} {y}";
+    }
+
+    protected override bool TryParseValueFromString(string? value, out string? result, [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        result = value;
+        validationErrorMessage = null;
+        return true;
+    }
+
+    private void HandlePointerMove(PointerEventArgs e)
+    {
+        if (!_isDrawing || string.IsNullOrEmpty(_activeStroke))
+            return;
+
+        var x = e.OffsetX.ToString("0.#", CultureInfo.InvariantCulture);
+        var y = e.OffsetY.ToString("0.#", CultureInfo.InvariantCulture);
+        _activeStroke += $" L {x} {y}";
+    }
+
+    private void HandlePointerUp(PointerEventArgs e)
+    {
+        if (!_isDrawing)
+            return;
+
+        _isDrawing = false;
+        if (!string.IsNullOrEmpty(_activeStroke))
+        {
+            _strokes.Add(_activeStroke);
+            _activeStroke = null;
+            ExportSignature();
+        }
+    }
+
+    public void UndoStroke()
+    {
+        if (_strokes.Count == 0)
+            return;
+
+        _strokes.RemoveAt(_strokes.Count - 1);
+        ExportSignature();
+    }
+
+    public async Task ClearSignature()
+    {
+        _strokes.Clear();
+        _activeStroke = null;
+        CurrentValueAsString = null;
+        if (OnClear.HasDelegate)
+            await OnClear.InvokeAsync();
+    }
+
+    private void ExportSignature()
+    {
+        if (_strokes.Count == 0)
+        {
+            CurrentValueAsString = null;
+            return;
+        }
+
+        var paths = string.Join("", _strokes.Select(p => $"<path d='{p}' fill='none' stroke='currentColor' stroke-width='{StrokeWidth}' stroke-linecap='round'/>"));
+        var svg = $"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {Width} {Height}'>{paths}</svg>";
+        CurrentValueAsString = $"data:image/svg+xml;utf8,{Uri.EscapeDataString(svg)}";
+    }
+}

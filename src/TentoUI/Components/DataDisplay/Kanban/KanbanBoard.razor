@@ -1,0 +1,250 @@
+@namespace TentoUI
+@typeparam TItem
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div class="@ComputedBoardClass"
+     style="@Style"
+     role="region"
+     aria-label="Kanban Board"
+     @attributes="AdditionalAttributes">
+    @foreach (var col in EffectiveColumns)
+    {
+        var colItems = GetItemsForColumn(col.Key);
+        var isOverLimit = col.MaxItems.HasValue && colItems.Count > col.MaxItems.Value;
+        var isAtLimit = col.MaxItems.HasValue && colItems.Count == col.MaxItems.Value;
+
+        <div class="tento-kanban-column flex flex-col w-72 shrink-0 rounded-xl bg-slate-100/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 p-3"
+             data-column-key="@col.Key"
+             @ondragover:preventDefault="true"
+             @ondrop="@(() => HandleDropAsync(col.Key))">
+            @* Column Header *@
+            <div class="flex items-center justify-between mb-3 px-1">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-xs text-slate-800 dark:text-slate-100">@col.Title</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        @(col.MaxItems.HasValue ? $"{colItems.Count}/{col.MaxItems.Value}" : colItems.Count.ToString())
+                    </span>
+                </div>
+                @if (isOverLimit)
+                {
+                    <Tag TagColor="TagColor.Error">WIP Exceeded</Tag>
+                }
+                else if (isAtLimit)
+                {
+                    <Tag TagColor="TagColor.Warning">WIP Max</Tag>
+                }
+            </div>
+
+            @* Column Cards *@
+            <div class="flex-1 space-y-2.5 min-h-[120px]">
+                @if (colItems.Count == 0)
+                {
+                    <div class="h-24 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-[11px] text-slate-400">
+                        No cards
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in colItems)
+                    {
+                        <div draggable="true"
+                             class="tento-kanban-card group p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md hover:border-primary-400 transition-all cursor-grab active:cursor-grabbing"
+                             @ondragstart="@(() => _draggedItem = item)">
+                            @if (CardTemplate != null)
+                            {
+                                @CardTemplate(item)
+                            }
+                            else
+                            {
+                                var tag = GetTag(item);
+                                var desc = GetDescription(item);
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="font-semibold text-xs text-slate-900 dark:text-white">
+                                        @GetTitle(item)
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(tag))
+                                    {
+                                        <Tag TagColor="TagColor.Primary">@tag</Tag>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(desc))
+                                {
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                                        @desc
+                                    </p>
+                                }
+                            }
+
+                            @* Accessible Move Controls *@
+                            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-slate-400">
+                                <span>@col.Title</span>
+                                <div class="flex items-center gap-1">
+                                    @{
+                                        var prevCol = GetAdjacentColumn(col.Key, -1);
+                                        var nextCol = GetAdjacentColumn(col.Key, 1);
+                                    }
+                                    @if (prevCol != null)
+                                    {
+                                        <button type="button"
+                                                aria-label="@($"Move to {prevCol.Title}")"
+                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                                                @onclick="@(() => MoveCardAsync(item, col.Key, prevCol.Key))">
+                                            <Icon Name="@IconNames.ArrowLeft" Size="12" />
+                                        </button>
+                                    }
+                                    @if (nextCol != null)
+                                    {
+                                        <button type="button"
+                                                aria-label="@($"Move to {nextCol.Title}")"
+                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                                                @onclick="@(() => MoveCardAsync(item, col.Key, nextCol.Key))">
+                                            <Icon Name="@IconNames.ArrowRight" Size="12" />
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Column definitions for the Kanban board.
+    /// </summary>
+    [Parameter] public IEnumerable<KanbanColumnDefinition>? Columns { get; set; }
+
+    /// <summary>
+    /// Data items rendered as cards across columns.
+    /// </summary>
+    [Parameter] public IEnumerable<TItem>? Items { get; set; }
+
+    /// <summary>
+    /// Selector returning the column key for a given item.
+    /// </summary>
+    [Parameter] public Func<TItem, string>? ColumnKeySelector { get; set; }
+
+    /// <summary>
+    /// Optional action to mutate an item's column key when moved.
+    /// </summary>
+    [Parameter] public Action<TItem, string>? ColumnKeySetter { get; set; }
+
+    /// <summary>
+    /// Selector returning the card title.
+    /// </summary>
+    [Parameter] public Func<TItem, string>? TitleSelector { get; set; }
+
+    /// <summary>
+    /// Selector returning the optional card description.
+    /// </summary>
+    [Parameter] public Func<TItem, string?>? DescriptionSelector { get; set; }
+
+    /// <summary>
+    /// Selector returning the optional card tag badge text.
+    /// </summary>
+    [Parameter] public Func<TItem, string?>? TagSelector { get; set; }
+
+    /// <summary>
+    /// Custom template for rendering each card's body.
+    /// </summary>
+    [Parameter] public RenderFragment<TItem>? CardTemplate { get; set; }
+
+    /// <summary>
+    /// Callback invoked when a card is moved between columns via drag-and-drop or keyboard/button controls.
+    /// </summary>
+    [Parameter] public EventCallback<KanbanCardMoveArgs<TItem>> OnCardMove { get; set; }
+
+    private TItem? _draggedItem;
+
+    private IReadOnlyList<KanbanColumnDefinition> EffectiveColumns => Columns?.ToList() ??
+    [
+        new("todo", "To Do", MaxItems: 5),
+        new("in-progress", "In Progress", MaxItems: 3),
+        new("done", "Done")
+    ];
+
+    private IReadOnlyList<TItem> EffectiveItems => Items?.ToList() ?? [];
+
+    private string GetColumnKey(TItem item)
+    {
+        if (ColumnKeySelector != null) return ColumnKeySelector(item);
+        if (item is KanbanCardItem card) return card.ColumnKey;
+        return EffectiveColumns.FirstOrDefault()?.Key ?? string.Empty;
+    }
+
+    private string GetTitle(TItem item)
+    {
+        if (TitleSelector != null) return TitleSelector(item);
+        if (item is KanbanCardItem card) return card.Title;
+        return item?.ToString() ?? string.Empty;
+    }
+
+    private string? GetDescription(TItem item)
+    {
+        if (DescriptionSelector != null) return DescriptionSelector(item);
+        if (item is KanbanCardItem card) return card.Description;
+        return null;
+    }
+
+    private string? GetTag(TItem item)
+    {
+        if (TagSelector != null) return TagSelector(item);
+        if (item is KanbanCardItem card) return card.Tag;
+        return null;
+    }
+
+    private IReadOnlyList<TItem> GetItemsForColumn(string columnKey) =>
+        EffectiveItems.Where(i => string.Equals(GetColumnKey(i), columnKey, StringComparison.OrdinalIgnoreCase)).ToList();
+
+    private KanbanColumnDefinition? GetAdjacentColumn(string currentKey, int offset)
+    {
+        var cols = EffectiveColumns;
+        for (var i = 0; i < cols.Count; i++)
+        {
+            if (string.Equals(cols[i].Key, currentKey, StringComparison.OrdinalIgnoreCase))
+            {
+                var target = i + offset;
+                if (target >= 0 && target < cols.Count) return cols[target];
+                break;
+            }
+        }
+        return null;
+    }
+
+    private async Task HandleDropAsync(string targetColumnKey)
+    {
+        if (_draggedItem is null) return;
+        var item = _draggedItem;
+        _draggedItem = default;
+        var sourceKey = GetColumnKey(item);
+        if (!string.Equals(sourceKey, targetColumnKey, StringComparison.OrdinalIgnoreCase))
+        {
+            await MoveCardAsync(item, sourceKey, targetColumnKey);
+        }
+    }
+
+    private async Task MoveCardAsync(TItem item, string sourceColumnKey, string targetColumnKey)
+    {
+        if (ColumnKeySetter != null)
+        {
+            ColumnKeySetter(item, targetColumnKey);
+        }
+        else if (item is KanbanCardItem card)
+        {
+            card.ColumnKey = targetColumnKey;
+        }
+
+        if (OnCardMove.HasDelegate)
+        {
+            await OnCardMove.InvokeAsync(new KanbanCardMoveArgs<TItem>(item, sourceColumnKey, targetColumnKey));
+        }
+    }
+
+    private string ComputedBoardClass => new CssBuilder("tento-kanban-board flex items-start gap-4 overflow-x-auto pb-2")
+        .AddClass(Class)
+        .Build();
+}

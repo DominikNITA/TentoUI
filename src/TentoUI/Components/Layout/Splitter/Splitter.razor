@@ -1,0 +1,233 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<CascadingValue Value="this" IsFixed="true">
+    <div class="@ComputedContainerClass" style="@Style" @attributes="AdditionalAttributes">
+        @* First Panel *@
+        <div class="tento-splitter-pane-first overflow-auto transition-all duration-75"
+             style="@FirstPaneStyle">
+            @if (FirstPanel != null)
+            {
+                @FirstPanel
+            }
+            else if (_panels.Count > 0)
+            {
+                @_panels[0].ChildContent
+            }
+        </div>
+
+        @* Accessible Resize Handle / Separator *@
+        <div role="separator"
+             tabindex="@(Disabled ? -1 : 0)"
+             aria-orientation="@(Orientation == SplitterOrientation.Horizontal ? "vertical" : "horizontal")"
+             aria-valuenow="@((int)Math.Round(EffectiveSplit))"
+             aria-valuemin="@((int)Math.Round(Min))"
+             aria-valuemax="@((int)Math.Round(Max))"
+             aria-label="Resize panels"
+             class="@ComputedBarClass"
+             @onkeydown="HandleKeyDownAsync">
+            <div class="@ComputedGripClass">
+                @if (Collapsible)
+                {
+                    <button type="button"
+                            aria-label="@(_isCollapsed ? "Expand panel" : "Collapse panel")"
+                            class="tento-splitter-collapse-btn p-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary-500 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                            @onclick="ToggleCollapseAsync"
+                            @onclick:stopPropagation="true">
+                        <Icon Name="@GetCollapseIcon()" Size="12" />
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Second Panel *@
+        <div class="tento-splitter-pane-second flex-1 overflow-auto"
+             style="@SecondPaneStyle">
+            @if (SecondPanel != null)
+            {
+                @SecondPanel
+            }
+            else if (_panels.Count > 1)
+            {
+                @_panels[1].ChildContent
+            }
+        </div>
+
+        @* Hidden registration slot for declarative SplitterPanel children *@
+        @if (ChildContent != null && FirstPanel == null && SecondPanel == null)
+        {
+            <div class="hidden" aria-hidden="true">
+                @ChildContent
+            </div>
+        }
+    </div>
+</CascadingValue>
+
+@code {
+    /// <summary>
+    /// Split direction: Horizontal (left/right panes) or Vertical (top/bottom panes).
+    /// </summary>
+    [Parameter] public SplitterOrientation Orientation { get; set; } = SplitterOrientation.Horizontal;
+
+    /// <summary>
+    /// Current split percentage of the first panel (0 to 100).
+    /// </summary>
+    [Parameter] public double Split { get; set; } = 50;
+
+    /// <summary>
+    /// Callback invoked when the split percentage changes.
+    /// </summary>
+    [Parameter] public EventCallback<double> SplitChanged { get; set; }
+
+    /// <summary>
+    /// Minimum allowed split percentage for the first panel.
+    /// </summary>
+    [Parameter] public double Min { get; set; } = 10;
+
+    /// <summary>
+    /// Maximum allowed split percentage for the first panel.
+    /// </summary>
+    [Parameter] public double Max { get; set; } = 90;
+
+    /// <summary>
+    /// Step percentage moved per keyboard arrow key press.
+    /// </summary>
+    [Parameter] public double Step { get; set; } = 5;
+
+    /// <summary>
+    /// Enables a quick collapse/expand button on the splitter bar.
+    /// </summary>
+    [Parameter] public bool Collapsible { get; set; }
+
+    /// <summary>
+    /// Disables resizing interactions when true.
+    /// </summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Optional explicit template for the first pane.
+    /// </summary>
+    [Parameter] public RenderFragment? FirstPanel { get; set; }
+
+    /// <summary>
+    /// Optional explicit template for the second pane.
+    /// </summary>
+    [Parameter] public RenderFragment? SecondPanel { get; set; }
+
+    /// <summary>
+    /// Declarative <see cref="SplitterPanel"/> child definitions.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly System.Collections.Generic.List<SplitterPanel> _panels = new();
+    private bool _isCollapsed;
+    private double _preCollapseSplit = 50;
+
+    internal void RegisterPanel(SplitterPanel panel)
+    {
+        if (!_panels.Contains(panel))
+        {
+            _panels.Add(panel);
+            StateHasChanged();
+        }
+    }
+
+    private double EffectiveSplit => _isCollapsed ? 0 : Math.Clamp(Split, Min, Max);
+
+    private string GetCollapseIcon()
+    {
+        if (Orientation == SplitterOrientation.Horizontal)
+        {
+            return _isCollapsed ? IconNames.ChevronRight : IconNames.ChevronLeft;
+        }
+        return _isCollapsed ? IconNames.ChevronDown : IconNames.ChevronUp;
+    }
+
+    private async Task ToggleCollapseAsync()
+    {
+        if (Disabled) return;
+        if (!_isCollapsed)
+        {
+            _preCollapseSplit = EffectiveSplit;
+            _isCollapsed = true;
+            await NotifySplitChangedAsync(0);
+        }
+        else
+        {
+            _isCollapsed = false;
+            Split = Math.Clamp(_preCollapseSplit <= 0 ? 50 : _preCollapseSplit, Min, Max);
+            await NotifySplitChangedAsync(Split);
+        }
+    }
+
+    private async Task HandleKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (Disabled) return;
+
+        var current = EffectiveSplit;
+        var next = current;
+
+        if (e.Key is "ArrowLeft" or "ArrowUp")
+        {
+            _isCollapsed = false;
+            next = Math.Clamp(current - Step, Min, Max);
+        }
+        else if (e.Key is "ArrowRight" or "ArrowDown")
+        {
+            _isCollapsed = false;
+            next = Math.Clamp(current + Step, Min, Max);
+        }
+        else if (e.Key == "Home")
+        {
+            _isCollapsed = false;
+            next = Min;
+        }
+        else if (e.Key == "End")
+        {
+            _isCollapsed = false;
+            next = Max;
+        }
+        else if (e.Key == "Enter" && Collapsible)
+        {
+            await ToggleCollapseAsync();
+            return;
+        }
+
+        if (Math.Abs(next - current) > 0.001)
+        {
+            Split = next;
+            await NotifySplitChangedAsync(Split);
+        }
+    }
+
+    private async Task NotifySplitChangedAsync(double value)
+    {
+        if (SplitChanged.HasDelegate)
+        {
+            await SplitChanged.InvokeAsync(value);
+        }
+    }
+
+    private string FirstPaneStyle => Orientation == SplitterOrientation.Horizontal
+        ? $"flex-basis: {EffectiveSplit.ToString(System.Globalization.CultureInfo.InvariantCulture)}%; width: {EffectiveSplit.ToString(System.Globalization.CultureInfo.InvariantCulture)}%;"
+        : $"flex-basis: {EffectiveSplit.ToString(System.Globalization.CultureInfo.InvariantCulture)}%; height: {EffectiveSplit.ToString(System.Globalization.CultureInfo.InvariantCulture)}%;";
+
+    private string SecondPaneStyle => Orientation == SplitterOrientation.Horizontal
+        ? $"flex-basis: {(100 - EffectiveSplit).ToString(System.Globalization.CultureInfo.InvariantCulture)}%;"
+        : $"flex-basis: {(100 - EffectiveSplit).ToString(System.Globalization.CultureInfo.InvariantCulture)}%;";
+
+    private string ComputedContainerClass => new CssBuilder("tento-splitter flex w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden")
+        .AddClass(Orientation == SplitterOrientation.Horizontal ? "flex-row min-h-[180px]" : "flex-col min-h-[240px]")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedBarClass => new CssBuilder("tento-splitter-bar relative flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-primary-100 dark:hover:bg-primary-950/60 transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 z-10")
+        .AddClass(Orientation == SplitterOrientation.Horizontal ? "w-2 cursor-col-resize border-x border-slate-200 dark:border-slate-700" : "h-2 cursor-row-resize border-y border-slate-200 dark:border-slate-700")
+        .AddClass("opacity-50 cursor-not-allowed", Disabled)
+        .Build();
+
+    private string ComputedGripClass => Orientation == SplitterOrientation.Horizontal
+        ? "flex flex-col items-center justify-center gap-1"
+        : "flex flex-row items-center justify-center gap-1";
+}

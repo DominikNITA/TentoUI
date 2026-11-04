@@ -1,0 +1,155 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+@inject IJSRuntime JSRuntime
+
+<button type="button"
+        disabled="@Disabled"
+        aria-label="@(_copied ? CopiedLabel : CopyLabel)"
+        aria-live="polite"
+        class="@ComputedClass"
+        style="@Style"
+        @onclick="HandleCopyAsync"
+        @attributes="AdditionalAttributes">
+    @if (_copied)
+    {
+        <Icon Name="@IconNames.Check" Size="@GetIconSize()" Class="text-emerald-500 shrink-0" />
+        @if (ShowLabel)
+        {
+            <span class="text-emerald-600 dark:text-emerald-400">@CopiedLabel</span>
+        }
+    }
+    else
+    {
+        <Icon Name="@IconNames.Copy" Size="@GetIconSize()" Class="shrink-0" />
+        @if (ShowLabel)
+        {
+            <span>@(ChildContent is null ? CopyLabel : "")</span>
+            @ChildContent
+        }
+    }
+</button>
+
+@code {
+    /// <summary>
+    /// The text value copied to the system clipboard when clicked.
+    /// </summary>
+    [Parameter] public string? Text { get; set; }
+
+    /// <summary>
+    /// Accessible label and button text displayed before copying.
+    /// </summary>
+    [Parameter] public string CopyLabel { get; set; } = "Copy";
+
+    /// <summary>
+    /// Accessible label and feedback text displayed after copying.
+    /// </summary>
+    [Parameter] public string CopiedLabel { get; set; } = "Copied!";
+
+    /// <summary>
+    /// Whether to display the text label alongside the copy icon.
+    /// </summary>
+    [Parameter] public bool ShowLabel { get; set; } = true;
+
+    /// <summary>
+    /// Visual button variant (Default, Primary, Dashed, Text, Link).
+    /// </summary>
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Default;
+
+    /// <summary>
+    /// Button size scale (Small, Middle, Large).
+    /// </summary>
+    [Parameter] public ComponentSize? Size { get; set; }
+
+    /// <summary>
+    /// Disables user interaction when true.
+    /// </summary>
+    [Parameter] public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Duration in milliseconds to keep the copied state active before resetting.
+    /// </summary>
+    [Parameter] public int ResetDelayMs { get; set; } = 2000;
+
+    /// <summary>
+    /// Callback invoked with the copied text when the button is activated.
+    /// </summary>
+    [Parameter] public EventCallback<string> OnCopy { get; set; }
+
+    /// <summary>
+    /// Optional custom label content rendered inside the button.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _copied;
+
+    private int GetIconSize() => ResolvedSize(Size) switch
+    {
+        ComponentSize.Small => 13,
+        ComponentSize.Large => 17,
+        _ => 15
+    };
+
+    private async Task HandleCopyAsync()
+    {
+        if (Disabled) return;
+        var textToCopy = Text ?? string.Empty;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", textToCopy);
+        }
+        catch
+        {
+            // Ignore clipboard interop failure in headless/SSR/bUnit environments
+        }
+
+        _copied = true;
+        if (OnCopy.HasDelegate)
+        {
+            await OnCopy.InvokeAsync(textToCopy);
+        }
+        StateHasChanged();
+
+        if (ResetDelayMs > 0)
+        {
+            _ = ResetAfterDelayAsync(ResetDelayMs);
+        }
+    }
+
+    private async Task ResetAfterDelayAsync(int delay)
+    {
+        await Task.Delay(delay);
+        _copied = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string ComputedClass
+    {
+        get
+        {
+            var size = ResolvedSize(Size);
+            var typeClass = Type switch
+            {
+                ButtonType.Primary => "bg-primary-500 text-white hover:bg-primary-600 shadow-sm",
+                ButtonType.Dashed => "border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-primary-500 hover:text-primary-500",
+                ButtonType.Text => "bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
+                ButtonType.Link => "bg-transparent text-primary-500 hover:underline p-0",
+                _ => "border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-primary-500 hover:text-primary-500 shadow-sm"
+            };
+
+            var sizeClass = size switch
+            {
+                ComponentSize.Small => ShowLabel ? "px-2.5 py-1 text-xs gap-1.5" : "p-1.5 text-xs",
+                ComponentSize.Large => ShowLabel ? "px-4 py-2.5 text-sm gap-2" : "p-2.5 text-sm",
+                _ => ShowLabel ? "px-3 py-1.5 text-xs gap-1.5" : "p-2 text-xs"
+            };
+
+            return new CssBuilder("tento-copy-button inline-flex items-center justify-center rounded-md font-medium select-none transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500")
+                .AddClass(typeClass)
+                .AddClass(sizeClass)
+                .AddClass("opacity-50 cursor-not-allowed", Disabled)
+                .AddClass(Class)
+                .Build();
+        }
+    }
+}

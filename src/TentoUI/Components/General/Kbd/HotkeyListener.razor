@@ -1,0 +1,74 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div id="@ElementId"
+     tabindex="0"
+     class="@ComputedClass"
+     style="@Style"
+     aria-keyshortcuts="@Shortcut"
+     @onkeydown="HandleKeyDown"
+     @attributes="AdditionalAttributes">
+    @if (ChildContent is not null)
+    {
+        @ChildContent
+    }
+    else
+    {
+        <div class="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+            <span>Press</span>
+            <Kbd Keys="@Shortcut" />
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Shortcut { get; set; } = "Ctrl+K";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<string> OnTrigger { get; set; }
+
+    private string ComputedClass => new CssBuilder("outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 rounded-lg")
+        .AddClass(Class)
+        .Build();
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (Disabled || string.IsNullOrWhiteSpace(Shortcut))
+            return;
+
+        if (MatchesShortcut(e, Shortcut))
+        {
+            if (OnTrigger.HasDelegate)
+                await OnTrigger.InvokeAsync(Shortcut);
+        }
+    }
+
+    private static bool MatchesShortcut(KeyboardEventArgs e, string shortcut)
+    {
+        var parts = shortcut.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        bool needCtrl = false, needShift = false, needAlt = false;
+        string? mainKey = null;
+
+        foreach (var part in parts)
+        {
+            if (part.Equals("Ctrl", StringComparison.OrdinalIgnoreCase) || part.Equals("Control", StringComparison.OrdinalIgnoreCase) || part.Equals("Cmd", StringComparison.OrdinalIgnoreCase) || part == "⌘")
+                needCtrl = true;
+            else if (part.Equals("Shift", StringComparison.OrdinalIgnoreCase))
+                needShift = true;
+            else if (part.Equals("Alt", StringComparison.OrdinalIgnoreCase))
+                needAlt = true;
+            else
+                mainKey = part;
+        }
+
+        if (needCtrl && !(e.CtrlKey || e.MetaKey)) return false;
+        if (needShift && !e.ShiftKey) return false;
+        if (needAlt && !e.AltKey) return false;
+
+        if (mainKey is not null && !string.Equals(e.Key, mainKey, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return true;
+    }
+}

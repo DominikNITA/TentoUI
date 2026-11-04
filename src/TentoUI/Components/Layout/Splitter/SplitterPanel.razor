@@ -1,0 +1,40 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [CascadingParameter] private Splitter? ParentSplitter { get; set; }
+
+    /// <summary>
+    /// Optional header title displayed at the top of the splitter panel.
+    /// </summary>
+    [Parameter] public string? Title { get; set; }
+
+    /// <summary>
+    /// Minimum size percentage (0-100) for this panel.
+    /// </summary>
+    [Parameter] public double? Min { get; set; }
+
+    /// <summary>
+    /// Maximum size percentage (0-100) for this panel.
+    /// </summary>
+    [Parameter] public double? Max { get; set; }
+
+    /// <summary>
+    /// Panel content fragment.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentSplitter?.RegisterPanel(this);
+    }
+
+    private string ComputedClass => new CssBuilder("tento-splitter-panel h-full w-full overflow-auto")
+        .AddClass(Class)
+        .Build();
+}

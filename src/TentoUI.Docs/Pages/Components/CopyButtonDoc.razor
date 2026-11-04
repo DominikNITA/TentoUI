@@ -1,0 +1,36 @@
+@page "/components/copy-button"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>CopyButton - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">CopyButton</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            One-click clipboard copy button with transient checkmark confirmation and accessible live status feedback.
+        </p>
+    </div>
+
+    <DemoCard Title="Button Variants &amp; Sizes" Description="CopyButton supports all standard button variants, sizes, and icon-only modes." Code="@_basicCode">
+        <div class="flex flex-wrap items-center gap-3">
+            <CopyButton Text="dotnet add package TentoUI" CopyLabel="Copy CLI Command" />
+            <CopyButton Text="https://tentoui.dev" Type="ButtonType.Primary" CopyLabel="Copy URL" />
+            <CopyButton Text="sk_live_982103481" Type="ButtonType.Dashed" Size="ComponentSize.Small" CopyLabel="Copy Key" />
+            <CopyButton Text="Icon-only copy" ShowLabel="false" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="CopyButton Properties" ComponentType="@typeof(CopyButton)" />
+</div>
+
+@code {
+    private const string _basicCode = """
+        <CopyButton Text="dotnet add package TentoUI" CopyLabel="Copy CLI Command" />
+        <CopyButton Text="https://tentoui.dev" Type="ButtonType.Primary" CopyLabel="Copy URL" />
+        <CopyButton Text="sk_live_982103481" Type="ButtonType.Dashed" Size="ComponentSize.Small" CopyLabel="Copy Key" />
+        <CopyButton Text="Icon-only copy" ShowLabel="false" />
+        """;
+}

@@ -1,0 +1,53 @@
+@page "/components/datagrid-virtual"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>DataGridVirtual - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">DataGridVirtual &amp; Sticky/Resizable Columns</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            High-density virtualized data grid rendering 1,000+ rows smoothly using Blazor's Virtualize engine, with sticky left/right columns and resizable headers.
+        </p>
+    </div>
+
+    <DemoCard Title="1,000-Row Virtualized DataGrid with Sticky &amp; Resizable Columns" Description="Scroll smoothly through 1,000 rows without pagination overhead." Code="@_gridCode">
+        <DataGridVirtual TItem="TelemetryRow" DataSource="@_rows" Bordered="true" Striped="true" ScrollHeight="360px">
+            <TableColumn TItem="TelemetryRow" Title="ID" Property="x => x.Id" Width="90px" Fixed="ColumnFixed.Left" Sortable="true" />
+            <TableColumn TItem="TelemetryRow" Title="Service" Property="x => x.Service" Resizable="true" Sortable="true" Filterable="true" />
+            <TableColumn TItem="TelemetryRow" Title="Region" Property="x => x.Region" Resizable="true" Sortable="true" />
+            <TableColumn TItem="TelemetryRow" Title="Latency (ms)" Property="x => x.LatencyMs" Align="Align.Right" Sortable="true" />
+            <TableColumn TItem="TelemetryRow" Title="Status" Property="x => x.Status" Fixed="ColumnFixed.Right" Width="110px" />
+        </DataGridVirtual>
+    </DemoCard>
+
+    <ApiTable Title="DataGridVirtual Properties" ComponentType="@typeof(DataGridVirtual<object>)" />
+</div>
+
+@code {
+    private sealed record TelemetryRow(int Id, string Service, string Region, int LatencyMs, string Status);
+
+    private static readonly string[] Services = ["AuthGateway", "OrderProcessor", "BillingEngine", "SearchIndexer", "NotificationHub"];
+    private static readonly string[] Regions = ["eu-central-1", "us-east-1", "ap-northeast-1", "eu-west-1"];
+
+    private readonly List<TelemetryRow> _rows = Enumerable.Range(1, 1000)
+        .Select(i => new TelemetryRow(
+            1000 + i,
+            Services[i % Services.Length],
+            Regions[i % Regions.Length],
+            12 + (i * 17) % 180,
+            i % 11 == 0 ? "Degraded" : "Healthy"))
+        .ToList();
+
+    private const string _gridCode = """
+        <DataGridVirtual Bordered="true" Striped="true" ScrollHeight="320px">
+            <TableColumn Title="ID" Field="Id" Fixed="ColumnFixed.Left" />
+            <TableColumn Title="Name" Field="Name" Resizable="true" />
+            <TableColumn Title="Department" Field="Department" Resizable="true" />
+            <TableColumn Title="Salary" Field="Salary" Fixed="ColumnFixed.Right" />
+        </DataGridVirtual>
+        """;
+}

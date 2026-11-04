@@ -1,9 +1,38 @@
 @namespace TentoUI.Docs.Layout
 @inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime
+@inject VersionService VersionService
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
-<TentoConfigProvider Theme="@_theme">
-    <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans">
+<TentoConfigProvider Theme="@_theme" ComponentSize="@_componentSize">
+    <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans"
+         @onkeydown="HandleGlobalKeyDown">
+        @* Cross-Version Status Banner when viewing Preview or Legacy docs *@
+        @if (!VersionService.CurrentVersion.IsLatest)
+        {
+            <div role="status"
+                 class="tento-version-banner px-4 py-1.5 text-xs font-medium flex flex-wrap items-center justify-center gap-2 border-b @(VersionService.CurrentVersion.IsPreview ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800" : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700")">
+                <span>
+                    @if (VersionService.CurrentVersion.IsPreview)
+                    {
+                        <strong>Preview Documentation (@VersionService.CurrentVersion.Label):</strong>
+                        <span>You are viewing pre-release documentation for the upcoming release.</span>
+                    }
+                    else
+                    {
+                        <strong>Archived Documentation (@VersionService.CurrentVersion.Label):</strong>
+                        <span>You are viewing an older version of TentoUI documentation.</span>
+                    }
+                </span>
+                <button type="button"
+                        class="underline font-bold hover:opacity-80 cursor-pointer ml-1"
+                        @onclick="SwitchToLatestVersion">
+                    Switch to Latest Stable (v1.0.0) →
+                </button>
+            </div>
+        }
+
         @* Top Navigation Header *@
         <header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-6 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -28,7 +57,19 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                @* Command Palette Search Trigger *@
+                <button type="button"
+                        aria-label="Open command palette"
+                        class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:border-primary-400 transition-colors cursor-pointer"
+                        @onclick="@(() => _commandPaletteOpen = true)">
+                    <Icon Name="@IconNames.Search" Size="13" />
+                    <span>Quick Search...</span>
+                    <kbd class="ml-2 px-1.5 py-0.2 text-[10px] font-mono font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded">
+                        Ctrl K
+                    </kbd>
+                </button>
+
                 @* Showcase Portal Link *@
                 <a href="showcase"
                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary-50 dark:bg-primary-950/60 hover:bg-primary-100 dark:hover:bg-primary-900/60 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-800 inline-flex items-center gap-1.5 transition-colors">
@@ -36,6 +77,15 @@
                     <span class="hidden sm:inline">Showcases</span>
                     <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-primary-600 text-white">Live</span>
                 </a>
+
+                @* Theme Customizer Trigger *@
+                <button type="button"
+                        aria-label="Open theme customizer"
+                        class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                        @onclick="@(() => _themeDrawerOpen = true)">
+                    <Icon Name="@IconNames.Settings" Size="14" />
+                    <span class="hidden lg:inline">Theme</span>
+                </button>
 
                 @* Dark / Light mode toggle *@
                 <button type="button"
@@ -80,6 +130,18 @@
             </main>
         </div>
 
+        @* Global Command Palette *@
+        <CommandPalette @bind-Open="_commandPaletteOpen"
+                        Placeholder="Jump to any component, guide, or showcase..."
+                        Items="@CommandItems"
+                        OnSelect="HandleCommandSelect" />
+
+        @* Live Theme Customizer Drawer *@
+        <ThemeCustomizerDrawer @bind-Open="_themeDrawerOpen"
+                               Theme="@_theme"
+                               @bind-ComponentSize="_componentSize"
+                               OnThemeUpdated="StateHasChanged" />
+
         @* Global Feedback Hosts *@
         <MessageHost />
         <NotificationHost />
@@ -89,7 +151,48 @@
 
 @code {
     private readonly TentoTheme _theme = new();
+    private ComponentSize _componentSize = ComponentSize.Middle;
     private bool _mobileNavOpen;
+    private bool _commandPaletteOpen;
+    private bool _themeDrawerOpen;
+
+    private IReadOnlyList<CommandItem> CommandItems =>
+        NavMenu.AllSections
+            .SelectMany(section => section.Items.Select(item => new CommandItem(
+                Key: item.Href,
+                Title: item.Label,
+                Category: section.Title,
+                Subtitle: string.IsNullOrEmpty(item.Href) ? "/" : $"/{item.Href}",
+                Icon: section.Title == "Showcases" ? IconNames.Eye : IconNames.File,
+                Shortcut: item.Tag,
+                Href: item.Href)))
+            .ToList();
+
+    protected override void OnInitialized()
+    {
+        VersionService.OnVersionChanged += StateHasChanged;
+    }
+
+    private void SwitchToLatestVersion()
+    {
+        VersionService.SwitchToLatest();
+    }
+
+    private void HandleGlobalKeyDown(KeyboardEventArgs e)
+    {
+        if ((e.CtrlKey || e.MetaKey) && string.Equals(e.Key, "k", StringComparison.OrdinalIgnoreCase))
+        {
+            _commandPaletteOpen = !_commandPaletteOpen;
+        }
+    }
+
+    private void HandleCommandSelect(CommandItem item)
+    {
+        if (item.Href != null)
+        {
+            NavigationManager.NavigateTo(item.Href);
+        }
+    }
 
     private async Task ToggleDarkModeAsync()
     {
@@ -106,5 +209,10 @@
             }
         }
         catch { }
+    }
+
+    public void Dispose()
+    {
+        VersionService.OnVersionChanged -= StateHasChanged;
     }
 }

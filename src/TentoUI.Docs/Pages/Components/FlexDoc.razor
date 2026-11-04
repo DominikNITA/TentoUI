@@ -1,0 +1,36 @@
+@page "/components/flex"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Flex - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Flex</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Ant Design v5 declarative flexbox layout container supporting horizontal/vertical direction, justification, alignment, wrapping, and preset or custom pixel gaps.
+        </p>
+    </div>
+
+    <DemoCard Title="Horizontal &amp; Justified Flex" Description="Use Gap, Justify, and Align to compose responsive toolbars and card rows." Code="@_flexCode">
+        <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Gap="FlexGap.Middle" Class="p-4 rounded-lg bg-slate-100 dark:bg-slate-800">
+            <Button Type="ButtonType.Primary">Primary Action</Button>
+            <Button>Secondary</Button>
+            <Tag TagColor="TagColor.Success">Ready</Tag>
+        </Flex>
+    </DemoCard>
+
+    <ApiTable Title="Flex Properties" ComponentType="@typeof(Flex)" />
+</div>
+
+@code {
+    private const string _flexCode = """
+        <Flex Justify="FlexJustify.SpaceBetween" Align="FlexAlign.Center" Gap="FlexGap.Middle">
+            <Button Type="ButtonType.Primary">Primary Action</Button>
+            <Button>Secondary</Button>
+            <Tag TagColor="TagColor.Success">Ready</Tag>
+        </Flex>
+        """;
+}

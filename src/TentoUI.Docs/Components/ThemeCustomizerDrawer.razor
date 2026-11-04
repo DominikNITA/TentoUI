@@ -1,0 +1,169 @@
+@namespace TentoUI.Docs.Components
+@inject IMessageService MessageService
+
+<Drawer Open="@Open"
+        OpenChanged="@OpenChanged"
+        Title="Live Theme Customizer"
+        Placement="DrawerPlacement.Right"
+        Width="360px">
+    <div class="space-y-6 text-xs">
+        <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+            Customize <code>TentoTheme</code> design tokens in real time across the entire documentation app and export your configuration.
+        </p>
+
+        @* Primary Brand Color Presets *@
+        <div class="space-y-2">
+            <label class="block font-bold text-slate-800 dark:text-slate-200">
+                Primary Brand Color (<code>--tento-primary-500</code>)
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+                @foreach (var preset in _colorPresets)
+                {
+                    var isSelected = string.Equals(Theme.PrimaryColor, preset.Primary, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="px-2.5 py-2 rounded-lg border text-left flex items-center gap-2 transition-all @(isSelected ? "border-primary-500 ring-2 ring-primary-500/20 bg-primary-50/40 dark:bg-primary-950/30 font-bold" : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800")"
+                            @onclick="@(() => SelectColorPresetAsync(preset))">
+                        <span class="w-3.5 h-3.5 rounded-full shrink-0" style="@($"background-color: {preset.Primary};")"></span>
+                        <span class="truncate">@preset.Name</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Border Radius Scale *@
+        <div class="space-y-2">
+            <label class="block font-bold text-slate-800 dark:text-slate-200">
+                Border Radius (<code>--tento-radius-md</code>)
+            </label>
+            <div class="grid grid-cols-4 gap-2">
+                @foreach (var r in _radiusPresets)
+                {
+                    var isSelected = string.Equals(Theme.BorderRadius, r.Value, StringComparison.OrdinalIgnoreCase);
+                    <button type="button"
+                            class="py-1.5 px-2 rounded-md border text-center font-medium transition-colors @(isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800")"
+                            @onclick="@(() => SelectRadiusAsync(r.Value))">
+                        @r.Label
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Global Component Size *@
+        <div class="space-y-2">
+            <label class="block font-bold text-slate-800 dark:text-slate-200">
+                Global Density (<code>ComponentSize</code>)
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+                @foreach (var sz in Enum.GetValues<ComponentSize>())
+                {
+                    var isSelected = ComponentSize == sz;
+                    <button type="button"
+                            class="py-1.5 px-2 rounded-md border text-center font-medium transition-colors @(isSelected ? "border-primary-500 bg-primary-500 text-white" : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800")"
+                            @onclick="@(() => SelectSizeAsync(sz))">
+                        @sz
+                    </button>
+                }
+            </div>
+        </div>
+
+        @* Export C# Configuration *@
+        <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-800 dark:text-slate-200">Generated C# Setup</span>
+                <CopyButton Text="@GeneratedCSharpCode" Size="ComponentSize.Small" CopyLabel="Copy C#" />
+            </div>
+            <pre class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-[11px] overflow-x-auto leading-relaxed">@GeneratedCSharpCode</pre>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+            <Button Size="ComponentSize.Small" OnClick="ResetDefaultsAsync">
+                Reset to Defaults
+            </Button>
+        </div>
+    </div>
+</Drawer>
+
+@code {
+    private record ColorPreset(string Name, string Primary, string Hover);
+    private record RadiusPreset(string Label, string Value);
+
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public TentoTheme Theme { get; set; } = new();
+    [Parameter] public ComponentSize ComponentSize { get; set; } = ComponentSize.Middle;
+    [Parameter] public EventCallback<ComponentSize> ComponentSizeChanged { get; set; }
+    [Parameter] public EventCallback OnThemeUpdated { get; set; }
+
+    private readonly ColorPreset[] _colorPresets =
+    [
+        new("Blue", "#3b82f6", "#2563eb"),
+        new("Violet", "#8b5cf6", "#7c3aed"),
+        new("Emerald", "#10b981", "#059669"),
+        new("Rose", "#f43f5e", "#e11d48"),
+        new("Amber", "#f59e0b", "#d97706"),
+        new("Cyan", "#06b6d4", "#0891b2")
+    ];
+
+    private readonly RadiusPreset[] _radiusPresets =
+    [
+        new("Sharp", "0rem"),
+        new("Small", "0.25rem"),
+        new("Medium", "0.375rem"),
+        new("Large", "0.75rem")
+    ];
+
+    private string GeneratedCSharpCode => $$"""
+        builder.Services.AddTentoUI(theme =>
+        {
+            theme.PrimaryColor = "{{Theme.PrimaryColor}}";
+            theme.PrimaryHoverColor = "{{Theme.PrimaryHoverColor}}";
+            theme.BorderRadius = "{{Theme.BorderRadius}}";
+            theme.DarkMode = {{(Theme.DarkMode ? "true" : "false")}};
+        });
+        """;
+
+    private async Task SelectColorPresetAsync(ColorPreset preset)
+    {
+        Theme.PrimaryColor = preset.Primary;
+        Theme.PrimaryHoverColor = preset.Hover;
+        await NotifyUpdatedAsync();
+    }
+
+    private async Task SelectRadiusAsync(string radius)
+    {
+        Theme.BorderRadius = radius;
+        await NotifyUpdatedAsync();
+    }
+
+    private async Task SelectSizeAsync(ComponentSize size)
+    {
+        ComponentSize = size;
+        if (ComponentSizeChanged.HasDelegate)
+        {
+            await ComponentSizeChanged.InvokeAsync(size);
+        }
+        await NotifyUpdatedAsync();
+    }
+
+    private async Task ResetDefaultsAsync()
+    {
+        Theme.PrimaryColor = "#3b82f6";
+        Theme.PrimaryHoverColor = "#2563eb";
+        Theme.BorderRadius = "0.375rem";
+        ComponentSize = ComponentSize.Middle;
+        if (ComponentSizeChanged.HasDelegate)
+        {
+            await ComponentSizeChanged.InvokeAsync(ComponentSize);
+        }
+        await NotifyUpdatedAsync();
+        MessageService.Info("Theme reset to default tokens.");
+    }
+
+    private async Task NotifyUpdatedAsync()
+    {
+        if (OnThemeUpdated.HasDelegate)
+        {
+            await OnThemeUpdated.InvokeAsync();
+        }
+    }
+}

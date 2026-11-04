@@ -1,0 +1,259 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div class="@ComputedClass" style="@Style" role="region" aria-label="Filter Builder" @attributes="AdditionalAttributes">
+    @* Header Bar *@
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+            <Icon Name="@IconNames.Filter" Size="15" Class="text-primary-500" />
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-100">@Title</span>
+            <div class="inline-flex rounded-md border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-50 dark:bg-slate-800 text-[11px]">
+                <button type="button"
+                        class="px-2 py-0.5 rounded font-semibold transition-colors @(LogicalOperator == FilterLogicalOperator.And ? "bg-primary-500 text-white" : "text-slate-600 dark:text-slate-400")"
+                        @onclick="@(() => SetLogicalOperatorAsync(FilterLogicalOperator.And))">
+                    AND
+                </button>
+                <button type="button"
+                        class="px-2 py-0.5 rounded font-semibold transition-colors @(LogicalOperator == FilterLogicalOperator.Or ? "bg-primary-500 text-white" : "text-slate-600 dark:text-slate-400")"
+                        @onclick="@(() => SetLogicalOperatorAsync(FilterLogicalOperator.Or))">
+                    OR
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <Button Size="ComponentSize.Small" Type="ButtonType.Dashed" OnClick="AddRuleAsync">
+                <Icon Name="@IconNames.Plus" Size="12" />
+                <span>Add Condition</span>
+            </Button>
+            @if (EffectiveRules.Count > 0)
+            {
+                <Button Size="ComponentSize.Small" Type="ButtonType.Text" Danger="true" OnClick="ClearRulesAsync">
+                    Clear All
+                </Button>
+            }
+        </div>
+    </div>
+
+    @* Condition Rows *@
+    <div class="py-3 space-y-2">
+        @if (EffectiveRules.Count == 0)
+        {
+            <div class="text-xs text-slate-400 dark:text-slate-500 py-2 text-center">
+                No active filter rules. Click "Add Condition" to filter records.
+            </div>
+        }
+        else
+        {
+            @for (var i = 0; i < EffectiveRules.Count; i++)
+            {
+                var idx = i;
+                var rule = EffectiveRules[i];
+                <div class="tento-filter-rule-row flex flex-wrap items-center gap-2 p-2 rounded-lg bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-800">
+                    <span class="text-[10px] font-mono font-bold uppercase text-slate-400 w-10 text-center">
+                        @(idx == 0 ? "WHERE" : LogicalOperator.ToString().ToUpperInvariant())
+                    </span>
+
+                    @* Field Selector *@
+                    <select aria-label="Filter field"
+                            value="@rule.FieldKey"
+                            class="px-2.5 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            @onchange="@(e => HandleFieldChangeAsync(rule, e.Value?.ToString()))">
+                        @foreach (var field in EffectiveFields)
+                        {
+                            <option value="@field.Key">@field.Label</option>
+                        }
+                    </select>
+
+                    @* Operator Selector *@
+                    <select aria-label="Comparison operator"
+                            value="@rule.Operator"
+                            class="px-2.5 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            @onchange="@(e => HandleOperatorChangeAsync(rule, e.Value?.ToString()))">
+                        @foreach (var op in Enum.GetValues<FilterComparisonOperator>())
+                        {
+                            <option value="@op">@op</option>
+                        }
+                    </select>
+
+                    @* Value Input *@
+                    <input type="text"
+                           aria-label="Filter value"
+                           value="@rule.Value"
+                           placeholder="Value..."
+                           class="flex-1 min-w-[140px] px-2.5 py-1.5 text-xs rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                           @oninput="@(e => HandleValueChangeAsync(rule, e.Value?.ToString()))" />
+
+                    <button type="button"
+                            aria-label="Remove condition"
+                            class="p-1.5 text-slate-400 hover:text-red-500 rounded transition-colors"
+                            @onclick="@(() => RemoveRuleAsync(rule))">
+                        <Icon Name="@IconNames.Trash2" Size="14" />
+                    </button>
+                </div>
+            }
+        }
+    </div>
+
+    @* Footer Apply Bar *@
+    @if (ShowApplyButton)
+    {
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400">
+                @EffectiveRules.Count active condition(s)
+            </span>
+            <Button Size="ComponentSize.Small" Type="ButtonType.Primary" OnClick="ApplyAsync">
+                Apply Filters
+            </Button>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Header title for the filter builder panel.
+    /// </summary>
+    [Parameter] public string Title { get; set; } = "Query Filter Builder";
+
+    /// <summary>
+    /// Available fields that can be filtered.
+    /// </summary>
+    [Parameter] public IEnumerable<FilterFieldDefinition>? Fields { get; set; }
+
+    /// <summary>
+    /// Active filter rules collection.
+    /// </summary>
+    [Parameter] public System.Collections.Generic.List<FilterRule>? Rules { get; set; }
+
+    /// <summary>
+    /// Callback invoked when the rules collection changes.
+    /// </summary>
+    [Parameter] public EventCallback<System.Collections.Generic.List<FilterRule>> RulesChanged { get; set; }
+
+    /// <summary>
+    /// Logical operator combining conditions (And, Or).
+    /// </summary>
+    [Parameter] public FilterLogicalOperator LogicalOperator { get; set; } = FilterLogicalOperator.And;
+
+    /// <summary>
+    /// Callback invoked when the logical operator changes.
+    /// </summary>
+    [Parameter] public EventCallback<FilterLogicalOperator> LogicalOperatorChanged { get; set; }
+
+    /// <summary>
+    /// Shows the "Apply Filters" footer button when true.
+    /// </summary>
+    [Parameter] public bool ShowApplyButton { get; set; } = true;
+
+    /// <summary>
+    /// Callback invoked with a dictionary of field/value filters compatible with <see cref="Table{TItem}"/> when applied.
+    /// </summary>
+    [Parameter] public EventCallback<IReadOnlyDictionary<string, string>> OnApply { get; set; }
+
+    private readonly System.Collections.Generic.List<FilterRule> _internalRules = new()
+    {
+        new FilterRule { FieldKey = "Status", Operator = FilterComparisonOperator.Equals, Value = "Active" }
+    };
+
+    private System.Collections.Generic.List<FilterRule> EffectiveRules => Rules ?? _internalRules;
+
+    private IReadOnlyList<FilterFieldDefinition> EffectiveFields => Fields?.ToList() ??
+    [
+        new("Name", "Employee Name"),
+        new("Role", "Role"),
+        new("Department", "Department"),
+        new("Status", "Status")
+    ];
+
+    private async Task SetLogicalOperatorAsync(FilterLogicalOperator op)
+    {
+        LogicalOperator = op;
+        if (LogicalOperatorChanged.HasDelegate)
+        {
+            await LogicalOperatorChanged.InvokeAsync(op);
+        }
+    }
+
+    private async Task AddRuleAsync()
+    {
+        var defaultField = EffectiveFields.FirstOrDefault()?.Key ?? "Field";
+        EffectiveRules.Add(new FilterRule
+        {
+            FieldKey = defaultField,
+            Operator = FilterComparisonOperator.Contains,
+            Value = string.Empty
+        });
+        await NotifyRulesChangedAsync();
+    }
+
+    private async Task RemoveRuleAsync(FilterRule rule)
+    {
+        EffectiveRules.Remove(rule);
+        await NotifyRulesChangedAsync();
+    }
+
+    private async Task ClearRulesAsync()
+    {
+        EffectiveRules.Clear();
+        await NotifyRulesChangedAsync();
+        if (OnApply.HasDelegate)
+        {
+            await OnApply.InvokeAsync(ToTableFilters());
+        }
+    }
+
+    private async Task HandleFieldChangeAsync(FilterRule rule, string? fieldKey)
+    {
+        rule.FieldKey = fieldKey ?? string.Empty;
+        await NotifyRulesChangedAsync();
+    }
+
+    private async Task HandleOperatorChangeAsync(FilterRule rule, string? opStr)
+    {
+        if (Enum.TryParse<FilterComparisonOperator>(opStr, true, out var op))
+        {
+            rule.Operator = op;
+            await NotifyRulesChangedAsync();
+        }
+    }
+
+    private async Task HandleValueChangeAsync(FilterRule rule, string? val)
+    {
+        rule.Value = val ?? string.Empty;
+        await NotifyRulesChangedAsync();
+    }
+
+    private async Task NotifyRulesChangedAsync()
+    {
+        if (RulesChanged.HasDelegate)
+        {
+            await RulesChanged.InvokeAsync(EffectiveRules);
+        }
+    }
+
+    private async Task ApplyAsync()
+    {
+        if (OnApply.HasDelegate)
+        {
+            await OnApply.InvokeAsync(ToTableFilters());
+        }
+    }
+
+    public IReadOnlyDictionary<string, string> ToTableFilters()
+    {
+        var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var r in EffectiveRules)
+        {
+            if (!string.IsNullOrWhiteSpace(r.FieldKey) && !string.IsNullOrWhiteSpace(r.Value))
+            {
+                dict[r.FieldKey] = r.Value;
+            }
+        }
+        return dict;
+    }
+
+    private string ComputedClass => new CssBuilder("tento-filter-builder p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm")
+        .AddClass(Class)
+        .Build();
+}

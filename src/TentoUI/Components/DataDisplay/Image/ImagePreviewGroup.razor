@@ -1,0 +1,198 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<CascadingValue Value="this" IsFixed="true">
+    <div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+        @if (ChildContent != null)
+        {
+            @ChildContent
+        }
+        else if (Images != null)
+        {
+            @foreach (var src in Images)
+            {
+                <Image Src="@src" Width="120px" Height="84px" />
+            }
+        }
+    </div>
+</CascadingValue>
+
+@if (_isOpen && EffectiveImages.Count > 0)
+{
+    <div class="tento-image-preview-group-modal fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-xs"
+         role="dialog"
+         aria-modal="true"
+         aria-label="Image gallery preview"
+         tabindex="-1"
+         @onkeydown="HandleKeyDown">
+        @* Top Counter & Toolbar *@
+        <div class="absolute top-4 inset-x-4 z-10 flex items-center justify-between">
+            <div class="tento-image-preview-counter px-3 py-1 rounded-full bg-black/60 text-white text-xs font-mono font-semibold">
+                @(_currentIndex + 1) / @EffectiveImages.Count
+            </div>
+
+            <div class="flex items-center gap-2 bg-black/60 rounded-full px-3 py-1.5 text-white">
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Zoom in"
+                        @onclick="@(() => _zoom = Math.Min(3.0, _zoom + 0.25))">
+                    <Icon Name="@IconNames.Plus" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Zoom out"
+                        @onclick="@(() => _zoom = Math.Max(0.5, _zoom - 0.25))">
+                    <Icon Name="@IconNames.Minus" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-primary-400 transition-colors"
+                        aria-label="Rotate"
+                        @onclick="@(() => _rotate = (_rotate - 90) % 360)">
+                    <Icon Name="@IconNames.RefreshCw" Size="16" />
+                </button>
+                <button type="button"
+                        class="p-1 hover:text-rose-400 transition-colors ml-2 border-l border-white/20 pl-2"
+                        aria-label="Close gallery"
+                        @onclick="Close">
+                    <Icon Name="@IconNames.X" Size="18" />
+                </button>
+            </div>
+        </div>
+
+        @* Previous / Next Navigation Arrows *@
+        @if (EffectiveImages.Count > 1)
+        {
+            <button type="button"
+                    aria-label="Previous image"
+                    class="tento-image-preview-prev absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors"
+                    @onclick="PrevImage">
+                <Icon Name="@IconNames.ChevronLeft" Size="20" />
+            </button>
+            <button type="button"
+                    aria-label="Next image"
+                    class="tento-image-preview-next absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors"
+                    @onclick="NextImage">
+                <Icon Name="@IconNames.ChevronRight" Size="20" />
+            </button>
+        }
+
+        @* Active Image *@
+        <div class="max-w-[85vw] max-h-[78vh] overflow-hidden flex items-center justify-center select-none"
+             @onclick="Close">
+            <img src="@EffectiveImages[_currentIndex]"
+                 alt="@($"Gallery image {_currentIndex + 1}")"
+                 class="max-w-full max-h-[75vh] object-contain transition-transform duration-200"
+                 style="@($"transform: scale({_zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}) rotate({_rotate}deg);")"
+                 @onclick:stopPropagation="true" />
+        </div>
+
+        @* Bottom Thumbnail Strip *@
+        @if (EffectiveImages.Count > 1)
+        {
+            <div class="absolute bottom-4 flex items-center gap-2 px-3 py-2 rounded-xl bg-black/60 max-w-[90vw] overflow-x-auto">
+                @for (var i = 0; i < EffectiveImages.Count; i++)
+                {
+                    var idx = i;
+                    var isCurrent = idx == _currentIndex;
+                    <button type="button"
+                            aria-label="@($"Select image {idx + 1}")"
+                            class="w-12 h-9 rounded overflow-hidden border-2 transition-all @(isCurrent ? "border-primary-500 scale-105" : "border-transparent opacity-60 hover:opacity-100")"
+                            @onclick="@(() => SelectImage(idx))">
+                        <img src="@EffectiveImages[idx]" alt="" class="w-full h-full object-cover" />
+                    </button>
+                }
+            </div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Optional list of image URLs when not declaring child <see cref="Image"/> components.
+    /// </summary>
+    [Parameter] public IEnumerable<string>? Images { get; set; }
+
+    /// <summary>
+    /// Child <see cref="Image"/> components grouped into the shared lightbox gallery.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private readonly System.Collections.Generic.List<string> _registeredImages = new();
+    private bool _isOpen;
+    private int _currentIndex;
+    private double _zoom = 1.0;
+    private int _rotate;
+
+    private IReadOnlyList<string> EffectiveImages =>
+        _registeredImages.Count > 0
+            ? _registeredImages
+            : (Images?.ToList() ?? []);
+
+    internal void RegisterImage(string? src)
+    {
+        if (!string.IsNullOrWhiteSpace(src) && !_registeredImages.Contains(src))
+        {
+            _registeredImages.Add(src);
+        }
+    }
+
+    internal void OpenAt(string? src)
+    {
+        var list = EffectiveImages;
+        if (list.Count == 0) return;
+
+        var idx = !string.IsNullOrWhiteSpace(src)
+            ? list.ToList().FindIndex(s => string.Equals(s, src, StringComparison.OrdinalIgnoreCase))
+            : 0;
+
+        _currentIndex = idx >= 0 ? idx : 0;
+        _zoom = 1.0;
+        _rotate = 0;
+        _isOpen = true;
+        StateHasChanged();
+    }
+
+    public void PrevImage()
+    {
+        var count = EffectiveImages.Count;
+        if (count == 0) return;
+        _currentIndex = (_currentIndex - 1 + count) % count;
+        _zoom = 1.0;
+        _rotate = 0;
+    }
+
+    public void NextImage()
+    {
+        var count = EffectiveImages.Count;
+        if (count == 0) return;
+        _currentIndex = (_currentIndex + 1) % count;
+        _zoom = 1.0;
+        _rotate = 0;
+    }
+
+    private void SelectImage(int index)
+    {
+        _currentIndex = index;
+        _zoom = 1.0;
+        _rotate = 0;
+    }
+
+    private void Close()
+    {
+        _isOpen = false;
+        _zoom = 1.0;
+        _rotate = 0;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape") Close();
+        else if (e.Key == "ArrowLeft") PrevImage();
+        else if (e.Key == "ArrowRight") NextImage();
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-image-preview-group inline-flex flex-wrap items-center gap-3")
+        .AddClass(Class)
+        .Build();
+}

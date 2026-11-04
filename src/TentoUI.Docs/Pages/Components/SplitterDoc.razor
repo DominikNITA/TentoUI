@@ -1,0 +1,48 @@
+@page "/components/splitter"
+@namespace TentoUI.Docs.Pages.Components
+
+<PageTitle>Splitter - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 mb-2">
+            <span>New in v1.1.0</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Splitter</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Accessible resizable split panes with keyboard arrow adjustments, min/max constraints, and collapsible panel triggers.
+        </p>
+    </div>
+
+    <DemoCard Title="Collapsible Horizontal Splitter" Description="Use keyboard arrows on the separator handle or click the collapse button to toggle the side pane." Code="@_splitterCode">
+        <Splitter Split="35" Collapsible="true">
+            <SplitterPanel>
+                <div class="p-4 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <strong>Navigation Pane (35%)</strong>
+                    <p class="mt-1 text-slate-400">Focus the separator and press ArrowLeft/ArrowRight to resize.</p>
+                </div>
+            </SplitterPanel>
+            <SplitterPanel>
+                <div class="p-4 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <strong>Main Workspace (65%)</strong>
+                    <p class="mt-1 text-slate-400">Primary editor or inspection viewport.</p>
+                </div>
+            </SplitterPanel>
+        </Splitter>
+    </DemoCard>
+
+    <ApiTable Title="Splitter Properties" ComponentType="@typeof(Splitter)" />
+</div>
+
+@code {
+    private const string _splitterCode = """
+        <Splitter Split="35" Collapsible="true">
+            <SplitterPanel>
+                <div class="p-4">Navigation Pane (35%)</div>
+            </SplitterPanel>
+            <SplitterPanel>
+                <div class="p-4">Main Workspace (65%)</div>
+            </SplitterPanel>
+        </Splitter>
+        """;
+}

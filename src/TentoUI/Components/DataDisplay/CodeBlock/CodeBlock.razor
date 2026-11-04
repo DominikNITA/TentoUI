@@ -1,0 +1,237 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.1.0")]
+
+<div id="@ElementId" class="@ComputedClass" style="@Style" @attributes="AdditionalAttributes">
+    @if (!string.IsNullOrWhiteSpace(Title) || !string.IsNullOrWhiteSpace(Language) || ShowCopyButton || Collapsible)
+    {
+        <div class="flex items-center justify-between px-4 py-2 bg-slate-900 dark:bg-slate-950 border-b border-slate-800 text-xs text-slate-400">
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="flex gap-1.5 mr-1" aria-hidden="true">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                </span>
+                @if (!string.IsNullOrWhiteSpace(Title))
+                {
+                    <span class="font-mono font-medium text-slate-200 truncate">@Title</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Language))
+                {
+                    <span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono uppercase tracking-wider text-[10px]">@Language</span>
+                }
+            </div>
+            <div class="flex items-center gap-2">
+                @if (Collapsible)
+                {
+                    <button type="button"
+                            class="px-2 py-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                            aria-expanded="@(!_isCollapsed ? "true" : "false")"
+                            @onclick="ToggleCollapse">
+                        @(_isCollapsed ? "Expand" : "Collapse")
+                    </button>
+                }
+                @if (ShowCopyButton)
+                {
+                    <CopyButton Text="@(Code ?? string.Empty)" Size="ComponentSize.Small" Type="ButtonType.Text" Class="text-slate-300 hover:text-white" />
+                }
+            </div>
+        </div>
+    }
+
+    @if (!_isCollapsed)
+    {
+        <div class="overflow-x-auto overflow-y-auto font-mono text-xs leading-relaxed bg-slate-950 text-slate-100 py-3"
+             style="@ViewportStyle">
+            @{
+                var lines = GetLines();
+                var highlightedSet = ParseHighlightLines(HighlightLines);
+            }
+            <table class="w-full border-collapse" role="presentation">
+                <tbody>
+                    @for (var i = 0; i < lines.Length; i++)
+                    {
+                        var lineNumber = StartLineNumber + i;
+                        var isHighlighted = highlightedSet.Contains(lineNumber);
+                        var rowClass = isHighlighted
+                            ? "bg-primary-500/15 border-l-2 border-primary-400"
+                            : "hover:bg-slate-900/60";
+                        <tr class="@rowClass">
+                            @if (ShowLineNumbers)
+                            {
+                                <td class="select-none text-right pr-4 pl-4 text-slate-500 w-10 align-top font-mono">@lineNumber</td>
+                            }
+                            <td class="pr-4 @(ShowLineNumbers ? "" : "pl-4") whitespace-pre font-mono">@RenderTokenizedLine(lines[i])</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly HashSet<string> Keywords = new(StringComparer.Ordinal)
+    {
+        "public", "private", "protected", "internal", "class", "interface", "record", "struct", "enum",
+        "static", "readonly", "const", "async", "await", "return", "if", "else", "for", "foreach",
+        "while", "switch", "case", "break", "new", "var", "let", "function", "import", "from", "export",
+        "default", "true", "false", "null", "void", "string", "int", "bool", "double", "float", "decimal",
+        "using", "namespace", "try", "catch", "finally", "throw", "override", "virtual", "abstract"
+    };
+
+    private bool _isCollapsed;
+
+    [Parameter] public string? Code { get; set; }
+    [Parameter] public string? Language { get; set; } = "csharp";
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public bool ShowLineNumbers { get; set; } = true;
+    [Parameter] public int StartLineNumber { get; set; } = 1;
+    [Parameter] public string? HighlightLines { get; set; }
+    [Parameter] public bool ShowCopyButton { get; set; } = true;
+    [Parameter] public bool Collapsible { get; set; }
+    [Parameter] public bool DefaultCollapsed { get; set; }
+    [Parameter] public string? MaxHeight { get; set; }
+
+    private string ComputedClass => new CssBuilder("rounded-xl border border-slate-800 overflow-hidden shadow-sm")
+        .AddClass(Class)
+        .Build();
+
+    private string? ViewportStyle => new StyleBuilder()
+        .AddStyle("max-height", MaxHeight, !string.IsNullOrWhiteSpace(MaxHeight))
+        .Build();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _isCollapsed = DefaultCollapsed;
+    }
+
+    private void ToggleCollapse()
+    {
+        _isCollapsed = !_isCollapsed;
+    }
+
+    private string[] GetLines()
+    {
+        if (string.IsNullOrEmpty(Code))
+            return [string.Empty];
+
+        return Code.Replace("\r\n", "\n").Split('\n');
+    }
+
+    private static HashSet<int> ParseHighlightLines(string? expr)
+    {
+        var set = new HashSet<int>();
+        if (string.IsNullOrWhiteSpace(expr))
+            return set;
+
+        foreach (var part in expr.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var dashIndex = part.IndexOf('-');
+            if (dashIndex > 0 &&
+                int.TryParse(part[..dashIndex], out var start) &&
+                int.TryParse(part[(dashIndex + 1)..], out var end) &&
+                end >= start)
+            {
+                for (var n = start; n <= end; n++)
+                    set.Add(n);
+            }
+            else if (int.TryParse(part, out var single))
+            {
+                set.Add(single);
+            }
+        }
+        return set;
+    }
+
+    private RenderFragment RenderTokenizedLine(string line) => builder =>
+    {
+        if (string.IsNullOrEmpty(line))
+        {
+            builder.AddContent(0, "\u00A0");
+            return;
+        }
+
+        var trimmed = line.TrimStart();
+        if (trimmed.StartsWith("//") || trimmed.StartsWith("#"))
+        {
+            builder.OpenElement(0, "span");
+            builder.AddAttribute(1, "class", "text-slate-500 italic");
+            builder.AddContent(2, line);
+            builder.CloseElement();
+            return;
+        }
+
+        var seq = 0;
+        var i = 0;
+        while (i < line.Length)
+        {
+            var ch = line[i];
+
+            if (ch == '"' || ch == '\'')
+            {
+                var quote = ch;
+                var start = i++;
+                while (i < line.Length && line[i] != quote)
+                {
+                    if (line[i] == '\\' && i + 1 < line.Length)
+                        i++;
+                    i++;
+                }
+                if (i < line.Length)
+                    i++;
+
+                builder.OpenElement(seq++, "span");
+                builder.AddAttribute(seq++, "class", "text-emerald-400");
+                builder.AddContent(seq++, line[start..i]);
+                builder.CloseElement();
+                continue;
+            }
+
+            if (char.IsLetter(ch) || ch == '_' || ch == '@')
+            {
+                var start = i++;
+                while (i < line.Length && (char.IsLetterOrDigit(line[i]) || line[i] == '_'))
+                    i++;
+
+                var word = line[start..i];
+                if (word.StartsWith('@') || Keywords.Contains(word))
+                {
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "text-sky-400 font-semibold");
+                    builder.AddContent(seq++, word);
+                    builder.CloseElement();
+                }
+                else if (char.IsUpper(word[0]))
+                {
+                    builder.OpenElement(seq++, "span");
+                    builder.AddAttribute(seq++, "class", "text-amber-300");
+                    builder.AddContent(seq++, word);
+                    builder.CloseElement();
+                }
+                else
+                {
+                    builder.AddContent(seq++, word);
+                }
+                continue;
+            }
+
+            if (char.IsDigit(ch))
+            {
+                var start = i++;
+                while (i < line.Length && (char.IsDigit(line[i]) || line[i] == '.'))
+                    i++;
+
+                builder.OpenElement(seq++, "span");
+                builder.AddAttribute(seq++, "class", "text-purple-400");
+                builder.AddContent(seq++, line[start..i]);
+                builder.CloseElement();
+                continue;
+            }
+
+            builder.AddContent(seq++, ch.ToString());
+            i++;
+        }
+    };
+}

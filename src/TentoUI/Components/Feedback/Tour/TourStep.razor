@@ -7,7 +7,7 @@
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string? Description { get; set; }
     [Parameter] public string? TargetSelector { get; set; }
-    [Parameter] public string? Target { get => TargetSelector; set => TargetSelector = value; }
+    [Parameter, Since("1.0.2")] public string? Target { get => TargetSelector; set => TargetSelector = value; }
 
     protected override void OnInitialized()
     {

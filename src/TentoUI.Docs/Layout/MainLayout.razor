@@ -28,7 +28,7 @@
                 <button type="button"
                         class="underline font-bold hover:opacity-80 cursor-pointer ml-1"
                         @onclick="SwitchToLatestVersion">
-                    Switch to Latest Stable (v1.0.0) →
+                    Switch to Latest Stable (@(VersionService.AvailableVersions.FirstOrDefault(v => v.IsLatest)?.Label ?? "Latest")) →
                 </button>
             </div>
         }

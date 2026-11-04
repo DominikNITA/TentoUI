@@ -1,13 +1,23 @@
 [
   {
-    "version": "1.0.1",
-    "label": "v1.0.1",
+    "version": "1.0.2",
+    "label": "v1.0.2",
     "path": "/",
     "isLatest": true,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",
-    "notes": "Current patch release (Icon spin speed, ContextMenu & docs enhancements)"
+    "notes": "Current release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"
+  },
+  {
+    "version": "1.0.1",
+    "label": "v1.0.1",
+    "path": "/v1.0.1/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Patch release (Icon spin speed, ContextMenu & docs enhancements)"
   },
   {
     "version": "1.0.0",

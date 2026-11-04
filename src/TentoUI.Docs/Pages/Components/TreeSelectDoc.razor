@@ -34,7 +34,8 @@
         </div>
     </DemoCard>
 
-    <ApiTable Title="TreeSelect Properties" Properties="@_props" />
+    <ApiTable Title="TreeSelect Properties" ComponentType="@typeof(TreeSelect)" />
+    <ApiTable Title="TreeDataNode Properties" ComponentType="@typeof(TreeDataNode)" />
 </div>
 
 @code {
@@ -69,13 +70,4 @@
                     Placeholder="Search files..."
                     ShowSearch="true" />
         """;
-
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("TreeData", "Hierarchical data structure of tree nodes.", "IEnumerable<TreeDataNode>?", "null"),
-        new("Value", "Current selected node key (bindable via @bind-Value).", "string?", "null"),
-        new("Placeholder", "Placeholder text.", "string?", "'Please select'"),
-        new("AllowClear", "Whether clear icon is enabled.", "bool", "true"),
-        new("ShowSearch", "Whether to display search filter input.", "bool", "false")
-    ];
 }

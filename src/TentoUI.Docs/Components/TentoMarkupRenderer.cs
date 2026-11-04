@@ -463,10 +463,12 @@ public class TentoMarkupRenderer : ComponentBase
     }
 
     private static bool IsVoidElement(string tag) =>
-        tag.Equals("br", StringComparison.OrdinalIgnoreCase) ||
-        tag.Equals("hr", StringComparison.OrdinalIgnoreCase) ||
-        tag.Equals("img", StringComparison.OrdinalIgnoreCase) ||
-        tag.Equals("input", StringComparison.OrdinalIgnoreCase);
+        !string.IsNullOrEmpty(tag) &&
+        !char.IsUpper(tag[0]) &&
+        (tag.Equals("br", StringComparison.OrdinalIgnoreCase) ||
+         tag.Equals("hr", StringComparison.OrdinalIgnoreCase) ||
+         tag.Equals("img", StringComparison.OrdinalIgnoreCase) ||
+         tag.Equals("input", StringComparison.OrdinalIgnoreCase));
 
     private static bool IsInlineTag(string tag) =>
         tag.Equals("Button", StringComparison.OrdinalIgnoreCase) ||
@@ -836,6 +838,44 @@ public class TentoMarkupRenderer : ComponentBase
             if (!node.Attributes.ContainsKey("NewText") || node.Attributes["NewText"].StartsWith("@"))
             {
                 builder.AddAttribute(seq++, "NewText", "public class OrderService\n{\n    public decimal TaxRate => 0.21m;\n    public bool IsEuVat => true;\n}");
+            }
+        }
+        // 10d. Transfer sample data fallback
+        else if (compType == typeof(Transfer))
+        {
+            if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
+            {
+                var sampleItems = new TransferItem[]
+                {
+                    new("admin", "Administrator", "Full system access"),
+                    new("editor", "Content Editor", "Can publish blog posts"),
+                    new("moderator", "Community Moderator", "Can flag user content"),
+                    new("billing", "Billing Officer", "Manages invoices"),
+                    new("developer", "Developer", "Access to API tokens and webhooks")
+                };
+                builder.AddAttribute(seq++, "DataSource", (IEnumerable<TransferItem>)sampleItems);
+            }
+        }
+        // 10e. TreeSelect sample data fallback
+        else if (compType == typeof(TreeSelect))
+        {
+            if (!node.Attributes.ContainsKey("TreeData") || node.Attributes["TreeData"].StartsWith("@"))
+            {
+                var sampleTree = new TreeDataNode[]
+                {
+                    new("src", "src",
+                    [
+                        new("components", "Components",
+                        [
+                            new("table", "Table.razor", isLeaf: true),
+                            new("button", "Button.razor", isLeaf: true),
+                            new("input", "Input.razor", isLeaf: true)
+                        ]),
+                        new("project", "TentoUI.csproj", isLeaf: true)
+                    ]),
+                    new("readme", "README.md", isLeaf: true)
+                };
+                builder.AddAttribute(seq++, "TreeData", (IEnumerable<TreeDataNode>)sampleTree);
             }
         }
         // 11. CommandPalette open state and sample commands

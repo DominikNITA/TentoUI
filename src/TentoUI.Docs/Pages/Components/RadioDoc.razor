@@ -35,7 +35,19 @@
         </div>
     </DemoCard>
 
-    @* Example 3: Disabled Options *@
+    @* Example 3: Vertical Radio Group *@
+    <DemoCard Title="Vertical Radio Group" Description="Stack choices vertically with Vertical='true'." Code="@_verticalCode">
+        <div class="p-2 space-y-2">
+            <RadioGroup TValue="string" @bind-Value="_selectedNotification" Vertical="true">
+                <Radio Value="@("all")">All new messages and direct mentions</Radio>
+                <Radio Value="@("mentions")">Direct @@mentions and replies only</Radio>
+                <Radio Value="@("mute")">Mute all email and push notifications</Radio>
+            </RadioGroup>
+            <div class="text-xs text-slate-400 font-mono mt-2">Notification preference: @_selectedNotification</div>
+        </div>
+    </DemoCard>
+
+    @* Example 4: Disabled Options *@
     <DemoCard Title="Disabled Options" Description="Selectively disable individual radio options." Code="@_disabledCode">
         <div class="p-2">
             <RadioGroup TValue="string" @bind-Value="_selectedRegion">
@@ -54,12 +66,21 @@
     private string _selectedPlan = "pro";
     private string _selectedPeriod = "monthly";
     private string _selectedRegion = "us-east";
+    private string _selectedNotification = "mentions";
 
     private const string _basicCode = """
         <RadioGroup TValue="string" @bind-Value="selectedPlan">
             <Radio Value="@("free")">Free Tier ($0/mo)</Radio>
             <Radio Value="@("pro")">Pro Team ($29/mo)</Radio>
             <Radio Value="@("enterprise")">Enterprise (Custom)</Radio>
+        </RadioGroup>
+        """;
+
+    private const string _verticalCode = """
+        <RadioGroup TValue="string" @bind-Value="selectedNotification" Vertical="true">
+            <Radio Value="@("all")">All new messages</Radio>
+            <Radio Value="@("mentions")">Direct @mentions only</Radio>
+            <Radio Value="@("mute")">Mute all notifications</Radio>
         </RadioGroup>
         """;
 
@@ -82,6 +103,7 @@
     private readonly ApiTable.ApiProp[] _groupProps =
     [
         new("Value", "Selected option value (bindable via @bind-Value).", "TValue", "default"),
+        new("Vertical", "Whether to layout radio options vertically in a column.", "bool", "false"),
         new("Disabled", "Disables all radio choices within this group.", "bool", "false"),
         new("ButtonStyle", "Visual style when rendered as buttons (Outline, Solid).", "RadioButtonStyle", "RadioButtonStyle.Outline"),
         new("ChildContent", "Radio child elements.", "RenderFragment?", "null")

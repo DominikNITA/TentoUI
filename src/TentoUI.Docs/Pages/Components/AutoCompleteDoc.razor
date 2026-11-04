@@ -9,48 +9,190 @@
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">AutoComplete</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
             Dynamic input completion offering suggestions as the user types into the field.
-            Supports inline options strings as well as strongly-typed options.
+            Supports dynamic email generation, complex models with custom templates, and debounced remote searches.
         </p>
     </div>
 
     @* Example 1: Email Domain Suggestions *@
     <DemoCard Title="Email AutoComplete"
-              Description="Provides common email domain suffix suggestions. The options are directly visible and editable in the snippet."
-              Code="@_emailCode" />
+              Description="Generates email address suggestions in real-time as you type your prefix."
+              Code="@_emailCode">
+        <div class="max-w-xs p-2 space-y-2">
+            <AutoComplete @bind-Value="_emailValue"
+                          Placeholder="Enter email address..."
+                          Options="@EmailOptions"
+                          AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Current Value: @_emailValue</div>
+        </div>
+    </DemoCard>
 
-    @* Example 2: Search Terms Suggestions *@
-    <DemoCard Title="Search Suggestions"
-              Description="Instant keyword suggestions for searching products or documentation."
-              Code="@_searchCode" />
+    @* Example 2: Complex Class with OptionTemplate *@
+    <DemoCard Title="Complex Objects &amp; OptionTemplate"
+              Description="Renders rich suggestion items containing avatars, roles, and formatted descriptions using OptionTemplate."
+              Code="@_complexCode">
+        <div class="max-w-md p-2 space-y-2">
+            <AutoComplete @bind-Value="_selectedUser"
+                          Placeholder="Search team member..."
+                          Options="@_userOptions"
+                          AllowClear="true">
+                <OptionTemplate Context="opt">
+                    @{
+                        var user = opt.Data as UserProfile;
+                    }
+                    <div class="flex items-center justify-between py-0.5 w-full">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-[10px]">
+                                @(opt.Label?.Length > 0 ? opt.Label[0].ToString() : "U")
+                            </div>
+                            <div>
+                                <div class="font-medium text-slate-800 dark:text-slate-200">@opt.Label</div>
+                                <div class="text-[10px] text-slate-400">@opt.Value</div>
+                            </div>
+                        </div>
+                        @if (user != null)
+                        {
+                            <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                                @user.Department
+                            </span>
+                        }
+                    </div>
+                </OptionTemplate>
+            </AutoComplete>
+            <div class="text-xs text-slate-400 font-mono">Selected: @_selectedUser</div>
+        </div>
+    </DemoCard>
 
-    <ApiTable Title="AutoComplete Properties" Properties="@_props" />
+    @* Example 3: Debounced Remote Backend Search *@
+    <DemoCard Title="Debounced Search"
+              Description="Invokes an async search callback with a customizable debounce interval (default 300ms) to prevent excessive server requests."
+              Code="@_debounceCode">
+        <div class="max-w-xs p-2 space-y-2">
+            <AutoComplete @bind-Value="_searchValue"
+                          Placeholder="Type to query backend..."
+                          Options="@_searchedOptions"
+                          DebounceMs="300"
+                          OnSearch="HandleRemoteSearch"
+                          AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">
+                @if (_isSearching)
+                {
+                    <span class="text-primary-500 font-semibold animate-pulse">Querying remote server...</span>
+                }
+                else
+                {
+                    <span>Results count: @_searchedOptions.Count</span>
+                }
+            </div>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="AutoComplete Properties" ComponentType="@typeof(AutoComplete)" />
+    <ApiTable Title="AutoCompleteOption Properties" ComponentType="@typeof(AutoCompleteOption)" />
 </div>
 
 @code {
-    private const string _emailCode = """
-        <div class="max-w-xs p-2">
-            <AutoComplete Placeholder="Enter email address..."
-                          OptionsString="gmail.com, outlook.com, yahoo.com, icloud.com, proton.me"
-                          AllowClear="true" />
-        </div>
-        """;
+    private string _emailValue = "dev";
+    private string _selectedUser = string.Empty;
+    private string _searchValue = string.Empty;
+    private bool _isSearching;
 
-    private const string _searchCode = """
-        <div class="max-w-xs p-2">
-            <AutoComplete Placeholder="Search components..."
-                          OptionsString="Button, Badge, Card, Modal, Table, Tabs, Tree, Segmented"
-                          AllowClear="true" />
-        </div>
-        """;
+    private static readonly string[] s_domains = ["gmail.com", "outlook.com", "yahoo.com", "proton.me", "icloud.com"];
 
-    private readonly ApiTable.ApiProp[] _props =
+    private IEnumerable<AutoCompleteOption> EmailOptions
+    {
+        get
+        {
+            var text = _emailValue?.Trim() ?? string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                return Array.Empty<AutoCompleteOption>();
+            }
+
+            if (!text.Contains('@'))
+            {
+                return s_domains.Select(domain => new AutoCompleteOption($"{text}@{domain}", $"{text}@{domain}"));
+            }
+
+            var parts = text.Split('@', 2);
+            var prefix = parts[0];
+            var suffix = parts.Length > 1 ? parts[1] : string.Empty;
+
+            return s_domains
+                .Where(domain => domain.StartsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                .Select(domain => new AutoCompleteOption($"{prefix}@{domain}", $"{prefix}@{domain}"));
+        }
+    }
+
+    private sealed record UserProfile(string Name, string Email, string Department);
+
+    private readonly List<AutoCompleteOption> _userOptions =
     [
-        new("OptionsString", "Comma-separated string of suggestions (e.g. 'Option 1, Option 2').", "string?", "null"),
-        new("SimpleOptions", "Array or list of string suggestions.", "IEnumerable<string>?", "null"),
-        new("Options", "List of strongly-typed AutoCompleteOption items.", "IEnumerable<AutoCompleteOption>?", "null"),
-        new("Value", "Current text value in the input (bindable via @bind-Value).", "string?", "null"),
-        new("Placeholder", "Placeholder prompt text.", "string?", "null"),
-        new("AllowClear", "Whether clear button is visible.", "bool", "true"),
-        new("OnSelect", "Callback invoked when a suggestion is clicked.", "EventCallback<string>", "null")
+        new("alice@company.com", "Alice Smith", new UserProfile("Alice Smith", "alice@company.com", "Design")),
+        new("bob@company.com", "Bob Jones", new UserProfile("Bob Jones", "bob@company.com", "Engineering")),
+        new("carol@company.com", "Carol White", new UserProfile("Carol White", "carol@company.com", "Product")),
+        new("david@company.com", "David Brown", new UserProfile("David Brown", "david@company.com", "DevOps")),
+        new("eva@company.com", "Eva Green", new UserProfile("Eva Green", "eva@company.com", "Engineering"))
     ];
+
+    private List<AutoCompleteOption> _searchedOptions = [];
+
+    private async Task HandleRemoteSearch(string query)
+    {
+        _isSearching = true;
+        StateHasChanged();
+
+        await Task.Delay(200); // simulate network latency
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            _searchedOptions = [];
+        }
+        else
+        {
+            var catalog = new[]
+            {
+                "Apple iPhone 16 Pro", "Apple MacBook Air M3", "Dell XPS 15",
+                "Sony WH-1000XM5", "Logitech MX Master 3S", "Keychron Q1 Pro",
+                "Google Pixel 9", "Samsung Galaxy S24"
+            };
+
+            _searchedOptions = catalog
+                .Where(c => c.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Select(c => new AutoCompleteOption(c, c))
+                .ToList();
+        }
+
+        _isSearching = false;
+        StateHasChanged();
+    }
+
+    private const string _emailCode = """
+        <AutoComplete @bind-Value="emailValue"
+                      Placeholder="Enter email address..."
+                      Options="@emailOptions"
+                      AllowClear="true" />
+        """;
+
+    private const string _complexCode = """
+        <AutoComplete @bind-Value="selectedUser"
+                      Placeholder="Search team member..."
+                      Options="@userOptions"
+                      AllowClear="true">
+            <OptionTemplate Context="opt">
+                <div class="flex items-center justify-between py-0.5 w-full">
+                    <span class="font-medium">@opt.Label</span>
+                    <span class="text-xs text-slate-400">@opt.Value</span>
+                </div>
+            </OptionTemplate>
+        </AutoComplete>
+        """;
+
+    private const string _debounceCode = """
+        <AutoComplete @bind-Value="searchValue"
+                      Placeholder="Type to query backend..."
+                      Options="@searchedOptions"
+                      DebounceMs="300"
+                      OnSearch="HandleRemoteSearch"
+                      AllowClear="true" />
+        """;
 }

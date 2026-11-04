@@ -33,7 +33,8 @@
         </div>
     </DemoCard>
 
-    <ApiTable Title="Cascader Properties" Properties="@_props" />
+    <ApiTable Title="Cascader Properties" ComponentType="@typeof(Cascader)" />
+    <ApiTable Title="CascaderOption Properties" ComponentType="@typeof(CascaderOption)" />
 </div>
 
 @code {
@@ -93,13 +94,4 @@
                   Placeholder="Select department..."
                   AllowClear="true" />
         """;
-
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("Options", "Hierarchical data options array.", "IEnumerable<CascaderOption>?", "null"),
-        new("Values", "Selected keys at each cascade depth (bindable via @bind-Values).", "IReadOnlyList<string>", "[]"),
-        new("Placeholder", "Input placeholder text.", "string?", "'Please select'"),
-        new("AllowClear", "Whether clear icon is enabled.", "bool", "true"),
-        new("ChangeOnSelect", "Whether selecting any parent level triggers value update immediately.", "bool", "false")
-    ];
 }

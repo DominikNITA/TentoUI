@@ -355,6 +355,8 @@ public static class ComponentApiRegistry
         "RowAlign" => "Vertical alignment of columns inside a 24-column Row.",
         "DropdownTrigger" => "User interaction that opens the dropdown menu.",
         "DropdownPlacement" => "Preferred placement of the dropdown overlay relative to the trigger.",
+        "FilterLogicalOperator" => "Logical operator (And, Or) used to combine filter rules.",
+        "FilterComparisonOperator" => "Comparison condition operator (Contains, Equals, StartsWith, EndsWith, GreaterThan, LessThan).",
         _ => $"Allowed values for {enumName}."
     };
 }

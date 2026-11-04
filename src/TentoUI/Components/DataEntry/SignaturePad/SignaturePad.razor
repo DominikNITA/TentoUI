@@ -7,16 +7,14 @@
     <div class="relative select-none touch-none bg-white dark:bg-slate-950"
          style="height: @(Height)px;">
         <svg class="w-full h-full cursor-crosshair"
-             viewBox="0 0 @Width @Height"
-             preserveAspectRatio="none"
              role="img"
              aria-label="@(Placeholder ?? "Signature pad")"
              @onpointerdown="HandlePointerDown"
              @onpointermove="HandlePointerMove"
              @onpointerup="HandlePointerUp"
              @onpointerleave="HandlePointerUp">
-            <line x1="24" y1="@(Height - 28)" x2="@(Width - 24)" y2="@(Height - 28)"
-                  class="stroke-slate-200 dark:stroke-slate-800" stroke-dasharray="4 4" stroke-width="1" />
+            <line x1="24" y1="@(Height - 28)" x2="95%" y2="@(Height - 28)"
+                  class="stroke-slate-200 dark:stroke-slate-800 pointer-events-none" stroke-dasharray="4 4" stroke-width="1" />
             @foreach (var path in _strokes)
             {
                 <path d="@path"
@@ -24,7 +22,7 @@
                       stroke-width="@StrokeWidth"
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      class="stroke-slate-900 dark:stroke-slate-100" />
+                      class="stroke-slate-900 dark:stroke-slate-100 pointer-events-none" />
             }
             @if (!string.IsNullOrEmpty(_activeStroke))
             {
@@ -33,7 +31,7 @@
                       stroke-width="@StrokeWidth"
                       stroke-linecap="round"
                       stroke-linejoin="round"
-                      class="stroke-primary-600 dark:stroke-primary-400" />
+                      class="stroke-primary-600 dark:stroke-primary-400 pointer-events-none" />
             }
         </svg>
 

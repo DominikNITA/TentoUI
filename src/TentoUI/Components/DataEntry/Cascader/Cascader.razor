@@ -30,6 +30,7 @@
 
     @if (_isOpen && !IsDisabled && !ReadOnly && Options != null && Options.Any())
     {
+        <div class="fixed inset-0 z-40" @onclick="@(() => _isOpen = false)"></div>
         <div class="tento-cascader-popup absolute z-50 mt-1 flex divide-x divide-slate-100 dark:divide-slate-700 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl overflow-hidden text-xs"
              @onclick:stopPropagation="true">
             @* Render each active column *@
@@ -66,6 +67,20 @@
     [Parameter] public string? Placeholder { get; set; } = "Please select";
     [Parameter] public bool AllowClear { get; set; } = true;
     [Parameter] public bool ChangeOnSelect { get; set; }
+
+    [Parameter]
+    public IReadOnlyList<string>? Values
+    {
+        get => Value;
+        set => Value = value;
+    }
+
+    [Parameter]
+    public EventCallback<IReadOnlyList<string>> ValuesChanged
+    {
+        get => ValueChanged;
+        set => ValueChanged = value;
+    }
 
     private bool _isOpen;
     private readonly System.Collections.Generic.List<string> _selectedPath = new();

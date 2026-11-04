@@ -4,7 +4,7 @@
 <div class="@ComputeWrapperClass()" style="@Style">
     @if (Prefix != null)
     {
-        <span class="tento-input-prefix mr-2 inline-flex items-center text-slate-400 select-none">
+        <span class="tento-input-prefix pl-3 pr-1 inline-flex items-center text-slate-400 select-none shrink-0">
             @Prefix
         </span>
     }
@@ -29,7 +29,7 @@
     @if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
     {
         <button type="button"
-                class="tento-input-clear-btn inline-flex items-center pr-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none"
+                class="tento-input-clear-btn inline-flex items-center px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none shrink-0"
                 aria-label="Clear input"
                 @onclick="@ClearValue">
             <span class="text-base leading-none">&times;</span>
@@ -39,7 +39,7 @@
     @if (Type == InputType.Password && AllowShowPassword)
     {
         <button type="button"
-                class="inline-flex items-center px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none"
+                class="inline-flex items-center px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none shrink-0"
                 aria-label="Toggle password visibility"
                 aria-pressed="@_showPassword"
                 @onclick="@TogglePasswordVisibility">
@@ -56,14 +56,14 @@
 
     @if (Suffix != null)
     {
-        <span class="tento-input-suffix ml-2 inline-flex items-center text-slate-400 select-none">
+        <span class="tento-input-suffix pl-1 pr-3 inline-flex items-center text-slate-400 select-none shrink-0">
             @Suffix
         </span>
     }
 
     @if (ShowCount && MaxLength.HasValue)
     {
-        <span class="inline-flex items-center pr-3 text-xs text-slate-400 select-none">
+        <span class="inline-flex items-center pr-3 text-xs text-slate-400 select-none shrink-0">
             @(CurrentValue?.Length ?? 0) / @MaxLength
         </span>
     }
@@ -145,10 +145,13 @@
     private string ComputeInputClass()
     {
         var size = ResolvedSize(Size);
-        return new CssBuilder("w-full bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none border-none")
-            .AddClass("py-1 px-2 text-xs", size == ComponentSize.Small)
-            .AddClass("py-1.5 px-3 text-sm", size == ComponentSize.Middle)
-            .AddClass("py-2 px-4 text-base", size == ComponentSize.Large)
+        var padLeft = Prefix != null ? "pl-1" : (size == ComponentSize.Small ? "pl-2.5" : (size == ComponentSize.Large ? "pl-4" : "pl-3"));
+        var padRight = (Suffix != null || AllowClear || (Type == InputType.Password && AllowShowPassword) || ShowCount)
+            ? "pr-1"
+            : (size == ComponentSize.Small ? "pr-2.5" : (size == ComponentSize.Large ? "pr-4" : "pr-3"));
+        var padY = size == ComponentSize.Small ? "py-1 text-xs" : (size == ComponentSize.Large ? "py-2 text-base" : "py-1.5 text-sm");
+
+        return new CssBuilder($"flex-1 min-w-0 w-full bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none border-none {padLeft} {padRight} {padY}")
             .AddClass("cursor-not-allowed", IsDisabled)
             .Build();
     }

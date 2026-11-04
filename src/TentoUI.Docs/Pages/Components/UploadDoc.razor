@@ -1,35 +1,91 @@
 @page "/components/upload"
 @namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
 
-<PageTitle>Upload &amp; Sliders - TentoUI</PageTitle>
+<PageTitle>Upload - TentoUI</PageTitle>
 
-<div class="max-w-4xl space-y-8">
+<div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Upload, Slider &amp; Rate</h1>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Upload</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            File upload controls, continuous/stepped range sliders, and star rating evaluations.
+            File upload controls with support for button triggers, interactive drag-and-drop drop zones, file lists, size validation, and multi-file attachments.
         </p>
     </div>
 
-    <DemoCard Title="Star Rating" Description="Clickable 5-star rating with hover preview." Code="@_rateCode">
-        <div class="flex items-center gap-4">
-            <Rate @bind-Value="_rating" />
-            <span class="text-xs font-semibold text-slate-500">Score: @_rating / 5</span>
+    @* Example 1: Standard Button Upload *@
+    <DemoCard Title="Basic Button Upload"
+              Description="Standard file picker button with file list display and remove actions."
+              Code="@_buttonCode">
+        <div class="max-w-md p-2 space-y-3">
+            <Upload ButtonText="Select Documentation Files"
+                    Hint="Supports PDF, PNG, or Markdown up to 10MB."
+                    FileList="@_buttonFiles"
+                    OnRemove="@(f => MessageService.Info($"Removed {f.Name}"))" />
         </div>
     </DemoCard>
 
-    <DemoCard Title="Upload Button" Description="Standard file picker with file size validation and list display." Code="@_uploadCode">
-        <div class="max-w-md">
-            <Upload ButtonText="Select Documentation Files"
-                    Hint="Supports PDF, PNG, or Markdown up to 10MB." />
+    @* Example 2: Drag & Drop DropZone *@
+    <DemoCard Title="Drag and Drop (DropZone)"
+              Description="Full-width interactive drop area supporting click to browse or drag-and-drop file attachment."
+              Code="@_dropzoneCode">
+        <div class="max-w-lg p-2 space-y-3">
+            <Upload DragDrop="true"
+                    Multiple="true"
+                    ButtonText="Click or drag files to this area to upload"
+                    Hint="Support for single or bulk upload of contracts, receipts, and images."
+                    FileList="@_dropFiles"
+                    OnRemove="@(f => MessageService.Info($"Removed {f.Name}"))" />
         </div>
     </DemoCard>
+
+    @* Example 3: File Type & Size Constraints *@
+    <DemoCard Title="Restricted Formats &amp; Size Limit"
+              Description="Restricts selection to specific MIME types or extensions and enforces a maximum file size threshold."
+              Code="@_restrictedCode">
+        <div class="max-w-md p-2 space-y-3">
+            <Upload Accept="image/png,image/jpeg,.pdf"
+                    MaxFileSize="5242880"
+                    ButtonText="Upload Receipt (Images or PDF only, max 5MB)"
+                    FileList="@_restrictedFiles" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Upload Properties" ComponentType="@typeof(Upload)" />
+    <ApiTable Title="UploadFileItem Properties" ComponentType="@typeof(UploadFileItem)" />
 </div>
 
 @code {
-    private int _rating = 4;
+    private readonly List<UploadFileItem> _buttonFiles =
+    [
+        new() { Name = "architecture-spec.pdf", Size = 2450000, ContentType = "application/pdf", Status = UploadStatus.Done }
+    ];
 
-    private const string _rateCode = @"<Rate @bind-Value=""_rating"" />";
-    private const string _uploadCode = @"<Upload ButtonText=""Select Documentation Files""
-        Hint=""Supports PDF, PNG, or Markdown up to 10MB."" />";
+    private readonly List<UploadFileItem> _dropFiles =
+    [
+        new() { Name = "invoice_2026_q1.xlsx", Size = 512000, ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Status = UploadStatus.Done },
+        new() { Name = "brand-guidelines.pdf", Size = 4194304, ContentType = "application/pdf", Status = UploadStatus.Done }
+    ];
+
+    private readonly List<UploadFileItem> _restrictedFiles =
+    [
+        new() { Name = "company-logo.png", Size = 124000, ContentType = "image/png", Status = UploadStatus.Done }
+    ];
+
+    private const string _buttonCode = """
+        <Upload ButtonText="Select Documentation Files"
+                Hint="Supports PDF, PNG, or Markdown up to 10MB." />
+        """;
+
+    private const string _dropzoneCode = """
+        <Upload DragDrop="true"
+                Multiple="true"
+                ButtonText="Click or drag files to this area to upload"
+                Hint="Support for single or bulk upload of contracts, receipts, and images." />
+        """;
+
+    private const string _restrictedCode = """
+        <Upload Accept="image/png,image/jpeg,.pdf"
+                MaxFileSize="5242880"
+                ButtonText="Upload Receipt (Images or PDF only, max 5MB)" />
+        """;
 }

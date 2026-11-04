@@ -32,7 +32,8 @@
         </div>
     </DemoCard>
 
-    <ApiTable Title="Transfer Properties" Properties="@_props" />
+    <ApiTable Title="Transfer Properties" ComponentType="@typeof(Transfer)" />
+    <ApiTable Title="TransferItem Properties" ComponentType="@typeof(TransferItem)" />
 </div>
 
 @code {
@@ -61,14 +62,4 @@
                   Titles="@(new[] { "Left List", "Right List" })"
                   ShowSearch="false" />
         """;
-
-    private readonly ApiTable.ApiProp[] _props =
-    [
-        new("DataSource", "Source data collection for items.", "IEnumerable<TransferItem>?", "null"),
-        new("TargetKeys", "Set of keys located in the target (right) column.", "HashSet<string>", "new()"),
-        new("Titles", "Array of two strings for column titles [Source, Target].", "string[]", "['Source', 'Target']"),
-        new("ShowSearch", "Whether to display search filter input in columns.", "bool", "true"),
-        new("Disabled", "Whether transfer interaction is disabled.", "bool", "false"),
-        new("OnChange", "Callback executed when items move between columns.", "EventCallback", "null")
-    ];
 }

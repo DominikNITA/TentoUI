@@ -26,13 +26,17 @@
 
         @* Live Preview Area *@
         <div class="tento-demo-preview p-6 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 min-h-[96px] relative overflow-visible">
-            @if (!string.IsNullOrWhiteSpace(_currentCode))
+            @if (_isModified && !string.IsNullOrWhiteSpace(_currentCode))
             {
                 <TentoMarkupRenderer @key="_currentCode" Markup="@_currentCode" Fallback="@ChildContent" />
             }
-            else
+            else if (ChildContent != null)
             {
                 @ChildContent
+            }
+            else if (!string.IsNullOrWhiteSpace(_currentCode))
+            {
+                <TentoMarkupRenderer @key="_currentCode" Markup="@_currentCode" />
             }
         </div>
     </div>

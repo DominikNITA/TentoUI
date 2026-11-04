@@ -13,12 +13,18 @@
     </div>
 
     <DemoCard Title="6-Digit Verification &amp; Masked PIN" Description="Supports automatic multi-digit paste and completion callbacks." Code="@_otpCode">
-        <div class="space-y-4">
-            <OTPInput @bind-Value="_code"
-                      Length="6"
-                      ShowSeparator="true"
-                      OnComplete="@(c => MessageService.Success($"Code verified: {c}"))" />
-            <OTPInput Value="4829" Length="4" Mask="true" />
+        <div class="flex flex-col gap-6 p-2">
+            <div>
+                <span class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">6-Digit SMS Verification</span>
+                <OTPInput @bind-Value="_code"
+                          Length="6"
+                          ShowSeparator="true"
+                          OnComplete="@(c => MessageService.Success($"Code verified: {c}"))" />
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">4-Digit Masked Security PIN</span>
+                <OTPInput Value="4829" Length="4" Mask="true" />
+            </div>
         </div>
     </DemoCard>
 
@@ -29,7 +35,15 @@
     private string? _code = "128940";
 
     private const string _otpCode = """
-        <OTPInput Value="128940" Length="6" ShowSeparator="true" />
-        <OTPInput Value="4829" Length="4" Mask="true" />
+        <div class="flex flex-col gap-6">
+            <div>
+                <span class="block text-xs font-medium text-slate-500 mb-2">6-Digit SMS Verification</span>
+                <OTPInput Value="128940" Length="6" ShowSeparator="true" />
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-slate-500 mb-2">4-Digit Masked Security PIN</span>
+                <OTPInput Value="4829" Length="4" Mask="true" />
+            </div>
+        </div>
         """;
 }

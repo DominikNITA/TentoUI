@@ -1,5 +1,6 @@
 @namespace TentoUI
 @inherits TentoInputBase<string>
+@implements IDisposable
 
 <div class="@ComputedWrapperClass" style="@Style">
     <div class="relative w-full">
@@ -67,9 +68,12 @@
     [Parameter] public bool AllowClear { get; set; } = true;
     [Parameter] public Func<string, AutoCompleteOption, bool>? FilterPredicate { get; set; }
     [Parameter] public EventCallback<string> OnSelect { get; set; }
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Parameter] public int DebounceMs { get; set; } = 300;
 
     private bool _isOpen;
     private int _highlightedIndex = -1;
+    private System.Threading.Timer? _debounceTimer;
 
     protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
     {
@@ -114,6 +118,26 @@
         CurrentValueAsString = e.Value?.ToString() ?? string.Empty;
         _isOpen = true;
         _highlightedIndex = 0;
+
+        if (OnSearch.HasDelegate)
+        {
+            if (DebounceMs > 0)
+            {
+                _debounceTimer?.Dispose();
+                _debounceTimer = new System.Threading.Timer(async _ =>
+                {
+                    await InvokeAsync(async () =>
+                    {
+                        await OnSearch.InvokeAsync(CurrentValueAsString);
+                        StateHasChanged();
+                    });
+                }, null, DebounceMs, System.Threading.Timeout.Infinite);
+            }
+            else
+            {
+                _ = OnSearch.InvokeAsync(CurrentValueAsString);
+            }
+        }
     }
 
     private void HandleFocus()
@@ -207,5 +231,10 @@
             .AddClass("bg-primary-50 text-primary-600 dark:bg-primary-950/40 dark:text-primary-400 font-medium", isHighlighted)
             .AddClass("hover:bg-slate-50 dark:hover:bg-slate-700/50", !isHighlighted)
             .Build();
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
     }
 }

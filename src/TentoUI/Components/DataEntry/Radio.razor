@@ -46,7 +46,7 @@ else
         await ParentGroup.SelectValue(Value);
     }
 
-    private string ComputeDefaultRadioClass() => new CssBuilder("tento-radio flex items-center space-x-2 cursor-pointer select-none")
+    private string ComputeDefaultRadioClass() => new CssBuilder("tento-radio inline-flex items-center space-x-2 cursor-pointer select-none")
         .AddClass("opacity-50 cursor-not-allowed pointer-events-none", IsDisabled)
         .AddClass(Class)
         .Build();

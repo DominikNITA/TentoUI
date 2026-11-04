@@ -30,6 +30,7 @@
 
     @if (_isOpen && !IsDisabled && !ReadOnly)
     {
+        <div class="fixed inset-0 z-40" @onclick="@(() => _isOpen = false)"></div>
         <div class="tento-treeselect-popup absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl p-2 text-xs"
              @onclick:stopPropagation="true">
             <Tree Data="@TreeData"

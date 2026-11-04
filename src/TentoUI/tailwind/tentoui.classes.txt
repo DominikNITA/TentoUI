@@ -82,7 +82,6 @@
 !isSel
 !isSelected
 !isSelected)
-!isSmall)
 !isToday
 !item.Danger
 !item.Disabled)
@@ -262,6 +261,7 @@
 !trimmed.StartsWith(
 !Typing)
 !Value.Any()
+!Vertical)
 !Visible
 -.33
 -.33-1.82l-.06-.06a2
@@ -375,7 +375,6 @@
 @(Tip
 @(TipFormatter
 @(Tooltip
-@(Width
 @*
 @_activeStroke
 @_bodyId
@@ -473,6 +472,7 @@
 @ComputeButtonRadioClass()
 @ComputeCardClass()
 @ComputeCellClass(col)
+@ComputeChildrenClass()
 @ComputeClass()
 @ComputeColumnItemClass(isCurrentH)
 @ComputeColumnItemClass(isCurrentM)
@@ -689,6 +689,7 @@
 @IconNames.HelpCircle
 @IconNames.Inbox
 @IconNames.Info
+@IconNames.Link
 @IconNames.Loader2
 @IconNames.Minus
 @IconNames.Plus
@@ -1082,6 +1083,7 @@ activePanel
 activePrefix
 activeStroke
 activeVal
+actual
 add
 Add
 AddClass(
@@ -1098,6 +1100,7 @@ AddClass(col.CellClass)
 AddClass(col.HeaderClass)
 AddClass(Color,
 AddClass(colorClass)
+AddClass(dimensions)
 AddClass(dirClass)
 AddClass(disabledClass)
 AddClass(dotColor)
@@ -1123,6 +1126,7 @@ AddClass(sizeClass)
 AddClass(statusBorder)
 AddClass(statusClass)
 AddClass(string
+AddClass(textSize)
 AddClass(themeClass)
 AddClass(typeClass)
 AddClass(value,
@@ -1206,6 +1210,7 @@ AllItems
 AllItems.Where(i
 AllOptions
 AllowClear
+AllowClear)
 AllowClear=
 allowed
 allowing
@@ -1251,6 +1256,7 @@ ApplyPresetAsync(preset))
 ApplySuggestion(chip)
 ApplySuggestion(string
 appsettings.json
+arbitrary
 are
 Are
 area
@@ -1324,6 +1330,7 @@ AttributeUsage(AttributeTargets.Class
 Author
 Author[..1].ToUpperInvariant()
 Auto,
+AutoComplete
 AutoCompleteOption(s)).ToList()
 AutoCompleteOption(string
 AutoCompleteOption,
@@ -1843,6 +1850,7 @@ ClearSearch()
 ClearSelection()
 ClearSignature
 ClearSignature()
+ClearValue
 ClearValue()
 Click
 Click,
@@ -2019,11 +2027,8 @@ components.
 ComponentSize
 ComponentSize,
 ComponentSize.Large
-ComponentSize.Large)
 ComponentSize.Middle
-ComponentSize.Middle)
 ComponentSize.Small
-ComponentSize.Small)
 ComponentStatus
 ComponentStatus.Error
 ComponentStatus.Error)
@@ -2039,6 +2044,7 @@ ComputeBodyClass()
 ComputeButtonRadioClass()
 ComputeCardClass()
 ComputeCellClass(ColumnBase
+ComputeChildrenClass()
 ComputeClass()
 ComputeColumnItemClass(bool
 ComputeColumnStyle(ColumnBase
@@ -2592,6 +2598,9 @@ days
 Days
 dd
 dd>
+DebounceMs
+DebounceMs,
+debounceTimer
 decimal
 decimal.TryParse(Convert.ToString(CurrentValue,
 decimal.TryParse(Convert.ToString(Max,
@@ -2688,6 +2697,7 @@ DiffLineType.Removed
 DiffLineType.Removed)
 Digit
 dim
+dimensions,
 dir=
 dirClass
 Direct
@@ -2741,6 +2751,7 @@ dl
 dl>
 Do
 dom
+domain
 dominant-baseline=
 dominik
 Dominik
@@ -2786,6 +2797,7 @@ DrawerPlacement.Left
 DrawerPlacement.Right
 DrawerPlacement.Top
 drawer-title-
+dropdown
 Dropdown
 DropdownMenuItem(
 DropdownMenuItem>
@@ -3142,6 +3154,7 @@ FileListChanged
 FileListChanged.HasDelegate)
 FileListChanged.InvokeAsync(FileList)
 fill=
+filled
 filled.
 Fills
 filter
@@ -3210,7 +3223,6 @@ first
 First
 first:border-l-0
 first:rounded-l-full
-first:rounded-l-md
 firstDay
 firstDay.AddDays(-startOffset)
 firstDayOfMonth
@@ -3690,7 +3702,9 @@ hasActiveFilter
 HasAnyActiveFilter
 HasAnyActiveFilter)
 hasChildren
+HasChildren
 hasChildren)
+HasChildren)
 hasDark
 hasDark)
 HasDescription
@@ -4150,8 +4164,6 @@ IsSelected(node.Key)
 IsSelected(string
 isSelected)
 isSelected,
-isSmall
-isSmall)
 isSortActive
 isToday
 isToday,
@@ -4299,7 +4311,6 @@ Last
 last:border-b-0
 last:border-r-0
 last:rounded-r-full
-last:rounded-r-md
 lastErrorLevel
 lastErrorLevel)
 lastProperty
@@ -4324,6 +4335,7 @@ left/right
 left:
 -left-[21px]
 left-0
+left-0.5
 left-1/2
 left-2
 left-4
@@ -5204,6 +5216,8 @@ OnRowClick.HasDelegate)
 OnRowClick.InvokeAsync(item)
 OnRowClick=
 OnSearch
+OnSearch.HasDelegate)
+OnSearch.InvokeAsync(CurrentValueAsString)
 OnSearch.InvokeAsync(Value))
 OnSelect
 OnSelect.HasDelegate
@@ -5372,7 +5386,11 @@ p-5
 p-6
 pad
 padding
+padding,
 padding-left:
+padLeft
+padRight
+padY
 page
 PageIndex
 PageIndex)
@@ -5455,6 +5473,7 @@ Paragraph
 Paragraph)
 param
 param.Value
+param>
 parameter
 Parameter(CaptureUnmatchedValues
 Parameter,
@@ -5512,6 +5531,7 @@ path
 path))
 path>
 paths
+payload
 pb-2
 pb-3
 pct
@@ -5526,9 +5546,14 @@ pixel
 pixel)
 pixels
 pixels.
+pl-1
+pl-1.5
 pl-2
+pl-2.5
 pl-3
 pl-4
+pl-7
+pl-8
 placeholder
 Placeholder
 placeholder:text-slate-400
@@ -5577,9 +5602,12 @@ pos
 posClass
 Position
 pr-1
+pr-1.5
 pr-2
+pr-2.5
 pr-3
 pr-4
+pr-7
 pr-8
 Precision
 Precision.HasValue
@@ -5750,7 +5778,6 @@ radio-group-
 RadioGroup
 RadioOptionItem
 RadioOptionType
-RadioOptionType.Button
 RadioOptionType.Button)
 RadioOptionType.Default
 radius
@@ -6347,6 +6374,7 @@ ShowArrow)
 ShowCopyButton
 ShowCopyButton)
 ShowCount
+ShowCount)
 ShowCropControls
 ShowDots
 ShowDots)
@@ -6895,6 +6923,7 @@ Suffix
 suffix,
 Suffix>
 suggestion
+Suggestion
 suggestion)
 suggestions
 Suggestions
@@ -6949,6 +6978,9 @@ System.Text
 System.Text.RegularExpressions
 System.Text.StringBuilder
 System.Text.StringBuilder()
+System.Threading.Timeout.Infinite)
+System.Threading.Timer
+System.Threading.Timer(async
 System:35,Apps:25,Media:15
 tab
 tab-
@@ -7316,6 +7348,7 @@ tento-tabpane
 tento-tabs
 tento-tabs-nav
 tento-tag
+tento-textarea-clear-btn
 tento-textarea-count
 tento-textarea-wrapper
 --tento-text-base:
@@ -7421,6 +7454,7 @@ text-rose-600
 text-rose-700
 text-rose-900
 textSize
+textSize)
 text-sky-400
 text-sky-500
 text-sky-700
@@ -7651,9 +7685,11 @@ Top,
 top/bottom
 top:
 top-0
+top-0.5
 top-1
 top-1/2
 -top-2
+top-2.5
 top-3
 top-4
 top-6
@@ -7710,8 +7746,11 @@ transition-transform
 translate-x-0
 translate-x-1/2
 -translate-x-1/2
-translate-x-3.5
+translate-x-3
 translate-x-5
+translate-x-7
+translate-x-8
+translate-x-9
 -translate-y-1/2
 transparent
 trash
@@ -7836,6 +7875,7 @@ underflow
 underline
 Underline
 Underline)
+underlying
 Undo
 UndoStroke
 UndoStroke()
@@ -7938,6 +7978,7 @@ Value
 Value!)
 value)
 Value)
+Value).
 value,
 Value,
 Value...
@@ -7982,6 +8023,7 @@ Version
 version)
 vertical
 Vertical
+Vertical)
 Vertical,
 VerticalGutter
 vertically

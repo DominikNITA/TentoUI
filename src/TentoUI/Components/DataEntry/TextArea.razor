@@ -16,6 +16,16 @@
               aria-describedby="@(EffectiveStatus == ComponentStatus.Error ? $"{ElementId}-error" : null)"
               @attributes="AdditionalAttributes">@CurrentValue</textarea>
 
+    @if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
+    {
+        <button type="button"
+                class="tento-textarea-clear-btn absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none"
+                aria-label="Clear text area"
+                @onclick="ClearValue">
+            <span class="text-base leading-none">&times;</span>
+        </button>
+    }
+
     @if (ShowCount && MaxLength.HasValue)
     {
         <div class="flex justify-end mt-1">
@@ -28,6 +38,7 @@
     [Parameter] public int Rows { get; set; } = 4;
     [Parameter] public int? MaxLength { get; set; }
     [Parameter] public bool ShowCount { get; set; }
+    [Parameter] public bool AllowClear { get; set; }
     [Parameter] public string? Placeholder { get; set; }
 
     private async Task HandleInput(ChangeEventArgs e)
@@ -38,6 +49,11 @@
     private async Task HandleChange(ChangeEventArgs e)
     {
         CurrentValueAsString = e.Value?.ToString();
+    }
+
+    private async Task ClearValue()
+    {
+        CurrentValueAsString = string.Empty;
     }
 
     protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
@@ -54,6 +70,7 @@
             : "border-slate-300 dark:border-slate-600 focus:border-primary-500 focus:ring-primary-500";
 
         return new CssBuilder("w-full rounded-md border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 p-3 text-sm focus:outline-none focus:ring-1 transition-all")
+            .AddClass("pr-8", AllowClear)
             .AddClass(statusBorder)
             .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
             .AddClass(Class)

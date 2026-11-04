@@ -18,7 +18,7 @@
                 <span class="font-mono">&lt;/&gt;</span>
             </button>
             <button type="button" class="@ToolbarBtnClass" title="Link" aria-label="Link" disabled="@Disabled" @onclick='() => InsertFormatting("[", "](https://)", "link")'>
-                <Icon Name="link" Class="w-3.5 h-3.5" />
+                <Icon Name="@IconNames.Link" Size="14" />
             </button>
             <button type="button" class="@ToolbarBtnClass" title="Bullet List" aria-label="Bullet List" disabled="@Disabled" @onclick='() => InsertFormatting("\n- ", "", "List item")'>
                 <span>• List</span>

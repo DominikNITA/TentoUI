@@ -29,7 +29,7 @@
 
             @if (Arrow)
             {
-                <span class="@ArrowComputedClass"></span>
+                <span class="@ArrowComputedClass" style="@ArrowStyle"></span>
             }
         </div>
     }
@@ -51,7 +51,8 @@
 
     private bool IsOpen => Visible ?? _internalVisible;
 
-    private string BubbleComputedClass => new CssBuilder("absolute z-50 whitespace-nowrap px-2.5 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-800 rounded shadow-md pointer-events-none transition-all duration-150")
+    private string BubbleComputedClass => new CssBuilder("absolute z-50 whitespace-nowrap px-2.5 py-1 text-xs font-medium text-white rounded shadow-md pointer-events-none transition-all duration-150")
+        .AddClass("bg-slate-900 dark:bg-slate-800", string.IsNullOrEmpty(Color))
         .AddClass("bottom-full left-1/2 -translate-x-1/2 mb-2", Placement == TooltipPlacement.Top)
         .AddClass("top-full left-1/2 -translate-x-1/2 mt-2", Placement == TooltipPlacement.Bottom)
         .AddClass("right-full top-1/2 -translate-y-1/2 mr-2", Placement == TooltipPlacement.Left)
@@ -63,7 +64,8 @@
         .AddClass(Class)
         .Build();
 
-    private string ArrowComputedClass => new CssBuilder("absolute w-2 h-2 rotate-45 bg-slate-900 dark:bg-slate-800")
+    private string ArrowComputedClass => new CssBuilder("absolute w-2 h-2 rotate-45")
+        .AddClass("bg-slate-900 dark:bg-slate-800", string.IsNullOrEmpty(Color))
         .AddClass("top-full left-1/2 -translate-x-1/2 -mt-1", Placement == TooltipPlacement.Top || Placement == TooltipPlacement.TopLeft || Placement == TooltipPlacement.TopRight)
         .AddClass("bottom-full left-1/2 -translate-x-1/2 -mb-1", Placement == TooltipPlacement.Bottom || Placement == TooltipPlacement.BottomLeft || Placement == TooltipPlacement.BottomRight)
         .AddClass("left-full top-1/2 -translate-y-1/2 -ml-1", Placement == TooltipPlacement.Left)
@@ -73,6 +75,10 @@
     private string BubbleStyle => new StyleBuilder()
         .AddStyle("background-color", Color, !string.IsNullOrEmpty(Color))
         .AddStyle(Style)
+        .Build();
+
+    private string ArrowStyle => new StyleBuilder()
+        .AddStyle("background-color", Color, !string.IsNullOrEmpty(Color))
         .Build();
 
     private async Task SetVisibility(bool visible)

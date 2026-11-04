@@ -92,6 +92,7 @@
 !Multiple)
 !node.IsLeaf)
 !OnChange.HasDelegate)
+!Open
 !p.Disabled)
 !p.Disabled).ToList()
 !pane.Disabled)
@@ -117,6 +118,7 @@
 !string.IsNullOrEmpty(column.FilterValue))
 !string.IsNullOrEmpty(currentFilter))
 !string.IsNullOrEmpty(currentStep.Description))
+!string.IsNullOrEmpty(currentStep.TargetSelector))
 !string.IsNullOrEmpty(CurrentValue)
 !string.IsNullOrEmpty(DefaultActiveKey)
 !string.IsNullOrEmpty(DefaultActiveKey))
@@ -157,6 +159,7 @@
 !string.IsNullOrEmpty(options.Key)
 !string.IsNullOrEmpty(options.Key))
 !string.IsNullOrEmpty(ResolvedSpinDuration))
+!string.IsNullOrEmpty(selector))
 !string.IsNullOrEmpty(Src)
 !string.IsNullOrEmpty(step.Description))
 !string.IsNullOrEmpty(step.Icon))
@@ -417,6 +420,7 @@
 @AriaLabel
 @AriaRole
 @ArrowComputedClass
+@ArrowStyle
 @attribute
 @attributes=
 @Author
@@ -575,6 +579,7 @@
 @currentModal.Options.Width
 @CurrentMonthDate.ToString(
 @currentStep.Description
+@currentStep.TargetSelector
 @currentStep.Title
 @CurrentValue
 @CurrentValueAsString
@@ -860,6 +865,7 @@
 @ResolveIconName()
 @rightBg
 @RightSegmentClass
+@RootClass
 @rowClass
 @Rows
 @RowSelection
@@ -1291,6 +1297,7 @@ aria-sort=
 aria-valuemax=
 aria-valuemin=
 aria-valuenow=
+around
 Array.Empty
 arrow
 Arrow
@@ -1303,6 +1310,7 @@ ArrowLeft
 arrow-right
 ArrowRight
 Arrows
+ArrowStyle
 arrowTransformClass
 arrow-up
 ArrowUp
@@ -1329,6 +1337,7 @@ AttributeTargets.Struct
 AttributeUsage(AttributeTargets.Class
 Author
 Author[..1].ToUpperInvariant()
+auto
 Auto,
 AutoComplete
 AutoCompleteOption(s)).ToList()
@@ -1533,6 +1542,7 @@ border-l-3
 border-lime-200
 border-none
 border-orange-200
+border-primary-200
 border-primary-400
 border-primary-500
 border-primary-600
@@ -1638,6 +1648,7 @@ c7
 c-7
 ca3af
 Cache
+calc(100vw
 calendar
 Calendar
 CalendarDays
@@ -1673,6 +1684,7 @@ capturedCol.MatchesFilter(item,
 capturedVal
 capturedVal))
 card
+Card
 card)
 Card,
 card.ColumnKey
@@ -2305,6 +2317,7 @@ currentRowNum)
 currentSection
 CurrentSize
 currentStep
+currentStep.TargetSelector
 CurrentValue
 CurrentValue)
 CurrentValue))
@@ -2319,6 +2332,7 @@ CurrentValue.Value.ToString(Format)
 CurrentValueAsString
 CurrentWidth
 cursor
+cursor:
 cursor-col-resize
 cursor-crosshair
 cursor-default
@@ -2330,6 +2344,7 @@ custom
 Custom
 CustomSorter
 CustomTokens
+cutout
 Cutout
 cw
 cw)
@@ -2416,6 +2431,7 @@ dark:border-fuchsia-800
 dark:border-indigo-800
 dark:border-lime-800
 dark:border-orange-800
+dark:border-primary-800
 dark:border-purple-800
 dark:border-rose-500
 dark:border-rose-800
@@ -2701,9 +2717,11 @@ Destroy()
 DetectTrigger(string
 DetectTrigger(text)
 dialog
+Dialog
 dialog.
 DialogClass
 DialogStyle
+dialogWidth
 dict
 dict.Remove(nameof(ConfigContext))
 dict.Remove(nameof(FormContext))
@@ -2796,6 +2814,10 @@ Done,
 Dot
 dotColor
 dotIndex
+DotNetObjectReference
+DotNetObjectReference.Create(this)
+dotNetRef
+dotNetRef)
 DotPosition
 dots
 Dots
@@ -2805,6 +2827,7 @@ double,
 double.TryParse(e.Value
 double.TryParse(part,
 double.TryParse(parts[1],
+double.TryParse(trimmed,
 double.TryParse(Value.ToString(),
 double>
 double>()
@@ -2971,6 +2994,7 @@ EffectiveSplit.ToString(System.Globalization.CultureInfo.InvariantCulture)
 EffectiveStatus
 EffectiveType
 EffectiveValues
+element
 ElementId
 ElementReference
 elements
@@ -3054,6 +3078,7 @@ Esc
 ESC
 Escape
 etc.)
+evenodd
 event
 EventCallback
 events
@@ -3190,6 +3215,7 @@ FileListChanged.InvokeAsync(FileList)
 fill=
 filled
 filled.
+fill-rule=
 Fills
 filter
 Filter
@@ -3389,6 +3415,8 @@ FormattedEnd
 FormattedStart
 FormattedTime
 FormattedValue
+FormattedWidth
+FormattedWidth)
 formatting
 FormatValue(object
 FormatValue(rawValue)
@@ -3428,6 +3456,7 @@ FromDesignMarkdown(string
 frontmatter
 FrontmatterRegex
 FrontmatterRegex.Match(markdownOrYaml)
+Full
 FullScreen
 Func
 function
@@ -3525,6 +3554,7 @@ Ghost)
 given
 global
 globalTerm
+glowing
 Go
 gold
 Gold,
@@ -3752,6 +3782,8 @@ HasSelectedItem
 HasSelectedItem)
 HasSelection
 HasSider
+hasTarget
+hasTarget)
 h-auto
 header
 Header
@@ -3791,6 +3823,7 @@ highlightIndex
 HighlightLines
 Hint
 Hints
+hole
 home
 Home
 horizontal
@@ -4261,6 +4294,7 @@ j--)
 j]
 j],
 JS
+JSInvokable]
 JSRuntime
 JSRuntime.InvokeAsync
 JSRuntime.InvokeVoidAsync(
@@ -4351,6 +4385,9 @@ last:border-r-0
 last:rounded-r-full
 lastErrorLevel
 lastErrorLevel)
+lastMeasuredSelector
+lastMeasuredStep
+lastMeasuredStep)
 lastProperty
 lastProperty))
 lastTriggeredTime
@@ -4511,6 +4548,7 @@ main>
 mainKey
 mainKey,
 manual
+margin:
 marginX
 marginY
 mark
@@ -4531,6 +4569,7 @@ markdownOrYaml)
 Marks
 Marks.Count
 Marks.OrderBy(k
+mask
 Mask
 Mask)
 MaskClosable
@@ -4558,6 +4597,7 @@ MatchingOptions.Count)
 MatchingOptions[index]
 Math.Abs(next
 Math.Clamp(_preCollapseSplit
+Math.Clamp(_targetRect.Left,
 Math.Clamp(Column,
 Math.Clamp(current
 Math.Clamp(Current,
@@ -4583,13 +4623,16 @@ Math.Max(0.5,
 Math.Max(1,
 Math.Max(1.0,
 Math.Max(100,
+Math.Max(16.0,
 Math.Max(1e-6,
 Math.Max(2,
 Math.Max(2.0,
+Math.Max(280.0,
 Math.Max(4,
 Math.Max(dp[i
 Math.Min(_highlightIndex
 Math.Min(3.0,
+Math.Min(384.0,
 Math.Min(42,
 Math.Min(EffectivePageIndex
 Math.Min(Math.Max(1,
@@ -4639,6 +4682,7 @@ max-w-[90vw]
 max-w-full
 max-width
 MaxWidth
+max-width:
 max-w-md
 max-w-none
 max-w-xl
@@ -4647,6 +4691,7 @@ mb-1
 -mb-1
 mb-1.5
 mb-2
+mb-2.5
 mb-3
 mb-4
 md
@@ -5026,6 +5071,7 @@ none
 None
 None,
 non-empty.
+non-targeted
 noopener
 noreferrer
 Normal,
@@ -5278,6 +5324,7 @@ OnSubmit.HasDelegate)
 OnSubmit.InvokeAsync(prompt)
 OnSubmit.InvokeAsync(suggestion)
 OnSubmit=
+OnTargetMoved(TourTargetRect
 OnTextInput
 OnTextInput(ChangeEventArgs
 OnTrigger
@@ -5398,6 +5445,7 @@ out
 outer
 Outline,
 outline-none
+over
 overflow-auto
 OverflowCount
 overflow-hidden
@@ -5426,6 +5474,7 @@ p-4
 p-5
 p-6
 pad
+pad)
 padding
 padding,
 padding-left:
@@ -5622,6 +5671,8 @@ Point2D(double
 Point2D(x,
 Point2D>
 Point2D>(vals.Count)
+pointer
+pointer-events:
 pointer-events-auto
 pointer-events-none
 points
@@ -5639,10 +5690,12 @@ polyline>
 PolylinePoints
 Popover
 popup
+Popup
 popup.
 pos
 posClass
 Position
+position:
 pr-1
 pr-1.5
 pr-2
@@ -5761,6 +5814,7 @@ Purple
 Push
 px
 px-
+px)
 px]
 px-0.5
 px-1
@@ -5860,6 +5914,7 @@ record
 recorded
 records.
 rect
+rect)
 rect>
 red
 Red,
@@ -5994,6 +6049,7 @@ return
 returning
 Returns
 rgba(100,
+rgba(15,
 right
 Right
 Right,
@@ -6023,6 +6079,7 @@ ring-white
 Role
 role=
 root
+RootClass
 rotate
 Rotate
 rotate(
@@ -6312,6 +6369,8 @@ SelectOptionAsync(TValue
 SelectOptionItem
 selector
 Selector
+selector)
+selector,
 SelectPrevious(Key)
 SelectPrevious(string
 SelectSecondAsync(int
@@ -6376,6 +6435,7 @@ SetVisibility(!IsOpen)
 SetVisibility(bool
 SetVisibility(false)
 SetVisibility(true)
+shadow-[0_0_0_4px_rgba(59,130,246,0.3)]
 shadow-2xl
 shadow-2xs
 shadow-inner
@@ -6517,7 +6577,7 @@ sm:flex-col
 sm:flex-row
 sm:grid-cols-2
 sm:items-start
-sm:p-0
+sm:p-6
 sm:text-right
 sm:text-sm
 sm:w-1/4
@@ -6578,12 +6638,15 @@ sourceKey
 sourceKey,
 sourceSearch
 sourceSearch,
+spaceAbove
+spaceAbove)
 SpaceAlign
 SpaceAlign.Baseline
 SpaceAlign.Center
 SpaceAlign.End
 SpaceAlign.Start
 SpaceAround,
+spaceBelow
 SpaceBetween,
 SpaceDirection
 SpaceDirection.Horizontal
@@ -6626,6 +6689,7 @@ span>Preview
 span>Refresh
 span>Sat
 span>Sun
+span>Target:
 span>Thought
 span>Thu
 span>to
@@ -6674,6 +6738,7 @@ SplitView)
 SplitViewChanged
 SplitViewChanged.HasDelegate)
 SplitViewChanged.InvokeAsync(split)
+Spotlight
 Square
 Square.
 src
@@ -6813,6 +6878,7 @@ string.IsNullOrEmpty(_searchQuery)
 string.IsNullOrEmpty(ActiveKey)
 string.IsNullOrEmpty(ActiveKey))
 string.IsNullOrEmpty(Code))
+string.IsNullOrEmpty(Color))
 string.IsNullOrEmpty(CurrentValue)
 string.IsNullOrEmpty(ElementId))
 string.IsNullOrEmpty(font))
@@ -6869,6 +6935,7 @@ string.IsNullOrWhiteSpace(textMuted)
 string.IsNullOrWhiteSpace(value))
 string.IsNullOrWhiteSpace(Value))
 string.IsNullOrWhiteSpace(warning)
+string.IsNullOrWhiteSpace(Width))
 string.Join(
 string[]
 string>
@@ -7081,6 +7148,7 @@ TagSelector(item)
 target
 Target
 target=
+targetBottom
 targetChecked
 targetChecked,
 targetChecked.Clear()
@@ -7102,9 +7170,17 @@ TargetKeysChanged
 TargetKeysChanged.HasDelegate)
 TargetKeysChanged.InvokeAsync(TargetKeys)
 targetPage))
+targetRect
+targetRect!.Left
+targetRect.Height
+targetRect.Top
+targetRect.Width
+targetRect.WindowHeight
+targetRect.WindowWidth
 targetSearch
 targetSearch,
 TargetSelector
+targetTop
 Task
 Task.CompletedTask
 Task.Delay(delay)
@@ -7411,6 +7487,10 @@ tento-timepicker-popup
 tento-timerangepicker
 tento-timerangepicker-popup
 tento-tooltip-
+tentoTour.getTargetRect
+tentoTour.startTracking
+tentoTour.stopTracking
+tento-tour-card
 tento-tour-root
 tento-transfer
 tento-transfer-panel
@@ -7773,8 +7853,10 @@ touch
 touch-none
 tour
 Tour
+Tour>
 TourStep>
 TourStepInfo
+TourTargetRect
 TProp>
 TProp>>
 tr
@@ -8171,6 +8253,7 @@ Weekday
 Weekdays
 Weekly,
 w-full
+wh
 when
 whenever
 where
@@ -8187,15 +8270,18 @@ whitespace-nowrap
 whitespace-pre
 width
 Width
-Width)
 Width,
+Width.Trim()
 width:
 width=
 Width=
 window.scrollTo
+WindowHeight
+WindowWidth
 WIP
 with
 within
+without
 word
 word)
 word.StartsWith(
@@ -8214,6 +8300,7 @@ WrapReverse
 WrapReverse).
 Write
 Write,
+ww
 X)
 X,
 x=

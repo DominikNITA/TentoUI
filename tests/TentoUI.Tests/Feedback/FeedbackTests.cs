@@ -66,6 +66,19 @@ public class FeedbackTests : TestContext
         okClicked.Should().BeTrue();
     }
 
+    [Fact]
+    public void Modal_NumericWidth_AppendsPxAndConstrainsWidth()
+    {
+        var cut = RenderComponent<Modal>(parameters => parameters
+            .Add(p => p.Visible, true)
+            .Add(p => p.Width, "500")
+            .AddChildContent("Modal Body"));
+
+        var dialogContainer = cut.Find(".relative.transform");
+        dialogContainer.GetAttribute("style").Should().Contain("max-width: 500px");
+        dialogContainer.GetAttribute("style").Should().Contain("width: 100%");
+    }
+
     [Theory]
     [InlineData(AlertType.Success, "bg-emerald-50", "status")]
     [InlineData(AlertType.Info, "bg-sky-50", "status")]

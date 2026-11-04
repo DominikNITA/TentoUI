@@ -120,7 +120,23 @@
     [Parameter] public EventCallback AfterClose { get; set; }
     [Parameter] public string? BodyClass { get; set; }
 
-    private string WrapperClass => new CssBuilder("min-h-full flex p-4 text-center sm:p-0")
+    private string FormattedWidth
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Width))
+                return "520px";
+
+            var trimmed = Width.Trim();
+            if (double.TryParse(trimmed, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
+            {
+                return $"{trimmed}px";
+            }
+            return trimmed;
+        }
+    }
+
+    private string WrapperClass => new CssBuilder("min-h-full flex p-4 sm:p-6 text-center")
         .AddClass("items-center justify-center", Centered)
         .AddClass("items-start justify-center pt-24", !Centered)
         .Build();
@@ -130,7 +146,8 @@
         .Build();
 
     private string DialogStyle => new StyleBuilder()
-        .AddStyle("max-width", Width)
+        .AddStyle("max-width", FormattedWidth)
+        .AddStyle("width", "100%")
         .AddStyle("z-index", ZIndex.ToString())
         .AddStyle(Style)
         .Build();

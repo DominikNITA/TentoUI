@@ -204,6 +204,23 @@ public class EnterpriseComponentsTests : TestContext
     }
 
     [Fact]
+    public void Tour_WithTarget_RendersTargetBadge()
+    {
+        var cut = RenderComponent<Tour>(parameters => parameters
+            .Add(p => p.Open, true)
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<TourStep>(0);
+                builder.AddAttribute(1, "Title", "Search Step");
+                builder.AddAttribute(2, "Target", "#tour-search");
+                builder.CloseComponent();
+            }));
+
+        cut.Find(".tento-tour-root").Should().NotBeNull();
+        cut.Markup.Should().Contain("Target: #tour-search");
+    }
+
+    [Fact]
     public void Anchor_And_Affix_RenderCorrectly()
     {
         string? active = null;

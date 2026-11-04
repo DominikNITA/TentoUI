@@ -1,5 +1,7 @@
 @namespace TentoUI
 @inherits TentoComponentBase
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
 
 <CascadingValue Value="@this" IsFixed="true">
     <div class="hidden">
@@ -11,30 +13,86 @@
 {
     var currentStep = _steps[EffectiveCurrent];
     var isLast = EffectiveCurrent == _steps.Count - 1;
+    var hasTarget = _targetRect != null && _targetRect.Width > 0 && _targetRect.Height > 0;
 
-    <div class="tento-tour-root fixed inset-0 z-50 flex items-center justify-center p-4"
+    @* 1. Spotlight Mask / Backdrop *@
+    @if (Mask)
+    {
+        @if (hasTarget)
+        {
+            var pad = 6.0;
+            var x = Math.Max(0, _targetRect!.Left - pad);
+            var y = Math.Max(0, _targetRect.Top - pad);
+            var w = _targetRect.Width + (pad * 2);
+            var h = _targetRect.Height + (pad * 2);
+            var ww = _targetRect.WindowWidth;
+            var wh = _targetRect.WindowHeight;
+
+            <!-- SVG Spotlight Mask with transparent cutout hole over target -->
+            <svg class="fixed inset-0 w-full h-full z-40"
+                 style="pointer-events: none;"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="@($"M 0,0 L {ww},0 L {ww},{wh} L 0,{wh} Z M {x},{y} L {x+w},{y} L {x+w},{y+h} L {x},{y+h} Z")"
+                      fill="rgba(15, 23, 42, 0.65)"
+                      fill-rule="evenodd"
+                      style="pointer-events: auto; cursor: pointer;"
+                      @onclick="CloseAsync" />
+            </svg>
+
+            <!-- Spotlight glowing border around target element -->
+            <div class="fixed pointer-events-none z-40 rounded-lg border-2 border-primary-500 shadow-[0_0_0_4px_rgba(59,130,246,0.3)] transition-all duration-200"
+                 style="@($"left: {x}px; top: {y}px; width: {w}px; height: {h}px;")">
+            </div>
+        }
+        else
+        {
+            <!-- Full viewport backdrop mask for non-targeted steps -->
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-[1px] transition-opacity z-40 cursor-pointer"
+                 @onclick="CloseAsync"></div>
+        }
+    }
+    else if (hasTarget)
+    {
+        var pad = 6.0;
+        var x = Math.Max(0, _targetRect!.Left - pad);
+        var y = Math.Max(0, _targetRect.Top - pad);
+        var w = _targetRect.Width + (pad * 2);
+        var h = _targetRect.Height + (pad * 2);
+
+        <!-- Spotlight glowing border without backdrop mask -->
+        <div class="fixed pointer-events-none z-40 rounded-lg border-2 border-primary-500 shadow-[0_0_0_4px_rgba(59,130,246,0.3)] transition-all duration-200"
+             style="@($"left: {x}px; top: {y}px; width: {w}px; height: {h}px;")">
+        </div>
+    }
+
+    @* 2. Tour Popup Dialog Card *@
+    <div class="@RootClass"
          role="dialog"
          aria-modal="true"
          aria-label="@currentStep.Title">
-        
-        @if (Mask)
-        {
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-[1px] transition-opacity"
-                 @onclick="CloseAsync"></div>
-        }
 
-        <div class="relative z-10 w-80 sm:w-96 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl p-5 text-slate-800 dark:text-slate-100 animate-in fade-in zoom-in-95">
+        <div class="tento-tour-card relative z-50 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl p-5 text-slate-800 dark:text-slate-100 animate-in fade-in zoom-in-95 pointer-events-auto"
+             style="@DialogStyle">
+
             <div class="flex items-start justify-between gap-2 mb-2">
                 <h4 class="text-sm font-bold text-slate-900 dark:text-white">
                     @currentStep.Title
                 </h4>
                 <button type="button"
                         aria-label="Close tour"
-                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded"
+                        class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded cursor-pointer transition-colors"
                         @onclick="CloseAsync">
                     <Icon Name="@IconNames.X" Size="14" />
                 </button>
             </div>
+
+            @if (!string.IsNullOrEmpty(currentStep.TargetSelector))
+            {
+                <div class="mb-2.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800">
+                    <Icon Name="@IconNames.Info" Size="12" />
+                    <span>Target: @currentStep.TargetSelector</span>
+                </div>
+            }
 
             @if (!string.IsNullOrEmpty(currentStep.Description))
             {
@@ -52,14 +110,14 @@
                     @if (EffectiveCurrent > 0)
                     {
                         <button type="button"
-                                class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                                class="px-2.5 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
                                 @onclick="PrevAsync">
                             Previous
                         </button>
                     }
 
                     <button type="button"
-                            class="px-3 py-1 rounded bg-primary-500 hover:bg-primary-600 text-white font-medium"
+                            class="px-3 py-1 rounded bg-primary-500 hover:bg-primary-600 text-white font-medium cursor-pointer transition-colors"
                             @onclick="NextOrFinishAsync">
                         @(isLast ? "Finish" : "Next")
                     </button>
@@ -82,6 +140,105 @@
     private readonly System.Collections.Generic.List<TourStep> _steps = new();
     private int EffectiveCurrent => Math.Clamp(Current, 0, Math.Max(0, _steps.Count - 1));
 
+    private TourTargetRect? _targetRect;
+    private string? _lastMeasuredSelector;
+    private int _lastMeasuredStep = -1;
+    private DotNetObjectReference<Tour>? _dotNetRef;
+
+    private string RootClass => (_targetRect != null && _targetRect.Width > 0 && _targetRect.Height > 0)
+        ? "tento-tour-root fixed inset-0 z-50 pointer-events-none"
+        : "tento-tour-root fixed inset-0 z-50 flex items-center justify-center p-4";
+
+    private string DialogStyle
+    {
+        get
+        {
+            if (_targetRect == null || _targetRect.Width <= 0 || _targetRect.Height <= 0)
+            {
+                return "width: 100%; max-width: 384px;";
+            }
+
+            var dialogWidth = Math.Min(384.0, Math.Max(280.0, _targetRect.WindowWidth - 32.0));
+            var left = Math.Clamp(_targetRect.Left, 16.0, Math.Max(16.0, _targetRect.WindowWidth - dialogWidth - 16.0));
+
+            var pad = 6.0;
+            var targetBottom = _targetRect.Top + _targetRect.Height + pad;
+            var targetTop = _targetRect.Top - pad;
+            var spaceBelow = _targetRect.WindowHeight - targetBottom;
+            var spaceAbove = targetTop;
+
+            double top;
+            if (spaceBelow >= 220.0 || spaceBelow >= spaceAbove)
+            {
+                top = targetBottom + 12.0;
+            }
+            else
+            {
+                top = Math.Max(16.0, targetTop - 220.0 - 12.0);
+            }
+
+            return $"position: fixed; left: {left}px; top: {top}px; width: {dialogWidth}px; max-width: calc(100vw - 32px); margin: 0;";
+        }
+    }
+
+    [JSInvokable]
+    public void OnTargetMoved(TourTargetRect? rect)
+    {
+        _targetRect = rect;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Open && _steps.Count > 0)
+        {
+            var currentStep = _steps[EffectiveCurrent];
+            var selector = currentStep.TargetSelector;
+
+            if (selector != _lastMeasuredSelector || EffectiveCurrent != _lastMeasuredStep)
+            {
+                _lastMeasuredSelector = selector;
+                _lastMeasuredStep = EffectiveCurrent;
+
+                if (!string.IsNullOrEmpty(selector))
+                {
+                    _dotNetRef ??= DotNetObjectReference.Create(this);
+                    try
+                    {
+                        _targetRect = await JSRuntime.InvokeAsync<TourTargetRect?>("tentoTour.getTargetRect", selector);
+                        await JSRuntime.InvokeVoidAsync("tentoTour.startTracking", selector, _dotNetRef);
+                        StateHasChanged();
+                    }
+                    catch
+                    {
+                        _targetRect = null;
+                    }
+                }
+                else
+                {
+                    _targetRect = null;
+                    try
+                    {
+                        await JSRuntime.InvokeVoidAsync("tentoTour.stopTracking");
+                    }
+                    catch { }
+                    StateHasChanged();
+                }
+            }
+        }
+        else if (!Open && _lastMeasuredStep != -1)
+        {
+            _lastMeasuredStep = -1;
+            _lastMeasuredSelector = null;
+            _targetRect = null;
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoTour.stopTracking");
+            }
+            catch { }
+        }
+    }
+
     internal void RegisterStep(TourStep step)
     {
         if (!_steps.Contains(step))
@@ -102,6 +259,15 @@
     private async Task CloseAsync()
     {
         Open = false;
+        _lastMeasuredStep = -1;
+        _lastMeasuredSelector = null;
+        _targetRect = null;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoTour.stopTracking");
+        }
+        catch { }
+
         if (OpenChanged.HasDelegate)
         {
             await OpenChanged.InvokeAsync(false);
@@ -142,5 +308,15 @@
                 await OnFinish.InvokeAsync();
             }
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoTour.stopTracking");
+        }
+        catch { }
+        _dotNetRef?.Dispose();
     }
 }

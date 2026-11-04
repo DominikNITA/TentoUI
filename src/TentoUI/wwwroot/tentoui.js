@@ -85,13 +85,77 @@ const tentoClipboard = {
   }
 };
 
+const tentoTour = {
+  _dotnetHelper: null,
+  _targetSelector: null,
+  _handler: null,
+
+  getTargetRect(selector) {
+    if (!selector) return null;
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      const inView =
+        rect.top >= 20 &&
+        rect.bottom <= window.innerHeight - 20 &&
+        rect.left >= 20 &&
+        rect.right <= window.innerWidth - 20;
+      if (!inView) {
+        el.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
+      }
+      const updated = el.getBoundingClientRect();
+      return {
+        left: Math.round(updated.left),
+        top: Math.round(updated.top),
+        right: Math.round(updated.right),
+        bottom: Math.round(updated.bottom),
+        width: Math.round(updated.width),
+        height: Math.round(updated.height),
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight
+      };
+    } catch (e) {
+      return null;
+    }
+  },
+
+  startTracking(selector, dotnetHelper) {
+    this._targetSelector = selector;
+    this._dotnetHelper = dotnetHelper;
+    if (!this._handler) {
+      this._handler = () => {
+        if (this._dotnetHelper && this._targetSelector) {
+          const r = this.getTargetRect(this._targetSelector);
+          if (r) {
+            this._dotnetHelper.invokeMethodAsync('OnTargetMoved', r);
+          }
+        }
+      };
+      window.addEventListener('resize', this._handler);
+      window.addEventListener('scroll', this._handler, true);
+    }
+  },
+
+  stopTracking() {
+    this._targetSelector = null;
+    this._dotnetHelper = null;
+    if (this._handler) {
+      window.removeEventListener('resize', this._handler);
+      window.removeEventListener('scroll', this._handler, true);
+      this._handler = null;
+    }
+  }
+};
+
 // Expose to window for standard script tag usage
 if (typeof window !== 'undefined') {
   window.tentoModal = tentoModal;
   window.tentoClipboard = tentoClipboard;
+  window.tentoTour = tentoTour;
 }
 
 // Export for module bundlers / CommonJS if supported
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tentoModal, tentoClipboard };
+  module.exports = { tentoModal, tentoClipboard, tentoTour };
 }

@@ -3,7 +3,6 @@ name: Deploy TentoUI Multi-Version Docs to GitHub Pages
 on:
   push:
     branches: [ master, main ]
-    tags: [ 'v*.*.*' ]
   workflow_dispatch:
 
 permissions:
@@ -75,10 +74,13 @@ jobs:
           cp -r output/wwwroot/wwwroot/* site-root/next/
           sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/next/\" />|g" site-root/next/index.html || true
 
-          # If triggered by a release tag (e.g. v1.0.0), publish into /v1.0/ and /latest/
-          REF_NAME="${{ github.ref_name }}"
-          if [[ "$REF_NAME" =~ ^v[0-9]+\.[0-9]+ ]]; then
-            MAJOR_MINOR=$(echo "$REF_NAME" | grep -oE '^v[0-9]+\.[0-9]+')
+          # Check if HEAD has a release tag (e.g. v1.0.0) or fall back to latest tag
+          TAG_NAME=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+' | head -n 1 || true)
+          if [ -z "$TAG_NAME" ]; then
+            TAG_NAME="${{ github.ref_name }}"
+          fi
+          if [[ "$TAG_NAME" =~ ^v[0-9]+\.[0-9]+ ]]; then
+            MAJOR_MINOR=$(echo "$TAG_NAME" | grep -oE '^v[0-9]+\.[0-9]+')
             mkdir -p "site-root/$MAJOR_MINOR"
             cp -r output/wwwroot/wwwroot/* "site-root/$MAJOR_MINOR/"
             sed -i "s|<base href=\"/\" />|<base href=\"${BASE_PATH}/$MAJOR_MINOR/\" />|g" "site-root/$MAJOR_MINOR/index.html" || true

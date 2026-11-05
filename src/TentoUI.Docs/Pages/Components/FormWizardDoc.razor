@@ -1,0 +1,147 @@
+@page "/components/form-wizard"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>FormWizard - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">FormWizard</h1>
+            <Tag Color="purple">v1.0.3</Tag>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Multi-step workflow container for guided onboarding, complex setups, and progressive data entry with async validation and multiple header layouts.
+        </p>
+    </div>
+
+    @* Example 1: Standard Multi-Step Onboarding *@
+    <DemoCard Title="Onboarding Workflow with Async Validation" Description="Navigates through interconnected steps. Advancing from Step 1 validates that the Workspace Name is filled." Code="@_basicWizardCode">
+        <FormWizard @bind-CurrentStep="_currentStep"
+                    BeforeStepChange="HandleBeforeStepChange"
+                    OnFinish="HandleFinish">
+            <WizardStep Title="Account Setup" Description="Organization credentials" Icon="@IconNames.User">
+                <div class="space-y-4 max-w-md">
+                    <FormItem Label="Workspace Name" Required="true">
+                        <Input Placeholder="e.g. Acme Corp" @bind-Value="_workspaceName" />
+                    </FormItem>
+                    <FormItem Label="Admin Email" Required="true">
+                        <Input Placeholder="admin@example.com" @bind-Value="_adminEmail" />
+                    </FormItem>
+                </div>
+            </WizardStep>
+
+            <WizardStep Title="Plan & Quota" Description="Resource allocation" Icon="@IconNames.CreditCard">
+                <div class="space-y-4 max-w-md">
+                    <FormItem Label="Hosting Region">
+                        <Select TItem="string" TValue="string" DataSource="@_regions" @bind-Value="_selectedRegion" />
+                    </FormItem>
+                    <FormItem Label="Estimated Monthly Active Users">
+                        <Slider Min="1000" Max="50000" Step="1000" @bind-Value="_monthlyUsers" />
+                    </FormItem>
+                </div>
+            </WizardStep>
+
+            <WizardStep Title="Confirmation" Description="Review & deploy" Icon="@IconNames.CheckCircle">
+                <div class="rounded-xl p-4 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Workspace:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">@(_workspaceName.Length > 0 ? _workspaceName : "N/A")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Admin Email:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">@(_adminEmail.Length > 0 ? _adminEmail : "N/A")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Region:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">@_selectedRegion</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">User Capacity:</span>
+                        <span class="font-bold text-slate-900 dark:text-white">@_monthlyUsers.ToString("N0") MAU</span>
+                    </div>
+                </div>
+            </WizardStep>
+        </FormWizard>
+    </DemoCard>
+
+    @* Example 2: Progress Header Mode *@
+    <DemoCard Title="Progress Header Variant" Description="Ideal for compact modal dialogs or long multi-page surveys." Code="@_progressWizardCode">
+        <FormWizard HeaderType="WizardHeaderType.Progress"
+                    FinishText="Complete Survey"
+                    OnFinish="@(() => MessageService.Success("Survey submitted successfully!"))">
+            <WizardStep Title="Profile Details">
+                <p class="text-xs text-slate-600 dark:text-slate-300">Enter your developer experience and role preferences.</p>
+            </WizardStep>
+            <WizardStep Title="Tech Stack Selection">
+                <p class="text-xs text-slate-600 dark:text-slate-300">Select your preferred backends: .NET 10, PostgreSQL, Tailwind v4.</p>
+            </WizardStep>
+            <WizardStep Title="Final Feedback">
+                <p class="text-xs text-slate-600 dark:text-slate-300">Rate your experience using TentoUI components.</p>
+            </WizardStep>
+        </FormWizard>
+    </DemoCard>
+
+    <ApiTable Title="FormWizard Properties" ComponentType="@typeof(FormWizard)" />
+    <ApiTable Title="WizardStep Properties" ComponentType="@typeof(WizardStep)" />
+    <ApiTable Title="WizardStepChangeArgs Properties" Properties="@_stepChangeProps" />
+</div>
+
+@code {
+    private int _currentStep = 0;
+    private string _workspaceName = "Tento Global";
+    private string _adminEmail = "dev@tentoui.dev";
+    private string _selectedRegion = "Frankfurt (eu-central-1)";
+    private double _monthlyUsers = 15000;
+    private readonly string[] _regions = ["Frankfurt (eu-central-1)", "Ireland (eu-west-1)", "Virginia (us-east-1)", "Tokyo (ap-northeast-1)"];
+
+    private async Task<bool> HandleBeforeStepChange(WizardStepChangeArgs args)
+    {
+        if (args.FromIndex == 0 && string.IsNullOrWhiteSpace(_workspaceName))
+        {
+            MessageService.Error("Workspace Name is required before proceeding to Step 2!");
+            return false;
+        }
+
+        await Task.Delay(200); // Simulate network or schema check
+        return true;
+    }
+
+    private void HandleFinish()
+    {
+        MessageService.Success($"Provisioned workspace '{_workspaceName}' in {_selectedRegion}!");
+    }
+
+    private const string _basicWizardCode = """
+        <FormWizard @bind-CurrentStep="currentStep" BeforeStepChange="HandleBeforeStepChange" OnFinish="HandleFinish">
+            <WizardStep Title="Account Setup" Description="Organization credentials" Icon="user">
+                <FormItem Label="Workspace Name" Required="true">
+                    <Input @bind-Value="workspaceName" />
+                </FormItem>
+            </WizardStep>
+            <WizardStep Title="Plan & Quota" Description="Resource allocation" Icon="credit-card">
+                <FormItem Label="Hosting Region">
+                    <Select DataSource="@regions" @bind-Value="selectedRegion" />
+                </FormItem>
+            </WizardStep>
+            <WizardStep Title="Confirmation" Description="Review & deploy" Icon="check-circle">
+                <p>Ready to deploy workspace.</p>
+            </WizardStep>
+        </FormWizard>
+        """;
+
+    private const string _progressWizardCode = """
+        <FormWizard HeaderType="WizardHeaderType.Progress" FinishText="Complete Survey">
+            <WizardStep Title="Profile Details">...</WizardStep>
+            <WizardStep Title="Tech Stack Selection">...</WizardStep>
+            <WizardStep Title="Final Feedback">...</WizardStep>
+        </FormWizard>
+        """;
+
+    private readonly ApiTable.ApiProp[] _stepChangeProps =
+    [
+        new("FromIndex", "Zero-based index of the current active step.", "int", "-", Since: "1.0.3"),
+        new("ToIndex", "Zero-based index of the target step being navigated to.", "int", "-", Since: "1.0.3"),
+        new("Cancel", "Set to true to abort step navigation (e.g. when field validation fails).", "bool", "false", Since: "1.0.3")
+    ];
+}

@@ -53,7 +53,7 @@ public class QRCodeTests : TestContext
     {
         // Act
         var cut = RenderComponent<QRCode>(parameters => parameters
-            .Add(p => p.Value, "https://github.com/dominik/TentoUI")
+            .Add(p => p.Value, "https://github.com/DominikNITA/TentoUI")
             .Add(p => p.Size, 180)
             .Add(p => p.Color, "#1d4ed8")
             .Add(p => p.BgColor, "#f8fafc"));

@@ -16,7 +16,8 @@ public class VersionService
 {
     private List<DocVersion> _versions =
     [
-        new("1.0.2", "v1.0.2", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"),
+        new("1.0.3", "v1.0.3", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop)"),
+        new("1.0.2", "v1.0.2", "/v1.0.2/", ReleaseDate: "November 2026", Notes: "Patch release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"),
         new("1.0.1", "v1.0.1", "/v1.0.1/", ReleaseDate: "November 2026", Notes: "Patch release (Icon spin speed, ContextMenu & docs enhancements)"),
         new("1.0.0", "v1.0.0", "/v1.0/", ReleaseDate: "October 2026", Notes: "Production General Availability"),
         new("1.1.0-preview", "v1.1.0 (Next)", "/next/", IsPreview: true, ReleaseDate: "November 2026", Notes: "Upcoming feature preview"),

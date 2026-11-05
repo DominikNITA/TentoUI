@@ -1,0 +1,88 @@
+@page "/components/audio-player"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>AudioPlayer - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">AudioPlayer</h1>
+            <Tag Color="purple">v1.0.3</Tag>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Modern audio playback component featuring interactive timeline scrubbers, cover artwork cards, volume controls, skip buttons, variable playback rates, and native HTML5 audio playback.
+        </p>
+    </div>
+
+    @* Example 1: Rich Card Player with Album Art *@
+    <DemoCard Title="Album Card Audio Player" Description="Full card layout with album artwork, track meta, interactive scrubber bar, playback rate toggle, and volume slider with native audio output." Code="@_cardCode">
+        <div class="max-w-xl mx-auto w-full">
+            <AudioPlayer Variant="AudioPlayerVariant.Card"
+                         Title="Deep Space Coding Session"
+                         Artist="Tento Soundscapes • Synthwave Vol. 1"
+                         CoverUrl="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=240&auto=format&fit=crop&q=80"
+                         Src="audio/synthwave.wav"
+                         Duration="8.0"
+                         @bind-CurrentTime="_cardTime"
+                         @bind-IsPlaying="_cardPlaying"
+                         OnPlay="@(() => MessageService.Info("Playback started"))"
+                         OnPause="@(() => MessageService.Info("Playback paused"))" />
+        </div>
+    </DemoCard>
+
+    @* Example 2: Default Horizontal Bar *@
+    <DemoCard Title="Default Horizontal Player" Description="Streamlined bar layout optimal for dashboards, tutorials, or podcast episodes." Code="@_defaultCode">
+        <AudioPlayer Variant="AudioPlayerVariant.Default"
+                     Title="Episode #42: Modern Blazor & Tailwind v4"
+                     Artist=".NET Architecture Weekly"
+                     Src="audio/synthwave.wav"
+                     Duration="8.0"
+                     @bind-CurrentTime="_defaultTime" />
+    </DemoCard>
+
+    @* Example 3: Compact Single-Line Player *@
+    <DemoCard Title="Compact Inline Audio Player" Description="Space-efficient single-line player designed for chat threads, comments, or data tables." Code="@_compactCode">
+        <div class="max-w-md">
+            <AudioPlayer Variant="AudioPlayerVariant.Compact"
+                         Title="Customer Voicemail #104"
+                         Src="audio/speech-sample.wav"
+                         Duration="5.0" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="AudioPlayer Properties" ComponentType="@typeof(AudioPlayer)" />
+</div>
+
+@code {
+    private double _cardTime = 0.0;
+    private bool _cardPlaying;
+    private double _defaultTime = 0.0;
+
+    private const string _cardCode = """
+        <AudioPlayer Variant="AudioPlayerVariant.Card"
+                     Title="Deep Space Coding Session"
+                     Artist="Tento Soundscapes"
+                     CoverUrl="https://.../cover.jpg"
+                     Src="audio/synthwave.wav"
+                     Duration="8.0"
+                     @bind-CurrentTime="currentTime"
+                     @bind-IsPlaying="isPlaying" />
+        """;
+
+    private const string _defaultCode = """
+        <AudioPlayer Variant="AudioPlayerVariant.Default"
+                     Title="Episode #42: Modern Blazor & Tailwind v4"
+                     Artist=".NET Architecture Weekly"
+                     Src="audio/synthwave.wav"
+                     Duration="8.0"
+                     @bind-CurrentTime="currentTime" />
+        """;
+
+    private const string _compactCode = """
+        <AudioPlayer Variant="AudioPlayerVariant.Compact"
+                     Title="Customer Voicemail #104"
+                     Src="audio/speech-sample.wav"
+                     Duration="5.0" />
+        """;
+}

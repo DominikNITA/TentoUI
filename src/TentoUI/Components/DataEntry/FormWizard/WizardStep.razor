@@ -1,0 +1,47 @@
+@namespace TentoUI
+@implements IDisposable
+@attribute [Since("1.0.3")]
+
+@code {
+    [CascadingParameter] protected FormWizard? ParentWizard { get; set; }
+
+    /// <summary>
+    /// Step header title text.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional secondary subtitle or description text.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Description { get; set; }
+
+    /// <summary>
+    /// Optional custom Lucide icon name.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Icon { get; set; }
+
+    /// <summary>
+    /// Whether this step is optional (displays an 'Optional' pill).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool Optional { get; set; }
+
+    /// <summary>
+    /// Whether direct navigation to this step is disabled.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool Disabled { get; set; }
+
+    /// <summary>
+    /// Step body content.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ParentWizard?.RegisterStep(this);
+    }
+
+    public void Dispose()
+    {
+        ParentWizard?.UnregisterStep(this);
+    }
+}

@@ -1,0 +1,366 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.0.3")]
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+<div class="@ComputedWizardClass" style="@Style" @attributes="AdditionalAttributes">
+    @* 1. Wizard Header Navigation *@
+    @if (_steps.Count > 0)
+    {
+        <div class="tento-wizard-header mb-6 pb-6 border-b border-slate-200/80 dark:border-slate-800">
+            @switch (HeaderType)
+            {
+                case WizardHeaderType.Pills:
+                    <div class="flex flex-wrap items-center gap-2">
+                        @for (var i = 0; i < _steps.Count; i++)
+                        {
+                            var stepIndex = i;
+                            var step = _steps[stepIndex];
+                            var isCurrent = stepIndex == EffectiveCurrent;
+                            var isCompleted = stepIndex < EffectiveCurrent;
+                            var pillClass = GetPillClass(isCurrent, isCompleted, step.Disabled);
+
+                            <button type="button"
+                                    disabled="@step.Disabled"
+                                    class="@pillClass"
+                                    @onclick="@(() => GoToStepAsync(stepIndex))">
+                                <span class="flex items-center gap-1.5">
+                                    @if (isCompleted)
+                                    {
+                                        <Icon Name="@IconNames.Check" Size="13" />
+                                    }
+                                    else if (!string.IsNullOrEmpty(step.Icon))
+                                    {
+                                        <Icon Name="@step.Icon" Size="13" />
+                                    }
+                                    else
+                                    {
+                                        <span>@(stepIndex + 1).</span>
+                                    }
+                                    <span>@step.Title</span>
+                                    @if (step.Optional)
+                                    {
+                                        <span class="text-[10px] opacity-75 font-normal">(Optional)</span>
+                                    }
+                                </span>
+                            </button>
+                        }
+                    </div>
+                    break;
+
+                case WizardHeaderType.Progress:
+                    var currentStepInfo = _steps[EffectiveCurrent];
+                    var progressPercent = (int)Math.Round(((EffectiveCurrent + 1) / (double)_steps.Count) * 100);
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between text-xs font-semibold">
+                            <span class="text-slate-900 dark:text-white flex items-center gap-2">
+                                <span>Step @(EffectiveCurrent + 1) of @_steps.Count:</span>
+                                <span class="text-primary-600 dark:text-primary-400">@currentStepInfo.Title</span>
+                            </span>
+                            <span class="text-slate-400">@progressPercent% completed</span>
+                        </div>
+                        <div class="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                            <div class="h-full bg-primary-500 rounded-full transition-all duration-300"
+                                 style="@($"width: {progressPercent}%;")"></div>
+                        </div>
+                    </div>
+                    break;
+
+                default: // WizardHeaderType.Steps
+                    <div class="flex items-center justify-between relative">
+                        @for (var i = 0; i < _steps.Count; i++)
+                        {
+                            var stepIndex = i;
+                            var step = _steps[stepIndex];
+                            var isCurrent = stepIndex == EffectiveCurrent;
+                            var isCompleted = stepIndex < EffectiveCurrent;
+                            var isLast = stepIndex == _steps.Count - 1;
+
+                            <div class="flex-1 flex items-center @(isLast ? "flex-none" : "")">
+                                <button type="button"
+                                        disabled="@step.Disabled"
+                                        class="group flex items-center gap-3 text-left focus:outline-none cursor-pointer disabled:cursor-not-allowed"
+                                        @onclick="@(() => GoToStepAsync(stepIndex))">
+                                    <div class="@GetStepCircleClass(isCurrent, isCompleted)">
+                                        @if (isCompleted)
+                                        {
+                                            <Icon Name="@IconNames.Check" Size="14" />
+                                        }
+                                        else if (!string.IsNullOrEmpty(step.Icon))
+                                        {
+                                            <Icon Name="@step.Icon" Size="14" />
+                                        }
+                                        else
+                                        {
+                                            <span>@(stepIndex + 1)</span>
+                                        }
+                                    </div>
+                                    <div class="hidden sm:block">
+                                        <div class="text-xs font-semibold @(isCurrent ? "text-primary-600 dark:text-primary-400" : isCompleted ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-slate-500")">
+                                            @step.Title
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(step.Description))
+                                        {
+                                            <div class="text-[11px] text-slate-400 dark:text-slate-500">
+                                                @step.Description
+                                            </div>
+                                        }
+                                    </div>
+                                </button>
+
+                                @if (!isLast)
+                                {
+                                    <div class="flex-1 mx-3 sm:mx-4 h-0.5 @(isCompleted ? "bg-primary-500" : "bg-slate-200 dark:bg-slate-800") transition-colors"></div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    break;
+            }
+        </div>
+    }
+
+    @* 2. Active Step Body Content *@
+    <div class="tento-wizard-body min-h-[160px]">
+        @if (_steps.Count > 0 && EffectiveCurrent < _steps.Count)
+        {
+            var activeStep = _steps[EffectiveCurrent];
+            <div class="animate-in fade-in zoom-in-98 duration-150">
+                @activeStep.ChildContent
+            </div>
+        }
+    </div>
+
+    @* 3. Wizard Footer Navigation *@
+    @if (ShowNavigation && _steps.Count > 0)
+    {
+        var isFirst = EffectiveCurrent == 0;
+        var isLast = EffectiveCurrent == _steps.Count - 1;
+
+        <div class="tento-wizard-footer mt-8 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+            <div>
+                @if (ShowCancel)
+                {
+                    <Button Type="ButtonType.Text" OnClick="CancelAsync" Disabled="@_isTransitioning">
+                        @CancelText
+                    </Button>
+                }
+            </div>
+
+            <div class="flex items-center gap-2">
+                @if (!isFirst)
+                {
+                    <Button Type="ButtonType.Default" OnClick="PreviousStepAsync" Disabled="@_isTransitioning">
+                        @PreviousText
+                    </Button>
+                }
+
+                @if (!isLast)
+                {
+                    <Button Type="ButtonType.Primary" OnClick="NextStepAsync" Loading="@_isTransitioning">
+                        @NextText
+                    </Button>
+                }
+                else
+                {
+                    <Button Type="ButtonType.Primary" OnClick="FinishAsync" Loading="@_isTransitioning">
+                        @FinishText
+                    </Button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Zero-based index of the currently active step. Supports two-way @bind-CurrentStep.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public int CurrentStep { get; set; }
+
+    /// <summary>
+    /// Callback executed when the active step index changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<int> CurrentStepChanged { get; set; }
+
+    /// <summary>
+    /// Visual style for the header step indicator (Steps, Pills, Progress).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public WizardHeaderType HeaderType { get; set; } = WizardHeaderType.Steps;
+
+    /// <summary>
+    /// Asynchronous validation callback invoked before navigating away from the current step.
+    /// Return false or set args.Cancel = true to abort step navigation.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public Func<WizardStepChangeArgs, Task<bool>>? BeforeStepChange { get; set; }
+
+    /// <summary>
+    /// Callback executed when the final step completes (Finish clicked).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnFinish { get; set; }
+
+    /// <summary>
+    /// Callback executed when Cancel is clicked.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnCancel { get; set; }
+
+    /// <summary>
+    /// Whether to render the built-in Next / Previous / Finish navigation bar.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowNavigation { get; set; } = true;
+
+    /// <summary>
+    /// Label for the next button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string NextText { get; set; } = "Next";
+
+    /// <summary>
+    /// Label for the previous button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string PreviousText { get; set; } = "Previous";
+
+    /// <summary>
+    /// Label for the finish button on the last step.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string FinishText { get; set; } = "Finish";
+
+    /// <summary>
+    /// Whether to show the Cancel button in the footer.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowCancel { get; set; }
+
+    /// <summary>
+    /// Label for the Cancel button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string CancelText { get; set; } = "Cancel";
+
+    /// <summary>
+    /// WizardStep children components.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public RenderFragment? ChildContent { get; set; }
+
+    private readonly List<WizardStep> _steps = new();
+    private bool _isTransitioning;
+
+    public int StepCount => _steps.Count;
+    private int EffectiveCurrent => Math.Clamp(CurrentStep, 0, Math.Max(0, _steps.Count - 1));
+
+    internal void RegisterStep(WizardStep step)
+    {
+        if (!_steps.Contains(step))
+        {
+            _steps.Add(step);
+            StateHasChanged();
+        }
+    }
+
+    internal void UnregisterStep(WizardStep step)
+    {
+        if (_steps.Remove(step))
+        {
+            StateHasChanged();
+        }
+    }
+
+    public async Task NextStepAsync()
+    {
+        if (EffectiveCurrent < _steps.Count - 1)
+        {
+            await GoToStepAsync(EffectiveCurrent + 1);
+        }
+    }
+
+    public async Task PreviousStepAsync()
+    {
+        if (EffectiveCurrent > 0)
+        {
+            await GoToStepAsync(EffectiveCurrent - 1);
+        }
+    }
+
+    public async Task GoToStepAsync(int targetIndex)
+    {
+        if (targetIndex == EffectiveCurrent || targetIndex < 0 || targetIndex >= _steps.Count) return;
+        if (_steps[targetIndex].Disabled) return;
+
+        var args = new WizardStepChangeArgs(EffectiveCurrent, targetIndex);
+
+        if (BeforeStepChange != null)
+        {
+            _isTransitioning = true;
+            try
+            {
+                var canProceed = await BeforeStepChange(args);
+                if (!canProceed || args.Cancel)
+                {
+                    return;
+                }
+            }
+            finally
+            {
+                _isTransitioning = false;
+            }
+        }
+
+        CurrentStep = targetIndex;
+        if (CurrentStepChanged.HasDelegate)
+        {
+            await CurrentStepChanged.InvokeAsync(CurrentStep);
+        }
+    }
+
+    public async Task FinishAsync()
+    {
+        var args = new WizardStepChangeArgs(EffectiveCurrent, EffectiveCurrent);
+        if (BeforeStepChange != null)
+        {
+            _isTransitioning = true;
+            try
+            {
+                var canProceed = await BeforeStepChange(args);
+                if (!canProceed || args.Cancel) return;
+            }
+            finally
+            {
+                _isTransitioning = false;
+            }
+        }
+
+        if (OnFinish.HasDelegate)
+        {
+            await OnFinish.InvokeAsync();
+        }
+    }
+
+    public async Task CancelAsync()
+    {
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+    private string GetStepCircleClass(bool isCurrent, bool isCompleted) =>
+        new CssBuilder("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all")
+            .AddClass("bg-primary-500 text-white shadow-md shadow-primary-500/20 ring-4 ring-primary-100 dark:ring-primary-950", isCurrent)
+            .AddClass("bg-primary-600 text-white", isCompleted && !isCurrent)
+            .AddClass("bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700", !isCurrent && !isCompleted)
+            .Build();
+
+    private string GetPillClass(bool isCurrent, bool isCompleted, bool isDisabled) =>
+        new CssBuilder("px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer")
+            .AddClass("bg-primary-500 text-white shadow-xs font-semibold", isCurrent)
+            .AddClass("bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700", !isCurrent && isCompleted)
+            .AddClass("bg-transparent text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300", !isCurrent && !isCompleted && !isDisabled)
+            .AddClass("opacity-40 cursor-not-allowed", isDisabled)
+            .Build();
+
+    private string ComputedWizardClass => new CssBuilder("tento-form-wizard w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs")
+        .AddClass(Class)
+        .Build();
+}

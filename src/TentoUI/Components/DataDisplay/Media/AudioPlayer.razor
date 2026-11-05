@@ -1,0 +1,575 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.0.3")]
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<div class="@ComputedRootClass" style="@Style" role="region" aria-label="@($"Audio player: {Title ?? "Track"}")" @attributes="AdditionalAttributes">
+    <audio @ref="_audioRef" src="@Src" preload="metadata" loop="@Loop" class="hidden"></audio>
+
+    @if (Variant == AudioPlayerVariant.Card)
+    {
+        @* Card Variant: Artwork, Info, Scrubber, Controls *@
+        <div class="flex flex-col sm:flex-row items-center gap-5">
+            @if (!string.IsNullOrEmpty(CoverUrl))
+            {
+                <div class="w-24 h-24 rounded-xl overflow-hidden shadow-md shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <img src="@CoverUrl" alt="@Title" class="w-full h-full object-cover" />
+                </div>
+            }
+            else
+            {
+                <div class="w-24 h-24 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary-500 to-indigo-600 text-white shadow-md shrink-0">
+                    <Icon Name="@IconNames.Music" Size="32" />
+                </div>
+            }
+
+            <div class="flex-1 min-w-0 w-full space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                            @(Title ?? "Audio Track")
+                        </div>
+                        @if (!string.IsNullOrEmpty(Artist))
+                        {
+                            <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                @Artist
+                            </div>
+                        }
+                    </div>
+
+                    @if (ShowPlaybackRate)
+                    {
+                        <button type="button"
+                                class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
+                                @onclick="CyclePlaybackRateAsync">
+                            @(PlaybackRate.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture))x
+                        </button>
+                    }
+                </div>
+
+                @* Timeline Scrubber *@
+                @RenderScrubber()
+
+                @* Controls Bar *@
+                <div class="flex items-center justify-between pt-1">
+                    <div class="flex items-center gap-1.5">
+                        @if (ShowSkipButtons)
+                        {
+                            <button type="button"
+                                    aria-label="Skip backward 10s"
+                                    class="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                                    @onclick="@(() => SkipAsync(-10))">
+                                <Icon Name="@IconNames.RotateCcw" Size="16" />
+                            </button>
+                        }
+
+                        <button type="button"
+                                aria-label="@(IsPlaying ? "Pause" : "Play")"
+                                class="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20 cursor-pointer transition-transform active:scale-95"
+                                @onclick="TogglePlayAsync">
+                            <Icon Name="@(IsPlaying ? IconNames.Pause : IconNames.Play)" Size="18" />
+                        </button>
+
+                        @if (ShowSkipButtons)
+                        {
+                            <button type="button"
+                                    aria-label="Skip forward 10s"
+                                    class="p-2 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                                    @onclick="@(() => SkipAsync(10))">
+                                <Icon Name="@IconNames.RotateCw" Size="16" />
+                            </button>
+                        }
+                    </div>
+
+                    @* Volume Control *@
+                    @if (ShowVolume)
+                    {
+                        <div class="flex items-center gap-2">
+                            <button type="button"
+                                    aria-label="Toggle mute"
+                                    class="p-1.5 rounded text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                                    @onclick="ToggleMute">
+                                <Icon Name="@VolumeIcon" Size="16" />
+                            </button>
+                            <input type="range"
+                                   min="0"
+                                   max="1"
+                                   step="0.05"
+                                   value="@Volume"
+                                   class="w-20 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                   @oninput="HandleVolumeChange" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else if (Variant == AudioPlayerVariant.Compact)
+    {
+        @* Compact Single-Line Variant *@
+        <div class="flex items-center gap-3 w-full">
+            <button type="button"
+                    aria-label="@(IsPlaying ? "Pause" : "Play")"
+                    class="w-8 h-8 rounded-full bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center shadow-xs shrink-0 cursor-pointer transition-transform active:scale-95"
+                    @onclick="TogglePlayAsync">
+                <Icon Name="@(IsPlaying ? IconNames.Pause : IconNames.Play)" Size="14" />
+            </button>
+
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <span class="text-xs font-semibold text-slate-900 dark:text-white truncate max-w-[140px]">
+                    @Title
+                </span>
+            }
+
+            <div class="flex-1 min-w-0">
+                @RenderScrubber()
+            </div>
+
+            @if (ShowPlaybackRate)
+            {
+                <button type="button"
+                        class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer"
+                        @onclick="CyclePlaybackRateAsync">
+                    @(PlaybackRate.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture))x
+                </button>
+            }
+        </div>
+    }
+    else
+    {
+        @* Default Horizontal Layout *@
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button type="button"
+                            aria-label="@(IsPlaying ? "Pause" : "Play")"
+                            class="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20 shrink-0 cursor-pointer transition-transform active:scale-95"
+                            @onclick="TogglePlayAsync">
+                        <Icon Name="@(IsPlaying ? IconNames.Pause : IconNames.Play)" Size="18" />
+                    </button>
+
+                    <div class="min-w-0">
+                        <div class="font-bold text-xs text-slate-900 dark:text-white truncate">
+                            @(Title ?? "Audio Preview")
+                        </div>
+                        @if (!string.IsNullOrEmpty(Artist))
+                        {
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                @Artist
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    @if (ShowSkipButtons)
+                    {
+                        <div class="flex items-center gap-1">
+                            <button type="button"
+                                    aria-label="Skip backward 10s"
+                                    class="p-1.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                                    @onclick="@(() => SkipAsync(-10))">
+                                <Icon Name="@IconNames.RotateCcw" Size="14" />
+                            </button>
+                            <button type="button"
+                                    aria-label="Skip forward 10s"
+                                    class="p-1.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                                    @onclick="@(() => SkipAsync(10))">
+                                <Icon Name="@IconNames.RotateCw" Size="14" />
+                            </button>
+                        </div>
+                    }
+
+                    @if (ShowPlaybackRate)
+                    {
+                        <button type="button"
+                                class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors"
+                                @onclick="CyclePlaybackRateAsync">
+                            @(PlaybackRate.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture))x
+                        </button>
+                    }
+
+                    @if (ShowVolume)
+                    {
+                        <div class="hidden sm:flex items-center gap-1.5">
+                            <button type="button"
+                                    aria-label="Toggle mute"
+                                    class="p-1.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                                    @onclick="ToggleMute">
+                                <Icon Name="@VolumeIcon" Size="15" />
+                            </button>
+                            <input type="range"
+                                   min="0"
+                                   max="1"
+                                   step="0.05"
+                                   value="@Volume"
+                                   class="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+                                   @oninput="HandleVolumeChange" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Progress Scrubber *@
+            @RenderScrubber()
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Audio source URL.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Src { get; set; }
+
+    /// <summary>
+    /// Track title header.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Title { get; set; }
+
+    /// <summary>
+    /// Artist or creator subtitle.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Artist { get; set; }
+
+    /// <summary>
+    /// URL for album artwork image.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? CoverUrl { get; set; }
+
+    /// <summary>
+    /// Visual style variant: Default, Card, Compact, or Minimal.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public AudioPlayerVariant Variant { get; set; } = AudioPlayerVariant.Default;
+
+    /// <summary>
+    /// Total duration of the audio in seconds.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double Duration { get; set; } = 8.0;
+
+    /// <summary>
+    /// Current playback head position in seconds. Supports two-way @bind-CurrentTime.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double CurrentTime { get; set; } = 0.0;
+
+    /// <summary>
+    /// Callback executed when the playback position changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<double> CurrentTimeChanged { get; set; }
+
+    /// <summary>
+    /// Whether audio is actively playing. Supports two-way @bind-IsPlaying.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool IsPlaying { get; set; }
+
+    /// <summary>
+    /// Callback executed when play/pause state changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<bool> IsPlayingChanged { get; set; }
+
+    /// <summary>
+    /// Audio volume between 0.0 (muted) and 1.0 (max).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double Volume { get; set; } = 0.8;
+
+    /// <summary>
+    /// Playback rate speed multiplier (e.g. 1.0, 1.25, 1.5, 2.0).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double PlaybackRate { get; set; } = 1.0;
+
+    /// <summary>
+    /// Whether to loop the track when playback reaches the end.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool Loop { get; set; }
+
+    /// <summary>
+    /// Whether to display the volume slider and mute button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowVolume { get; set; } = true;
+
+    /// <summary>
+    /// Whether to display the playback rate toggle pill (1x, 1.5x, 2x).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowPlaybackRate { get; set; } = true;
+
+    /// <summary>
+    /// Whether to display +10s / -10s skip buttons.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowSkipButtons { get; set; } = true;
+
+    /// <summary>
+    /// Callback invoked when playback starts.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnPlay { get; set; }
+
+    /// <summary>
+    /// Callback invoked when playback is paused.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnPause { get; set; }
+
+    /// <summary>
+    /// Callback invoked when playback finishes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnEnded { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user manually seeks to a new timestamp.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<double> OnSeek { get; set; }
+
+    private ElementReference _audioRef;
+    private DotNetObjectReference<AudioPlayer>? _dotNetRef;
+    private double _previousVolume = 0.8;
+
+    private string VolumeIcon => Volume <= 0 ? IconNames.VolumeX : Volume < 0.5 ? IconNames.Volume1 : IconNames.Volume2;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _dotNetRef = DotNetObjectReference.Create(this);
+                await JSRuntime.InvokeVoidAsync("tentoAudio.init", _audioRef, _dotNetRef);
+                await JSRuntime.InvokeVoidAsync("tentoAudio.setVolume", _audioRef, Volume);
+                await JSRuntime.InvokeVoidAsync("tentoAudio.setPlaybackRate", _audioRef, PlaybackRate);
+            }
+            catch
+            {
+                // Test runner or SSR context fallback
+            }
+        }
+    }
+
+    public async Task TogglePlayAsync()
+    {
+        IsPlaying = !IsPlaying;
+        try
+        {
+            if (IsPlaying)
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.play", _audioRef);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.pause", _audioRef);
+            }
+        }
+        catch
+        {
+            // Browser policy or test fallback
+        }
+
+        if (IsPlayingChanged.HasDelegate)
+        {
+            await IsPlayingChanged.InvokeAsync(IsPlaying);
+        }
+
+        if (IsPlaying && OnPlay.HasDelegate)
+        {
+            await OnPlay.InvokeAsync();
+        }
+        else if (!IsPlaying && OnPause.HasDelegate)
+        {
+            await OnPause.InvokeAsync();
+        }
+    }
+
+    public async Task SeekToAsync(double targetSeconds)
+    {
+        CurrentTime = Math.Clamp(targetSeconds, 0.0, Duration);
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoAudio.setCurrentTime", _audioRef, CurrentTime);
+        }
+        catch
+        {
+            // Test fallback
+        }
+
+        if (CurrentTimeChanged.HasDelegate)
+        {
+            await CurrentTimeChanged.InvokeAsync(CurrentTime);
+        }
+        if (OnSeek.HasDelegate)
+        {
+            await OnSeek.InvokeAsync(CurrentTime);
+        }
+    }
+
+    public async Task SkipAsync(double deltaSeconds)
+    {
+        await SeekToAsync(CurrentTime + deltaSeconds);
+    }
+
+    private async Task CyclePlaybackRateAsync()
+    {
+        double[] speeds = [1.0, 1.25, 1.5, 2.0, 0.5];
+        var idx = Array.IndexOf(speeds, PlaybackRate);
+        PlaybackRate = speeds[(idx + 1) % speeds.Length];
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoAudio.setPlaybackRate", _audioRef, PlaybackRate);
+        }
+        catch
+        {
+            // Test fallback
+        }
+    }
+
+    private void ToggleMute()
+    {
+        if (Volume > 0)
+        {
+            _previousVolume = Volume;
+            Volume = 0;
+        }
+        else
+        {
+            Volume = _previousVolume > 0 ? _previousVolume : 0.8;
+        }
+
+        try
+        {
+            _ = JSRuntime.InvokeVoidAsync("tentoAudio.setVolume", _audioRef, Volume);
+        }
+        catch
+        {
+            // Test fallback
+        }
+    }
+
+    private void HandleVolumeChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var v))
+        {
+            Volume = Math.Clamp(v, 0.0, 1.0);
+            try
+            {
+                _ = JSRuntime.InvokeVoidAsync("tentoAudio.setVolume", _audioRef, Volume);
+            }
+            catch
+            {
+                // Test fallback
+            }
+        }
+    }
+
+    private async Task HandleScrubberInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var val))
+        {
+            await SeekToAsync(val);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnJsTimeUpdate(double currentTime)
+    {
+        CurrentTime = currentTime;
+        if (CurrentTimeChanged.HasDelegate)
+        {
+            await CurrentTimeChanged.InvokeAsync(CurrentTime);
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnJsLoadedMetadata(double duration)
+    {
+        if (duration > 0 && (Duration <= 0 || Math.Abs(Duration - 8.0) < 0.001))
+        {
+            Duration = duration;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnJsEnded()
+    {
+        IsPlaying = false;
+        if (IsPlayingChanged.HasDelegate)
+        {
+            await IsPlayingChanged.InvokeAsync(false);
+        }
+        if (OnEnded.HasDelegate)
+        {
+            await OnEnded.InvokeAsync();
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnJsPlayStateChanged(bool playing)
+    {
+        if (IsPlaying != playing)
+        {
+            IsPlaying = playing;
+            if (IsPlayingChanged.HasDelegate)
+            {
+                await IsPlayingChanged.InvokeAsync(playing);
+            }
+            StateHasChanged();
+        }
+    }
+
+    private RenderFragment RenderScrubber() => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "space-y-1.5 w-full");
+
+        builder.OpenElement(2, "input");
+        builder.AddAttribute(3, "type", "range");
+        builder.AddAttribute(4, "min", "0");
+        builder.AddAttribute(5, "max", (Duration > 0 ? Duration : 100).ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture));
+        builder.AddAttribute(6, "step", "0.1");
+        builder.AddAttribute(7, "value", CurrentTime.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture));
+        builder.AddAttribute(8, "class", "w-full h-1.5 bg-slate-200 dark:bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-primary-500");
+        builder.AddAttribute(9, "oninput", EventCallback.Factory.Create<ChangeEventArgs>(this, HandleScrubberInput));
+        builder.CloseElement();
+
+        // Time labels
+        builder.OpenElement(10, "div");
+        builder.AddAttribute(11, "class", "flex items-center justify-between text-[11px] font-mono text-slate-400 select-none");
+        builder.OpenElement(12, "span");
+        builder.AddContent(13, FormatTime(CurrentTime));
+        builder.CloseElement();
+        builder.OpenElement(14, "span");
+        builder.AddContent(15, FormatTime(Duration));
+        builder.CloseElement();
+        builder.CloseElement(); // Time labels
+
+        builder.CloseElement();
+    };
+
+    public static string FormatTime(double totalSeconds)
+    {
+        var ts = TimeSpan.FromSeconds(Math.Max(0, totalSeconds));
+        return ts.TotalHours >= 1
+            ? $"{(int)ts.TotalHours}:{ts.Minutes:D2}:{ts.Seconds:D2}"
+            : $"{ts.Minutes}:{ts.Seconds:D2}";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.dispose", _audioRef);
+            }
+            catch
+            {
+                // Dispose fallback
+            }
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+    }
+
+    private string ComputedRootClass => new CssBuilder("tento-audio-player w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-xs")
+        .AddClass(Class)
+        .Build();
+}

@@ -1,0 +1,143 @@
+@page "/components/stepper-form"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+
+<PageTitle>StepperForm - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">StepperForm</h1>
+            <Tag Color="purple">v1.0.3</Tag>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Integrated multi-step EditForm component binding directly to strongly-typed models, supporting DataAnnotations validation per step, horizontal and vertical layouts.
+        </p>
+    </div>
+
+    @* Example 1: Horizontal Enterprise Onboarding Form *@
+    <DemoCard Title="Horizontal Multi-Step Form with Model Binding" Description="Validates model fields progressively and submits the entire entity on the final step." Code="@_horizontalCode">
+        <StepperForm TModel="RegisterModel"
+                     Model="@_registerModel"
+                     OnValidateStep="ValidateStepAsync"
+                     OnValidSubmit="HandleValidSubmit">
+            <StepperFormStep Title="Credentials" SubTitle="Email & Security" Icon="@IconNames.Lock">
+                <div class="space-y-4 max-w-md">
+                    <FormItem Label="Email Address" Required="true">
+                        <Input Placeholder="user@domain.com" @bind-Value="_registerModel.Email" />
+                    </FormItem>
+                    <FormItem Label="Password" Required="true">
+                        <Input Type="InputType.Password" Placeholder="Min 8 characters" @bind-Value="_registerModel.Password" />
+                    </FormItem>
+                </div>
+            </StepperFormStep>
+
+            <StepperFormStep Title="Company Profile" SubTitle="Team Size & Industry" Icon="@IconNames.Building">
+                <div class="space-y-4 max-w-md">
+                    <FormItem Label="Company Name" Required="true">
+                        <Input Placeholder="e.g. Tento Technologies" @bind-Value="_registerModel.CompanyName" />
+                    </FormItem>
+                    <FormItem Label="Team Size">
+                        <Select TItem="string" TValue="string" DataSource="@_teamSizes" @bind-Value="_registerModel.TeamSize" />
+                    </FormItem>
+                </div>
+            </StepperFormStep>
+
+            <StepperFormStep Title="Preferences" SubTitle="Notifications & Cloud" Icon="@IconNames.Settings">
+                <div class="space-y-4 max-w-md">
+                    <div class="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <div class="text-xs font-bold text-slate-900 dark:text-white">Email Release Notes</div>
+                            <div class="text-[11px] text-slate-500">Receive weekly updates on new TentoUI releases.</div>
+                        </div>
+                        <Switch @bind-Checked="_registerModel.EmailAlerts" />
+                    </div>
+                </div>
+            </StepperFormStep>
+        </StepperForm>
+    </DemoCard>
+
+    @* Example 2: Vertical Layout *@
+    <DemoCard Title="Vertical Stepper Layout" Description="Places step milestones in a dedicated left column sidebar, optimal for wide desktop forms." Code="@_verticalCode">
+        <StepperForm TModel="RegisterModel"
+                     Model="@_verticalModel"
+                     Layout="StepperFormLayout.Vertical"
+                     OnValidSubmit="@(m => MessageService.Success($"Saved company profile for {m.CompanyName}!"))">
+            <StepperFormStep Title="Basic Info" SubTitle="Company identity" Icon="@IconNames.Info">
+                <FormItem Label="Legal Entity Name">
+                    <Input @bind-Value="_verticalModel.CompanyName" />
+                </FormItem>
+            </StepperFormStep>
+
+            <StepperFormStep Title="Billing & Tax" SubTitle="Payment terms" Icon="@IconNames.CreditCard">
+                <FormItem Label="Tax ID (VAT)">
+                    <Input Placeholder="EU-94810294" />
+                </FormItem>
+            </StepperFormStep>
+
+            <StepperFormStep Title="Review" SubTitle="Submit application" Icon="@IconNames.CheckCircle">
+                <p class="text-xs text-slate-600 dark:text-slate-300">Ready to complete setup.</p>
+            </StepperFormStep>
+        </StepperForm>
+    </DemoCard>
+
+    <ApiTable Title="StepperForm Properties" ComponentType="@typeof(StepperForm<RegisterModel>)" />
+    <ApiTable Title="StepperFormStep Properties" ComponentType="@typeof(StepperFormStep)" />
+</div>
+
+@code {
+    public class RegisterModel
+    {
+        public string Email { get; set; } = "lead@tentoui.com";
+        public string Password { get; set; } = "SecurePass123";
+        public string CompanyName { get; set; } = "Tento Global";
+        public string TeamSize { get; set; } = "11-50 employees";
+        public bool EmailAlerts { get; set; } = true;
+    }
+
+    private readonly RegisterModel _registerModel = new();
+    private readonly RegisterModel _verticalModel = new();
+    private readonly string[] _teamSizes = ["1-10 employees", "11-50 employees", "51-200 employees", "200+ enterprise"];
+
+    private Task<bool> ValidateStepAsync(int stepIndex)
+    {
+        if (stepIndex == 0 && string.IsNullOrWhiteSpace(_registerModel.Email))
+        {
+            MessageService.Error("Email is required before proceeding.");
+            return Task.FromResult(false);
+        }
+        if (stepIndex == 1 && string.IsNullOrWhiteSpace(_registerModel.CompanyName))
+        {
+            MessageService.Error("Company Name is required before proceeding.");
+            return Task.FromResult(false);
+        }
+        return Task.FromResult(true);
+    }
+
+    private void HandleValidSubmit(RegisterModel model)
+    {
+        MessageService.Success($"Successfully registered organization '{model.CompanyName}' ({model.Email})!");
+    }
+
+    private const string _horizontalCode = """
+        <StepperForm TModel="RegisterModel" Model="@model" OnValidSubmit="HandleValidSubmit">
+            <StepperFormStep Title="Credentials" Icon="lock">
+                <FormItem Label="Email Address">
+                    <Input @bind-Value="model.Email" />
+                </FormItem>
+            </StepperFormStep>
+            <StepperFormStep Title="Company Profile" Icon="building">
+                <FormItem Label="Company Name">
+                    <Input @bind-Value="model.CompanyName" />
+                </FormItem>
+            </StepperFormStep>
+        </StepperForm>
+        """;
+
+    private const string _verticalCode = """
+        <StepperForm TModel="RegisterModel" Model="@model" Layout="StepperFormLayout.Vertical">
+            <StepperFormStep Title="Basic Info" Icon="info">...</StepperFormStep>
+            <StepperFormStep Title="Billing & Tax" Icon="credit-card">...</StepperFormStep>
+        </StepperForm>
+        """;
+}

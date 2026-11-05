@@ -13,16 +13,19 @@
         var colItems = GetItemsForColumn(col.Key);
         var isOverLimit = col.MaxItems.HasValue && colItems.Count > col.MaxItems.Value;
         var isAtLimit = col.MaxItems.HasValue && colItems.Count == col.MaxItems.Value;
+        var isDragTarget = string.Equals(_hoveredColumnKey, col.Key, StringComparison.OrdinalIgnoreCase);
 
-        <div class="tento-kanban-column flex flex-col w-72 shrink-0 rounded-xl bg-slate-100/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 p-3"
+        <div class="@GetColumnClass(isDragTarget, isOverLimit)"
              data-column-key="@col.Key"
              @ondragover:preventDefault="true"
+             @ondragenter="@(() => _hoveredColumnKey = col.Key)"
+             @ondragleave="@(() => { if (_hoveredColumnKey == col.Key) _hoveredColumnKey = null; })"
              @ondrop="@(() => HandleDropAsync(col.Key))">
             @* Column Header *@
             <div class="flex items-center justify-between mb-3 px-1">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-xs text-slate-800 dark:text-slate-100">@col.Title</span>
-                    <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                         @(col.MaxItems.HasValue ? $"{colItems.Count}/{col.MaxItems.Value}" : colItems.Count.ToString())
                     </span>
                 </div>
@@ -37,8 +40,8 @@
             </div>
 
             @* Column Cards *@
-            <div class="flex-1 space-y-2.5 min-h-[120px]">
-                @if (colItems.Count == 0)
+            <div class="flex-1 space-y-2.5 min-h-[120px] transition-colors">
+                @if (colItems.Count == 0 && !isDragTarget)
                 {
                     <div class="h-24 rounded-lg border border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center text-[11px] text-slate-400">
                         No cards
@@ -48,9 +51,14 @@
                 {
                     @foreach (var item in colItems)
                     {
+                        var isBeingDragged = EqualityComparer<TItem>.Default.Equals(_draggedItem, item);
+                        var cardClass = GetCardClass(isBeingDragged);
+
                         <div draggable="true"
-                             class="tento-kanban-card group p-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md hover:border-primary-400 transition-all cursor-grab active:cursor-grabbing"
-                             @ondragstart="@(() => _draggedItem = item)">
+                             class="@cardClass"
+                             @onclick="@(() => HandleCardClickAsync(item))"
+                             @ondragstart="@(() => _draggedItem = item)"
+                             @ondragend="@(() => { _draggedItem = default; _hoveredColumnKey = null; })">
                             @if (CardTemplate != null)
                             {
                                 @CardTemplate(item)
@@ -58,14 +66,19 @@
                             else
                             {
                                 var tag = GetTag(item);
+                                var tagColor = GetTagColor(item);
+                                var priority = GetPriority(item);
+                                var priorityColor = GetPriorityColor(item);
                                 var desc = GetDescription(item);
+                                var assignee = GetAssignee(item);
+
                                 <div class="flex items-start justify-between gap-2">
-                                    <div class="font-semibold text-xs text-slate-900 dark:text-white">
+                                    <div class="font-semibold text-xs text-slate-900 dark:text-white leading-snug">
                                         @GetTitle(item)
                                     </div>
                                     @if (!string.IsNullOrEmpty(tag))
                                     {
-                                        <Tag TagColor="TagColor.Primary">@tag</Tag>
+                                        <Tag TagColor="@tagColor">@tag</Tag>
                                     }
                                 </div>
                                 @if (!string.IsNullOrEmpty(desc))
@@ -74,11 +87,35 @@
                                         @desc
                                     </p>
                                 }
+
+                                @if (!string.IsNullOrEmpty(priority) || !string.IsNullOrEmpty(assignee))
+                                {
+                                    <div class="flex items-center justify-between mt-2.5 pt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                                        @if (!string.IsNullOrEmpty(priority))
+                                        {
+                                            <Tag TagColor="@priorityColor">@priority</Tag>
+                                        }
+                                        else
+                                        {
+                                            <span></span>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(assignee))
+                                        {
+                                            <div class="inline-flex items-center gap-1 font-medium">
+                                                <div class="w-4 h-4 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-700 dark:text-primary-300 flex items-center justify-center text-[9px] font-bold">
+                                                    @assignee[0]
+                                                </div>
+                                                <span>@assignee</span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             }
 
                             @* Accessible Move Controls *@
                             <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-slate-400">
-                                <span>@col.Title</span>
+                                <span class="truncate max-w-[120px]">@col.Title</span>
                                 <div class="flex items-center gap-1">
                                     @{
                                         var prevCol = GetAdjacentColumn(col.Key, -1);
@@ -88,7 +125,8 @@
                                     {
                                         <button type="button"
                                                 aria-label="@($"Move to {prevCol.Title}")"
-                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors cursor-pointer"
+                                                @onclick:stopPropagation="true"
                                                 @onclick="@(() => MoveCardAsync(item, col.Key, prevCol.Key))">
                                             <Icon Name="@IconNames.ArrowLeft" Size="12" />
                                         </button>
@@ -97,7 +135,8 @@
                                     {
                                         <button type="button"
                                                 aria-label="@($"Move to {nextCol.Title}")"
-                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors"
+                                                class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 hover:text-primary-500 transition-colors cursor-pointer"
+                                                @onclick:stopPropagation="true"
                                                 @onclick="@(() => MoveCardAsync(item, col.Key, nextCol.Key))">
                                             <Icon Name="@IconNames.ArrowRight" Size="12" />
                                         </button>
@@ -106,8 +145,28 @@
                             </div>
                         </div>
                     }
+
+                    @if (isDragTarget && _draggedItem is not null)
+                    {
+                        <div class="h-14 rounded-lg border-2 border-dashed border-primary-400 bg-primary-50/30 dark:bg-primary-950/30 flex items-center justify-center text-[11px] font-medium text-primary-600 dark:text-primary-400 animate-pulse">
+                            Drop card here
+                        </div>
+                    }
                 }
             </div>
+
+            @* Quick Add Button *@
+            @if (ShowAddButton)
+            {
+                <div class="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800">
+                    <button type="button"
+                            class="w-full py-1.5 px-2 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                            @onclick="@(() => HandleAddCardClickAsync(col.Key))">
+                        <Icon Name="@IconNames.Plus" Size="13" />
+                        <span>Add Task</span>
+                    </button>
+                </div>
+            }
         </div>
     }
 </div>
@@ -149,16 +208,47 @@
     [Parameter] public Func<TItem, string?>? TagSelector { get; set; }
 
     /// <summary>
+    /// Selector returning the optional card priority text.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public Func<TItem, string?>? PrioritySelector { get; set; }
+
+    /// <summary>
+    /// Selector returning the optional card assignee name.
+    /// </summary>
+    [Parameter] public Func<TItem, string?>? AssigneeSelector { get; set; }
+
+    /// <summary>
+    /// Whether to display a quick 'Add Task' button at the bottom of each column.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowAddButton { get; set; }
+
+    /// <summary>
     /// Custom template for rendering each card's body.
     /// </summary>
     [Parameter] public RenderFragment<TItem>? CardTemplate { get; set; }
 
     /// <summary>
-    /// Callback invoked when a card is moved between columns via drag-and-drop or keyboard/button controls.
+    /// Callback invoked when a card is moved between columns via drag-and-drop or manual controls.
     /// </summary>
     [Parameter] public EventCallback<KanbanCardMoveArgs<TItem>> OnCardMove { get; set; }
 
+    /// <summary>
+    /// Alias for OnCardMove for intuitive naming.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<KanbanCardMoveArgs<TItem>> OnCardMoved { get => OnCardMove; set => OnCardMove = value; }
+
+    /// <summary>
+    /// Callback invoked when a card is clicked.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<TItem> OnCardClick { get; set; }
+
+    /// <summary>
+    /// Callback invoked when user clicks the quick 'Add Task' button on a specific column.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<string> OnAddCard { get; set; }
+
     private TItem? _draggedItem;
+    private string? _hoveredColumnKey;
 
     private IReadOnlyList<KanbanColumnDefinition> EffectiveColumns => Columns?.ToList() ??
     [
@@ -197,6 +287,32 @@
         return null;
     }
 
+    private TagColor GetTagColor(TItem item)
+    {
+        if (item is KanbanCardItem card) return card.TagColor;
+        return TagColor.Primary;
+    }
+
+    private string? GetPriority(TItem item)
+    {
+        if (PrioritySelector != null) return PrioritySelector(item);
+        if (item is KanbanCardItem card) return card.Priority;
+        return null;
+    }
+
+    private TagColor GetPriorityColor(TItem item)
+    {
+        if (item is KanbanCardItem card) return card.PriorityColor;
+        return TagColor.Default;
+    }
+
+    private string? GetAssignee(TItem item)
+    {
+        if (AssigneeSelector != null) return AssigneeSelector(item);
+        if (item is KanbanCardItem card) return card.Assignee;
+        return null;
+    }
+
     private IReadOnlyList<TItem> GetItemsForColumn(string columnKey) =>
         EffectiveItems.Where(i => string.Equals(GetColumnKey(i), columnKey, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -217,6 +333,7 @@
 
     private async Task HandleDropAsync(string targetColumnKey)
     {
+        _hoveredColumnKey = null;
         if (_draggedItem is null) return;
         var item = _draggedItem;
         _draggedItem = default;
@@ -244,7 +361,36 @@
         }
     }
 
-    private string ComputedBoardClass => new CssBuilder("tento-kanban-board flex items-start gap-4 overflow-x-auto pb-2")
+    private async Task HandleCardClickAsync(TItem item)
+    {
+        if (OnCardClick.HasDelegate)
+        {
+            await OnCardClick.InvokeAsync(item);
+        }
+    }
+
+    private async Task HandleAddCardClickAsync(string columnKey)
+    {
+        if (OnAddCard.HasDelegate)
+        {
+            await OnAddCard.InvokeAsync(columnKey);
+        }
+    }
+
+    private string GetColumnClass(bool isDragTarget, bool isOverLimit) =>
+        new CssBuilder("tento-kanban-column flex flex-col w-72 shrink-0 rounded-xl bg-slate-100/80 dark:bg-slate-900/70 border p-3 transition-all duration-200")
+            .AddClass("border-slate-200 dark:border-slate-800", !isDragTarget && !isOverLimit)
+            .AddClass("border-rose-300 dark:border-rose-800 bg-rose-50/20 dark:bg-rose-950/20", isOverLimit && !isDragTarget)
+            .AddClass("ring-2 ring-primary-500 border-primary-500 bg-primary-50/30 dark:bg-primary-950/30 shadow-md", isDragTarget)
+            .Build();
+
+    private string GetCardClass(bool isBeingDragged) =>
+        new CssBuilder("tento-kanban-card group p-3 rounded-lg bg-white dark:bg-slate-800 border shadow-xs transition-all cursor-grab active:cursor-grabbing")
+            .AddClass("border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-primary-400", !isBeingDragged)
+            .AddClass("opacity-40 border-dashed border-primary-500 scale-[0.98] shadow-inner", isBeingDragged)
+            .Build();
+
+    private string ComputedBoardClass => new CssBuilder("tento-kanban-board flex items-start gap-4 overflow-x-auto pb-4")
         .AddClass(Class)
         .Build();
 }

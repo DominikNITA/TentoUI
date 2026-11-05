@@ -148,14 +148,114 @@ const tentoTour = {
   }
 };
 
+const tentoAudio = {
+  init(audioEl, dotnetHelper) {
+    if (!audioEl || !dotnetHelper) return;
+
+    const onTimeUpdate = () => {
+      dotnetHelper.invokeMethodAsync('OnJsTimeUpdate', audioEl.currentTime);
+    };
+
+    const onLoadedMetadata = () => {
+      if (Number.isFinite(audioEl.duration) && audioEl.duration > 0) {
+        dotnetHelper.invokeMethodAsync('OnJsLoadedMetadata', audioEl.duration);
+      }
+    };
+
+    const onEnded = () => {
+      dotnetHelper.invokeMethodAsync('OnJsEnded');
+    };
+
+    const onPlay = () => {
+      dotnetHelper.invokeMethodAsync('OnJsPlayStateChanged', true);
+    };
+
+    const onPause = () => {
+      dotnetHelper.invokeMethodAsync('OnJsPlayStateChanged', false);
+    };
+
+    audioEl.addEventListener('timeupdate', onTimeUpdate);
+    audioEl.addEventListener('loadedmetadata', onLoadedMetadata);
+    audioEl.addEventListener('ended', onEnded);
+    audioEl.addEventListener('play', onPlay);
+    audioEl.addEventListener('pause', onPause);
+
+    audioEl._tentoAudioCleanup = () => {
+      audioEl.removeEventListener('timeupdate', onTimeUpdate);
+      audioEl.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audioEl.removeEventListener('ended', onEnded);
+      audioEl.removeEventListener('play', onPlay);
+      audioEl.removeEventListener('pause', onPause);
+    };
+
+    // If metadata already loaded
+    if (Number.isFinite(audioEl.duration) && audioEl.duration > 0) {
+      dotnetHelper.invokeMethodAsync('OnJsLoadedMetadata', audioEl.duration);
+    }
+  },
+
+  play(audioEl) {
+    if (!audioEl) return Promise.resolve();
+    try {
+      const p = audioEl.play();
+      if (p && typeof p.catch === 'function') {
+        return p.catch(err => {
+          console.warn('TentoUI Audio play warning:', err);
+        });
+      }
+    } catch (e) {
+      console.warn('TentoUI Audio play error:', e);
+    }
+    return Promise.resolve();
+  },
+
+  pause(audioEl) {
+    if (!audioEl) return;
+    try {
+      audioEl.pause();
+    } catch (e) {}
+  },
+
+  setCurrentTime(audioEl, time) {
+    if (!audioEl) return;
+    try {
+      if (Number.isFinite(time)) {
+        audioEl.currentTime = time;
+      }
+    } catch (e) {}
+  },
+
+  setVolume(audioEl, volume) {
+    if (!audioEl) return;
+    try {
+      audioEl.volume = Math.max(0, Math.min(1, volume));
+    } catch (e) {}
+  },
+
+  setPlaybackRate(audioEl, rate) {
+    if (!audioEl) return;
+    try {
+      audioEl.playbackRate = rate;
+    } catch (e) {}
+  },
+
+  dispose(audioEl) {
+    if (audioEl && audioEl._tentoAudioCleanup) {
+      audioEl._tentoAudioCleanup();
+      delete audioEl._tentoAudioCleanup;
+    }
+  }
+};
+
 // Expose to window for standard script tag usage
 if (typeof window !== 'undefined') {
   window.tentoModal = tentoModal;
   window.tentoClipboard = tentoClipboard;
   window.tentoTour = tentoTour;
+  window.tentoAudio = tentoAudio;
 }
 
 // Export for module bundlers / CommonJS if supported
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tentoModal, tentoClipboard, tentoTour };
+  module.exports = { tentoModal, tentoClipboard, tentoTour, tentoAudio };
 }

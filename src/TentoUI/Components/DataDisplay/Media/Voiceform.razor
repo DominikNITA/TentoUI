@@ -1,0 +1,411 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.0.3")]
+@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<div class="@ComputedRootClass" style="@Style" role="region" aria-label="Voice message waveform" @attributes="AdditionalAttributes">
+    <audio @ref="_audioRef" src="@Src" preload="metadata" class="hidden"></audio>
+
+    <div class="flex items-center gap-3 w-full">
+        @* 1. Play / Pause Button or Recording Stop Button *@
+        @if (IsRecording || Variant == VoiceformVariant.Recording)
+        {
+            <button type="button"
+                    aria-label="Stop recording"
+                    class="relative w-9 h-9 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/30 cursor-pointer transition-transform active:scale-95 group"
+                    @onclick="StopRecordingAsync">
+                <span class="absolute inset-0 rounded-full bg-rose-400 opacity-75 animate-ping pointer-events-none"></span>
+                <span class="relative w-3.5 h-3.5 rounded-xs bg-white"></span>
+            </button>
+        }
+        else
+        {
+            <button type="button"
+                    aria-label="@(IsPlaying ? "Pause voice note" : "Play voice note")"
+                    class="w-9 h-9 rounded-full bg-primary-500 hover:bg-primary-600 text-white flex items-center justify-center shadow-md shadow-primary-500/20 shrink-0 cursor-pointer transition-transform active:scale-95"
+                    @onclick="TogglePlayAsync">
+                <Icon Name="@(IsPlaying ? IconNames.Pause : IconNames.Play)" Size="15" />
+            </button>
+        }
+
+        @* 2. Author Avatar (optional) *@
+        @if (!string.IsNullOrEmpty(AvatarUrl))
+        {
+            <img src="@AvatarUrl" alt="@Author" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700" />
+        }
+        else if (!string.IsNullOrEmpty(Author))
+        {
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center text-xs font-bold shrink-0">
+                @Author[0]
+            </div>
+        }
+
+        @* 3. Waveform Bars & Time Info *@
+        <div class="flex-1 min-w-0 space-y-1">
+            @if (!string.IsNullOrEmpty(Author))
+            {
+                <div class="text-[11px] font-semibold text-slate-700 dark:text-slate-300 truncate">
+                    @Author
+                </div>
+            }
+
+            @* Waveform Visualization *@
+            <div class="flex items-center gap-[3px] h-8 w-full select-none cursor-pointer py-1"
+                 role="slider"
+                 aria-valuemin="0"
+                 aria-valuemax="@Duration"
+                 aria-valuenow="@CurrentTime">
+                @{
+                    var bars = EffectiveBars;
+                    var progressRatio = Duration > 0 ? Math.Clamp(CurrentTime / Duration, 0.0, 1.0) : 0.0;
+                    var activeBarCount = (int)Math.Round(progressRatio * bars.Count);
+                }
+
+                @for (var i = 0; i < bars.Count; i++)
+                {
+                    var barIndex = i;
+                    var amp = bars[barIndex];
+                    var isActive = barIndex < activeBarCount && !IsRecording;
+                    var barHeightPx = Math.Max(4, (int)Math.Round(amp * 26));
+
+                    <div class="flex-1 rounded-full transition-all duration-150 @(isActive ? "bg-primary-500" : IsRecording ? "bg-rose-400 animate-pulse" : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600")"
+                         style="@($"height: {barHeightPx}px; min-width: 2px;")"
+                         @onclick="@(() => SeekToBar(barIndex, bars.Count))"></div>
+                }
+            </div>
+
+            @* Duration / Status Footer *@
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 select-none">
+                @if (IsRecording)
+                {
+                    <span class="text-rose-500 font-semibold flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                        <span>Recording audio...</span>
+                    </span>
+                    <span>@FormatTime(CurrentTime)</span>
+                }
+                else
+                {
+                    <span>@(IsPlaying ? FormatTime(CurrentTime) : FormatTime(Duration))</span>
+                    @if (ShowSpeed)
+                    {
+                        <button type="button"
+                                class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 cursor-pointer"
+                                @onclick="CycleSpeedAsync">
+                            @(Speed.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture))x
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Audio source URL.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Src { get; set; }
+
+    /// <summary>
+    /// Array of normalized amplitude heights (0.1 to 1.0) for the waveform bars.
+    /// If null or empty, realistic voice note amplitudes are auto-generated.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public IEnumerable<double>? Bars { get; set; }
+
+    /// <summary>
+    /// Total duration of the voice message in seconds.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double Duration { get; set; } = 42.0;
+
+    /// <summary>
+    /// Current playback position in seconds. Supports two-way @bind-CurrentTime.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double CurrentTime { get; set; } = 0.0;
+
+    /// <summary>
+    /// Callback executed when the playback head advances or seeks.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<double> CurrentTimeChanged { get; set; }
+
+    /// <summary>
+    /// Whether the voice message is actively playing. Supports two-way @bind-IsPlaying.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool IsPlaying { get; set; }
+
+    /// <summary>
+    /// Callback executed when play/pause state changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<bool> IsPlayingChanged { get; set; }
+
+    /// <summary>
+    /// Whether the component is in live recording state. Supports two-way @bind-IsRecording.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool IsRecording { get; set; }
+
+    /// <summary>
+    /// Callback executed when recording state changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<bool> IsRecordingChanged { get; set; }
+
+    /// <summary>
+    /// Callback executed when recording is stopped by user clicking stop.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnStopRecording { get; set; }
+
+    /// <summary>
+    /// Callback executed when recording starts.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnStartRecording { get; set; }
+
+    /// <summary>
+    /// Playback speed multiplier (e.g. 1.0, 1.5, 2.0).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public double Speed { get; set; } = 1.0;
+
+    /// <summary>
+    /// Whether to display the speed toggle pill (1x, 1.5x, 2x).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowSpeed { get; set; } = true;
+
+    /// <summary>
+    /// Optional author or sender display name.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? Author { get; set; }
+
+    /// <summary>
+    /// Optional author avatar image URL.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string? AvatarUrl { get; set; }
+
+    /// <summary>
+    /// Visual presentation variant.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public VoiceformVariant Variant { get; set; } = VoiceformVariant.Default;
+
+    /// <summary>
+    /// Callback executed when user seeks along the waveform.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<double> OnSeek { get; set; }
+
+    /// <summary>
+    /// Callback executed when playback starts.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnPlay { get; set; }
+
+    /// <summary>
+    /// Callback executed when playback is paused.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback OnPause { get; set; }
+
+    private ElementReference _audioRef;
+    private DotNetObjectReference<Voiceform>? _dotNetRef;
+
+    private static readonly double[] _defaultWaveform =
+    [
+        0.2, 0.35, 0.6, 0.45, 0.8, 0.95, 0.65, 0.4, 0.7, 0.85,
+        1.0, 0.75, 0.5, 0.3, 0.6, 0.9, 0.85, 0.55, 0.4, 0.65,
+        0.8, 0.7, 0.45, 0.6, 0.9, 0.75, 0.5, 0.35, 0.6, 0.4, 0.25, 0.15
+    ];
+
+    private IReadOnlyList<double> EffectiveBars => Bars?.ToList() is { Count: > 0 } custom ? custom : _defaultWaveform;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _dotNetRef = DotNetObjectReference.Create(this);
+                await JSRuntime.InvokeVoidAsync("tentoAudio.init", _audioRef, _dotNetRef);
+                await JSRuntime.InvokeVoidAsync("tentoAudio.setPlaybackRate", _audioRef, Speed);
+            }
+            catch
+            {
+                // Test runner or SSR fallback
+            }
+        }
+    }
+
+    public async Task StartRecordingAsync()
+    {
+        IsRecording = true;
+        if (IsRecordingChanged.HasDelegate)
+        {
+            await IsRecordingChanged.InvokeAsync(true);
+        }
+        if (OnStartRecording.HasDelegate)
+        {
+            await OnStartRecording.InvokeAsync();
+        }
+        StateHasChanged();
+    }
+
+    public async Task StopRecordingAsync()
+    {
+        IsRecording = false;
+        if (IsRecordingChanged.HasDelegate)
+        {
+            await IsRecordingChanged.InvokeAsync(false);
+        }
+        if (OnStopRecording.HasDelegate)
+        {
+            await OnStopRecording.InvokeAsync();
+        }
+        StateHasChanged();
+    }
+
+    public async Task TogglePlayAsync()
+    {
+        if (IsRecording) return;
+
+        IsPlaying = !IsPlaying;
+        try
+        {
+            if (IsPlaying)
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.play", _audioRef);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.pause", _audioRef);
+            }
+        }
+        catch
+        {
+            // Browser policy or test fallback
+        }
+
+        if (IsPlayingChanged.HasDelegate)
+        {
+            await IsPlayingChanged.InvokeAsync(IsPlaying);
+        }
+
+        if (IsPlaying && OnPlay.HasDelegate)
+        {
+            await OnPlay.InvokeAsync();
+        }
+        else if (!IsPlaying && OnPause.HasDelegate)
+        {
+            await OnPause.InvokeAsync();
+        }
+    }
+
+    public async Task SeekToBar(int barIndex, int totalBars)
+    {
+        if (IsRecording || totalBars <= 0) return;
+
+        var targetRatio = (barIndex + 1) / (double)totalBars;
+        CurrentTime = Math.Clamp(targetRatio * Duration, 0.0, Duration);
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoAudio.setCurrentTime", _audioRef, CurrentTime);
+        }
+        catch
+        {
+            // Test fallback
+        }
+
+        if (CurrentTimeChanged.HasDelegate)
+        {
+            await CurrentTimeChanged.InvokeAsync(CurrentTime);
+        }
+        if (OnSeek.HasDelegate)
+        {
+            await OnSeek.InvokeAsync(CurrentTime);
+        }
+    }
+
+    private async Task CycleSpeedAsync()
+    {
+        double[] speeds = [1.0, 1.5, 2.0];
+        var idx = Array.IndexOf(speeds, Speed);
+        Speed = speeds[(idx + 1) % speeds.Length];
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("tentoAudio.setPlaybackRate", _audioRef, Speed);
+        }
+        catch
+        {
+            // Test fallback
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnJsTimeUpdate(double currentTime)
+    {
+        if (!IsRecording)
+        {
+            CurrentTime = currentTime;
+            if (CurrentTimeChanged.HasDelegate)
+            {
+                await CurrentTimeChanged.InvokeAsync(CurrentTime);
+            }
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public void OnJsLoadedMetadata(double duration)
+    {
+        if (duration > 0 && Math.Abs(Duration - 42.0) < 0.001)
+        {
+            Duration = duration;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnJsEnded()
+    {
+        IsPlaying = false;
+        if (IsPlayingChanged.HasDelegate)
+        {
+            await IsPlayingChanged.InvokeAsync(false);
+        }
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnJsPlayStateChanged(bool playing)
+    {
+        if (IsPlaying != playing)
+        {
+            IsPlaying = playing;
+            if (IsPlayingChanged.HasDelegate)
+            {
+                await IsPlayingChanged.InvokeAsync(playing);
+            }
+            StateHasChanged();
+        }
+    }
+
+    public static string FormatTime(double totalSeconds)
+    {
+        var ts = TimeSpan.FromSeconds(Math.Max(0, totalSeconds));
+        return $"{ts.Minutes}:{ts.Seconds:D2}";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoAudio.dispose", _audioRef);
+            }
+            catch
+            {
+                // Dispose fallback
+            }
+            _dotNetRef.Dispose();
+            _dotNetRef = null;
+        }
+    }
+
+    private string ComputedRootClass => new CssBuilder("tento-voiceform inline-flex max-w-sm w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 shadow-xs")
+        .AddClass(Class)
+        .Build();
+}

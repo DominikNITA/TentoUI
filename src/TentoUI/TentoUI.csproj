@@ -14,12 +14,15 @@
     
     <!-- Package Metadata -->
     <PackageId>TentoUI</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>Tento Team</Authors>
     <Description>AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS for .NET 10.</Description>
     <PackageTags>blazor;antdesign;tailwind;components;ui;net10</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://dominiknita.github.io/TentoUI/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DominikNITA/TentoUI</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

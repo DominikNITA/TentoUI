@@ -1,0 +1,194 @@
+@page "/components/voiceform"
+@namespace TentoUI.Docs.Pages.Components
+@inject IMessageService MessageService
+@implements IDisposable
+
+<PageTitle>Voiceform - TentoUI</PageTitle>
+
+<div class="max-w-5xl space-y-8">
+    <div>
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Voiceform</h1>
+            <Tag Color="purple">v1.0.3</Tag>
+        </div>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+            Voice message waveform visualizer with interactive bar scrubbing, play head progression, variable speed playback, author avatars, and live recording workflow.
+        </p>
+    </div>
+
+    @* Example 1: Interactive Waveform Message *@
+    <DemoCard Title="Interactive Waveform Message" Description="Click any bar in the soundwave to seek directly to that position. Toggle play to view the progress fill with real audio." Code="@_basicVoiceCode">
+        <div class="flex flex-col sm:flex-row items-center gap-4">
+            <Voiceform Author="Dominik (Lead Engineer)"
+                       Duration="5.0"
+                       Src="audio/speech-sample.wav"
+                       @bind-CurrentTime="_currentTime1"
+                       @bind-IsPlaying="_isPlaying1"
+                       OnSeek="@(sec => MessageService.Info($"Seeked to {Voiceform.FormatTime(sec)}"))" />
+
+            <Voiceform Author="Sarah (Product Designer)"
+                       Duration="5.0"
+                       Src="audio/speech-sample.wav"
+                       @bind-CurrentTime="_currentTime2"
+                       @bind-IsPlaying="_isPlaying2" />
+        </div>
+    </DemoCard>
+
+    @* Example 2: Chat Bubble Integration *@
+    <DemoCard Title="Chat Conversation Context" Description="Integrated inside chat conversation streams alongside avatars, speeds, and timestamps." Code="@_chatVoiceCode">
+        <div class="space-y-4 max-w-lg p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+            @* Incoming Voice Note *@
+            <div class="flex items-start gap-3">
+                <Avatar Text="AI" Class="bg-indigo-600 text-white" />
+                <div class="space-y-1">
+                    <div class="text-[11px] font-semibold text-slate-500">Claude Assistant • 10:24 AM</div>
+                    <Voiceform Duration="5.0" Speed="1.5" Src="audio/speech-sample.wav" />
+                </div>
+            </div>
+
+            @* Outgoing Voice Note *@
+            <div class="flex items-start gap-3 justify-end">
+                <div class="space-y-1 text-right">
+                    <div class="text-[11px] font-semibold text-slate-500">You • 10:25 AM</div>
+                    <Voiceform Duration="5.0" Author="You" Src="audio/speech-sample.wav" />
+                </div>
+                <Avatar Text="ME" Class="bg-primary-500 text-white" />
+            </div>
+        </div>
+    </DemoCard>
+
+    @* Example 3: Live Audio Recording Workflow *@
+    <DemoCard Title="Live Voice Recording Mode" Description="Press 'Start Recording' to begin live audio capture with dynamic waveform bars and timer. Press 'Stop Recording' (or the red button on the waveform) to finish and review the voice note." Code="@_recordingCode">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <Voiceform Variant="@(_isRecording ? VoiceformVariant.Recording : VoiceformVariant.Default)"
+                       IsRecording="@_isRecording"
+                       Duration="@(_isRecording ? _recordingTime : (_recordedDuration > 0 ? _recordedDuration : 5.0))"
+                       CurrentTime="@(_isRecording ? _recordingTime : _playbackRecordedTime)"
+                       Bars="@(_recordedBars.Count > 0 ? _recordedBars : null)"
+                       Author="@(_isRecording ? "Recording your message..." : (_recordedDuration > 0 ? "Your Voice Note" : "Ready to record"))"
+                       Src="audio/speech-sample.wav"
+                       OnStopRecording="StopRecording" />
+
+            <div>
+                @if (!_isRecording)
+                {
+                    <Button Type="ButtonType.Primary"
+                            Icon="@IconNames.Mic"
+                            OnClick="StartRecording">
+                        @(_recordedDuration > 0 ? "Record Again" : "Start Recording")
+                    </Button>
+                }
+                else
+                {
+                    <Button Type="ButtonType.Default"
+                            Danger="true"
+                            Icon="@IconNames.Square"
+                            OnClick="StopRecording">
+                        Stop Recording
+                    </Button>
+                }
+            </div>
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="Voiceform Properties" ComponentType="@typeof(Voiceform)" />
+</div>
+
+@code {
+    private double _currentTime1 = 0.0;
+    private bool _isPlaying1;
+    private double _currentTime2 = 0.0;
+    private bool _isPlaying2;
+
+    // Recording state
+    private bool _isRecording;
+    private double _recordingTime;
+    private double _recordedDuration;
+    private double _playbackRecordedTime;
+    private List<double> _recordedBars = new();
+    private System.Threading.Timer? _recordingTimer;
+
+    private void StartRecording()
+    {
+        _isRecording = true;
+        _recordingTime = 0.0;
+        _recordedBars.Clear();
+
+        _recordingTimer?.Dispose();
+        _recordingTimer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                if (_isRecording)
+                {
+                    _recordingTime += 0.25;
+                    // Add animated live amplitude bar
+                    var nextAmp = 0.2 + (Random.Shared.NextDouble() * 0.75);
+                    _recordedBars.Add(Math.Round(nextAmp, 2));
+                    if (_recordedBars.Count > 32)
+                    {
+                        _recordedBars.RemoveAt(0);
+                    }
+                    StateHasChanged();
+                }
+            });
+        }, null, 250, 250);
+
+        MessageService.Info("Recording started. Speak into your microphone...");
+    }
+
+    private void StopRecording()
+    {
+        if (!_isRecording) return;
+
+        _isRecording = false;
+        _recordingTimer?.Dispose();
+        _recordingTimer = null;
+
+        _recordedDuration = Math.Max(1.0, Math.Round(_recordingTime, 1));
+        _playbackRecordedTime = 0.0;
+
+        MessageService.Success($"Recording saved ({_recordedDuration:0.0}s). You can now play it back!");
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _recordingTimer?.Dispose();
+    }
+
+    private const string _basicVoiceCode = """
+        <Voiceform Author="Dominik (Lead Engineer)"
+                   Duration="5.0"
+                   Src="audio/speech-sample.wav"
+                   @bind-CurrentTime="currentTime"
+                   @bind-IsPlaying="isPlaying" />
+        """;
+
+    private const string _chatVoiceCode = """
+        <div class="flex items-start gap-3">
+            <Avatar Text="AI" Class="bg-indigo-600 text-white" />
+            <Voiceform Duration="5.0" Speed="1.5" Src="audio/speech-sample.wav" />
+        </div>
+        """;
+
+    private const string _recordingCode = """
+        @if (!isRecording)
+        {
+            <Button Type="ButtonType.Primary" Icon="mic" OnClick="StartRecording">
+                Start Recording
+            </Button>
+        }
+        else
+        {
+            <Button Type="ButtonType.Default" Danger="true" Icon="square" OnClick="StopRecording">
+                Stop Recording
+            </Button>
+        }
+
+        <Voiceform Variant="@(isRecording ? VoiceformVariant.Recording : VoiceformVariant.Default)"
+                   IsRecording="isRecording"
+                   Duration="recordedDuration"
+                   OnStopRecording="StopRecording" />
+        """;
+}

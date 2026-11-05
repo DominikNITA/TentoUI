@@ -4,7 +4,7 @@
 
 <PageTitle>TentoUI - Modern Blazor Components styled with Tailwind CSS</PageTitle>
 
-<div class="max-w-4xl space-y-12">
+<div class="max-w-5xl space-y-12">
     @* Hero Header *@
     <div class="space-y-4 pt-4">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 dark:bg-primary-950/50 text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800">
@@ -20,7 +20,7 @@
         </h1>
 
         <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-            Over 60+ fully accessible (WCAG 2.1 AA) UI components for Blazor. Built with native Tailwind CSS utilities, dark mode support, and clean declarative APIs.
+            Over 75+ fully accessible (WCAG 2.1 AA) UI components for Blazor. Built with native Tailwind CSS utilities, dark mode support, and clean declarative APIs.
         </p>
 
         <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -32,6 +32,13 @@
                class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors">
                 Getting Started
             </a>
+            <a href="https://github.com/DominikNITA/TentoUI"
+               target="_blank"
+               rel="noreferrer"
+               class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors inline-flex items-center gap-2">
+                <Icon Name="@IconNames.ExternalLink" Size="14" />
+                <span>GitHub Repository</span>
+            </a>
         </div>
     </div>
 
@@ -42,43 +49,145 @@
             <span>dotnet add package TentoUI</span>
         </div>
         <button type="button"
-                class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-sans font-medium text-xs transition-colors"
+                class="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-sans font-medium text-xs transition-colors cursor-pointer"
                 @onclick="CopyInstallCommand">
             Copy Command
         </button>
     </div>
 
     @* Interactive Quick Playground *@
-    <div class="space-y-4">
-        <h2 class="text-xl font-bold text-slate-900 dark:text-white">Interactive Playground</h2>
-        <p class="text-sm text-slate-500 dark:text-slate-400">
-            Test a few TentoUI components right now:
-        </p>
+    <div class="space-y-5">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Interactive Playground</h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    Live interactive showcase of TentoUI components right in your browser:
+                </p>
+            </div>
+            <span class="hidden sm:inline-flex px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Live State Binding
+            </span>
+        </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Buttons &amp; Rating</h4>
-                <div class="flex flex-wrap items-center gap-2">
-                    <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Primary clicked!"))">Primary</Button>
-                    <Button Type="ButtonType.Default" OnClick="@(() => MessageService.Info("Default clicked"))">Default</Button>
-                    <Button Type="ButtonType.Dashed">Dashed</Button>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            @* 1. Buttons & Rating *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Buttons &amp; Rating</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">General</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Button Type="ButtonType.Primary" Size="ComponentSize.Small" OnClick="@(() => MessageService.Success("Primary action triggered!"))">Primary</Button>
+                        <Button Type="ButtonType.Default" Size="ComponentSize.Small" OnClick="@(() => MessageService.Info("Default clicked"))">Default</Button>
+                        <Button Type="ButtonType.Dashed" Size="ComponentSize.Small">Dashed</Button>
+                        <Button Type="ButtonType.Primary" Danger="true" Size="ComponentSize.Small" OnClick="@(() => MessageService.Error("Danger clicked!"))">Delete</Button>
+                    </div>
                 </div>
-                <div class="pt-2 flex items-center justify-between">
-                    <span class="text-xs text-slate-500">Rating:</span>
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-500">Rating (@_rating/5):</span>
                     <Rate @bind-Value="_rating" />
                 </div>
             </div>
 
-            <div class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
-                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Segmented Control</h4>
-                <Segmented TValue="string"
-                           @bind-Value="_activePill"
-                           Options="@_pillOptions"
-                           Block="true" />
+            @* 2. Segmented & Switch *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Navigation &amp; Switch</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Controls</span>
+                    </div>
+                    <Segmented TValue="string"
+                               @bind-Value="_activePill"
+                               Options="@_pillOptions"
+                               Block="true" />
+                </div>
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">Enable Turbo Engine:</span>
+                        <Switch @bind-Value="_switchChecked">
+                            <CheckedChildren>ON</CheckedChildren>
+                            <UnCheckedChildren>OFF</UnCheckedChildren>
+                        </Switch>
+                    </div>
+                    <div class="flex items-center justify-between text-xs pt-1">
+                        <span class="text-slate-500">Selected View:</span>
+                        <Tag Color="TagColor.Primary">@_activePill</Tag>
+                    </div>
+                </div>
+            </div>
 
-                <div class="pt-1 flex items-center justify-between text-xs text-slate-500">
-                    <span>Active state:</span>
-                    <Tag Color="TagColor.Success">@_activePill</Tag>
+            @* 3. Audio & Voiceform (v1.0.3) *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Voice Note &amp; Audio</h4>
+                        <Tag Color="purple">v1.0.3</Tag>
+                    </div>
+                    <Voiceform Author="Dominik (Lead)"
+                               Duration="5.0"
+                               Src="audio/speech-sample.wav"
+                               @bind-CurrentTime="_voiceTime"
+                               @bind-IsPlaying="_voicePlaying" />
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                    <span>Click bars to seek timestamp</span>
+                    <span class="font-mono">@Voiceform.FormatTime(_voiceTime) / 0:05</span>
+                </div>
+            </div>
+
+            @* 4. Speedometer Gauge & Live Meter *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Animated Gauge</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Analytics</span>
+                    </div>
+                    <div class="flex justify-center">
+                        <Gauge Value="_gaugeValue" Label="Cluster Health" Unit="%" Size="130" />
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1.5">
+                    <Button Size="ComponentSize.Small" OnClick="@(() => _gaugeValue = Math.Max(0, _gaugeValue - 15))">-15%</Button>
+                    <Button Size="ComponentSize.Small" OnClick="@(() => _gaugeValue = Math.Min(100, _gaugeValue + 15))">+15%</Button>
+                    <Button Size="ComponentSize.Small" Type="ButtonType.Primary" OnClick="RandomizeGauge">Randomize</Button>
+                </div>
+            </div>
+
+            @* 5. AI Prompt Input *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">AI Prompt Input</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Copilot</span>
+                    </div>
+                    <PromptInput @bind-Value="_promptText"
+                                 Placeholder="Ask TentoUI Copilot..."
+                                 Suggestions="@_promptSuggestions"
+                                 Loading="_promptLoading"
+                                 Rows="2"
+                                 OnSubmit="HandlePromptSubmit" />
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                    <span>Press Enter to simulate AI response</span>
+                    <Icon Name="@IconNames.Sparkles" Size="14" Class="text-amber-500" />
+                </div>
+            </div>
+
+            @* 6. SignaturePad Canvas *@
+            <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Vector Signature Pad</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Canvas</span>
+                    </div>
+                    <SignaturePad @bind-Value="_signatureSvg"
+                                  Height="105"
+                                  Placeholder="Draw a signature or doodle here..." />
+                </div>
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                    <span>Touch &amp; mouse vector capture</span>
+                    <Icon Name="@IconNames.Edit" Size="13" />
                 </div>
             </div>
         </div>
@@ -88,12 +197,43 @@
 @code {
     private int _rating = 4;
     private string _activePill = "Overview";
+    private bool _switchChecked = true;
+    private double _voiceTime = 0.0;
+    private bool _voicePlaying;
+    private double _gaugeValue = 82.0;
+
+    private string _promptText = string.Empty;
+    private bool _promptLoading;
+    private string? _signatureSvg;
+
+    private readonly string[] _promptSuggestions = ["Create FormWizard", "Build KanbanBoard", "Add Dark Mode"];
+
     private readonly SegmentedOption<string>[] _pillOptions =
     [
         new("Overview", "Overview", IconNames.Home),
         new("Analytics", "Analytics", IconNames.Search),
         new("Settings", "Settings", IconNames.Settings)
     ];
+
+    private void RandomizeGauge()
+    {
+        _gaugeValue = Random.Shared.Next(25, 98);
+        MessageService.Info($"Updated health score to {_gaugeValue:0}%");
+    }
+
+    private async Task HandlePromptSubmit(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return;
+
+        _promptLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(400); // Simulate AI generation
+        _promptLoading = false;
+        _promptText = string.Empty;
+
+        MessageService.Success($"Copilot generated: Scaffolded '{query}' component with Tailwind tokens!");
+    }
 
     private void CopyInstallCommand()
     {

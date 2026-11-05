@@ -42,6 +42,17 @@
             </div>
         }
     </div>
+
+    @* External Links Footer *@
+    <div class="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-xs">
+        <a href="https://github.com/DominikNITA/TentoUI"
+           target="_blank"
+           rel="noreferrer"
+           class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <Icon Name="@IconNames.ExternalLink" Size="13" />
+            <span class="font-medium truncate">GitHub Repository</span>
+        </a>
+    </div>
 </div>
 
 @code {
@@ -110,6 +121,7 @@
             new("DateRangePicker", "components/date-range-picker"),
             new("FilterBuilder", "components/filter-builder"),
             new("Form", "components/form"),
+            new("FormWizard", "components/form-wizard"),
             new("Input", "components/input"),
             new("InputNumber", "components/input-number"),
             new("MarkdownEditor", "components/markdown-editor"),
@@ -120,6 +132,7 @@
             new("Select", "components/select"),
             new("SignaturePad", "components/signature-pad"),
             new("Slider", "components/slider"),
+            new("StepperForm", "components/stepper-form"),
             new("Switch", "components/switch"),
             new("TextArea", "components/textarea"),
             new("TimePicker", "components/time-picker"),
@@ -130,6 +143,7 @@
         ]),
         new("Data Display",
         [
+            new("AudioPlayer", "components/audio-player"),
             new("Avatar", "components/avatar"),
             new("Badge", "components/badge"),
             new("Calendar", "components/calendar"),
@@ -156,6 +170,7 @@
             new("Tag", "components/tag"),
             new("Timeline", "components/timeline"),
             new("Tree", "components/tree"),
+            new("Voiceform", "components/voiceform"),
             new("Watermark", "components/watermark")
         ]),
         new("Feedback",

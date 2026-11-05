@@ -1,13 +1,23 @@
 [
   {
-    "version": "1.0.2",
-    "label": "v1.0.2",
+    "version": "1.0.3",
+    "label": "v1.0.3",
     "path": "/",
     "isLatest": true,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",
-    "notes": "Current release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"
+    "notes": "Current release (FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop)"
+  },
+  {
+    "version": "1.0.2",
+    "label": "v1.0.2",
+    "path": "/v1.0.2/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Patch release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"
   },
   {
     "version": "1.0.1",

@@ -1,0 +1,375 @@
+@namespace TentoUI
+@typeparam TModel
+@inherits TentoComponentBase
+@implements IStepperFormContext
+@attribute [Since("1.0.3")]
+
+<CascadingValue Value="@this" IsFixed="true">
+    <div class="hidden">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+<div class="@ComputedRootClass" style="@Style" @attributes="AdditionalAttributes">
+    <EditForm Model="@Model" OnValidSubmit="HandleSubmitAsync" OnInvalidSubmit="HandleInvalidSubmitAsync" class="w-full">
+        <DataAnnotationsValidator />
+
+        @if (Layout == StepperFormLayout.Vertical)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                @* Left Vertical Stepper Navigation *@
+                <div class="md:col-span-4 lg:col-span-3 space-y-4 pr-4 border-b md:border-b-0 md:border-r border-slate-200/80 dark:border-slate-800 pb-6 md:pb-0">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">
+                        Form Progress
+                    </div>
+                    <div class="space-y-4">
+                        @for (var i = 0; i < _steps.Count; i++)
+                        {
+                            var stepIndex = i;
+                            var step = _steps[stepIndex];
+                            var isCurrent = stepIndex == EffectiveCurrent;
+                            var isCompleted = stepIndex < EffectiveCurrent;
+
+                            <button type="button"
+                                    disabled="@step.Disabled"
+                                    class="w-full flex items-start gap-3 text-left p-2.5 rounded-xl transition-all cursor-pointer @(isCurrent ? "bg-primary-50 dark:bg-primary-950/40 border border-primary-200 dark:border-primary-800 shadow-xs" : "hover:bg-slate-50 dark:hover:bg-slate-800/60")"
+                                    @onclick="@(() => GoToStepAsync(stepIndex))">
+                                <div class="@GetStepBadgeClass(isCurrent, isCompleted)">
+                                    @if (isCompleted)
+                                    {
+                                        <Icon Name="@IconNames.Check" Size="13" />
+                                    }
+                                    else if (!string.IsNullOrEmpty(step.Icon))
+                                    {
+                                        <Icon Name="@step.Icon" Size="13" />
+                                    }
+                                    else
+                                    {
+                                        <span>@(stepIndex + 1)</span>
+                                    }
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-bold truncate @(isCurrent ? "text-primary-700 dark:text-primary-300" : isCompleted ? "text-slate-800 dark:text-slate-200" : "text-slate-400 dark:text-slate-500")">
+                                        @step.Title
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(step.SubTitle))
+                                    {
+                                        <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">
+                                            @step.SubTitle
+                                        </div>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @* Right Form Body *@
+                <div class="md:col-span-8 lg:col-span-9 flex flex-col justify-between min-h-[300px]">
+                    <div class="tento-stepper-body">
+                        @if (_steps.Count > 0 && EffectiveCurrent < _steps.Count)
+                        {
+                            var step = _steps[EffectiveCurrent];
+                            <div class="mb-4">
+                                <h3 class="text-base font-bold text-slate-900 dark:text-white">@step.Title</h3>
+                                @if (!string.IsNullOrEmpty(step.Description))
+                                {
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@step.Description</p>
+                                }
+                            </div>
+                            <div class="animate-in fade-in duration-150">
+                                @step.ChildContent
+                            </div>
+                        }
+                    </div>
+
+                    @* Bottom Navigation *@
+                    @if (ShowNavigation && _steps.Count > 0)
+                    {
+                        @RenderFooterNavigation()
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            @* Horizontal Layout *@
+            <div class="tento-stepper-header mb-6 pb-6 border-b border-slate-200/80 dark:border-slate-800">
+                <div class="flex items-center justify-between relative">
+                    @for (var i = 0; i < _steps.Count; i++)
+                    {
+                        var stepIndex = i;
+                        var step = _steps[stepIndex];
+                        var isCurrent = stepIndex == EffectiveCurrent;
+                        var isCompleted = stepIndex < EffectiveCurrent;
+                        var isLast = stepIndex == _steps.Count - 1;
+
+                        <div class="flex-1 flex items-center @(isLast ? "flex-none" : "")">
+                            <button type="button"
+                                    disabled="@step.Disabled"
+                                    class="group flex items-center gap-3 text-left focus:outline-none cursor-pointer disabled:cursor-not-allowed"
+                                    @onclick="@(() => GoToStepAsync(stepIndex))">
+                                <div class="@GetStepBadgeClass(isCurrent, isCompleted)">
+                                    @if (isCompleted)
+                                    {
+                                        <Icon Name="@IconNames.Check" Size="14" />
+                                    }
+                                    else if (!string.IsNullOrEmpty(step.Icon))
+                                    {
+                                        <Icon Name="@step.Icon" Size="14" />
+                                    }
+                                    else
+                                    {
+                                        <span>@(stepIndex + 1)</span>
+                                    }
+                                </div>
+                                <div class="hidden sm:block">
+                                    <div class="text-xs font-semibold @(isCurrent ? "text-primary-600 dark:text-primary-400" : isCompleted ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-slate-500")">
+                                        @step.Title
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(step.SubTitle))
+                                    {
+                                        <div class="text-[11px] text-slate-400 dark:text-slate-500">
+                                            @step.SubTitle
+                                        </div>
+                                    }
+                                </div>
+                            </button>
+
+                            @if (!isLast)
+                            {
+                                <div class="flex-1 mx-3 sm:mx-4 h-0.5 @(isCompleted ? "bg-primary-500" : "bg-slate-200 dark:bg-slate-800") transition-colors"></div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @* Horizontal Body *@
+            <div class="tento-stepper-body min-h-[180px]">
+                @if (_steps.Count > 0 && EffectiveCurrent < _steps.Count)
+                {
+                    var step = _steps[EffectiveCurrent];
+                    <div class="mb-4">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">@step.Title</h3>
+                        @if (!string.IsNullOrEmpty(step.Description))
+                        {
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@step.Description</p>
+                        }
+                    </div>
+                    <div class="animate-in fade-in duration-150">
+                        @step.ChildContent
+                    </div>
+                }
+            </div>
+
+            @* Horizontal Footer Navigation *@
+            @if (ShowNavigation && _steps.Count > 0)
+            {
+                @RenderFooterNavigation()
+            }
+        }
+    </EditForm>
+</div>
+
+@code {
+    /// <summary>
+    /// The form model instance containing the data bound to inputs.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public TModel? Model { get; set; }
+
+    /// <summary>
+    /// Layout structure: Horizontal (stepper on top) or Vertical (stepper on left).
+    /// </summary>
+    [Parameter, Since("1.0.3")] public StepperFormLayout Layout { get; set; } = StepperFormLayout.Horizontal;
+
+    /// <summary>
+    /// Zero-based index of the currently active step. Supports two-way @bind-CurrentStep.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public int CurrentStep { get; set; }
+
+    /// <summary>
+    /// Callback executed when the active step changes.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<int> CurrentStepChanged { get; set; }
+
+    /// <summary>
+    /// Optional step validation callback. Return false to prevent advancing to the next step.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public Func<int, Task<bool>>? OnValidateStep { get; set; }
+
+    /// <summary>
+    /// Callback invoked when form passes validation and is submitted on the final step.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<TModel> OnValidSubmit { get; set; }
+
+    /// <summary>
+    /// Callback invoked when form validation fails.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public EventCallback<EditContext> OnInvalidSubmit { get; set; }
+
+    /// <summary>
+    /// Whether to show the navigation footer with Previous, Next, and Submit buttons.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public bool ShowNavigation { get; set; } = true;
+
+    /// <summary>
+    /// Label for the Next button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string NextText { get; set; } = "Next Step";
+
+    /// <summary>
+    /// Label for the Previous button.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string PreviousText { get; set; } = "Previous";
+
+    /// <summary>
+    /// Label for the Submit button on the final step.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public string SubmitText { get; set; } = "Submit Form";
+
+    /// <summary>
+    /// StepperFormStep child components.
+    /// </summary>
+    [Parameter, Since("1.0.3")] public RenderFragment? ChildContent { get; set; }
+
+    private readonly List<StepperFormStep> _steps = new();
+    private bool _isValidating;
+    private int EffectiveCurrent => Math.Clamp(CurrentStep, 0, Math.Max(0, _steps.Count - 1));
+
+    public void RegisterStep(StepperFormStep step)
+    {
+        if (!_steps.Contains(step))
+        {
+            _steps.Add(step);
+            StateHasChanged();
+        }
+    }
+
+    public void UnregisterStep(StepperFormStep step)
+    {
+        if (_steps.Remove(step))
+        {
+            StateHasChanged();
+        }
+    }
+
+    public async Task NextStepAsync()
+    {
+        if (EffectiveCurrent < _steps.Count - 1)
+        {
+            if (OnValidateStep != null)
+            {
+                _isValidating = true;
+                try
+                {
+                    var valid = await OnValidateStep(EffectiveCurrent);
+                    if (!valid) return;
+                }
+                finally
+                {
+                    _isValidating = false;
+                }
+            }
+            await GoToStepAsync(EffectiveCurrent + 1);
+        }
+    }
+
+    public async Task PreviousStepAsync()
+    {
+        if (EffectiveCurrent > 0)
+        {
+            await GoToStepAsync(EffectiveCurrent - 1);
+        }
+    }
+
+    public async Task GoToStepAsync(int targetIndex)
+    {
+        if (targetIndex < 0 || targetIndex >= _steps.Count || targetIndex == EffectiveCurrent) return;
+        if (_steps[targetIndex].Disabled) return;
+
+        CurrentStep = targetIndex;
+        if (CurrentStepChanged.HasDelegate)
+        {
+            await CurrentStepChanged.InvokeAsync(CurrentStep);
+        }
+    }
+
+    private async Task HandleSubmitAsync(EditContext editContext)
+    {
+        if (OnValidateStep != null)
+        {
+            var valid = await OnValidateStep(EffectiveCurrent);
+            if (!valid) return;
+        }
+
+        if (OnValidSubmit.HasDelegate && Model != null)
+        {
+            await OnValidSubmit.InvokeAsync(Model);
+        }
+    }
+
+    private async Task HandleInvalidSubmitAsync(EditContext editContext)
+    {
+        if (OnInvalidSubmit.HasDelegate)
+        {
+            await OnInvalidSubmit.InvokeAsync(editContext);
+        }
+    }
+
+    private RenderFragment RenderFooterNavigation() => builder =>
+    {
+        var isFirst = EffectiveCurrent == 0;
+        var isLast = EffectiveCurrent == _steps.Count - 1;
+
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "tento-stepper-footer mt-8 pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3");
+
+        builder.OpenElement(2, "div");
+        if (!isFirst)
+        {
+            builder.OpenComponent<Button>(3);
+            builder.AddAttribute(4, "Type", ButtonType.Default);
+            builder.AddAttribute(5, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(this, PreviousStepAsync));
+            builder.AddAttribute(6, "Disabled", _isValidating);
+            builder.AddAttribute(7, "ChildContent", (RenderFragment)(b => b.AddContent(0, PreviousText)));
+            builder.CloseComponent();
+        }
+        builder.CloseElement();
+
+        builder.OpenElement(8, "div");
+        builder.AddAttribute(9, "class", "flex items-center gap-2");
+        if (!isLast)
+        {
+            builder.OpenComponent<Button>(10);
+            builder.AddAttribute(11, "Type", ButtonType.Primary);
+            builder.AddAttribute(12, "OnClick", EventCallback.Factory.Create<MouseEventArgs>(this, NextStepAsync));
+            builder.AddAttribute(13, "Loading", _isValidating);
+            builder.AddAttribute(14, "ChildContent", (RenderFragment)(b => b.AddContent(0, NextText)));
+            builder.CloseComponent();
+        }
+        else
+        {
+            builder.OpenComponent<Button>(15);
+            builder.AddAttribute(16, "Type", ButtonType.Primary);
+            builder.AddAttribute(17, "HtmlType", ButtonHtmlType.Submit);
+            builder.AddAttribute(18, "Loading", _isValidating);
+            builder.AddAttribute(19, "ChildContent", (RenderFragment)(b => b.AddContent(0, SubmitText)));
+            builder.CloseComponent();
+        }
+        builder.CloseElement();
+
+        builder.CloseElement();
+    };
+
+    private string GetStepBadgeClass(bool isCurrent, bool isCompleted) =>
+        new CssBuilder("w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all")
+            .AddClass("bg-primary-500 text-white shadow-xs ring-4 ring-primary-100 dark:ring-primary-950", isCurrent)
+            .AddClass("bg-primary-600 text-white", isCompleted && !isCurrent)
+            .AddClass("bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700", !isCurrent && !isCompleted)
+            .Build();
+
+    private string ComputedRootClass => new CssBuilder("tento-stepper-form w-full rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xs")
+        .AddClass(Class)
+        .Build();
+}

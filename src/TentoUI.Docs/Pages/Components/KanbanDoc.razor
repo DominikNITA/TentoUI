@@ -4,40 +4,157 @@
 
 <PageTitle>KanbanBoard - TentoUI</PageTitle>
 
-<div class="max-w-5xl space-y-8">
+<div class="max-w-6xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">KanbanBoard</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Multi-column Kanban workflow board with HTML5 drag-and-drop, accessible card movement buttons, custom card templates, and column WIP limits.
+            Multi-column agile workflow board featuring smooth HTML5 drag-and-drop, visual drop-target rings, WIP capacity limits, quick card addition, and rich task cards.
         </p>
     </div>
 
-    <DemoCard Title="Interactive Project Pipeline" Description="Drag cards between columns or click the directional arrow buttons on any card." Code="@_kanbanCode">
+    @* Example 1: Interactive Sprint Workflow with Drag & Drop *@
+    <DemoCard Title="Interactive Sprint Workflow" Description="Drag cards smoothly between columns or use the quick shift buttons. Try dragging into a column to see the active drop ring." Code="@_kanbanCode">
+        <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs">
+                <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                    <Icon Name="@IconNames.Info" Size="14" Class="text-primary-500" />
+                    <span>Total cards in sprint: <strong class="text-slate-900 dark:text-white">@_cards.Count</strong></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Button Type="ButtonType.Default" Size="ComponentSize.Small" Icon="@IconNames.Plus" OnClick="@(() => AddQuickTask("todo"))">
+                        New Backlog Task
+                    </Button>
+                </div>
+            </div>
+
+            <KanbanBoard TItem="KanbanCardItem"
+                         Columns="@_columns"
+                         Items="@_cards"
+                         ShowAddButton="true"
+                         OnAddCard="AddQuickTask"
+                         OnCardClick="HandleCardClick"
+                         OnCardMove="HandleCardMove" />
+        </div>
+    </DemoCard>
+
+    @* Example 2: Work-in-Progress (WIP) Limits Enforcement *@
+    <DemoCard Title="WIP Limits & Capacity Warnings" Description="Columns automatically display WIP capacity badges (e.g. 2/3) and highlight in warning/error colors when limits are reached or exceeded." Code="@_wipCode">
         <KanbanBoard TItem="KanbanCardItem"
-                     Columns="@_columns"
-                     Items="@_cards"
+                     Columns="@_wipColumns"
+                     Items="@_wipCards"
                      OnCardMove="@(args => MessageService.Info($"Moved '{args.Item.Title}' to {args.TargetColumnKey}"))" />
     </DemoCard>
 
     <ApiTable Title="KanbanBoard Properties" ComponentType="@typeof(KanbanBoard<KanbanCardItem>)" />
+    <ApiTable Title="KanbanColumnDefinition Properties" Properties="@_columnProps" />
+    <ApiTable Title="KanbanCardItem Properties" Properties="@_cardProps" />
+    <ApiTable Title="KanbanCardMoveArgs Properties" Properties="@_moveArgsProps" />
 </div>
 
 @code {
     private readonly KanbanColumnDefinition[] _columns =
     [
+        new("backlog", "Backlog", MaxItems: 6),
         new("todo", "To Do", MaxItems: 4),
-        new("in-progress", "In Progress", MaxItems: 2),
+        new("in-progress", "In Progress", MaxItems: 3),
+        new("review", "Code Review", MaxItems: 2),
         new("done", "Done")
     ];
 
     private readonly System.Collections.Generic.List<KanbanCardItem> _cards =
     [
-        new() { Id = "c1", Title = "Multi-version docs manifest", Description = "Fetch versions.json and preserve routes across builds", ColumnKey = "todo", Tag = "Docs" },
-        new() { Id = "c2", Title = "CommandPalette Ctrl+K shortcut", Description = "Global spotlight search modal", ColumnKey = "in-progress", Tag = "Navigation" },
-        new() { Id = "c3", Title = "Source-verified ApiTable", Description = "Reflect Parameter & Since attributes automatically", ColumnKey = "done", Tag = "Architecture" }
+        new() { Id = "c1", Title = "Implement FormWizard & StepperForm", Description = "Build validated multi-step form orchestration components.", ColumnKey = "in-progress", Tag = "Core", TagColor = TagColor.Primary, Priority = "High", PriorityColor = TagColor.Error, Assignee = "Dominik" },
+        new() { Id = "c2", Title = "AudioPlayer & Voiceform Waveforms", Description = "Interactive scrubber, playback speed, and soundwave visualizer.", ColumnKey = "in-progress", Tag = "Media", TagColor = TagColor.Purple, Priority = "High", PriorityColor = TagColor.Error, Assignee = "Elena" },
+        new() { Id = "c3", Title = "Kanban Drag & Drop Enhancements", Description = "Add drop target rings, visual placeholders, and API docs.", ColumnKey = "review", Tag = "Kanban", TagColor = TagColor.Warning, Priority = "Medium", PriorityColor = TagColor.Warning, Assignee = "Lucas" },
+        new() { Id = "c4", Title = "Optimize Tailwind v4 tokens build", Description = "Ensure fast CSS bundle compile times during CI runs.", ColumnKey = "done", Tag = "DevOps", TagColor = TagColor.Success, Priority = "Low", PriorityColor = TagColor.Default, Assignee = "Sarah" },
+        new() { Id = "c5", Title = "Write unit tests for media components", Description = "Cover seek, playback toggle, and bar amplitude clamping.", ColumnKey = "todo", Tag = "Testing", TagColor = TagColor.Cyan, Priority = "Medium", PriorityColor = TagColor.Warning, Assignee = "Alex" },
+        new() { Id = "c6", Title = "Dark mode contrast verification", Description = "Run automated accessibility checks against WCAG AAA standards.", ColumnKey = "backlog", Tag = "A11y", TagColor = TagColor.Default, Priority = "Low", PriorityColor = TagColor.Default, Assignee = "Mia" }
     ];
 
+    private readonly KanbanColumnDefinition[] _wipColumns =
+    [
+        new("ready", "Ready for Dev", MaxItems: 2),
+        new("active", "Active Sprint", MaxItems: 2),
+        new("shipped", "Shipped")
+    ];
+
+    private readonly System.Collections.Generic.List<KanbanCardItem> _wipCards =
+    [
+        new() { Id = "w1", Title = "Database migration v10", Description = "Apply schema delta for partitioned audit tables.", ColumnKey = "active", Tag = "DB", Priority = "Urgent", PriorityColor = TagColor.Error },
+        new() { Id = "w2", Title = "Redis Cache-Aside pipeline", Description = "Implement MediatR caching pipeline behavior.", ColumnKey = "active", Tag = "Cache", Priority = "High", PriorityColor = TagColor.Warning },
+        new() { Id = "w3", Title = "Scalar OpenAPI docs UI", Description = "Expose interactive scalar API explorer.", ColumnKey = "ready", Tag = "Docs" }
+    ];
+
+    private void HandleCardMove(KanbanCardMoveArgs<KanbanCardItem> args)
+    {
+        MessageService.Success($"Card '{args.Item.Title}' moved from {args.SourceColumnKey} to {args.TargetColumnKey}");
+    }
+
+    private void HandleCardClick(KanbanCardItem card)
+    {
+        MessageService.Info($"Selected task: {card.Title} (Assigned to: {card.Assignee ?? "Unassigned"})");
+    }
+
+    private void AddQuickTask(string columnKey)
+    {
+        var newTask = new KanbanCardItem
+        {
+            Id = $"task-{DateTime.Now.Ticks % 10000}",
+            Title = $"New Task #{_cards.Count + 1}",
+            Description = "Describe task objectives and acceptance criteria here.",
+            ColumnKey = columnKey,
+            Tag = "Feature",
+            TagColor = TagColor.Primary,
+            Priority = "Medium",
+            PriorityColor = TagColor.Warning,
+            Assignee = "You"
+        };
+        _cards.Add(newTask);
+        MessageService.Success($"Added '{newTask.Title}' to {columnKey}");
+    }
+
     private const string _kanbanCode = """
-        <KanbanBoard TItem="KanbanCardItem" />
+        <KanbanBoard TItem="KanbanCardItem"
+                     Columns="@columns"
+                     Items="@cards"
+                     ShowAddButton="true"
+                     OnAddCard="AddQuickTask"
+                     OnCardMove="HandleCardMove" />
         """;
+
+    private const string _wipCode = """
+        <KanbanBoard TItem="KanbanCardItem"
+                     Columns="@wipColumns"
+                     Items="@wipCards"
+                     OnCardMove="HandleCardMove" />
+        """;
+
+    private readonly ApiTable.ApiProp[] _columnProps =
+    [
+        new("Key", "Unique string identifier for the column matching card ColumnKey.", "string", "-"),
+        new("Title", "Human-readable column title displayed in the column header.", "string", "-"),
+        new("MaxItems", "Optional Work-In-Progress (WIP) capacity limit. Exceeding shows a warning badge.", "int?", "null"),
+        new("BadgeColor", "TagColor variant applied to the count badge.", "TagColor", "TagColor.Default")
+    ];
+
+    private readonly ApiTable.ApiProp[] _cardProps =
+    [
+        new("Id", "Unique identifier for the card.", "string", "Guid.NewGuid()"),
+        new("Title", "Header text displayed on the card.", "string", "string.Empty"),
+        new("Description", "Secondary descriptive summary text.", "string?", "null"),
+        new("ColumnKey", "Key of the column containing this card.", "string", "string.Empty"),
+        new("Tag", "Category or label tag text.", "string?", "null"),
+        new("TagColor", "Color variant for the category tag badge.", "TagColor", "TagColor.Primary"),
+        new("Assignee", "Name or initials of the assigned team member.", "string?", "null"),
+        new("Priority", "Priority level text (e.g. Urgent, High, Medium, Low).", "string?", "null", Since: "1.0.3"),
+        new("PriorityColor", "Color token applied to the priority badge.", "TagColor", "TagColor.Default", Since: "1.0.3")
+    ];
+
+    private readonly ApiTable.ApiProp[] _moveArgsProps =
+    [
+        new("Item", "The card instance that was moved.", "TItem", "-"),
+        new("SourceColumnKey", "The column key where the card was originally located.", "string", "-"),
+        new("TargetColumnKey", "The destination column key where the card was dropped.", "string", "-"),
+        new("TargetIndex", "Optional destination index within the destination column.", "int?", "null", Since: "1.0.3")
+    ];
 }

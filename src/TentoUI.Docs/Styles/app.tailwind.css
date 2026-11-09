@@ -7,3 +7,9 @@
 @source "../../TentoUI/**/*.razor";
 @source "../../TentoUI/**/*.cs";
 @source "../../TentoUI/tailwind/tentoui.classes.txt";
+
+/* Ensure doc pages can breathe horizontally in wide container */
+main > div.max-w-5xl,
+main > div.max-w-4xl {
+    max-width: 100% !important;
+}

@@ -1,0 +1,220 @@
+@namespace TentoUI.Docs.Components
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+
+<aside class="hidden xl:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto pl-6 pr-2 py-8 select-none">
+    @if (_items.Count > 0)
+    {
+        <div class="space-y-6 text-xs">
+            <div class="flex items-center gap-2 font-bold uppercase tracking-wider text-[11px] text-slate-400 dark:text-slate-500">
+                <Icon Name="@IconNames.Layers" Size="13" Class="text-primary-500 shrink-0" />
+                <span>On this page</span>
+            </div>
+
+            @{
+                var playgroundItems = _items.Where(i => i.Category == "playground").ToList();
+                var exampleItems = _items.Where(i => i.Category == "example").ToList();
+                var apiItems = _items.Where(i => i.Category == "api").ToList();
+                var otherItems = _items.Where(i => i.Category != "playground" && i.Category != "example" && i.Category != "api").ToList();
+            }
+
+            @* Grupa: Playground *@
+            @if (playgroundItems.Count > 0)
+            {
+                <div class="space-y-2">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                        <span>Playground</span>
+                    </div>
+                    <ul class="border-l-2 border-slate-200 dark:border-slate-800 space-y-1 ml-1">
+                        @foreach (var item in playgroundItems)
+                        {
+                            var isActive = item.Id == _activeId;
+                            <li>
+                                <button type="button"
+                                        data-target-id="@item.Id"
+                                        class="tento-toc-item block w-full text-left pl-3 -ml-[2px] border-l-2 @(isActive ? "border-primary-500 text-primary-600 dark:text-primary-400 font-semibold" : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200") transition-colors truncate text-xs cursor-pointer"
+                                        title="@item.Title"
+                                        @onclick="@(() => ScrollToSectionAsync(item.Id))">
+                                    @item.Title
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Grupa: Przykłady *@
+            @if (exampleItems.Count > 0)
+            {
+                <div class="space-y-2">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                        <span>Examples (@exampleItems.Count)</span>
+                    </div>
+                    <ul class="border-l-2 border-slate-200 dark:border-slate-800 space-y-1 ml-1">
+                        @foreach (var item in exampleItems)
+                        {
+                            var isActive = item.Id == _activeId;
+                            <li>
+                                <button type="button"
+                                        data-target-id="@item.Id"
+                                        class="tento-toc-item block w-full text-left pl-3 -ml-[2px] border-l-2 @(isActive ? "border-primary-500 text-primary-600 dark:text-primary-400 font-semibold" : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200") transition-colors truncate text-xs cursor-pointer"
+                                        title="@item.Title"
+                                        @onclick="@(() => ScrollToSectionAsync(item.Id))">
+                                    @item.Title
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Grupa: Dokumentacja API *@
+            @if (apiItems.Count > 0)
+            {
+                <div class="space-y-2">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span>API Reference</span>
+                    </div>
+                    <ul class="border-l-2 border-slate-200 dark:border-slate-800 space-y-1 ml-1">
+                        @foreach (var item in apiItems)
+                        {
+                            var isActive = item.Id == _activeId;
+                            <li>
+                                <button type="button"
+                                        data-target-id="@item.Id"
+                                        class="tento-toc-item block w-full text-left pl-3 -ml-[2px] border-l-2 @(isActive ? "border-primary-500 text-primary-600 dark:text-primary-400 font-semibold" : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200") transition-colors truncate text-xs cursor-pointer"
+                                        title="@item.Title"
+                                        @onclick="@(() => ScrollToSectionAsync(item.Id))">
+                                    @item.Title
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Grupa: Pozostałe sekcje *@
+            @if (otherItems.Count > 0)
+            {
+                <div class="space-y-2">
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                        <span>Sections</span>
+                    </div>
+                    <ul class="border-l-2 border-slate-200 dark:border-slate-800 space-y-1 ml-1">
+                        @foreach (var item in otherItems)
+                        {
+                            var isActive = item.Id == _activeId;
+                            <li>
+                                <button type="button"
+                                        data-target-id="@item.Id"
+                                        class="tento-toc-item block w-full text-left pl-3 -ml-[2px] border-l-2 @(isActive ? "border-primary-500 text-primary-600 dark:text-primary-400 font-semibold" : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200") transition-colors truncate text-xs cursor-pointer"
+                                        title="@item.Title"
+                                        @onclick="@(() => ScrollToSectionAsync(item.Id))">
+                                    @item.Title
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @* Quick link back to top *@
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                <button type="button"
+                        class="text-[11px] text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                        @onclick="ScrollToTopAsync">
+                    <Icon Name="@IconNames.ArrowUp" Size="12" />
+                    <span>Back to top</span>
+                </button>
+            </div>
+        </div>
+    }
+</aside>
+
+@code {
+    public record TocItem(string Id, string Title, string Category);
+
+    private List<TocItem> _items = new();
+    private string? _activeId;
+    private DotNetObjectReference<TableOfContents>? _dotNetRef;
+    private bool _initialized;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            _initialized = true;
+            await ScanPageAsync();
+        }
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // Give Blazor WASM a short moment to render the new page component tree
+        await Task.Delay(120);
+        await ScanPageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ScanPageAsync()
+    {
+        if (!_initialized || _dotNetRef == null) return;
+        try
+        {
+            var items = await JSRuntime.InvokeAsync<List<TocItem>>("tentoToc.scan", _dotNetRef);
+            _items = items ?? new List<TocItem>();
+            if (_items.Count > 0)
+            {
+                _activeId = _items[0].Id;
+            }
+            StateHasChanged();
+        }
+        catch
+        {
+            // Non-blocking in case JS is unavailable during render
+        }
+    }
+
+    [JSInvokable]
+    public void OnActiveSectionChanged(string id)
+    {
+        _activeId = id;
+        StateHasChanged();
+    }
+
+    private async Task ScrollToSectionAsync(string id)
+    {
+        _activeId = id;
+        await JSRuntime.InvokeVoidAsync("tentoToc.scrollTo", id);
+    }
+
+    private async Task ScrollToTopAsync()
+    {
+        await JSRuntime.InvokeVoidAsync("window.scrollTo", new { top = 0, behavior = "smooth" });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        if (_dotNetRef != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoToc.cleanup");
+            }
+            catch {}
+            _dotNetRef.Dispose();
+        }
+    }
+}

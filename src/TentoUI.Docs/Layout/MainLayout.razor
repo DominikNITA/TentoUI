@@ -106,8 +106,8 @@
             </div>
         </header>
 
-        @* Body Content with Sidebar *@
-        <div class="flex-1 flex max-w-7xl w-full mx-auto">
+        @* Body Content with Sidebar and Right TOC *@
+        <div class="flex-1 flex max-w-[96rem] 2xl:max-w-[104rem] w-full mx-auto px-2 sm:px-4 lg:px-6">
             @* Desktop Sidebar *@
             <aside class="hidden md:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)]">
                 <NavMenu />
@@ -125,14 +125,17 @@
             }
 
             @* Main Content Area *@
-            <main class="flex-1 min-w-0 p-6 sm:p-10">
+            <main class="flex-1 min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
                 @Body
             </main>
+
+            @* Right-side Table of Contents *@
+            <TableOfContents />
         </div>
 
         @* Global Footer *@
         <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 py-6 px-4 sm:px-6">
-            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+            <div class="max-w-[96rem] 2xl:max-w-[104rem] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-slate-800 dark:text-slate-200">TentoUI</span>
                     <span>&bull;</span>
@@ -177,6 +180,7 @@
     private bool _mobileNavOpen;
     private bool _commandPaletteOpen;
     private bool _themeDrawerOpen;
+    private DotNetObjectReference<MainLayout>? _dotNetRef;
 
     private IReadOnlyList<CommandItem> CommandItems =>
         NavMenu.AllSections
@@ -193,6 +197,29 @@
     protected override void OnInitialized()
     {
         VersionService.OnVersionChanged += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoCommandPalette.registerCallback", _dotNetRef, nameof(ToggleCommandPalette));
+            }
+            catch
+            {
+                // Ignored if JS Interop unavailable
+            }
+        }
+    }
+
+    [JSInvokable]
+    public void ToggleCommandPalette()
+    {
+        _commandPaletteOpen = !_commandPaletteOpen;
+        StateHasChanged();
     }
 
     private void SwitchToLatestVersion()
@@ -236,5 +263,6 @@
     public void Dispose()
     {
         VersionService.OnVersionChanged -= StateHasChanged;
+        _dotNetRef?.Dispose();
     }
 }

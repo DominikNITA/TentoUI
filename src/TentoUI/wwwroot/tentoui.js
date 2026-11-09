@@ -247,15 +247,206 @@ const tentoAudio = {
   }
 };
 
+const tentoCommandPalette = {
+  _listenerAttached: false,
+  _activeCallbacks: new Set(),
+
+  initShortcut() {
+    if (this._listenerAttached) return;
+    this._listenerAttached = true;
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        e.stopPropagation();
+        for (const cb of this._activeCallbacks) {
+          try {
+            cb();
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    }, { capture: true });
+  },
+
+  registerCallback(dotNetHelper, methodName) {
+    this.initShortcut();
+    const cb = () => {
+      dotNetHelper.invokeMethodAsync(methodName);
+    };
+    this._activeCallbacks.add(cb);
+    return {
+      dispose: () => this._activeCallbacks.delete(cb)
+    };
+  },
+
+  focusInput(selector) {
+    setTimeout(() => {
+      const input = document.querySelector(selector || '.tento-command-palette-input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }, 20);
+  }
+};
+
+const tentoToc = {
+  _observer: null,
+  _activeId: null,
+  _dotNetHelper: null,
+
+  scan(dotNetHelper) {
+    this._dotNetHelper = dotNetHelper;
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+
+    const main = document.querySelector('main');
+    if (!main) return [];
+
+    const items = [];
+    const slugCounts = {};
+
+    function makeSlug(text) {
+      const base = (text || 'section')
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+      if (!slugCounts[base]) {
+        slugCounts[base] = 1;
+        return base;
+      }
+      return `${base}-${slugCounts[base]++}`;
+    }
+
+    // 1. Interactive PropsPlayground
+    const playgrounds = main.querySelectorAll('.tento-props-playground');
+    playgrounds.forEach((pg) => {
+      const h3 = pg.querySelector('h3');
+      const title = h3 ? h3.textContent.trim() : 'Interactive Playground';
+      const id = pg.id || makeSlug(title);
+      pg.id = id;
+      pg.classList.add('scroll-mt-24');
+      items.push({ id, title, category: 'playground' });
+    });
+
+    // 2. Demo Cards (Examples)
+    const demoCards = main.querySelectorAll('.tento-demo-card');
+    demoCards.forEach((dc) => {
+      const h3 = dc.querySelector('h3');
+      if (!h3) return;
+      const title = h3.textContent.trim();
+      const id = dc.id || makeSlug(title);
+      dc.id = id;
+      dc.classList.add('scroll-mt-24');
+      items.push({ id, title, category: 'example' });
+    });
+
+    // 3. API Reference Tables
+    const apiTables = main.querySelectorAll('.tento-api-table, .mt-8:has(table)');
+    apiTables.forEach((at) => {
+      const h3 = at.querySelector('h3');
+      if (!h3) return;
+      const title = h3.textContent.trim();
+      const id = at.id || makeSlug(title);
+      at.id = id;
+      at.classList.add('scroll-mt-24');
+      items.push({ id, title, category: 'api' });
+    });
+
+    // 4. Fallback: if no playgrounds, demo cards or API tables, scan h2 and h3
+    if (items.length === 0) {
+      const headings = main.querySelectorAll('h2, h3');
+      headings.forEach((h) => {
+        const title = h.textContent.trim();
+        if (!title) return;
+        const id = h.id || makeSlug(title);
+        h.id = id;
+        h.classList.add('scroll-mt-24');
+        items.push({ id, title, category: h.tagName.toLowerCase() === 'h2' ? 'heading-2' : 'heading-3' });
+      });
+    }
+
+    // Setup IntersectionObserver for smooth scroll spy
+    const observedElements = items.map(item => document.getElementById(item.id)).filter(Boolean);
+    if (observedElements.length > 0 && typeof IntersectionObserver !== 'undefined') {
+      this._observer = new IntersectionObserver((entries) => {
+        const visibleEntries = entries.filter(e => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort((a, b) => Math.abs(a.boundingClientRect.top - 100) - Math.abs(b.boundingClientRect.top - 100));
+          const topEntry = visibleEntries[0];
+          tentoToc.setActiveItem(topEntry.target.id);
+        }
+      }, {
+        rootMargin: '-80px 0px -65% 0px',
+        threshold: [0, 0.25, 0.5]
+      });
+
+      observedElements.forEach(el => this._observer.observe(el));
+    }
+
+    return items;
+  },
+
+  setActiveItem(id) {
+    if (this._activeId === id) return;
+    this._activeId = id;
+
+    const links = document.querySelectorAll('.tento-toc-item');
+    links.forEach(link => {
+      const targetId = link.getAttribute('data-target-id');
+      const isTarget = targetId === id;
+      link.classList.toggle('text-primary-600', isTarget);
+      link.classList.toggle('dark:text-primary-400', isTarget);
+      link.classList.toggle('font-semibold', isTarget);
+      link.classList.toggle('border-primary-500', isTarget);
+      link.classList.toggle('text-slate-500', !isTarget);
+      link.classList.toggle('dark:text-slate-400', !isTarget);
+      link.classList.toggle('border-transparent', !isTarget);
+    });
+
+    if (this._dotNetHelper) {
+      try {
+        this._dotNetHelper.invokeMethodAsync('OnActiveSectionChanged', id);
+      } catch {}
+    }
+  },
+
+  scrollTo(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.setActiveItem(id);
+    }
+  },
+
+  cleanup() {
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+    this._dotNetHelper = null;
+  }
+};
+
 // Expose to window for standard script tag usage
 if (typeof window !== 'undefined') {
   window.tentoModal = tentoModal;
   window.tentoClipboard = tentoClipboard;
   window.tentoTour = tentoTour;
   window.tentoAudio = tentoAudio;
+  window.tentoCommandPalette = tentoCommandPalette;
+  window.tentoToc = tentoToc;
+
+  // Auto-register capture-phase prevention for Ctrl+K
+  tentoCommandPalette.initShortcut();
 }
 
 // Export for module bundlers / CommonJS if supported
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tentoModal, tentoClipboard, tentoTour, tentoAudio };
+  module.exports = { tentoModal, tentoClipboard, tentoTour, tentoAudio, tentoCommandPalette, tentoToc };
 }

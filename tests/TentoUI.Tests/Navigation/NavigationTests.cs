@@ -155,4 +155,53 @@ public class NavigationTests : TestContext
 
         cut.FindAll("[role='tab']").Should().HaveCount(2);
     }
+
+    [Fact]
+    public void CommandPalette_WhenOpen_RendersDialogWithAutofocusInput()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var items = new List<CommandItem>
+        {
+            new("btn", "Button", "Components", "Buttons documentation", IconNames.Search, "B"),
+            new("inp", "Input", "Components", "Input documentation", IconNames.Edit, "I")
+        };
+
+        var cut = RenderComponent<CommandPalette>(parameters => parameters
+            .Add(p => p.Open, true)
+            .Add(p => p.Items, items));
+
+        var dialog = cut.Find("[role='dialog']");
+        dialog.Should().NotBeNull();
+
+        var input = cut.Find("input.tento-command-palette-input");
+        input.Should().NotBeNull();
+        input.HasAttribute("autofocus").Should().BeTrue();
+
+        var renderedItems = cut.FindAll("[role='option']");
+        renderedItems.Should().HaveCount(2);
+        renderedItems[0].TextContent.Should().Contain("Button");
+        renderedItems[1].TextContent.Should().Contain("Input");
+    }
+
+    [Fact]
+    public void CommandPalette_FilterQuery_FiltersDisplayedItems()
+    {
+        JSInterop.Mode = JSRuntimeMode.Loose;
+        var items = new List<CommandItem>
+        {
+            new("btn", "Button", "Components", "Buttons documentation"),
+            new("inp", "Input", "Components", "Input documentation")
+        };
+
+        var cut = RenderComponent<CommandPalette>(parameters => parameters
+            .Add(p => p.Open, true)
+            .Add(p => p.Items, items));
+
+        var input = cut.Find("input.tento-command-palette-input");
+        input.Input("input");
+
+        var renderedItems = cut.FindAll("[role='option']");
+        renderedItems.Should().HaveCount(1);
+        renderedItems[0].TextContent.Should().Contain("Input");
+    }
 }

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="TimeRangePicker Interactive Playground"
+                     ComponentTag="TimeRangePicker"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Shift &amp; Schedule Window" Description="Select start and end times with 30-minute intervals." Code="@_timeRangeCode">
         <div class="max-w-sm">
             <TimeRangePicker @bind-StartTime="_start"
@@ -24,6 +29,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "PlaceholderStart", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Start time", DefaultValue = "Start time" },
+        new() { Name = "PlaceholderEnd", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "End time", DefaultValue = "End time" },
+        new() { Name = "Format", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "HH:mm", DefaultValue = "HH:mm", Options = ["HH:mm", "hh:mm tt"] },
+        new() { Name = "MinuteStep", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "30", DefaultValue = "30", Options = ["5", "10", "15", "30", "60"] },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private TimeOnly? _start = new(9, 0);
     private TimeOnly? _end = new(17, 0);
 

@@ -61,6 +61,7 @@ public class TentoMarkupRenderer : ComponentBase
         s_componentMap["TableColumn"] = typeof(TableColumn<object>);
         s_componentMap["DataGridVirtual"] = typeof(DataGridVirtual<object>);
         s_componentMap["KanbanBoard"] = typeof(KanbanBoard<KanbanCardItem>);
+        s_componentMap["StepperForm"] = typeof(StepperForm<object>);
 
         // 3. Precache parameter properties for fast runtime resolution
         foreach (var (_, type) in s_componentMap)
@@ -622,6 +623,55 @@ public class TentoMarkupRenderer : ComponentBase
                         if (decimal.TryParse(rawVal, NumberStyles.Any, CultureInfo.InvariantCulture, out var mVal))
                             builder.AddAttribute(seq++, prop.Name, mVal);
                     }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        var cleanDate = rawVal.Trim().Trim('"', '\'', '@', '(', ')');
+                        if (string.Equals(cleanDate, "DateTime.Today", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(cleanDate, "Today", StringComparison.OrdinalIgnoreCase))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, DateTime.Today);
+                        }
+                        else if (string.Equals(cleanDate, "DateTime.Now", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(cleanDate, "Now", StringComparison.OrdinalIgnoreCase))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, DateTime.Now);
+                        }
+                        else if (DateTime.TryParse(cleanDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dtVal) ||
+                                 DateTime.TryParse(cleanDate, out dtVal))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, dtVal);
+                        }
+                    }
+                    else if (targetType == typeof(DateOnly))
+                    {
+                        var cleanDate = rawVal.Trim().Trim('"', '\'', '@', '(', ')');
+                        if (string.Equals(cleanDate, "DateTime.Today", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(cleanDate, "Today", StringComparison.OrdinalIgnoreCase) ||
+                            cleanDate.Contains("FromDateTime", StringComparison.OrdinalIgnoreCase))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, DateOnly.FromDateTime(DateTime.Today));
+                        }
+                        else if (DateOnly.TryParse(cleanDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var doVal) ||
+                                 DateOnly.TryParse(cleanDate, out doVal))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, doVal);
+                        }
+                    }
+                    else if (targetType == typeof(TimeOnly))
+                    {
+                        var cleanTime = rawVal.Trim().Trim('"', '\'', '@', '(', ')');
+                        if (string.Equals(cleanTime, "DateTime.Now", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(cleanTime, "Now", StringComparison.OrdinalIgnoreCase) ||
+                            cleanTime.Contains("FromDateTime", StringComparison.OrdinalIgnoreCase))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, TimeOnly.FromDateTime(DateTime.Now));
+                        }
+                        else if (TimeOnly.TryParse(cleanTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out var toVal) ||
+                                 TimeOnly.TryParse(cleanTime, out toVal))
+                        {
+                            builder.AddAttribute(seq++, prop.Name, toVal);
+                        }
+                    }
                     else if (targetType.IsEnum)
                     {
                         var cleanEnum = NormalizeEnumString(rawVal);
@@ -902,6 +952,43 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "TreeData", (IEnumerable<TreeDataNode>)sampleTree);
             }
         }
+        // 10f. Cascader sample data fallback
+        else if (compType == typeof(Cascader))
+        {
+            if (!node.Attributes.ContainsKey("Options") || node.Attributes["Options"].StartsWith("@"))
+            {
+                var sampleCascader = new CascaderOption[]
+                {
+                    new("us", "United States",
+                    [
+                        new("ca", "California",
+                        [
+                            new("sf", "San Francisco"),
+                            new("la", "Los Angeles")
+                        ]),
+                        new("ny", "New York",
+                        [
+                            new("nyc", "New York City"),
+                            new("buf", "Buffalo")
+                        ])
+                    ]),
+                    new("eu", "Europe",
+                    [
+                        new("de", "Germany",
+                        [
+                            new("ber", "Berlin"),
+                            new("mun", "Munich")
+                        ]),
+                        new("pl", "Poland",
+                        [
+                            new("waw", "Warsaw"),
+                            new("krk", "Krakow")
+                        ])
+                    ])
+                };
+                builder.AddAttribute(seq++, "Options", (IEnumerable<CascaderOption>)sampleCascader);
+            }
+        }
         // 11. CommandPalette open state and sample commands
         else if (compType == typeof(CommandPalette))
         {
@@ -1042,6 +1129,466 @@ public class TentoMarkupRenderer : ComponentBase
                 node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "1", ["Tab"] = "Overview" }, TextContent = "System overview and health metrics." });
                 node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "2", ["Tab"] = "Deployments" }, TextContent = "Active rollouts across production clusters." });
                 node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "3", ["Tab"] = "Settings" }, TextContent = "Organization policies and security guardrails." });
+            }
+        }
+        // 21. DateRangePicker OnRangeChange notification
+        else if (compType == typeof(DateRangePicker))
+        {
+            if (!node.Attributes.ContainsKey("OnRangeChange"))
+            {
+                builder.AddAttribute(seq++, "OnRangeChange", EventCallback.Factory.Create<DateRange>(this, r =>
+                {
+                    MessageService?.Info($"Selected range: {r.Start:yyyy-MM-dd} → {r.End:yyyy-MM-dd}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 22. TimeRangePicker OnRangeChange notification
+        else if (compType == typeof(TimeRangePicker))
+        {
+            if (!node.Attributes.ContainsKey("OnRangeChange"))
+            {
+                builder.AddAttribute(seq++, "OnRangeChange", EventCallback.Factory.Create<TimeRange>(this, r =>
+                {
+                    MessageService?.Info($"Selected time range: {r.Start:HH:mm} → {r.End:HH:mm}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 23. Calendar OnSelect notification
+        else if (compType == typeof(Calendar))
+        {
+            if (!node.Attributes.ContainsKey("OnSelect"))
+            {
+                builder.AddAttribute(seq++, "OnSelect", EventCallback.Factory.Create<DateOnly>(this, d =>
+                {
+                    MessageService?.Info($"Selected date: {d:yyyy-MM-dd}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 24. Affix sample content fallback
+        else if (compType == typeof(Affix))
+        {
+            if (node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                node.Children.Add(new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "px-4 py-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-primary-200 dark:border-primary-800 shadow-md text-xs font-semibold text-primary-700 dark:text-primary-300" }, TextContent = "Pinned Affix Toolbar" });
+            }
+        }
+        // 25. Anchor sample links fallback
+        else if (compType == typeof(Anchor))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("AnchorLink", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "AnchorLink", Attributes = new() { ["Href"] = "#basic", ["Title"] = "Basic Usage" } });
+                node.Children.Add(new MarkupNode { TagName = "AnchorLink", Attributes = new() { ["Href"] = "#api", ["Title"] = "API Reference" } });
+                node.Children.Add(new MarkupNode { TagName = "AnchorLink", Attributes = new() { ["Href"] = "#examples", ["Title"] = "Examples" } });
+            }
+        }
+        // 26. Menu sample items fallback
+        else if (compType == typeof(Menu))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("MenuItem", StringComparison.OrdinalIgnoreCase) ||
+                                       c.TagName.Equals("SubMenu", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "MenuItem", Attributes = new() { ["Key"] = "dashboard", ["Title"] = "Dashboard" } });
+                node.Children.Add(new MarkupNode { TagName = "MenuItem", Attributes = new() { ["Key"] = "analytics", ["Title"] = "Analytics" } });
+                node.Children.Add(new MarkupNode { TagName = "MenuItem", Attributes = new() { ["Key"] = "settings", ["Title"] = "Settings" } });
+            }
+        }
+        // 27. Space sample buttons fallback
+        else if (compType == typeof(Space))
+        {
+            if (node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                node.Children.Add(new MarkupNode { TagName = "Button", Attributes = new() { ["Type"] = "ButtonType.Primary" }, TextContent = "Button 1" });
+                node.Children.Add(new MarkupNode { TagName = "Button", Attributes = new() { ["Type"] = "ButtonType.Default" }, TextContent = "Button 2" });
+                node.Children.Add(new MarkupNode { TagName = "Button", Attributes = new() { ["Type"] = "ButtonType.Dashed" }, TextContent = "Button 3" });
+            }
+        }
+        // 28. Text sample content fallback
+        else if (compType == typeof(Text))
+        {
+            if (node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                node.TextContent = "The quick brown fox jumps over the lazy dog";
+            }
+        }
+        // 29. Transfer sample items fallback
+        else if (compType == typeof(Transfer))
+        {
+            if (!node.Attributes.ContainsKey("DataSource") || node.Attributes["DataSource"].StartsWith("@"))
+            {
+                var sampleTransfer = new[]
+                {
+                    new TransferItem("1", "User Management", "Manage accounts and permissions"),
+                    new TransferItem("2", "Billing & Invoices", "Payment gateways and receipts"),
+                    new TransferItem("3", "Audit Logs", "Compliance and security trail"),
+                    new TransferItem("4", "API Keys", "Developer tokens and webhooks"),
+                    new TransferItem("5", "Notifications", "Email and Slack alerts")
+                };
+                builder.AddAttribute(seq++, "DataSource", (IEnumerable<TransferItem>)sampleTransfer);
+            }
+        }
+        // 30. Tree sample nodes fallback
+        else if (compType == typeof(Tree))
+        {
+            if ((!node.Attributes.ContainsKey("Data") || node.Attributes["Data"].StartsWith("@")) &&
+                !node.Children.Any(c => c.TagName.Equals("TreeNode", StringComparison.OrdinalIgnoreCase)))
+            {
+                var sampleTree = new System.Collections.Generic.List<TreeDataNode>
+                {
+                    new("src", "src", [
+                        new("src/components", "Components", [
+                            new("src/components/button", "Button.razor", isLeaf: true),
+                            new("src/components/modal", "Modal.razor", isLeaf: true),
+                            new("src/components/table", "Table.razor", isLeaf: true)
+                        ]),
+                        new("src/services", "Services", [
+                            new("src/services/api", "ApiService.cs", isLeaf: true)
+                        ])
+                    ]),
+                    new("tests", "tests", [
+                        new("tests/unit", "UnitTests.cs", isLeaf: true)
+                    ])
+                };
+                builder.AddAttribute(seq++, "Data", (IEnumerable<TreeDataNode>)sampleTree);
+                builder.AddAttribute(seq++, "ExpandedKeys", new HashSet<string> { "src", "src/components" });
+            }
+            if (!node.Attributes.ContainsKey("OnSelect"))
+            {
+                builder.AddAttribute(seq++, "OnSelect", EventCallback.Factory.Create<string>(this, key =>
+                {
+                    MessageService?.Info($"Selected tree node: {key}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 31. OTPInput OnComplete notification
+        else if (compType == typeof(OTPInput))
+        {
+            if (!node.Attributes.ContainsKey("OnComplete"))
+            {
+                builder.AddAttribute(seq++, "OnComplete", EventCallback.Factory.Create<string>(this, code =>
+                {
+                    MessageService?.Success($"OTP code completed: {code}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 32. Mentions OnSelect notification
+        else if (compType == typeof(Mentions))
+        {
+            if (!node.Attributes.ContainsKey("OnSelect"))
+            {
+                builder.AddAttribute(seq++, "OnSelect", EventCallback.Factory.Create<MentionOption>(this, opt =>
+                {
+                    MessageService?.Info($"Mention selected: {opt.EffectiveLabel}");
+                    StateHasChanged();
+                }));
+            }
+        }
+        // 33. Image sample fallback
+        else if (compType == typeof(Image))
+        {
+            if (!node.Attributes.ContainsKey("Src"))
+            {
+                builder.AddAttribute(seq++, "Src", "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=400&q=80");
+            }
+        }
+        // 34. Carousel sample panels fallback
+        else if (compType == typeof(Carousel))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("CarouselPanel", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "CarouselPanel",
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "h-48 bg-primary-600 text-white flex items-center justify-center font-bold text-xl rounded-lg" }, TextContent = "Slide 1: High Performance" }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "CarouselPanel",
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "h-48 bg-emerald-600 text-white flex items-center justify-center font-bold text-xl rounded-lg" }, TextContent = "Slide 2: AntDesign Design Language" }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "CarouselPanel",
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "h-48 bg-purple-600 text-white flex items-center justify-center font-bold text-xl rounded-lg" }, TextContent = "Slide 3: Tailwind CSS v4" }]
+                });
+            }
+        }
+        // 35. AudioPlayer sample fallback
+        else if (compType == typeof(AudioPlayer))
+        {
+            if (!node.Attributes.ContainsKey("Title"))
+            {
+                builder.AddAttribute(seq++, "Title", "Ambient Flow");
+            }
+            if (!node.Attributes.ContainsKey("Artist"))
+            {
+                builder.AddAttribute(seq++, "Artist", "TentoUI Studio");
+            }
+        }
+        // 36. CodeBlock sample fallback
+        else if (compType == typeof(CodeBlock))
+        {
+            if (!node.Attributes.ContainsKey("Code"))
+            {
+                builder.AddAttribute(seq++, "Code", "public record User(string Name, string Role);\nvar admin = new User(\"Dominik\", \"Administrator\");\nConsole.WriteLine($\"Welcome, {admin.Name}!\");");
+            }
+        }
+        // 37. Watermark sample content fallback
+        else if (compType == typeof(Watermark))
+        {
+            if (node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "div",
+                    Attributes = new() { ["Class"] = "h-48 p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2" },
+                    Children = [
+                        new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "font-bold text-slate-800 dark:text-white" }, TextContent = "Protected Document" },
+                        new MarkupNode { TagName = "p", Attributes = new() { ["Class"] = "text-xs text-slate-500" }, TextContent = "This container is protected by an interactive SVG watermark background layer." }
+                    ]
+                });
+            }
+        }
+        // 38. Splitter sample panels fallback
+        else if (compType == typeof(Splitter))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("SplitterPanel", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "SplitterPanel",
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "p-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 rounded-l-lg h-32 flex items-center justify-center" }, TextContent = "Left Panel" }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "SplitterPanel",
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "p-4 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-r-lg h-32 flex items-center justify-center" }, TextContent = "Right Panel" }]
+                });
+            }
+        }
+        // 39. Sparkline sample values fallback
+        else if (compType == typeof(Sparkline))
+        {
+            if (!node.Attributes.ContainsKey("Values") && !node.Attributes.ContainsKey("Data"))
+            {
+                builder.AddAttribute(seq++, "Values", "12, 18, 14, 25, 22, 32, 28, 42");
+            }
+        }
+        // 40. Layout sample structure fallback
+        else if (compType == typeof(TentoUI.Layout))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("Header", StringComparison.OrdinalIgnoreCase) ||
+                                       c.TagName.Equals("Sider", StringComparison.OrdinalIgnoreCase) ||
+                                       c.TagName.Equals("Content", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "Header", Attributes = new() { ["Class"] = "bg-primary-600 text-white p-3 text-center text-xs font-bold" }, TextContent = "Header" });
+                node.Children.Add(new MarkupNode { TagName = "Content", Attributes = new() { ["Class"] = "p-6 bg-slate-50 dark:bg-slate-900 text-center text-xs text-slate-600 dark:text-slate-300 min-h-[6rem]" }, TextContent = "Content Body" });
+                node.Children.Add(new MarkupNode { TagName = "Footer", Attributes = new() { ["Class"] = "bg-slate-100 dark:bg-slate-800 p-2 text-center text-xs text-slate-500" }, TextContent = "Footer © TentoUI" });
+            }
+        }
+        // 41. Row sample columns fallback
+        else if (compType == typeof(Row))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("Col", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "Col",
+                    Attributes = new() { ["Span"] = "8" },
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "bg-primary-500 text-white py-2 text-center rounded text-xs font-semibold" }, TextContent = "col-8" }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "Col",
+                    Attributes = new() { ["Span"] = "8" },
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "bg-primary-600 text-white py-2 text-center rounded text-xs font-semibold" }, TextContent = "col-8" }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "Col",
+                    Attributes = new() { ["Span"] = "8" },
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "bg-primary-700 text-white py-2 text-center rounded text-xs font-semibold" }, TextContent = "col-8" }]
+                });
+            }
+        }
+        // 42. Upload sample fallback
+        else if (compType == typeof(Upload))
+        {
+            if (!node.Attributes.ContainsKey("ButtonText"))
+            {
+                builder.AddAttribute(seq++, "ButtonText", "Select Files to Upload");
+            }
+        }
+        // 43. AvatarUpload sample fallback
+        else if (compType == typeof(AvatarUpload))
+        {
+            if (!node.Attributes.ContainsKey("Src"))
+            {
+                builder.AddAttribute(seq++, "Src", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&auto=format&fit=crop&q=80");
+            }
+        }
+        // 44. SignaturePad sample fallback
+        else if (compType == typeof(SignaturePad))
+        {
+            if (!node.Attributes.ContainsKey("Placeholder"))
+            {
+                builder.AddAttribute(seq++, "Placeholder", "Sign here to approve contract");
+            }
+        }
+        // 45. MarkdownEditor sample fallback
+        else if (compType == typeof(MarkdownEditor))
+        {
+            if (!node.Attributes.ContainsKey("Value"))
+            {
+                builder.AddAttribute(seq++, "Value", "# Welcome to TentoUI\n\n- Real-time markdown preview\n- Formatting toolbar\n- Syntax-highlighted output\n\n> Powered by .NET 10");
+            }
+        }
+        // 46. Voiceform sample fallback
+        else if (compType == typeof(Voiceform))
+        {
+            if (!node.Attributes.ContainsKey("Src"))
+            {
+                builder.AddAttribute(seq++, "Src", "audio/speech-sample.wav");
+            }
+            if (!node.Attributes.ContainsKey("Duration"))
+            {
+                builder.AddAttribute(seq++, "Duration", 5.0);
+            }
+            if (!node.Attributes.ContainsKey("Author"))
+            {
+                builder.AddAttribute(seq++, "Author", "Dominik");
+            }
+        }
+        // 47. Form sample fallback
+        else if (compType == typeof(Form))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("FormItem", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "FormItem",
+                    Attributes = new() { ["Label"] = "Full Name", ["Required"] = "true" },
+                    Children = [new MarkupNode { TagName = "Input", Attributes = new() { ["Placeholder"] = "Enter full name..." } }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "FormItem",
+                    Attributes = new() { ["Label"] = "Email Address", ["Required"] = "true" },
+                    Children = [new MarkupNode { TagName = "Input", Attributes = new() { ["Placeholder"] = "name@company.com" } }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "Button",
+                    Attributes = new() { ["Type"] = "ButtonType.Primary" },
+                    TextContent = "Submit Form"
+                });
+            }
+        }
+        // 48. FormWizard sample fallback
+        else if (compType == typeof(FormWizard))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("WizardStep", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "WizardStep",
+                    Attributes = new() { ["Title"] = "Account Setup", ["Description"] = "Organization details" },
+                    Children = [new MarkupNode { TagName = "Input", Attributes = new() { ["Placeholder"] = "Enter workspace name..." } }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "WizardStep",
+                    Attributes = new() { ["Title"] = "Confirmation", ["Description"] = "Review & Deploy" },
+                    Children = [new MarkupNode { TagName = "Text", TextContent = "Ready to deploy configuration." }]
+                });
+            }
+        }
+        // 49. DiffViewer sample fallback
+        else if (compType == typeof(DiffViewer))
+        {
+            if (!node.Attributes.ContainsKey("OldText"))
+            {
+                builder.AddAttribute(seq++, "OldText", "{\n  \"version\": \"1.0.0\",\n  \"caching\": false\n}");
+            }
+            if (!node.Attributes.ContainsKey("NewText"))
+            {
+                builder.AddAttribute(seq++, "NewText", "{\n  \"version\": \"1.1.0\",\n  \"caching\": true,\n  \"provider\": \"HybridCache\"\n}");
+            }
+        }
+        // 50. ContextMenu sample fallback
+        else if (compType == typeof(ContextMenu))
+        {
+            if (!node.Attributes.ContainsKey("Items"))
+            {
+                var menuItems = new[]
+                {
+                    new DropdownMenuItem("copy", "Copy Selection", IconNames.Copy, Shortcut: "Ctrl+C"),
+                    new DropdownMenuItem("duplicate", "Duplicate", IconNames.Plus, Shortcut: "Ctrl+D"),
+                    new DropdownMenuItem("delete", "Delete Item", IconNames.Trash2, Danger: true, DividerBefore: true)
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<DropdownMenuItem>)menuItems);
+            }
+            if (node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "div",
+                    Attributes = new() { ["Class"] = "h-36 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex flex-col items-center justify-center gap-2 text-slate-500 cursor-context-menu" },
+                    TextContent = "Right-click anywhere inside this container"
+                });
+            }
+        }
+        // 51. ImagePreviewGroup sample fallback
+        else if (compType == typeof(ImagePreviewGroup))
+        {
+            if (node.Children.Count == 0 && !node.Attributes.ContainsKey("Images"))
+            {
+                node.Children.Add(new MarkupNode { TagName = "Image", Attributes = new() { ["Src"] = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80", ["Width"] = "140px", ["Height"] = "90px" } });
+                node.Children.Add(new MarkupNode { TagName = "Image", Attributes = new() { ["Src"] = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&q=80", ["Width"] = "140px", ["Height"] = "90px" } });
+                node.Children.Add(new MarkupNode { TagName = "Image", Attributes = new() { ["Src"] = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80", ["Width"] = "140px", ["Height"] = "90px" } });
+            }
+        }
+        // 52. ChatBubble sample fallback
+        else if (compType == typeof(ChatBubble))
+        {
+            if (!node.Attributes.ContainsKey("Message"))
+            {
+                builder.AddAttribute(seq++, "Message", "Hello! How can I help you build with TentoUI today?");
+            }
+            if (!node.Attributes.ContainsKey("Author"))
+            {
+                builder.AddAttribute(seq++, "Author", "Tento Copilot");
+            }
+        }
+        // 53. PromptInput sample fallback
+        else if (compType == typeof(PromptInput))
+        {
+            if (!node.Attributes.ContainsKey("Placeholder"))
+            {
+                builder.AddAttribute(seq++, "Placeholder", "Ask anything about TentoUI...");
+            }
+            if (!node.Attributes.ContainsKey("SuggestionsString"))
+            {
+                builder.AddAttribute(seq++, "SuggestionsString", "Generate form, Table virtualization, Theme tokens");
+            }
+        }
+        // 54. CommandPalette sample fallback
+        else if (compType == typeof(CommandPalette))
+        {
+            if (!node.Attributes.ContainsKey("Items"))
+            {
+                var cmds = new[]
+                {
+                    new CommandItem("new", "Create Project", "Workspace", "Initialize new solution", IconNames.Plus, "Ctrl+N"),
+                    new CommandItem("docs", "Search Docs", "Help", "Browse component APIs", IconNames.Search, "Ctrl+K"),
+                    new CommandItem("theme", "Toggle Theme", "Appearance", "Switch dark/light", IconNames.Moon, "Ctrl+J")
+                };
+                builder.AddAttribute(seq++, "Items", (IEnumerable<CommandItem>)cmds);
             }
         }
     }

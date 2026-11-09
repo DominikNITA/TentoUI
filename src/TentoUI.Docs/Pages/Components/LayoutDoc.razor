@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Layout Interactive Playground"
+                     ComponentTag="Layout"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Sider on Left *@
     <DemoCard Title="Application Layout Structure" Description="Nested layout with sidebar on the left, top header, main content body, and footer." Code="@_leftSiderCode">
         <div class="h-64 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 text-xs">
@@ -60,6 +65,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "HasSider", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _leftSiderCode = """
         <Layout>
             <Sider Width="140">Sider</Sider>

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="AvatarUpload Interactive Playground"
+                     ComponentTag="AvatarUpload"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Avatar Upload with Zoom &amp; Rotate Crop Controls" Description="Upload a new image or adjust zoom and rotation on the current profile photo." Code="@_avatarUploadCode">
         <AvatarUpload @bind-Src="_avatarSrc" Size="104" ShowCropControls="true" />
     </DemoCard>
@@ -19,6 +24,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Src", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&auto=format&fit=crop&q=80", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "104", DefaultValue = "96" },
+        new() { Name = "ShowCropControls", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _avatarSrc = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=240&auto=format&fit=crop&q=80";
 
     private const string _avatarUploadCode = """

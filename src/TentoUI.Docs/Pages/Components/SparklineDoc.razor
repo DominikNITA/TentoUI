@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Sparkline Interactive Playground"
+                     ComponentTag="Sparkline"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Line, Area &amp; Bar Sparklines" Description="Zero-JS SVG sparklines ideal for KPI Statistic cards and Table cells." Code="@_sparkCode">
         <div class="flex flex-wrap items-center gap-8">
             <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-4">
@@ -38,6 +43,18 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Area", DefaultValue = "Line", Options = ["Line", "Area", "Bar"] },
+        new() { Name = "Values", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "12, 19, 15, 28, 22, 32, 28, 45", DefaultValue = "" },
+        new() { Name = "Trend", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Auto", DefaultValue = "Auto", Options = ["Auto", "Up", "Down", "Neutral"] },
+        new() { Name = "Width", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "160", DefaultValue = "120" },
+        new() { Name = "Height", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "44", DefaultValue = "36" },
+        new() { Name = "StrokeWidth", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "2", DefaultValue = "2" },
+        new() { Name = "ShowDots", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "ShowArea", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _sparkCode = """
         <Sparkline Type="SparklineType.Area" Values="18, 24, 21, 32, 38, 45, 58" ShowDots="true" />
         <Sparkline Type="SparklineType.Line" Values="42, 35, 38, 29, 20, 14, 9" Trend="SparklineTrend.Down" />

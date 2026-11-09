@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Select Interactive Playground"
+                     ComponentTag="Select"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Select with Inline Options *@
     <DemoCard Title="Basic Single Select"
               Description="Choose a destination from an inline options list. All options are visible and editable in the code."
@@ -31,6 +36,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Options", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Warsaw, Berlin, London, Paris, Tokyo, Sydney", DefaultValue = "" },
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Choose a destination...", DefaultValue = "Select an option" },
+        new() { Name = "Mode", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "SelectMode.Single", DefaultValue = "SelectMode.Single", Options = ["SelectMode.Single", "SelectMode.Multiple"] },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "ShowSearch", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _basicCode = """
         <div class="max-w-xs p-2">
             <Select TItem="string"

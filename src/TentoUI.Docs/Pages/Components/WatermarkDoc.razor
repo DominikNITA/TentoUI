@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Watermark Interactive Playground"
+                     ComponentTag="Watermark"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Watermark *@
     <DemoCard Title="Confidential Document Watermark" Description="Repeated diagonal watermark text superimposed over secure content." Code="@_basicCode">
         <div class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
@@ -43,6 +48,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "TentoUI CONFIDENTIAL", DefaultValue = "TentoUI" },
+        new() { Name = "Rotate", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "-22", DefaultValue = "-22" },
+        new() { Name = "FontSize", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "14", DefaultValue = "14" },
+        new() { Name = "GapX", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "80", DefaultValue = "80" },
+        new() { Name = "GapY", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "80", DefaultValue = "80" }
+    ];
+
     private const string _basicCode = """
         <Watermark Content="TentoUI CONFIDENTIAL" Rotate="-22" FontSize="14">
             <div class="h-48 p-6">

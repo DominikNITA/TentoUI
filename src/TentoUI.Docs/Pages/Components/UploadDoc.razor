@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Upload Interactive Playground"
+                     ComponentTag="Upload"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Standard Button Upload *@
     <DemoCard Title="Basic Button Upload"
               Description="Standard file picker button with file list display and remove actions."
@@ -55,6 +60,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "ButtonText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Select Documentation Files", DefaultValue = "Select Files to Upload" },
+        new() { Name = "Hint", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Supports PDF, PNG up to 10MB.", DefaultValue = "" },
+        new() { Name = "DragDrop", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Multiple", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private readonly List<UploadFileItem> _buttonFiles =
     [
         new() { Name = "architecture-spec.pdf", Size = 2450000, ContentType = "application/pdf", Status = UploadStatus.Done }

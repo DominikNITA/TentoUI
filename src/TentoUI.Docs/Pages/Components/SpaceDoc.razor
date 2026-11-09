@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Space Interactive Playground"
+                     ComponentTag="Space"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Horizontal Space *@
     <DemoCard Title="Horizontal Flow" Description="Default horizontal arrangement with even spacing between elements." Code="@_horizontalCode">
         <div class="p-2">
@@ -54,6 +59,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Direction", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Horizontal", DefaultValue = "Horizontal", Options = ["Horizontal", "Vertical"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Middle", DefaultValue = "Middle", Options = ["Small", "Middle", "Large"] },
+        new() { Name = "Align", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Center", DefaultValue = "", Options = ["Start", "End", "Center", "Baseline"] },
+        new() { Name = "Wrap", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _horizontalCode = """
         <Space Direction="SpaceDirection.Horizontal" Wrap="true">
             <Button Type="ButtonType.Primary">Primary Action</Button>

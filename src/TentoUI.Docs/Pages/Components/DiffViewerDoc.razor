@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="DiffViewer Interactive Playground"
+                     ComponentTag="DiffViewer"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Split &amp; Unified Diff Comparison" Description="Switch interactively between side-by-side and unified diff modes with automatic +N / -M line statistics." Code="@_diffDemo">
         <DiffViewer OldTitle="appsettings.Production.json (v1.0)"
                     NewTitle="appsettings.Production.json (v1.1)"
@@ -23,6 +28,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "SplitView", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "OldTitle", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "v1.0 Config", DefaultValue = "Original" },
+        new() { Name = "NewTitle", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "v1.1 Config", DefaultValue = "Modified" }
+    ];
+
     private bool _split = true;
 
     private const string _oldConfig = """

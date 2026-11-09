@@ -15,6 +15,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="StepperForm Interactive Playground"
+                     ComponentTag="StepperForm"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Horizontal Enterprise Onboarding Form *@
     <DemoCard Title="Horizontal Multi-Step Form with Model Binding" Description="Validates model fields progressively and submits the entire entity on the final step." Code="@_horizontalCode">
         <StepperForm TModel="RegisterModel"
@@ -86,6 +91,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "CurrentStep", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "0", DefaultValue = "0" },
+        new() { Name = "Layout", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Horizontal", DefaultValue = "Horizontal", Options = ["Horizontal", "Vertical"] }
+    ];
+
     public class RegisterModel
     {
         public string Email { get; set; } = "lead@tentoui.com";

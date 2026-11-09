@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Transfer Interactive Playground"
+                     ComponentTag="Transfer"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Transfer Shuttle *@
     <DemoCard Title="Transfer Shuttle with Search" Description="Move items between source and target lists with search filtering." Code="@_transferCode">
         <div class="p-2">
@@ -37,6 +42,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "ShowSearch", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private HashSet<string> _targetKeys = new() { "editor" };
     private HashSet<string> _compactKeys = new() { "developer" };
 

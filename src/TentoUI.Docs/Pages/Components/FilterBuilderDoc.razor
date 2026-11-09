@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="FilterBuilder Interactive Playground"
+                     ComponentTag="FilterBuilder"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Interactive Query Builder" Description="Add, modify, or remove filter conditions and apply them to your data view." Code="@_filterCode">
         <FilterBuilder Title="Employee Directory Filters"
                        OnApply="@(filters => MessageService.Success($"Applied {filters.Count} active filter(s)"))" />
@@ -23,6 +28,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Employee Directory Filters", DefaultValue = "Filter Builder" },
+        new() { Name = "ShowApplyButton", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _filterCode = """
         <FilterBuilder Title="Employee Directory Filters" ShowApplyButton="true" />
         """;

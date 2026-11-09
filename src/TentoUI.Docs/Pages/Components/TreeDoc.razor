@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Tree Interactive Playground"
+                     ComponentTag="Tree"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Expandable Tree *@
     <DemoCard Title="Basic Tree &amp; Node Selection"
               Description="Expandable tree structure with click-to-select and active highlight."
@@ -67,6 +72,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Checkable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ShowLine", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "ShowIcon", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "ShowSearch", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "SearchPlaceholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Search tree...", DefaultValue = "Search tree..." }
+    ];
+
     private string? _selectedKey = "src/Components/Table.razor";
     private HashSet<string> _checkedKeys = ["users.read", "roles.read"];
 

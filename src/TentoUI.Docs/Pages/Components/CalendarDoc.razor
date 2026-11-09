@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Calendar Interactive Playground"
+                     ComponentTag="Calendar"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Calendar *@
     <DemoCard Title="Basic Calendar" Description="Full month grid view with two-way date binding and date click notification." Code="@_basicCode">
         <div class="max-w-xl mx-auto space-y-3">
@@ -71,6 +76,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Mode", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Month", DefaultValue = "Month", Options = ["Month", "Year"] }
+    ];
+
     private DateOnly _selectedDate = DateOnly.FromDateTime(DateTime.Today);
     private DateOnly _contextDate = DateOnly.FromDateTime(DateTime.Today);
     private DateOnly _scheduleMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);

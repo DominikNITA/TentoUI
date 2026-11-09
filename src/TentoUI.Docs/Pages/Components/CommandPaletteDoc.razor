@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="CommandPalette Interactive Playground"
+                     ComponentTag="CommandPalette"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Spotlight Command Launcher"
               Description="Click the button to open the command palette, filter by keyword, and navigate with ArrowUp / ArrowDown / Enter."
               Code="@_paletteCode">
@@ -31,6 +36,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Type a command or search...", DefaultValue = "Type a command or search..." }
+    ];
+
     private bool _open;
 
     private readonly CommandItem[] _commands =

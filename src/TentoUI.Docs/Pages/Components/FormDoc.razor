@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Form Interactive Playground"
+                     ComponentTag="Form"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Vertical Form *@
     <DemoCard Title="Vertical Form" Description="Standard stacked form layout where labels appear above inputs." Code="@_verticalCode">
         <div class="max-w-md p-2">
@@ -58,6 +63,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Layout", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Vertical", DefaultValue = "Vertical", Options = ["Vertical", "Horizontal", "Inline"] },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     public class UserLoginForm
     {
         public string Username { get; set; } = "dominik";

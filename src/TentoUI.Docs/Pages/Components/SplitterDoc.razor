@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Splitter Interactive Playground"
+                     ComponentTag="Splitter"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Collapsible Horizontal Splitter" Description="Use keyboard arrows on the separator handle or click the collapse button to toggle the side pane." Code="@_splitterCode">
         <Splitter Split="35" Collapsible="true">
             <SplitterPanel>
@@ -32,6 +37,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Orientation", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Horizontal", DefaultValue = "Horizontal", Options = ["Horizontal", "Vertical"] },
+        new() { Name = "Split", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "35", DefaultValue = "50" },
+        new() { Name = "Min", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "10", DefaultValue = "10" },
+        new() { Name = "Max", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "90", DefaultValue = "90" },
+        new() { Name = "Step", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "5", DefaultValue = "5" },
+        new() { Name = "Collapsible", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _splitterCode = """
         <Splitter Split="35" Collapsible="true">
             <SplitterPanel>

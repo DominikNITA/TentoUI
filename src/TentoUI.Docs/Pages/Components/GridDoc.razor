@@ -14,6 +14,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Grid Row Interactive Playground"
+                     ComponentTag="Row"
+                     Controls="@_playgroundControls" />
+
     <!-- 1. Basic 24-Column Grid -->
     <DemoCard Title="24-Column Grid System"
               Description="Divide rows into up to 24 proportional columns using Span (e.g., 24, 12+12, 8+8+8, 6+6+6+6)."
@@ -100,6 +105,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Gutter", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "16", DefaultValue = "0" },
+        new() { Name = "Justify", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Start", DefaultValue = "Start", Options = ["Start", "Center", "End", "SpaceBetween", "SpaceAround", "SpaceEvenly"] },
+        new() { Name = "Align", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Top", DefaultValue = "Top", Options = ["Top", "Middle", "Bottom", "Stretch"] },
+        new() { Name = "Wrap", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private const string _basicGridCode = """
         <div class="space-y-3 text-center text-xs font-bold text-white">
             <Row Gutter="12">

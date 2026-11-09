@@ -16,6 +16,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Voiceform Interactive Playground"
+                     ComponentTag="Voiceform"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Interactive Waveform Message *@
     <DemoCard Title="Interactive Waveform Message" Description="Click any bar in the soundwave to seek directly to that position. Toggle play to view the progress fill with real audio." Code="@_basicVoiceCode">
         <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -95,6 +100,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Author", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Dominik", DefaultValue = "Dominik" },
+        new() { Name = "Duration", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "5", DefaultValue = "5" },
+        new() { Name = "Speed", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "1", DefaultValue = "1" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private double _currentTime1 = 0.0;
     private bool _isPlaying1;
     private double _currentTime2 = 0.0;

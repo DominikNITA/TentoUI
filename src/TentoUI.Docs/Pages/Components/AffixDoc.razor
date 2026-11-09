@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Affix Interactive Playground"
+                     ComponentTag="Affix"
+                     Controls="@_playgroundControls" />
+
     <!-- 1. Top Affix Toolbar inside Scrollable Container -->
     <DemoCard Title="Sticky Top Toolbar (Scroll Inside Container)"
               Description="Scroll down inside the viewport below — the Affix toolbar stays pinned 12px from the top edge."
@@ -95,6 +100,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "OffsetTop", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "8", DefaultValue = "0" },
+        new() { Name = "OffsetBottom", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "", DefaultValue = "" }
+    ];
+
     private const string _topAffixCode = """
         <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-4">
             <div class="text-xs text-slate-400">Scroll down to see the toolbar stick to the top...</div>

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="RadioGroup Interactive Playground"
+                     ComponentTag="RadioGroup"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Radio Group *@
     <DemoCard Title="Basic Radio Group" Description="Single choice selection across multiple items." Code="@_basicCode">
         <div class="p-2 space-y-3">
@@ -63,6 +68,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "OptionType", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "RadioOptionType.Default", DefaultValue = "RadioOptionType.Default", Options = ["RadioOptionType.Default", "RadioOptionType.Button"] },
+        new() { Name = "Vertical", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Radio Value=\"free\">Free Tier ($0/mo)</Radio>\n<Radio Value=\"pro\">Pro Team ($29/mo)</Radio>\n<Radio Value=\"enterprise\">Enterprise (Custom)</Radio>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private string _selectedPlan = "pro";
     private string _selectedPeriod = "monthly";
     private string _selectedRegion = "us-east";

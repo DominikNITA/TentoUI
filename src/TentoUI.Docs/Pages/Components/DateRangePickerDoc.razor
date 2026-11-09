@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="DateRangePicker Interactive Playground"
+                     ComponentTag="DateRangePicker"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Date Range with Presets" Description="Click the range input to pick a start and end date or apply a quick range preset." Code="@_rangeCode">
         <div class="max-w-sm">
             <DateRangePicker @bind-StartDate="_start"
@@ -24,6 +29,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "PlaceholderStart", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Start date", DefaultValue = "Start date" },
+        new() { Name = "PlaceholderEnd", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "End date", DefaultValue = "End date" },
+        new() { Name = "Format", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "yyyy-MM-dd", DefaultValue = "yyyy-MM-dd", Options = ["yyyy-MM-dd", "MM/dd/yyyy", "dd.MM.yyyy"] },
+        new() { Name = "ShowPresets", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private DateTime? _start = DateTime.Today.AddDays(-6);
     private DateTime? _end = DateTime.Today;
 

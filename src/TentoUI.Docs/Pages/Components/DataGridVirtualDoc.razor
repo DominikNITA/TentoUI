@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="DataGridVirtual Interactive Playground"
+                     ComponentTag="DataGridVirtual"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="1,000-Row Virtualized DataGrid with Sticky &amp; Resizable Columns"
               Description="Scroll smoothly through 1,000 live telemetry records without pagination overhead."
               Code="@_gridCode">
@@ -41,6 +46,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Striped", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "ScrollHeight", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "360px", DefaultValue = "400px" }
+    ];
+
     private sealed record TelemetryRow(int Id, string Service, string Region, int LatencyMs, string Status);
 
     private static readonly string[] Services = ["AuthGateway", "OrderProcessor", "BillingEngine", "SearchIndexer", "NotificationHub"];

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="TextArea Interactive Playground"
+                     ComponentTag="TextArea"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic TextArea *@
     <DemoCard Title="Basic TextArea" Description="Multi-line text editor with placeholder and row sizing." Code="@_basicCode">
         <div class="max-w-lg p-2 space-y-2">
@@ -42,6 +47,18 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Enter notes or feedback...", DefaultValue = "" },
+        new() { Name = "Rows", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "4", DefaultValue = "4" },
+        new() { Name = "MaxLength", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "150", DefaultValue = "" },
+        new() { Name = "ShowCount", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "None", DefaultValue = "None", Options = ["None", "Error", "Warning", "Success"] },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ReadOnly", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _text = "TentoUI provides high-performance Blazor components.";
     private string? _bio = "Engineering lead passionate about modern UI libraries.";
 

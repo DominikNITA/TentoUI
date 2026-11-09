@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Image Interactive Playground"
+                     ComponentTag="Image"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Lightbox Preview *@
     <DemoCard Title="Interactive Lightbox Preview" Description="Click the image to trigger an interactive lightbox modal with zoom and rotate controls." Code="@_previewCode">
         <div class="p-4 flex items-center justify-center">
@@ -42,6 +47,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Src", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "https://picsum.photos/400/250", DefaultValue = "https://picsum.photos/400/250" },
+        new() { Name = "Alt", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Scenic Nature", DefaultValue = "" },
+        new() { Name = "Width", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "260px", DefaultValue = "" },
+        new() { Name = "Height", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "160px", DefaultValue = "" },
+        new() { Name = "Preview", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private const string _previewCode = """
         <Image Src="https://picsum.photos/400/250"
                Alt="Scenic Mountain"

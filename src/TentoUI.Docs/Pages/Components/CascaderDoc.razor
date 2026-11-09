@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Cascader Interactive Playground"
+                     ComponentTag="Cascader"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Cascader *@
     <DemoCard Title="Geographic Cascade" Description="Navigate continent, country, and city in adjacent dropdown panels." Code="@_geoCode">
         <div class="max-w-xs p-2 space-y-2">
@@ -38,6 +43,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Select location...", DefaultValue = "Please select" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "ChangeOnSelect", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private IReadOnlyList<string> _selectedValues = new[] { "eu", "pl", "waw" };
     private IReadOnlyList<string> _selectedCategory = new[] { "tech", "frontend" };
 

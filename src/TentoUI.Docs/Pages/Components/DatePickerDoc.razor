@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="DatePicker Interactive Playground"
+                     ComponentTag="DatePicker"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic DatePicker *@
     <DemoCard Title="Basic DatePicker" Description="Select a single date using the popup calendar grid." Code="@_basicCode">
         <div class="max-w-xs p-2 space-y-2">
@@ -44,6 +49,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Select target date", DefaultValue = "Select date" },
+        new() { Name = "Format", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "yyyy-MM-dd", DefaultValue = "yyyy-MM-dd", Options = ["yyyy-MM-dd", "MM/dd/yyyy", "dd.MM.yyyy", "yyyy/MM/dd"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Middle", DefaultValue = "Middle", Options = ["Small", "Middle", "Large"] },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "None", DefaultValue = "None", Options = ["None", "Error", "Warning", "Success"] },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ReadOnly", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private DateTime? _date = DateTime.Today;
 
     private const string _basicCode = """

@@ -13,6 +13,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="AutoComplete Interactive Playground"
+                     ComponentTag="AutoComplete"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Email Domain Suggestions *@
     <DemoCard Title="Email AutoComplete"
               Description="Generates email address suggestions in real-time as you type your prefix."
@@ -91,6 +96,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "OptionsString", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Azure, AWS, Google Cloud, DigitalOcean, Hetzner, Cloudflare", DefaultValue = "" },
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Search cloud providers...", DefaultValue = "" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string _emailValue = "dev";
     private string _selectedUser = string.Empty;
     private string _searchValue = string.Empty;

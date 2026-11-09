@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Carousel Interactive Playground"
+                     ComponentTag="Carousel"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Autoplay Carousel *@
     <DemoCard Title="Autoplay Carousel with Arrows" Description="Cycles automatically through slides with navigation arrows and bottom dots." Code="@_autoplayCode">
         <div class="max-w-xl mx-auto">
@@ -64,6 +69,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Autoplay", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "AutoplaySpeed", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "3000", DefaultValue = "3000" },
+        new() { Name = "Dots", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Arrows", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "DotPosition", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Bottom", DefaultValue = "Bottom", Options = ["Bottom", "Top"] }
+    ];
+
     private const string _autoplayCode = """
         <div class="max-w-xl mx-auto">
             <Carousel AutoPlay="true" AutoPlaySpeed="4000" Dots="true" Arrows="true">

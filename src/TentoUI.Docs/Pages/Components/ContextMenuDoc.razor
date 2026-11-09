@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="ContextMenu Interactive Playground"
+                     ComponentTag="ContextMenu"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Right-Click Target Area"
               Description="Right-click anywhere inside the dashed surface below to open the context menu at the cursor position."
               Code="@_contextCode">
@@ -30,6 +35,8 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls = [];
+
     private readonly DropdownMenuItem[] _menuItems =
     [
         new("copy", "Copy Selection", IconNames.Copy, Shortcut: "Ctrl+C"),

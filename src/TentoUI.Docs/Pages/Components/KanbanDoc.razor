@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="KanbanBoard Interactive Playground"
+                     ComponentTag="KanbanBoard"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Interactive Sprint Workflow with Drag & Drop *@
     <DemoCard Title="Interactive Sprint Workflow" Description="Drag cards smoothly between columns or use the quick shift buttons. Try dragging into a column to see the active drop ring." Code="@_kanbanCode">
         <div class="space-y-4">
@@ -52,6 +57,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "ShowAddButton", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private readonly KanbanColumnDefinition[] _columns =
     [
         new("backlog", "Backlog", MaxItems: 6),

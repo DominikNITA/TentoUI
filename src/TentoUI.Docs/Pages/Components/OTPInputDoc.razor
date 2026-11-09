@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="OTPInput Interactive Playground"
+                     ComponentTag="OTPInput"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="6-Digit Verification &amp; Masked PIN" Description="Supports automatic multi-digit paste and completion callbacks." Code="@_otpCode">
         <div class="flex flex-col gap-6 p-2">
             <div>
@@ -32,6 +37,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Length", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "6", DefaultValue = "6" },
+        new() { Name = "Mask", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ShowSeparator", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Separator", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "-", DefaultValue = "-" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "None", DefaultValue = "None", Options = ["None", "Error", "Warning", "Success"] },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _code = "128940";
 
     private const string _otpCode = """

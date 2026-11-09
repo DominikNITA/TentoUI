@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Notification Interactive Playground"
+                     ComponentTag="Button"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Notification Types *@
     <DemoCard Title="Notification Types" Description="Trigger corner notifications for Success, Info, Warning, and Error events." Code="@_typesCode">
         <div class="flex flex-wrap items-center gap-3">
@@ -44,6 +49,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Primary", DefaultValue = "Primary", Options = ["Primary", "Default", "Dashed"] },
+        new() { Name = "OnClick", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "@(() => NotificationService.Success(\"Deployment Finished\", \"All services were verified.\"))", DefaultValue = "" }
+    ];
+
     private const string _typesCode = """
         <Button Type="ButtonType.Primary" OnClick="@(() => NotificationService.Success("Deployment Finished", "All services were verified and deployed successfully."))">
             Success Notice

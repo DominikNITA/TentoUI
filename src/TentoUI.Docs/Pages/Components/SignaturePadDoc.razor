@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="SignaturePad Interactive Playground"
+                     ComponentTag="SignaturePad"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Digital Approval Signature Capture" Description="@("Draw directly on the pad below; exports an SVG data URL via @bind-Value.")" Code="@_sigCode">
         <div class="space-y-3 max-w-lg">
             <SignaturePad @bind-Value="_signatureDataUrl" />
@@ -27,6 +32,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Sign here to approve contract", DefaultValue = "" },
+        new() { Name = "StrokeWidth", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "2", DefaultValue = "2" },
+        new() { Name = "StrokeColor", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "#0f172a", DefaultValue = "#0f172a" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _signatureDataUrl;
 
     private const string _sigCode = """

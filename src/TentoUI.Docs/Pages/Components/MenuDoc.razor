@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Menu Interactive Playground"
+                     ComponentTag="Menu"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Inline Menu *@
     <DemoCard Title="Inline Sidebar Navigation" Description="Accordion-style expandable menu designed for application sidebars." Code="@_inlineCode">
         <div class="max-w-xs p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
@@ -52,6 +57,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Mode", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Inline", DefaultValue = "Inline", Options = ["Inline", "Horizontal", "Vertical"] },
+        new() { Name = "Theme", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Light", DefaultValue = "Light", Options = ["Light", "Dark"] },
+        new() { Name = "SelectedKey", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "dashboard", DefaultValue = "dashboard", Options = ["dashboard", "analytics", "settings"] },
+        new() { Name = "Collapsed", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string _selectedKey = "dashboard";
 
     private const string _inlineCode = """

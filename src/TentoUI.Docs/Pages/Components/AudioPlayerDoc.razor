@@ -15,6 +15,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="AudioPlayer Interactive Playground"
+                     ComponentTag="AudioPlayer"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Rich Card Player with Album Art *@
     <DemoCard Title="Album Card Audio Player" Description="Full card layout with album artwork, track meta, interactive scrubber bar, playback rate toggle, and volume slider with native audio output." Code="@_cardCode">
         <div class="max-w-xl mx-auto w-full">
@@ -55,6 +60,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Deep Space Coding Session", DefaultValue = "Ambient Flow" },
+        new() { Name = "Artist", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Tento Soundscapes", DefaultValue = "TentoUI Studio" },
+        new() { Name = "Variant", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Card", DefaultValue = "Default", Options = ["Default", "Card", "Compact", "Minimal"] },
+        new() { Name = "ShowVolume", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "ShowPlaybackRate", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "ShowSkipButtons", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Loop", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private double _cardTime = 0.0;
     private bool _cardPlaying;
     private double _defaultTime = 0.0;

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Gauge Interactive Playground"
+                     ComponentTag="Gauge"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Semi-Circular Radial Gauges" Description="Automatically colors thresholds (Healthy < 65%, Warning 65–85%, Critical >= 85%) or accepts explicit GaugeStatus." Code="@_gaugeCode">
         <div class="flex flex-wrap items-center justify-around gap-6">
             <Gauge Value="42" Label="CPU Load" Unit="%" />
@@ -31,6 +36,19 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "68", DefaultValue = "68" },
+        new() { Name = "Min", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "0", DefaultValue = "0" },
+        new() { Name = "Max", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "100", DefaultValue = "100" },
+        new() { Name = "Unit", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "%", DefaultValue = "%" },
+        new() { Name = "Label", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "CPU Utilization", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "160", DefaultValue = "160" },
+        new() { Name = "StrokeWidth", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "10", DefaultValue = "10" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Default", DefaultValue = "Default", Options = ["Default", "Success", "Warning", "Error"] },
+        new() { Name = "AutoThresholdColor", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private const string _gaugeCode = """
         <Gauge Value="42" Label="CPU Load" Unit="%" />
         <Gauge Value="74" Label="Memory Pressure" Unit="%" />

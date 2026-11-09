@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="CodeBlock Interactive Playground"
+                     ComponentTag="CodeBlock"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Syntax Highlighting &amp; Line Highlighting" Description="Highlight key lines using comma-separated numbers or ranges (e.g. '2,4-6')." Code="@_codeDemo">
         <CodeBlock Title="Program.cs"
                    Language="csharp"
@@ -23,6 +28,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Program.cs", DefaultValue = "" },
+        new() { Name = "Language", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "csharp", DefaultValue = "csharp", Options = ["csharp", "javascript", "html", "css", "json", "sql"] },
+        new() { Name = "ShowLineNumbers", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "HighlightLines", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "2, 4-5", DefaultValue = "" },
+        new() { Name = "ShowCopyButton", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Collapsible", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _sampleSnippet = """
         using TentoUI;
 

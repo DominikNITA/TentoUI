@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Tour Interactive Playground"
+                     ComponentTag="Tour"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Targeted Guided Tour *@
     <DemoCard Title="Targeted Interface Walkthrough" Description="Guide users across concrete DOM targets using CSS selectors (#tour-search, #tour-action, #tour-settings)." Code="@_tourCode">
         <div class="p-6 flex flex-col items-center gap-6 w-full">
@@ -73,6 +78,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Mask", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private bool _open = false;
     private int _current = 0;
     private bool _openNoMask = false;

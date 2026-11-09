@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Message Interactive Playground"
+                     ComponentTag="Button"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Message Types *@
     <DemoCard Title="Message Types" Description="Trigger toasts for Success, Info, Warning, and Error outcomes." Code="@_typesCode">
         <div class="flex flex-wrap items-center gap-3">
@@ -44,6 +49,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Primary", DefaultValue = "Primary", Options = ["Primary", "Default", "Dashed"] },
+        new() { Name = "OnClick", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "@(() => MessageService.Success(\"Operation completed successfully!\"))", DefaultValue = "" }
+    ];
+
     private const string _typesCode = """
         <Button Type="ButtonType.Primary" OnClick="@(() => MessageService.Success("Operation completed successfully!"))">
             Success

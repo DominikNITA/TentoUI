@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="MarkdownEditor Interactive Playground"
+                     ComponentTag="MarkdownEditor"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Interactive Split-View Markdown Editor" Description="@("Supports two-way @bind-Value and EditForm validation via TentoInputBase.")" Code="@_mdCode">
         <MarkdownEditor @bind-Value="_content" @bind-Mode="_mode" Rows="7" />
     </DemoCard>
@@ -19,6 +24,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Mode", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Split", DefaultValue = "Split", Options = ["Split", "Write", "Preview"] },
+        new() { Name = "Rows", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "7", DefaultValue = "6" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private MarkdownEditorMode _mode = MarkdownEditorMode.Split;
     private string? _content = """
         # Release Notes v1.1.0

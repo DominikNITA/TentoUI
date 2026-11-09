@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="ImagePreviewGroup Interactive Playground"
+                     ComponentTag="ImagePreviewGroup"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Multi-Image Lightbox Gallery" Description="Click any image below to open the shared full-screen gallery modal." Code="@_galleryCode">
         <ImagePreviewGroup>
             <Image Src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80" Alt="Yosemite Valley" Width="160px" Height="110px" />
@@ -23,6 +28,8 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls = [];
+
     private const string _galleryCode = """
         <ImagePreviewGroup>
             <Image Src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400&q=80" Width="160px" Height="110px" />

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="TreeSelect Interactive Playground"
+                     ComponentTag="TreeSelect"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic TreeSelect *@
     <DemoCard Title="Basic TreeSelect" Description="Dropdown picker with nested folder and file tree navigation." Code="@_basicCode">
         <div class="max-w-xs p-2 space-y-2">
@@ -39,6 +44,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Select file or directory...", DefaultValue = "Please select" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "ShowSearch", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _selectedKey = "components";
     private string? _searchKey = "table";
 

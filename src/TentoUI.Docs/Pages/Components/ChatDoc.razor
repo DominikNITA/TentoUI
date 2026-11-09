@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="ChatBubble Interactive Playground"
+                     ComponentTag="ChatBubble"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Interactive AI Copilot Conversation" Description="Send a message or click a suggestion chip to append to the conversation thread." Code="@_chatCode">
         <div class="space-y-4">
             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-4 max-h-96 overflow-y-auto">
@@ -35,6 +40,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Author", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Tento Copilot", DefaultValue = "Tento Copilot" },
+        new() { Name = "Message", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "How can I help you build with TentoUI today?", DefaultValue = "" },
+        new() { Name = "Placement", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Start", DefaultValue = "Start", Options = ["Start", "End"] },
+        new() { Name = "ShowActions", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private sealed record ChatEntry(string Author, string Time, ChatPlacement Placement, string Text, IReadOnlyList<string>? Steps = null);
 
     private readonly List<ChatEntry> _messages =

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Mentions Interactive Playground"
+                     ComponentTag="Mentions"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Team Member Mentions" Description="@("Type @ followed by a name to filter and insert a mention handle.")" Code="@_mentionsCode">
         <Mentions @bind-Value="_text"
                   OptionsString="dominik, sarah, alex, elena"
@@ -22,6 +27,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Prefix", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "@", DefaultValue = "@", Options = ["@", "#"] },
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Type @ to mention someone...", DefaultValue = "" },
+        new() { Name = "OptionsString", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "dominik, sarah, alex, elena", DefaultValue = "" },
+        new() { Name = "Rows", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "2", DefaultValue = "1" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "None", DefaultValue = "None", Options = ["None", "Error", "Warning", "Success"] },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string? _text = "Hey @dominik please review this PR";
 
     private const string _mentionsCode = """

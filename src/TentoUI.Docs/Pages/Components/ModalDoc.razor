@@ -13,6 +13,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Modal Interactive Playground"
+                     ComponentTag="Modal"
+                     Controls="@_playgroundControls" />
+
     @* Setup Note for IModalService *@
     <div class="rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/70 dark:bg-sky-950/30 p-4 text-xs text-sky-900 dark:text-sky-200 space-y-2">
         <div class="flex items-center gap-2 font-bold text-sky-800 dark:text-sky-300">
@@ -79,6 +84,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Confirm Action", DefaultValue = "" },
+        new() { Name = "OkText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Confirm", DefaultValue = "OK" },
+        new() { Name = "CancelText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Dismiss", DefaultValue = "Cancel" },
+        new() { Name = "Danger", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Centered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Closable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<p class=\"text-sm text-slate-600\">Are you sure you want to proceed with this operation?</p>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private bool _isFormModalOpen;
     private bool _isSaving;
     private MemberEditDto _editModel = new();

@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Table Interactive Playground"
+                     ComponentTag="Table"
+                     Controls="@_playgroundControls" />
+
     @* Demo 1: Full-featured customizable table *@
     <DemoCard Title="Custom Columns, Sorting, Filtering &amp; Pagination"
               Description="Define custom column layouts using TableColumn, custom cell markup with avatars, formatted values, dropdown and text filters, and pagination controls."
@@ -183,6 +188,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Striped", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Compact", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Loading", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ShowPagination", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<TableColumn Title=\"ID\" Property=\"Id\" Width=\"80px\" />\n<TableColumn Title=\"Name\" Property=\"Name\" />\n<TableColumn Title=\"Department\" Property=\"Department\" />\n<TableColumn Title=\"Salary\" Property=\"Salary\" />", DefaultValue = "", IsChildContent = true }
+    ];
+
     private int _pageIndex = 1;
     private int _pageSize = 5;
     private bool _isLoadingBackend;

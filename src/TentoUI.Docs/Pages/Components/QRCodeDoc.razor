@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="QRCode Interactive Playground"
+                     ComponentTag="QRCode"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic QR Code *@
     <DemoCard Title="Basic QR Code" Description="Generates standard ISO-compliant scannable QR codes for URLs or text data." Code="@_basicCode">
         <div class="p-6 flex items-center justify-center">
@@ -52,6 +57,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "https://github.com/DominikNITA/TentoUI", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "140", DefaultValue = "160" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "QRCodeStatus.Active", DefaultValue = "QRCodeStatus.Active", Options = ["QRCodeStatus.Active", "QRCodeStatus.Loading", "QRCodeStatus.Expired"] },
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private QRCodeStatus _qrStatus = QRCodeStatus.Expired;
 
     private void HandleRefresh()

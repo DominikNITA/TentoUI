@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Kbd Interactive Playground"
+                     ComponentTag="Kbd"
+                     Controls="@_playgroundControls" />
+
     <DemoCard Title="Keyboard Shortcut Badges (Kbd)" Description="Each Kbd component splits a '+'-delimited chord into individual tactile keycaps. Displayed vertically below so each shortcut chord is distinct." Code="@_kbdCode">
         <div class="flex flex-col gap-3 text-xs text-slate-700 dark:text-slate-300">
             <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -44,6 +49,11 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Keys", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Ctrl+Shift+P", DefaultValue = "" }
+    ];
+
     private const string _kbdCode = """
         <div class="flex flex-col gap-3 text-xs">
             <div class="flex items-center justify-between max-w-xs p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">

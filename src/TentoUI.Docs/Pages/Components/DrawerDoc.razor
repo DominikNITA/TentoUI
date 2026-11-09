@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Drawer Interactive Playground"
+                     ComponentTag="Drawer"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Drawer *@
     <DemoCard Title="Basic Drawer" Description="Standard sliding drawer panel triggered by an action button." Code="@_basicCode">
         <div>
@@ -59,6 +64,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Workspace Configuration", DefaultValue = "" },
+        new() { Name = "Placement", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "DrawerPlacement.Right", DefaultValue = "DrawerPlacement.Right", Options = ["DrawerPlacement.Right", "DrawerPlacement.Left", "DrawerPlacement.Top", "DrawerPlacement.Bottom"] },
+        new() { Name = "Width", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "360px", DefaultValue = "378px" },
+        new() { Name = "Closable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Mask", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<p class=\"text-xs text-slate-500\">Manage integration webhooks and team permissions.</p>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private bool _openBasic;
     private bool _openLeft;
 

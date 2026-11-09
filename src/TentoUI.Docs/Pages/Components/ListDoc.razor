@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="List Interactive Playground"
+                     ComponentTag="ListView"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic List *@
     <DemoCard Title="Basic List with Metadata"
               Description="List items featuring letter avatars, titles, and descriptions. All items are visible and editable in the snippet."
@@ -27,6 +32,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "HeaderText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Active Deployments", DefaultValue = "" },
+        new() { Name = "FooterText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "4 services running", DefaultValue = "" },
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _basicCode = """
         <div class="max-w-lg">
             <ListView Bordered="true">

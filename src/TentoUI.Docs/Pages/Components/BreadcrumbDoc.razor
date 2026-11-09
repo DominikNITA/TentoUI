@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Breadcrumb Interactive Playground"
+                     ComponentTag="Breadcrumb"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Breadcrumb *@
     <DemoCard Title="Basic Breadcrumb" Description="Standard hierarchical navigation trail with default slash separator." Code="@_basicCode">
         <Breadcrumb Separator="/">
@@ -51,6 +56,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Separator", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "/", DefaultValue = "" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<BreadcrumbItem Href=\"#\">Home</BreadcrumbItem>\n<BreadcrumbItem Href=\"#\">Infrastructure</BreadcrumbItem>\n<BreadcrumbItem IsLast=\"true\">Clusters</BreadcrumbItem>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Breadcrumb Separator="/">
             <BreadcrumbItem Href="#">Home</BreadcrumbItem>

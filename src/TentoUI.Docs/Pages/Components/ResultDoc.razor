@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Result Interactive Playground"
+                     ComponentTag="Result"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Success Result *@
     <DemoCard Title="Success Result" Description="Show a positive confirmation message with primary actions." Code="@_successCode">
         <Result Status="ResultStatus.Success"
@@ -69,6 +74,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ResultStatus.Success", DefaultValue = "ResultStatus.Info", Options = ["ResultStatus.Success", "ResultStatus.Info", "ResultStatus.Warning", "ResultStatus.Error"] },
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Successfully Deployed Application", DefaultValue = "" },
+        new() { Name = "SubTitle", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Production instance is healthy and serving live requests.", DefaultValue = "" }
+    ];
+
     private const string _successCode = """
         <Result Status="ResultStatus.Success"
                 Title="Successfully Purchased Cloud Instance"

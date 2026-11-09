@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Descriptions Interactive Playground"
+                     ComponentTag="Descriptions"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Bordered Descriptions *@
     <DemoCard Title="Bordered Descriptions Grid" Description="Standard structured grid layout with clear borders and shaded headers." Code="@_borderedCode">
         <Descriptions Title="System Cluster Info" Bordered="true" Column="3">
@@ -38,6 +43,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "System Cluster Info", DefaultValue = "" },
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Column", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "3", DefaultValue = "3" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] }
+    ];
+
     private const string _borderedCode = """
         <Descriptions Title="System Cluster Info" Bordered="true" Column="3">
             <DescriptionsItem Label="Cluster Name">prod-cluster-us-east-1</DescriptionsItem>

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="InputNumber Interactive Playground"
+                     ComponentTag="InputNumber"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic InputNumber *@
     <DemoCard Title="Basic InputNumber" Description="Numeric input with mouse-clickable stepper arrows." Code="@_basicCode">
         <div class="flex items-center gap-4 max-w-xs p-2">
@@ -40,6 +45,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "25", DefaultValue = "" },
+        new() { Name = "Min", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "0", DefaultValue = "0" },
+        new() { Name = "Max", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "100", DefaultValue = "100" },
+        new() { Name = "Step", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "1", DefaultValue = "1" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Controls", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private double _number = 42;
     private double _ranged = 25;
 

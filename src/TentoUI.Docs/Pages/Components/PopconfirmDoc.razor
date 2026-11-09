@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Popconfirm Interactive Playground"
+                     ComponentTag="Popconfirm"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Popconfirm *@
     <DemoCard Title="Basic Popconfirm" Description="Prompt user confirmation before executing a destructive action." Code="@_basicCode">
         <div class="p-4 flex items-center justify-center">
@@ -48,6 +53,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Delete this task permanently?", DefaultValue = "Are you sure?" },
+        new() { Name = "Description", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "This action cannot be undone.", DefaultValue = "" },
+        new() { Name = "OkText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Yes, Delete", DefaultValue = "Yes" },
+        new() { Name = "CancelText", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Cancel", DefaultValue = "No" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button Danger=\"true\">Delete Item</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Popconfirm Title="Delete this task?"
                     Description="This action cannot be undone."

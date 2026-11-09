@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Steps Interactive Playground"
+                     ComponentTag="Steps"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Horizontal Steps *@
     <DemoCard Title="Basic Steps" Description="Simple linear progress flow across multi-stage wizard." Code="@_basicCode">
         <div class="p-4">
@@ -58,6 +63,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Current", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "1", DefaultValue = "" },
+        new() { Name = "Direction", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "StepsDirection.Horizontal", DefaultValue = "StepsDirection.Horizontal", Options = ["StepsDirection.Horizontal", "StepsDirection.Vertical"] },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "StepStatus.Process", DefaultValue = "StepStatus.Process", Options = ["StepStatus.Process", "StepStatus.Finish", "StepStatus.Error", "StepStatus.Wait"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle"] }
+    ];
+
     private int _currentStep = 0;
 
     private const string _basicCode = """

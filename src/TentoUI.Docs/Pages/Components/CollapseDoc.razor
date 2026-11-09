@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Collapse Interactive Playground"
+                     ComponentTag="Collapse"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Collapse *@
     <DemoCard Title="Basic Collapse" Description="Multi-panel unfoldable list with bordered containers." Code="@_basicCode">
         <Collapse Bordered="true">
@@ -65,6 +70,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Accordion", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Ghost", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "DefaultActiveKey", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "1", DefaultValue = "" }
+    ];
+
     private const string _basicCode = """
         <Collapse Bordered="true">
             <CollapsePanel Key="1" Header="What is TentoUI?">

@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Segmented Interactive Playground"
+                     ComponentTag="Segmented"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Declarative Child Items *@
     <DemoCard Title="Declarative Child Items"
               Description="Declare options directly in markup using SegmentedItem child elements. Every option is visible and editable."
@@ -37,6 +42,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Options", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Daily, Weekly, Monthly, Quarterly", DefaultValue = "" },
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Weekly", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Block", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _basicCode = """
         <Segmented TValue="string" Value="Daily">
             <SegmentedItem Value="Daily">Daily</SegmentedItem>

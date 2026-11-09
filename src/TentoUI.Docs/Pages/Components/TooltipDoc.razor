@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Tooltip Interactive Playground"
+                     ComponentTag="Tooltip"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Tooltip *@
     <DemoCard Title="Basic Usage" Description="Hover over the target to reveal contextual prompt text." Code="@_basicCode">
         <div class="p-4">
@@ -60,6 +65,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Keyboard shortcut: Ctrl+S", DefaultValue = "" },
+        new() { Name = "Placement", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "TooltipPlacement.Top", DefaultValue = "TooltipPlacement.Top", Options = ["TooltipPlacement.Top", "TooltipPlacement.Bottom", "TooltipPlacement.Left", "TooltipPlacement.Right"] },
+        new() { Name = "Arrow", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Color", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "", DefaultValue = "" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button Type=\"ButtonType.Primary\">Hover Me</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Tooltip Title="Prompt text appears on hover">
             <Button Type="ButtonType.Primary">Hover over me</Button>

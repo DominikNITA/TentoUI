@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="ColorPicker Interactive Playground"
+                     ComponentTag="ColorPicker"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic ColorPicker *@
     <DemoCard Title="Basic ColorPicker" Description="Select a color swatch with two-way binding and hex code indicator." Code="@_basicCode">
         <div class="max-w-xs p-2 space-y-4">
@@ -34,6 +39,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "#1677ff", DefaultValue = "" },
+        new() { Name = "ShowText", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string _color = "#3b82f6";
 
     private const string _basicCode = """

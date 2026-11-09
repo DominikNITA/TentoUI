@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Tabs Interactive Playground"
+                     ComponentTag="Tabs"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Line Tabs *@
     <DemoCard Title="Line Tabs" Description="Default underline indicator with responsive panel switching." Code="@_lineCode">
         <div class="p-2">
@@ -63,6 +68,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "TabType.Line", DefaultValue = "TabType.Line", Options = ["TabType.Line", "TabType.Card", "TabType.EditableCard"] },
+        new() { Name = "Position", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "TabPosition.Top", DefaultValue = "TabPosition.Top", Options = ["TabPosition.Top", "TabPosition.Bottom", "TabPosition.Left", "TabPosition.Right"] },
+        new() { Name = "DefaultActiveKey", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "1", DefaultValue = "" }
+    ];
+
     private string _activeTab = "general";
 
     private const string _lineCode = """

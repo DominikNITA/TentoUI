@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Popover Interactive Playground"
+                     ComponentTag="Popover"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Hover Popover *@
     <DemoCard Title="Hover Popover" Description="Floating card opened when hovering over the anchor button." Code="@_hoverCode">
         <div class="py-14 flex items-center justify-center">
@@ -52,6 +57,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "System Notifications", DefaultValue = "" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "All 14 background services are operating within normal parameters.", DefaultValue = "" },
+        new() { Name = "Placement", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "TooltipPlacement.Top", DefaultValue = "TooltipPlacement.Top", Options = ["TooltipPlacement.Top", "TooltipPlacement.Bottom", "TooltipPlacement.Left", "TooltipPlacement.Right"] },
+        new() { Name = "Trigger", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "TooltipTrigger.Click", DefaultValue = "TooltipTrigger.Click", Options = ["TooltipTrigger.Click", "TooltipTrigger.Hover"] },
+        new() { Name = "ContentSlot", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button Type=\"ButtonType.Default\">Toggle Popover</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _hoverCode = """
         <div class="py-14 flex items-center justify-center">
             <Popover Title="Cluster Statistics" Trigger="TooltipTrigger.Hover" Placement="TooltipPlacement.Top">

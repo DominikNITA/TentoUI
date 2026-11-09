@@ -970,6 +970,80 @@ public class TentoMarkupRenderer : ComponentBase
                 builder.AddAttribute(seq++, "Items", (IEnumerable<KanbanCardItem>)sampleCards);
             }
         }
+        // 14. Breadcrumb sample items fallback
+        else if (compType == typeof(Breadcrumb))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("BreadcrumbItem", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "BreadcrumbItem", Attributes = new() { ["Href"] = "#" }, TextContent = "Home" });
+                node.Children.Add(new MarkupNode { TagName = "BreadcrumbItem", Attributes = new() { ["Href"] = "#" }, TextContent = "Components" });
+                node.Children.Add(new MarkupNode { TagName = "BreadcrumbItem", Attributes = new() { ["IsLast"] = "true" }, TextContent = "Breadcrumb" });
+            }
+        }
+        // 15. Timeline sample items fallback
+        else if (compType == typeof(Timeline))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("TimelineItem", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "green", ["Label"] = "2026-10-28" }, TextContent = "Released TentoUI v1.0.0 on NuGet" });
+                node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "blue", ["Label"] = "2026-10-20" }, TextContent = "Completed 40+ AntDesign Tailwind components" });
+                node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "gray", ["Label"] = "2026-10-01" }, TextContent = "Extracted standalone git repository" });
+            }
+        }
+        // 16. Steps sample steps fallback
+        else if (compType == typeof(Steps))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("Step", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "Step", Attributes = new() { ["Title"] = "Account", ["Description"] = "Account setup" } });
+                node.Children.Add(new MarkupNode { TagName = "Step", Attributes = new() { ["Title"] = "Verification", ["Description"] = "Identity check" } });
+                node.Children.Add(new MarkupNode { TagName = "Step", Attributes = new() { ["Title"] = "Approval", ["Description"] = "Final confirmation" } });
+            }
+        }
+        // 17. Collapse sample panels fallback
+        else if (compType == typeof(Collapse))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("CollapsePanel", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "CollapsePanel", Attributes = new() { ["Key"] = "1", ["Header"] = "Infrastructure Topology" }, TextContent = "Multi-region AWS EKS clusters connected via Cilium service mesh." });
+                node.Children.Add(new MarkupNode { TagName = "CollapsePanel", Attributes = new() { ["Key"] = "2", ["Header"] = "Database Failover" }, TextContent = "Automated PostgreSQL replication across availability zones." });
+            }
+        }
+        // 18. Descriptions sample items fallback
+        else if (compType == typeof(Descriptions))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("DescriptionsItem", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "DescriptionsItem", Attributes = new() { ["Label"] = "Product" }, TextContent = "Cloud Infrastructure Suite" });
+                node.Children.Add(new MarkupNode { TagName = "DescriptionsItem", Attributes = new() { ["Label"] = "Billing Cycle" }, TextContent = "Monthly auto-renewal" });
+                node.Children.Add(new MarkupNode { TagName = "DescriptionsItem", Attributes = new() { ["Label"] = "Status" }, TextContent = "Active" });
+            }
+        }
+        // 19. ListView sample items fallback
+        else if (compType == typeof(ListView<string>))
+        {
+            if (!node.Attributes.ContainsKey("DataSource") && node.Children.Count == 0 && string.IsNullOrEmpty(node.TextContent))
+            {
+                var sampleList = new[]
+                {
+                    "Kubernetes Cluster Deployment v1.31",
+                    "Redis Enterprise Cache Layer",
+                    "PostgreSQL Multi-AZ Primary Node",
+                    "Prometheus Telemetry Exporter"
+                };
+                builder.AddAttribute(seq++, "DataSource", (IEnumerable<string>)sampleList);
+            }
+        }
+        // 20. Tabs sample panes fallback
+        else if (compType == typeof(Tabs))
+        {
+            if (!node.Children.Any(c => c.TagName.Equals("TabPane", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "1", ["Tab"] = "Overview" }, TextContent = "System overview and health metrics." });
+                node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "2", ["Tab"] = "Deployments" }, TextContent = "Active rollouts across production clusters." });
+                node.Children.Add(new MarkupNode { TagName = "TabPane", Attributes = new() { ["Key"] = "3", ["Tab"] = "Settings" }, TextContent = "Organization policies and security guardrails." });
+            }
+        }
     }
 
     private EventCallback<MouseEventArgs> CreateMouseCallback(string rawVal)

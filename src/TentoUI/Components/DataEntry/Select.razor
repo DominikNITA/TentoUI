@@ -71,7 +71,7 @@
         <div id="@($"{ElementId}-listbox")"
              role="listbox"
              aria-multiselectable="@(Mode == SelectMode.Multiple ? "true" : "false")"
-             class="absolute left-0 top-full mt-1 w-full z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto py-1">
+             class="absolute left-0 top-full mt-1 w-full z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto py-1 tento-animate-slide-down">
             
             @if (ShowSearch)
             {
@@ -292,10 +292,10 @@
         return true;
     }
 
-    private string ComputeTriggerClass() => new CssBuilder("flex items-center justify-between w-full rounded-md border bg-white dark:bg-slate-900 cursor-pointer shadow-sm min-h-[38px] px-3 py-1.5 text-sm transition-all")
+    private string ComputeTriggerClass() => new CssBuilder("flex items-center justify-between w-full rounded-md border bg-white dark:bg-slate-900 cursor-pointer shadow-sm min-h-[38px] px-3 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30 focus-visible:border-primary-500")
         .AddClass(GetStatusBorderClass())
         .AddClass("opacity-60 bg-slate-100 dark:bg-slate-800 cursor-not-allowed", IsDisabled)
-        .AddClass("ring-2 ring-primary-500/20 border-primary-500", _isOpen)
+        .AddClass("ring-2 ring-primary-500/30 border-primary-500", _isOpen)
         .AddClass(Class)
         .Build();
 

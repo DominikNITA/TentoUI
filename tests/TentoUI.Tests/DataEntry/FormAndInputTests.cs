@@ -157,4 +157,100 @@ public class FormAndInputTests : TestContext
         input.GetAttribute("step").Should().Be("1");
         input.GetAttribute("value").Should().Be("5");
     }
+
+    [Fact]
+    public void Form_WithDataAnnotations_TriggersValidationOnSubmit()
+    {
+        var model = new TestModel { Username = null };
+        var invalidInvoked = false;
+        var validInvoked = false;
+
+        var cut = RenderComponent<Form>(parameters => parameters
+            .Add(p => p.Model, model)
+            .Add(p => p.EnableDataAnnotations, true)
+            .Add(p => p.OnFinishFailed, EventCallback.Factory.Create<EditContext>(this, _ => invalidInvoked = true))
+            .Add(p => p.OnFinish, EventCallback.Factory.Create<EditContext>(this, _ => validInvoked = true))
+            .AddChildContent(builder =>
+            {
+                builder.OpenComponent<FormItem>(0);
+                builder.AddAttribute(1, "For", (System.Linq.Expressions.Expression<Func<string?>>)(() => model.Username));
+                builder.AddAttribute(2, "ChildContent", (RenderFragment)(b =>
+                {
+                    b.OpenComponent<Input>(0);
+                    b.AddAttribute(1, "Value", model.Username);
+                    b.CloseComponent();
+                }));
+                builder.CloseComponent();
+
+                builder.OpenElement(10, "button");
+                builder.AddAttribute(11, "type", "submit");
+                builder.AddContent(12, "Submit");
+                builder.CloseElement();
+            }));
+
+        var form = cut.Find("form");
+        form.Submit();
+
+        invalidInvoked.Should().BeTrue();
+        validInvoked.Should().BeFalse();
+
+        var alert = cut.Find("[role='alert']");
+        alert.TextContent.Should().Contain("Username is required");
+    }
+
+    [Fact]
+    public async Task AutoComplete_WithSearchProvider_FetchesRemoteResults()
+    {
+        var cut = RenderComponent<AutoComplete>(parameters => parameters
+            .Add(p => p.DebounceMs, 0)
+            .Add(p => p.SearchProvider, (query, ct) =>
+            {
+                var list = new List<AutoCompleteOption>
+                {
+                    new("result-1", "First Match"),
+                    new("result-2", "Second Match")
+                };
+                return Task.FromResult<IEnumerable<AutoCompleteOption>>(list);
+            }));
+
+        var input = cut.Find("input");
+        input.Input("match");
+
+        // Allow debounce task to execute
+        await Task.Delay(50);
+        cut.Render();
+
+        var options = cut.FindAll("[role='option']");
+        options.Should().HaveCount(2);
+        options[0].TextContent.Should().Contain("First Match");
+    }
+
+    [Fact]
+    public void FileDropzone_RendersDropAreaAndFiles()
+    {
+        var files = new List<UploadFileItem>
+        {
+            new() { Name = "test-doc.pdf", Size = 1048576, Status = UploadStatus.Done }
+        };
+
+        var cut = RenderComponent<FileDropzone>(parameters => parameters
+            .Add(p => p.Title, "Drag files here")
+            .Add(p => p.Files, files));
+
+        cut.Find(".tento-file-dropzone").Should().NotBeNull();
+        cut.Find("span").TextContent.Should().Contain("Drag files here");
+        cut.Markup.Should().Contain("test-doc.pdf");
+        cut.Markup.Should().Contain("1.0 MB");
+    }
+
+    [Fact]
+    public void Input_FocusRing_ContainsModernRingClasses()
+    {
+        var cut = RenderComponent<Input>(parameters => parameters
+            .Add(p => p.Value, "Focus test"));
+
+        var wrapper = cut.Find(".tento-input-wrapper");
+        wrapper.GetAttribute("class").Should().Contain("focus-within:ring-2");
+        wrapper.GetAttribute("class").Should().Contain("focus-within:border-primary-500");
+    }
 }

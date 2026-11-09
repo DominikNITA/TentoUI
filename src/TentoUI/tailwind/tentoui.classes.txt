@@ -13,6 +13,8 @@
 !_initialized)
 !_isCollapsed
 !_isCollapsed)
+!_isDraggingOver
+!_isDraggingOver)
 !_isDrawing
 !_isDrawing)
 !_isHovered)
@@ -21,6 +23,7 @@
 !_isSelected
 !_items.Contains(item))
 !_panels.Contains(panel))
+!_previousOpen)
 !_prevVisible)
 !_registeredImages.Contains(src))
 !_sb.ToString().TrimEnd().EndsWith(
@@ -147,6 +150,7 @@
 !string.IsNullOrEmpty(Fallback)
 !string.IsNullOrEmpty(FieldId)
 !string.IsNullOrEmpty(FieldId))
+!string.IsNullOrEmpty(file.ThumbUrl))
 !string.IsNullOrEmpty(FooterText))
 !string.IsNullOrEmpty(Format)
 !string.IsNullOrEmpty(FormItemContext.Id))
@@ -168,6 +172,7 @@
 !string.IsNullOrEmpty(LabelColClass))
 !string.IsNullOrEmpty(n.Description))
 !string.IsNullOrEmpty(node.Icon)
+!string.IsNullOrEmpty(NotFoundContent))
 !string.IsNullOrEmpty(OkText))
 !string.IsNullOrEmpty(opt.Description))
 !string.IsNullOrEmpty(opt.Icon))
@@ -309,6 +314,7 @@
 @(_currentIndex
 @(_failed
 @(_isCollapsed
+@(_isDraggingOver
 @(_isExpanded
 @(_isOpen
 @(_lastTriggeredTime
@@ -339,6 +345,8 @@
 @(EffectiveDarkMode
 @(EffectiveStatus
 @(Feedback
+@(file.ErrorMessage
+@(file.Percent)%
 @(file.Status
 @(GetInitials())
 @(hasActiveFilter
@@ -359,6 +367,7 @@
 @(isExp
 @(isExpanded
 @(isHighlighted
+@(IsImageFile(file.Name)
 @(isItemDisabled
 @(isLast
 @(IsOpen
@@ -372,6 +381,7 @@
 @(Loading
 @(LogicalOperator
 @(Mask
+@(MaxFiles.HasValue
 @(Mode
 @(NewTitle
 @(OldTitle
@@ -537,6 +547,7 @@
 @ComputedClass
 @ComputedContainerClass
 @ComputedDotClass
+@ComputedDropAreaClass
 @ComputedDropzoneClass
 @ComputeDefaultRadioClass()
 @ComputedGridClass
@@ -544,6 +555,7 @@
 @ComputedHeaderClass
 @ComputedHorizontalClass
 @ComputedHorizontalWithTitleClass
+@ComputedIconWrapperClass
 @ComputedInputClass
 @ComputedListClass()
 @ComputeDotBtnClass(isActive)
@@ -644,7 +656,6 @@
 @Dot
 @Duration
 @EditText
-@EffectiveErrors.First()
 @EffectiveImages.Count
 @EffectiveImages[_currentIndex]
 @EffectiveImages[idx]
@@ -671,6 +682,8 @@
 @field.Key
 @field.Label
 @file.Name
+@file.ThumbUrl
+@Files.Count
 @FilteredItems.Count
 @FinishText
 @FirstPanel
@@ -680,6 +693,7 @@
 @for
 @foreach
 @FormatDisplayText()
+@FormatFileSize(file.Size)
 @FormattedDate
 @FormattedEnd
 @FormattedStart
@@ -711,6 +725,7 @@
 @HandleKeyDown
 @HandleManualInput
 @HandleSelect
+@HandleValidSubmit
 @HandleValueChanged
 @Header
 @HeaderTemplate
@@ -733,6 +748,7 @@
 @IconNames.Calendar
 @IconNames.Check
 @IconNames.CheckCircle
+@IconNames.CheckCircle2
 @IconNames.ChevronDown
 @IconNames.ChevronLeft
 @IconNames.ChevronRight
@@ -747,6 +763,7 @@
 @IconNames.Inbox
 @IconNames.Info
 @IconNames.Link
+@IconNames.Loader
 @IconNames.Loader2
 @IconNames.Minus
 @IconNames.Music
@@ -835,6 +852,7 @@
 @node.Disabled
 @node.Key
 @node.Title
+@NotFoundContent
 @OkText
 @OkType
 @OnBlur
@@ -848,6 +866,7 @@
 @ondragenter=
 @ondragleave=
 @ondragover:preventDefault=
+@ondragover=
 @ondragstart=
 @ondrop=
 @onerror=
@@ -868,7 +887,6 @@
 @onpointerup=
 @OnRowClick
 @OnSubmit
-@OnValidSubmit
 @op
 @opt
 @opt.Description
@@ -1444,6 +1462,7 @@ Archive
 are
 Are
 area
+Area
 Area,
 AreaPolygonPoints
 args
@@ -1519,8 +1538,10 @@ AssigneeSelector(item)
 Assistant
 async
 Asynchronous
+asyncLoading
 at
 At
+Attached
 Attribute
 attributes
 attributes)
@@ -1553,6 +1574,8 @@ AutoCompleteOption(string
 AutoCompleteOption,
 AutoCompleteOption>
 AutoCompleteOption>()
+AutoCompleteOption>>>
+autofocus
 auto-generated.
 Autoplay
 autoplayCts
@@ -1627,6 +1650,7 @@ bars.Count))
 bars[barIndex]
 barWidth
 base
+base.OnAfterRenderAsync(firstRender)
 base.OnInitialized()
 base.OnParametersSet()
 base.SetParametersAsync(parameters)
@@ -1689,6 +1713,7 @@ bg-primary-50
 bg-primary-50/30
 bg-primary-50/40
 bg-primary-50/50
+bg-primary-50/60
 bg-primary-500
 bg-primary-500/15
 bg-primary-600
@@ -1840,6 +1865,7 @@ Breadcrumb
 break
 Breakpoint
 brief
+browse
 Browser
 Btn
 bubble
@@ -1920,6 +1946,8 @@ ButtonType.Primary)
 ButtonType.Primary,
 ButtonType.Text
 by
+bytes
+bytes)
 C#
 c.94.94
 c.Filterable
@@ -1963,6 +1991,8 @@ CancelAsync
 CancelAsync()
 CancelEdit
 CancelEdit()
+CancellationToken
+CancellationToken,
 CancellationTokenSource
 CancellationTokenSource()
 CancelText
@@ -2168,6 +2198,8 @@ cleanKey
 cleanKey)
 clear
 Clear
+ClearAllFilesAsync
+ClearAllFilesAsync()
 ClearAllFiltersAsync
 ClearAllFiltersAsync()
 ClearAsync
@@ -2191,6 +2223,7 @@ ClearSignature
 ClearSignature()
 ClearValue
 ClearValue()
+click
 Click
 Click,
 clicked).
@@ -2418,6 +2451,7 @@ ComputedCardClass
 ComputedClass
 ComputedContainerClass
 ComputedDotClass
+ComputedDropAreaClass
 ComputedDropzoneClass
 ComputeDefaultRadioClass()
 ComputedGridClass
@@ -2425,6 +2459,7 @@ ComputedGripClass
 ComputedHeaderClass
 ComputedHorizontalClass
 ComputedHorizontalWithTitleClass
+ComputedIconWrapperClass
 ComputeDiff()
 ComputedInputClass
 ComputedListClass()
@@ -2524,6 +2559,7 @@ context)
 context.Id
 context.ValidateStatus
 Context=
+contexts
 continue
 ContinueWith(t
 control
@@ -2763,6 +2799,7 @@ dark:bg-primary-950/30
 dark:bg-primary-950/40
 dark:bg-primary-950/50
 dark:bg-primary-950/70
+dark:bg-primary-950/80
 dark:bg-purple-950/40
 dark:bg-red-950/40
 dark:bg-rose-950/20
@@ -2781,6 +2818,7 @@ dark:bg-slate-800/50
 dark:bg-slate-800/60
 dark:bg-slate-800/80
 dark:bg-slate-900
+dark:bg-slate-900/40
 dark:bg-slate-900/50
 dark:bg-slate-900/60
 dark:bg-slate-900/70
@@ -2811,6 +2849,7 @@ dark:border-white/10
 dark:divide-slate-700
 dark:divide-slate-800
 dark:divide-slate-800/50
+dark:focus-within:ring-primary-400/25
 dark:hover:bg-primary-950/40
 dark:hover:bg-primary-950/50
 dark:hover:bg-primary-950/60
@@ -2821,6 +2860,7 @@ dark:hover:bg-slate-700/50
 dark:hover:bg-slate-800
 dark:hover:bg-slate-800/50
 dark:hover:bg-slate-800/60
+dark:hover:bg-slate-900/80
 dark:hover:bg-white/10
 dark:hover:border-slate-700
 dark:hover:text-primary-400
@@ -2934,6 +2974,7 @@ Data)
 data.
 Data.ToList()
 data:
+data:image/png
 data:image/svg
 Data=
 DataAnnotationsValidator
@@ -3232,6 +3273,7 @@ dp[i
 dp[i,
 dp[x
 dp[x,
+Drag
 drag-and-drop
 DragDrop
 DragDrop)
@@ -3245,6 +3287,7 @@ DrawerPlacement.Left
 DrawerPlacement.Right
 DrawerPlacement.Top
 drawer-title-
+drop
 Drop
 dropdown
 Dropdown
@@ -3289,6 +3332,7 @@ e.FileCount
 e.g.
 e.g.,
 e.GetMultipleFiles(50)
+e.GetMultipleFiles(MaxFiles
 e.Key
 e.Key)
 e.MetaKey))
@@ -3352,7 +3396,6 @@ effectiveEditContext.Model
 EffectiveErrors
 EffectiveErrors)
 EffectiveErrors.Any())
-EffectiveErrors.Count()
 EffectiveFields
 EffectiveFields)
 EffectiveFields.FirstOrDefault()
@@ -3366,6 +3409,8 @@ EffectiveKey
 EffectiveKey,
 EffectiveLabel
 EffectiveLength
+EffectiveLoading
+EffectiveLoading)
 EffectiveOptions
 EffectiveOptions)
 EffectivePageIndex
@@ -3414,6 +3459,7 @@ enabled
 enabled.Count
 enabled.Count)
 enabled.IndexOf(currentKey)
+EnableDataAnnotations
 enabledItems
 enabledItems.All(i
 enabledItems.Count
@@ -3497,6 +3543,8 @@ exceeds
 Exception
 Exception)
 executed
+ExecuteSearchAsync(CurrentValueAsString
+ExecuteSearchAsync(string
 execution.
 existing
 existing.Close()
@@ -3533,6 +3581,7 @@ expression
 Expression
 Expression.Lambda(member.Expression).Compile()
 ExpressionType.Convert)
+ext
 external-link
 ExternalLink
 Extra
@@ -3553,6 +3602,7 @@ f.IsLiteral
 f.Name,
 f.Size
 f.Size,
+F1
 f172a
 f1f5f9
 F2
@@ -3610,10 +3660,17 @@ fieldset
 fieldset>
 file
 File
+file)
 file.
 file.ContentType
+file.ContentType,
 file.Name
+file.Name,
 file.OpenReadStream(MaxFileSize)
+file.RequestImageFileAsync(
+file.Size
+file.Size,
+file.Status
 FileList
 FileList)
 FileList.Add(new
@@ -3623,6 +3680,17 @@ FileList.Remove(item)
 FileListChanged
 FileListChanged.HasDelegate)
 FileListChanged.InvokeAsync(FileList)
+filename)
+files
+Files
+Files)
+Files.Add(item)
+Files.Clear()
+Files.Count
+Files.Remove(file)
+FilesChanged
+FilesChanged.HasDelegate)
+FilesChanged.InvokeAsync(Files)
 fill=
 filled
 filled.
@@ -3772,27 +3840,30 @@ focus:border-red-500
 focus:outline-none
 focus:ring-1
 focus:ring-2
-focus:ring-amber-500
 focus:ring-amber-500/20
 focus:ring-emerald-500/20
 focus:ring-primary-500
 focus:ring-primary-500/20
+focus:ring-primary-500/25
 focus:ring-red-500
 focus:ring-red-500/20
 FocusEventArgs>
+focus-visible:border-primary-500
 focus-visible:outline-none
 focus-visible:ring-2
 focus-visible:ring-offset-2
 focus-visible:ring-primary-500
+focus-visible:ring-primary-500/30
 focus-visible:ring-primary-500/50
 focus-visible:ring-red-500
+focus-within:border-amber-500
 focus-within:border-primary-500
 focus-within:border-red-500
-focus-within:ring-1
 focus-within:ring-2
-focus-within:ring-primary-500
+focus-within:ring-amber-500/20
 focus-within:ring-primary-500/20
-focus-within:ring-red-500
+focus-within:ring-primary-500/25
+focus-within:ring-red-500/20
 folder
 Folder
 font
@@ -3830,6 +3901,9 @@ Format,
 format.
 format:
 FormatDisplayText()
+FormatFileSize(long
+FormatFileSize(MaxFileSize)
+formats:
 formattable)
 formattable.ToString(Format,
 formatted
@@ -3935,6 +4009,7 @@ GaugeStatus.Warning
 GB
 geekblue
 Geekblue,
+Generate
 Generated
 Generates
 generator
@@ -4009,6 +4084,7 @@ GetWidthClass(Span)
 GetWordCount()
 Ghost
 Ghost)
+gif
 given
 global
 globalTerm
@@ -4167,6 +4243,12 @@ HandleContextMenuAsync
 HandleContextMenuAsync(MouseEventArgs
 HandleCopyAsync
 HandleCopyAsync()
+HandleDragLeave
+HandleDragLeave()
+HandleDragOver
+HandleDragOver()
+HandleDrop
+HandleDrop()
 HandleDropAsync(col.Key))
 HandleDropAsync(string
 HandleEditKeyDownAsync
@@ -4178,6 +4260,8 @@ HandleFieldChangeAsync(FilterRule
 HandleFieldChangeAsync(rule,
 HandleFileSelected
 HandleFileSelected(InputFileChangeEventArgs
+HandleFileSelectionAsync
+HandleFileSelectionAsync(InputFileChangeEventArgs
 HandleFilesSelectedAsync
 HandleFilesSelectedAsync(InputFileChangeEventArgs
 HandleFocus
@@ -4267,6 +4351,7 @@ HandleTriggerClickAsync
 HandleTriggerClickAsync()
 HandleValidationStateChanged
 HandleValidationStateChanged(object
+HandleValidSubmit(EditContext
 HandleValueChangeAsync(FilterRule
 HandleValueChangeAsync(rule,
 HandleValueChanged(string
@@ -4287,6 +4372,7 @@ hasDark
 hasDark)
 HasDescription
 HasDescription)
+HasFeedback
 HashSet
 hasIcon
 HasPaginationVisible
@@ -4310,6 +4396,7 @@ HeaderToolbar=
 HeaderType
 HeaderType)
 Heading
+headless
 headless/SSR/bUnit
 headphones
 Headphones
@@ -4329,6 +4416,7 @@ HelpCircle
 helpful
 Helpful
 here
+here...
 hex
 hex)
 h-full
@@ -4408,6 +4496,7 @@ hover:text-primary-600
 hover:text-primary-700
 hover:text-red-500
 hover:text-red-600
+hover:text-red-700
 hover:text-rose-400
 hover:text-slate-600
 hover:text-slate-700
@@ -4506,6 +4595,7 @@ IconNames.Edit]
 IconNames.Edit2]
 IconNames.Euro]
 IconNames.ExternalLink]
+IconNames.Eye
 IconNames.Eye]
 IconNames.EyeOff]
 IconNames.File)
@@ -4657,6 +4747,7 @@ if
 If
 IFormattable
 Ignore
+Ignored
 IJSObjectReference
 IJSObjectReference>(
 IJSRuntime
@@ -4664,8 +4755,10 @@ image
 Image
 image.
 image/*
+image/png
 imageFailed
 ImagePreviewGroup
+images
 Images
 Images)
 ImageTemplate
@@ -4732,6 +4825,8 @@ InputFileChangeEventArgs>
 inputmode=
 InputNumber
 InputOTP
+inputRef
+inputRef.FocusAsync()
 inputs.
 InputType
 InputType.Email
@@ -4786,6 +4881,7 @@ internalOpen
 internalRules
 internalVisible
 interop
+Interop
 interval
 into
 introduced.
@@ -4793,6 +4889,7 @@ intuitive
 Invalid
 Invoke()
 Invoke(theme)
+InvokeAsync(()
 InvokeAsync(async
 InvokeAsync(StateHasChanged)
 invoked
@@ -4840,6 +4937,8 @@ isDisabled)
 IsDisabled)
 IsDot
 IsDot)
+isDraggingOver
+isDraggingOver)
 isDragTarget
 isDragTarget)
 isDragTarget,
@@ -4863,6 +4962,8 @@ isHighlighted,
 isHorizontal
 isHorizontal)
 isHovered
+IsImageFile(file.Name)
+IsImageFile(string
 isInRange
 isInRange)
 isItemDisabled
@@ -4976,6 +5077,9 @@ its
 j--)
 j]
 j],
+jpeg
+jpg
+JPG,
 JS
 JSInvokable]
 JSRuntime
@@ -5003,6 +5107,7 @@ KanbanCardMoveArgs
 KanbanColumnDefinition
 KanbanColumnDefinition(
 KanbanColumnDefinition>
+KB
 kbd
 Kbd
 kbd>
@@ -5153,6 +5258,7 @@ lightbox
 Like,
 lime
 Lime,
+limit
 limit.
 line
 Line
@@ -5356,7 +5462,7 @@ MatchesShortcut(e,
 MatchesShortcut(KeyboardEventArgs
 matching
 MatchingOptions
-MatchingOptions.Any()
+MatchingOptions.Any())
 MatchingOptions.Count
 MatchingOptions.Count)
 MatchingOptions[index]
@@ -5422,6 +5528,9 @@ MaxDate
 MaxDate.HasValue
 MaxDate.Value.Date)
 maxDays
+MaxFiles
+MaxFiles.HasValue
+MaxFiles.Value)
 MaxFileSize
 max-h-[75vh]
 max-h-[78vh]
@@ -5465,6 +5574,7 @@ max-w-none
 max-w-sm
 max-w-xl
 max-w-xs
+MB
 mb-1
 -mb-1
 mb-1.5
@@ -5500,6 +5610,7 @@ memberExpr)
 memberExpr.Member.Name
 MemberExpression
 MemberExpression)
+MemoryStream()
 mention
 Mention
 MentionOption(
@@ -5900,6 +6011,7 @@ none
 None
 None,
 non-empty.
+non-interactive
 non-targeted
 noopener
 noreferrer
@@ -5916,6 +6028,7 @@ note
 Note:
 Notes
 notes.
+NotFoundContent
 Nothing
 notification
 NotificationItem
@@ -6093,9 +6206,16 @@ OnEveryMinutesChanged(ChangeEventArgs
 OnFeedback
 OnFeedback.HasDelegate)
 OnFeedback.InvokeAsync(Feedback)
+OnFileSelected
+OnFileSelected.HasDelegate)
+OnFileSelected.InvokeAsync(e)
 OnFinish
 OnFinish.HasDelegate)
 OnFinish.InvokeAsync()
+OnFinish.InvokeAsync(context)
+OnFinishFailed
+OnFinishFailed.HasDelegate)
+OnFinishFailed.InvokeAsync(context)
 OnFocus
 OnHourChanged
 OnHourChanged(ChangeEventArgs
@@ -6148,6 +6268,7 @@ OnRangeChange.InvokeAsync(new
 OnRefresh
 OnRemove
 OnRemove.HasDelegate)
+OnRemove.InvokeAsync(file)
 OnRemove.InvokeAsync(item)
 OnRowClick
 OnRowClick.HasDelegate)
@@ -6195,6 +6316,8 @@ OnValidateStep
 OnValidateStep(EffectiveCurrent)
 OnValidSubmit
 OnValidSubmit.HasDelegate
+OnValidSubmit.HasDelegate)
+OnValidSubmit.InvokeAsync(context)
 OnValidSubmit.InvokeAsync(Model)
 OnValidSubmit=
 OnZoomInput
@@ -6243,6 +6366,7 @@ OpenKeysChanged.InvokeAsync(_menuContext.OpenKeys)
 OpenPreview
 OpenPreview()
 Operand
+OperationCanceledException)
 operator
 Operator
 opStr)
@@ -6494,6 +6618,7 @@ paste.Length
 paste[p]
 path
 path))
+Path.GetExtension(filename).ToLowerInvariant()
 path>
 paths
 pause
@@ -6504,6 +6629,7 @@ pb-3
 pb-4
 pb-6
 pct
+PDF,
 per
 Percent
 percentage
@@ -6572,6 +6698,8 @@ Please
 plus
 Plus
 Plus-separated
+png
+PNG,
 point
 Point2D(double
 Point2D(x,
@@ -6664,6 +6792,7 @@ prevIndex
 previous
 Previous
 Previous,
+previousOpen
 PreviousStepAsync
 PreviousStepAsync()
 PreviousStepAsync))
@@ -6796,6 +6925,7 @@ qrData
 qrData.ModuleMatrix
 query
 Query
+query,
 query.
 query.Where(item
 quick
@@ -6907,6 +7037,8 @@ relative
 release
 ReleaseFocusTrapAsync()
 rem
+remotely...
+remoteOptions
 remove
 Remove
 Remove(Guid
@@ -6963,6 +7095,8 @@ resetting.
 Resilient
 Resizable
 Resize
+resized
+resized.OpenReadStream(5
 resize-none
 resize-y
 resizing
@@ -6992,6 +7126,7 @@ result
 result)
 result,
 result.Add(new
+results
 Results
 ResultStatus
 ResultStatus.Error
@@ -7029,7 +7164,8 @@ ring-black/5
 ring-emerald-100
 ring-primary-100
 ring-primary-500
-ring-primary-500/20
+ring-primary-500/10
+ring-primary-500/30
 ring-red-100
 ring-slate-100
 ring-white
@@ -7173,6 +7309,7 @@ sb.ToString().TrimEnd()
 scale
 scale(
 scale-[0.98]
+scale-[1.01]
 scale-105
 Schedule
 schedule:
@@ -7194,7 +7331,11 @@ Search
 search,
 search...
 Search...
+searchCts
+searchCts.Token
 SearchPlaceholder
+SearchProvider
+SearchProvider!(query,
 searchQuery
 searchQuery.Trim()
 searchTerm
@@ -7275,6 +7416,8 @@ selectedDays.Add(dayIndex)
 selectedDays.Contains(dayIndex)
 selectedDays.Count
 selectedDays.OrderBy(d
+selectedFiles
+selectedFiles)
 SelectedItem
 SelectedItems
 SelectedItems)
@@ -7465,6 +7608,8 @@ shortcut...
 shortcut.Split(
 shortcuts
 Shorthand
+shouldFocusInput
+shouldFocusInput)
 ShouldShowBottomPagination
 ShouldShowBottomPagination)
 ShouldShowTopPagination
@@ -7490,6 +7635,7 @@ ShowCount)
 ShowCropControls
 ShowDots
 ShowDots)
+ShowFileList
 ShowFilterRow
 ShowFilterRow=
 ShowFooter
@@ -7724,15 +7870,18 @@ span>&#8593
 span>&#8595
 span>:
 span>Add
+span>Attached
 span>Fri
 span>Go
 span>Markdown
 span>Mon
 span>No
 span>Preview
+span>Ready
 span>Recording
 span>Refresh
 span>Sat
+span>Searching
 span>Step
 span>Sun
 span>Target:
@@ -8139,6 +8288,7 @@ Sunday
 sup
 sup>
 supported
+Supported
 Supports
 sure
 surface
@@ -8308,6 +8458,12 @@ tento-affix
 tento-anchor
 tento-anchor-ink
 tento-anchor-link
+tento-animate-fade-in
+tento-animate-scale-in
+tento-animate-slide-down
+tento-animate-slide-left
+tento-animate-slide-right
+tento-animate-slide-up
 tentoAudio.dispose
 tentoAudio.init
 tentoAudio.pause
@@ -8367,6 +8523,7 @@ tento-colorpicker
 tento-colorpicker-popup
 tento-command-item
 tento-command-palette
+tentoCommandPalette.focusInput
 tento-command-palette-input
 tento-command-palette-root
 TentoComponentBase
@@ -8410,6 +8567,7 @@ tento-empty-description
 tento-empty-footer
 tento-empty-image
 --tento-error:
+tento-file-dropzone
 tento-filter-builder
 tento-filter-rule-row
 tento-flex
@@ -8771,11 +8929,15 @@ this)
 threshold
 throw
 Thu
+thumbnail
 Thumbnail
 thumbs-down
 ThumbsDown
 thumbs-up
 ThumbsUp
+thumbUrl
+ThumbUrl
+thumbUrl,
 time
 Time
 time.
@@ -8894,7 +9056,9 @@ ToIndex
 toIndex)
 to-indigo-600
 ToJsonConfig(this
+token
 token)
+token))
 token.IsCancellationRequested
 tokenKey
 tokens
@@ -9170,6 +9334,7 @@ unary.NodeType
 unary.Operand
 UnaryExpression
 UnaryExpression)
+unavailable
 Unchanged,
 UnCheckedChildren
 under
@@ -9202,6 +9367,7 @@ UnregisterStep(StepperFormStep
 UnregisterStep(this)
 UnregisterStep(TourStep
 UnregisterStep(WizardStep
+up
 Up,
 Up/Success,
 up-arrow
@@ -9223,6 +9389,8 @@ UploadStatus
 UploadStatus.Done
 UploadStatus.Done,
 UploadStatus.Error
+UploadStatus.Error)
+UploadStatus.Uploading)
 uppercase
 Uri.EscapeDataString(svg)
 url
@@ -9505,6 +9673,7 @@ waveform.
 waves.
 we
 We
+webp
 Wed
 week
 Week
@@ -9637,6 +9806,7 @@ Zero-based
 z-index
 ZIndex
 ZIndex.ToString())
+ZIP
 zoom
 Zoom
 zoom.ToString(

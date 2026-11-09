@@ -17,7 +17,7 @@
         @* Backdrop Mask *@
         @if (Mask)
         {
-            <div class="tento-modal-backdrop fixed inset-0 bg-black/50 transition-opacity backdrop-blur-[1px]"
+            <div class="tento-modal-backdrop fixed inset-0 bg-black/50 backdrop-blur-[1px] tento-animate-fade-in"
                  @onclick="HandleMaskClick"
                  aria-hidden="true"></div>
         }
@@ -141,7 +141,7 @@
         .AddClass("items-start justify-center pt-24", !Centered)
         .Build();
 
-    private string DialogClass => new CssBuilder("relative transform overflow-hidden rounded-lg bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full border border-slate-200 dark:border-slate-800")
+    private string DialogClass => new CssBuilder("relative transform overflow-hidden rounded-lg bg-white dark:bg-slate-900 text-left shadow-2xl transition-all w-full border border-slate-200 dark:border-slate-800 tento-animate-scale-in")
         .AddClass(Class)
         .Build();
 

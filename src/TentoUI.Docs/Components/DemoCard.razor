@@ -48,7 +48,7 @@
             @if (_isModified)
             {
                 <button type="button"
-                        class="px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors inline-flex items-center gap-1"
+                        class="px-2 py-0.5 rounded text-[11px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors inline-flex items-center gap-1 cursor-pointer"
                         @onclick="ResetCode">
                     <Icon Name="@IconNames.RefreshCw" Size="11" />
                     <span>Revert to Original</span>
@@ -58,13 +58,13 @@
 
         <div class="flex items-center gap-2">
             <button type="button"
-                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium"
+                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium cursor-pointer"
                     @onclick="CopyCodeAsync">
                 <Icon Name="@IconNames.Copy" Size="13" />
                 <span>Copy</span>
             </button>
             <button type="button"
-                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium"
+                    class="px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 font-medium cursor-pointer"
                     @onclick="@(() => _showEditor = !_showEditor)">
                 <Icon Name="@IconNames.Edit2" Size="13" />
                 <span>@(_showEditor ? "Hide Editor" : "Modify Code")</span>

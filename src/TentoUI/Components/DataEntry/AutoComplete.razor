@@ -12,14 +12,23 @@
                placeholder="@Placeholder"
                class="@ComputedInputClass"
                aria-autocomplete="list"
-               aria-expanded="@(_isOpen && MatchingOptions.Any() ? "true" : "false")"
+               aria-expanded="@(_isOpen ? "true" : "false")"
                @oninput="HandleInput"
                @onfocus="HandleFocus"
                @onblur="HandleBlur"
                @onkeydown="HandleKeyDown"
                @attributes="AdditionalAttributes" />
 
-        @if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
+        @if (EffectiveLoading)
+        {
+            <div class="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary-500 animate-spin flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+            </div>
+        }
+        else if (AllowClear && !string.IsNullOrEmpty(CurrentValue) && !IsDisabled && !ReadOnly)
         {
             <button type="button"
                     class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
@@ -30,32 +39,48 @@
         }
     </div>
 
-    @if (_isOpen && MatchingOptions.Any() && !IsDisabled && !ReadOnly)
+    @if (_isOpen && !IsDisabled && !ReadOnly)
     {
-        <ul role="listbox"
-            class="tento-autocomplete-dropdown absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-slate-800 py-1 text-xs shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none">
-            @for (int i = 0; i < MatchingOptions.Count; i++)
-            {
-                var index = i;
-                var opt = MatchingOptions[index];
-                var isHighlighted = index == _highlightedIndex;
+        @if (EffectiveLoading)
+        {
+            <div class="tento-autocomplete-dropdown absolute z-50 mt-1 w-full rounded-md bg-white dark:bg-slate-800 py-3 text-xs shadow-lg ring-1 ring-black/5 dark:ring-white/10 tento-animate-slide-down flex items-center justify-center gap-2 text-slate-500">
+                <span class="animate-spin"><Icon Name="@IconNames.Loader" Size="14" /></span>
+                <span>Searching remotely...</span>
+            </div>
+        }
+        else if (MatchingOptions.Any())
+        {
+            <ul role="listbox"
+                class="tento-autocomplete-dropdown absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-slate-800 py-1 text-xs shadow-lg ring-1 ring-black/5 dark:ring-white/10 focus:outline-none tento-animate-slide-down">
+                @for (int i = 0; i < MatchingOptions.Count; i++)
+                {
+                    var index = i;
+                    var opt = MatchingOptions[index];
+                    var isHighlighted = index == _highlightedIndex;
 
-                <li role="option"
-                    aria-selected="@(isHighlighted ? "true" : "false")"
-                    class="@ComputeOptionClass(isHighlighted)"
-                    @onmousedown:preventDefault="true"
-                    @onclick="@(() => SelectOptionAsync(opt.Value))">
-                    @if (OptionTemplate != null)
-                    {
-                        @OptionTemplate(opt)
-                    }
-                    else
-                    {
-                        <span>@(opt.Label ?? opt.Value)</span>
-                    }
-                </li>
-            }
-        </ul>
+                    <li role="option"
+                        aria-selected="@(isHighlighted ? "true" : "false")"
+                        class="@ComputeOptionClass(isHighlighted)"
+                        @onmousedown:preventDefault="true"
+                        @onclick="@(() => SelectOptionAsync(opt.Value))">
+                        @if (OptionTemplate != null)
+                        {
+                            @OptionTemplate(opt)
+                        }
+                        else
+                        {
+                            <span>@(opt.Label ?? opt.Value)</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else if (!string.IsNullOrEmpty(CurrentValue) && !string.IsNullOrEmpty(NotFoundContent))
+        {
+            <div class="tento-autocomplete-dropdown absolute z-50 mt-1 w-full rounded-md bg-white dark:bg-slate-800 py-3 text-xs shadow-lg ring-1 ring-black/5 dark:ring-white/10 tento-animate-slide-down text-center text-slate-400">
+                @NotFoundContent
+            </div>
+        }
     }
 </div>
 
@@ -66,14 +91,22 @@
     [Parameter] public RenderFragment<AutoCompleteOption>? OptionTemplate { get; set; }
     [Parameter] public string? Placeholder { get; set; }
     [Parameter] public bool AllowClear { get; set; } = true;
+    [Parameter] public bool Loading { get; set; }
+    [Parameter] public string NotFoundContent { get; set; } = "No matching results found.";
     [Parameter] public Func<string, AutoCompleteOption, bool>? FilterPredicate { get; set; }
+    [Parameter] public Func<string, CancellationToken, Task<IEnumerable<AutoCompleteOption>>>? SearchProvider { get; set; }
     [Parameter] public EventCallback<string> OnSelect { get; set; }
     [Parameter] public EventCallback<string> OnSearch { get; set; }
     [Parameter] public int DebounceMs { get; set; } = 300;
 
     private bool _isOpen;
     private int _highlightedIndex = -1;
+    private bool _asyncLoading;
     private System.Threading.Timer? _debounceTimer;
+    private CancellationTokenSource? _searchCts;
+    private List<AutoCompleteOption> _remoteOptions = new();
+
+    private bool EffectiveLoading => Loading || _asyncLoading;
 
     protected override bool TryParseValueFromString(string? value, out string result, out string validationErrorMessage)
     {
@@ -86,6 +119,7 @@
     {
         get
         {
+            if (SearchProvider != null) return _remoteOptions;
             if (Options != null) return Options.ToList();
             if (SimpleOptions != null) return SimpleOptions.Select(s => new AutoCompleteOption(s)).ToList();
             if (!string.IsNullOrWhiteSpace(OptionsString))
@@ -99,6 +133,7 @@
     {
         get
         {
+            if (SearchProvider != null) return _remoteOptions;
             var text = CurrentValue ?? string.Empty;
             if (string.IsNullOrWhiteSpace(text)) return NormalizedOptions;
 
@@ -119,11 +154,31 @@
         _isOpen = true;
         _highlightedIndex = 0;
 
-        if (OnSearch.HasDelegate)
+        _debounceTimer?.Dispose();
+
+        if (SearchProvider != null)
+        {
+            _searchCts?.Cancel();
+            _searchCts?.Dispose();
+            _searchCts = new CancellationTokenSource();
+            var token = _searchCts.Token;
+
+            if (DebounceMs <= 0)
+            {
+                _ = ExecuteSearchAsync(CurrentValueAsString ?? string.Empty, token);
+            }
+            else
+            {
+                _debounceTimer = new System.Threading.Timer(async _ =>
+                {
+                    await InvokeAsync(() => ExecuteSearchAsync(CurrentValueAsString ?? string.Empty, token));
+                }, null, DebounceMs, System.Threading.Timeout.Infinite);
+            }
+        }
+        else if (OnSearch.HasDelegate)
         {
             if (DebounceMs > 0)
             {
-                _debounceTimer?.Dispose();
                 _debounceTimer = new System.Threading.Timer(async _ =>
                 {
                     await InvokeAsync(async () =>
@@ -136,6 +191,34 @@
             else
             {
                 _ = OnSearch.InvokeAsync(CurrentValueAsString);
+            }
+        }
+    }
+
+    private async Task ExecuteSearchAsync(string query, CancellationToken token)
+    {
+        _asyncLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var results = await SearchProvider!(query, token);
+            if (!token.IsCancellationRequested)
+            {
+                _remoteOptions = results?.ToList() ?? new();
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            _remoteOptions = new();
+        }
+        finally
+        {
+            if (!token.IsCancellationRequested)
+            {
+                _asyncLoading = false;
+                StateHasChanged();
             }
         }
     }
@@ -218,7 +301,7 @@
                 _ => "px-3 py-1.5 text-sm"
             };
 
-            return new CssBuilder($"w-full rounded-md border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none transition-colors {sizePadding}")
+            return new CssBuilder($"w-full rounded-md border bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/25 focus:border-primary-500 transition-all {sizePadding}")
                 .AddClass(GetStatusBorderClass())
                 .AddClass("opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-800", IsDisabled)
                 .Build();
@@ -236,5 +319,7 @@
     public void Dispose()
     {
         _debounceTimer?.Dispose();
+        _searchCts?.Cancel();
+        _searchCts?.Dispose();
     }
 }

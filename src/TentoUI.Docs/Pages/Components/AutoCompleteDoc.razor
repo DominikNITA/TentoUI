@@ -91,6 +91,21 @@
         </div>
     </DemoCard>
 
+    @* Example 4: Asynchronous Remote Search Provider *@
+    <DemoCard Title="Asynchronous Remote Search Provider"
+              Description="Native async SearchProvider with cancellation token support, animated spinner, and automatic cancellation of stale requests."
+              Code="@_asyncCode">
+        <div class="max-w-md p-2 space-y-2">
+            <AutoComplete @bind-Value="_asyncRepoValue"
+                          Placeholder="Search tech stack (e.g. Blazor, Tailwind, Docker, Rust)..."
+                          SearchProvider="SearchRepositoriesAsync"
+                          DebounceMs="250"
+                          NotFoundContent="No matching technologies found."
+                          AllowClear="true" />
+            <div class="text-xs text-slate-400 font-mono">Value: @(_asyncRepoValue ?? "none")</div>
+        </div>
+    </DemoCard>
+
     <ApiTable Title="AutoComplete Properties" ComponentType="@typeof(AutoComplete)" />
     <ApiTable Title="AutoCompleteOption Properties" ComponentType="@typeof(AutoCompleteOption)" />
 </div>
@@ -178,6 +193,35 @@
         _isSearching = false;
         StateHasChanged();
     }
+
+    private string _asyncRepoValue = string.Empty;
+
+    private async Task<IEnumerable<AutoCompleteOption>> SearchRepositoriesAsync(string query, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return Enumerable.Empty<AutoCompleteOption>();
+
+        // Simulate network latency
+        await Task.Delay(350, ct);
+
+        var allTechnologies = new[]
+        {
+            "Blazor WebAssembly", "Blazor Server", "Tailwind CSS v4", "ASP.NET Core",
+            "Docker Containers", "PostgreSQL", "Rust Language", "TypeScript",
+            "Next.js", "React 19", "Kubernetes", "Redis Cache", "Entity Framework Core"
+        };
+
+        return allTechnologies
+            .Where(t => t.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .Select(t => new AutoCompleteOption(t, t));
+    }
+
+    private const string _asyncCode = """
+        <AutoComplete @bind-Value="repoValue"
+                      Placeholder="Search tech stack..."
+                      SearchProvider="SearchRepositoriesAsync"
+                      DebounceMs="250"
+                      AllowClear="true" />
+        """;
 
     private const string _emailCode = """
         <AutoComplete @bind-Value="emailValue"

@@ -22,3 +22,70 @@
 
 /* TentoUI toggles dark mode with a `.dark` class or [data-theme="dark"] on <TentoConfigProvider>. */
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Modern Micro-Animations */
+@keyframes tentoFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tentoScaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes tentoSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tentoSlideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tentoSlideLeft {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes tentoSlideRight {
+  from { opacity: 0; transform: translateX(-100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.tento-animate-fade-in {
+  animation: tentoFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tento-animate-scale-in {
+  animation: tentoScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tento-animate-slide-down {
+  animation: tentoSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tento-animate-slide-up {
+  animation: tentoSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tento-animate-slide-left {
+  animation: tentoSlideLeft 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tento-animate-slide-right {
+  animation: tentoSlideRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessible Focus Rings */
+.tento-focus-ring {
+  outline: none;
+  transition: box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.tento-focus-ring:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--tento-primary-500, #3b82f6), 0 0 0 4px rgba(59, 130, 246, 0.25);
+}

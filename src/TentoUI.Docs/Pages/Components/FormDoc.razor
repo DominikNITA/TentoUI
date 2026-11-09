@@ -58,6 +58,30 @@
         </div>
     </DemoCard>
 
+    @* Example 3: DataAnnotations Validation *@
+    <DemoCard Title="Validation with DataAnnotations" Description="Automatic integration with EditContext. FormItem displays animated validation alerts directly under fields when invalid." Code="@_validationCode">
+        <div class="max-w-md p-2">
+            <Form Model="@_validationModel" Layout="FormLayout.Vertical" OnFinish="HandleValidationFinish" OnFinishFailed="HandleValidationFailed">
+                <FormItem Label="Account Handle" For="@(() => _validationModel.Username)" Help="Allowed 3-20 characters">
+                    <Input @bind-Value="_validationModel.Username" Placeholder="username..." />
+                </FormItem>
+
+                <FormItem Label="Corporate Email" For="@(() => _validationModel.Email)">
+                    <Input @bind-Value="_validationModel.Email" Placeholder="user@domain.com" />
+                </FormItem>
+
+                <FormItem Label="Master Password" For="@(() => _validationModel.Password)">
+                    <Input @bind-Value="_validationModel.Password" Type="InputType.Password" Placeholder="Minimum 6 characters..." />
+                </FormItem>
+
+                <div class="pt-3 flex items-center gap-3">
+                    <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Validate &amp; Submit</Button>
+                    <Button Type="ButtonType.Default" OnClick="ResetValidationModel">Clear to Trigger Errors</Button>
+                </div>
+            </Form>
+        </div>
+    </DemoCard>
+
     <ApiTable Title="Form Properties" Properties="@_formProps" />
     <ApiTable Title="FormItem Properties" Properties="@_itemProps" />
 </div>
@@ -76,12 +100,58 @@
         public bool RememberMe { get; set; } = true;
     }
 
+    public class ValidatedAccountForm
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Account handle is required.")]
+        [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 3, ErrorMessage = "Handle must be between 3 and 20 characters.")]
+        public string Username { get; set; } = "dominik";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Email address is required.")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Please provide a valid corporate email.")]
+        public string Email { get; set; } = "dominik@tento.dev";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Password is required.")]
+        [System.ComponentModel.DataAnnotations.MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
+        public string Password { get; set; } = "strongPass123";
+    }
+
     private UserLoginForm _model = new();
+    private ValidatedAccountForm _validationModel = new();
 
     private void HandleFinish()
     {
         MessageService.Success($"Submitted form for: {_model.Username} ({_model.Email})");
     }
+
+    private void HandleValidationFinish()
+    {
+        MessageService.Success("Form validated successfully! All rules passed.");
+    }
+
+    private void HandleValidationFailed()
+    {
+        MessageService.Error("Validation failed. Please review errors marked in red.");
+    }
+
+    private void ResetValidationModel()
+    {
+        _validationModel = new ValidatedAccountForm { Username = "", Email = "invalid-mail", Password = "12" };
+    }
+
+    private const string _validationCode = """
+        <Form Model="@accountModel" Layout="FormLayout.Vertical" OnFinish="HandleValid">
+            <FormItem Label="Account Handle" For="@(() => accountModel.Username)">
+                <Input @bind-Value="accountModel.Username" />
+            </FormItem>
+            <FormItem Label="Corporate Email" For="@(() => accountModel.Email)">
+                <Input @bind-Value="accountModel.Email" />
+            </FormItem>
+            <FormItem Label="Master Password" For="@(() => accountModel.Password)">
+                <Input @bind-Value="accountModel.Password" Type="InputType.Password" />
+            </FormItem>
+            <Button Type="ButtonType.Primary" HtmlType="ButtonHtmlType.Submit">Submit</Button>
+        </Form>
+        """;
 
     private const string _verticalCode = """
         <Form Model="@model" Layout="FormLayout.Vertical" OnFinish="HandleFinish">

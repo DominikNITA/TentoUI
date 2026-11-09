@@ -1,0 +1,257 @@
+@namespace TentoUI
+@inherits TentoComponentBase
+@attribute [Since("1.2.0")]
+
+<div class="@ComputedWrapperClass" style="@Style" @attributes="AdditionalAttributes">
+    @* Drop Area Label *@
+    <label class="@ComputedDropAreaClass"
+           @ondragover="HandleDragOver"
+           @ondragover:preventDefault="true"
+           @ondragleave="HandleDragLeave"
+           @ondrop="HandleDrop">
+        
+        <InputFile OnChange="HandleFileSelectionAsync"
+                   multiple="@Multiple"
+                   accept="@Accept"
+                   disabled="@Disabled"
+                   class="sr-only" />
+
+        <div class="flex flex-col items-center justify-center py-8 px-6 text-center select-none pointer-events-none">
+            <div class="@ComputedIconWrapperClass">
+                <Icon Name="@IconNames.Upload" Size="28" Class="@(_isDraggingOver ? "text-primary-600 dark:text-primary-400" : "text-slate-400 dark:text-slate-500")" />
+            </div>
+            
+            <div class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                @if (_isDraggingOver)
+                {
+                    <span class="text-primary-600 dark:text-primary-400">Drop files here...</span>
+                }
+                else
+                {
+                    <span>@Title</span>
+                }
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
+                @Description
+            </p>
+
+            @if (!string.IsNullOrEmpty(Hint))
+            {
+                <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500 mt-2 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800/80">
+                    @Hint
+                </span>
+            }
+        </div>
+    </label>
+
+    @* Attached Files List *@
+    @if (ShowFileList && Files.Count > 0)
+    {
+        <div class="mt-4 space-y-2">
+            <div class="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
+                <span>Attached files (@Files.Count@(MaxFiles.HasValue ? $"/{MaxFiles}" : ""))</span>
+                @if (Files.Count > 1 && !Disabled)
+                {
+                    <button type="button"
+                            class="text-xs text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                            @onclick="ClearAllFilesAsync">
+                        Remove all
+                    </button>
+                }
+            </div>
+
+            <div class="space-y-2">
+                @foreach (var file in Files)
+                {
+                    <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-all">
+                        @* Thumbnail or Icon *@
+                        <div class="w-10 h-10 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+                            @if (!string.IsNullOrEmpty(file.ThumbUrl))
+                            {
+                                <img src="@file.ThumbUrl" alt="@file.Name" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <Icon Name="@(IsImageFile(file.Name) ? IconNames.Eye : IconNames.File)" Size="18" Class="text-slate-400" />
+                            }
+                        </div>
+
+                        @* File info & progress *@
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                    @file.Name
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono shrink-0">
+                                    @FormatFileSize(file.Size)
+                                </span>
+                            </div>
+
+                            @if (file.Status == UploadStatus.Uploading)
+                            {
+                                <div class="mt-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-primary-500 h-full rounded-full transition-all duration-300" style="width: @(file.Percent)%"></div>
+                                </div>
+                            }
+                            else if (file.Status == UploadStatus.Error)
+                            {
+                                <span class="text-[11px] text-red-500 flex items-center gap-1 mt-0.5">
+                                    <Icon Name="@IconNames.AlertCircle" Size="12" />
+                                    <span>@(file.ErrorMessage ?? "Upload failed")</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                                    <Icon Name="@IconNames.CheckCircle2" Size="12" />
+                                    <span>Ready</span>
+                                </span>
+                            }
+                        </div>
+
+                        @* Remove Button *@
+                        @if (!Disabled)
+                        {
+                            <button type="button"
+                                    aria-label="@($"Remove {file.Name}")"
+                                    class="p-1.5 rounded text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
+                                    @onclick="@(() => RemoveFileAsync(file))">
+                                <Icon Name="@IconNames.Trash2" Size="15" />
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Drag and drop files here or click to browse";
+    [Parameter] public string Description { get; set; } = "Supported formats: PNG, JPG, PDF, ZIP up to 15 MB";
+    [Parameter] public string? Hint { get; set; }
+    [Parameter] public string? Accept { get; set; }
+    [Parameter] public bool Multiple { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool ShowFileList { get; set; } = true;
+    [Parameter] public long MaxFileSize { get; set; } = 15 * 1024 * 1024;
+    [Parameter] public int? MaxFiles { get; set; }
+    [Parameter] public List<UploadFileItem> Files { get; set; } = new();
+    [Parameter] public EventCallback<List<UploadFileItem>> FilesChanged { get; set; }
+    [Parameter] public EventCallback<UploadFileItem> OnRemove { get; set; }
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnFileSelected { get; set; }
+
+    private bool _isDraggingOver;
+
+    private void HandleDragOver() => _isDraggingOver = true;
+    private void HandleDragLeave() => _isDraggingOver = false;
+    private void HandleDrop() => _isDraggingOver = false;
+
+    private async Task HandleFileSelectionAsync(InputFileChangeEventArgs e)
+    {
+        if (Disabled) return;
+
+        var selectedFiles = Multiple ? e.GetMultipleFiles(MaxFiles ?? 50) : new[] { e.File };
+        if (!Multiple)
+        {
+            Files.Clear();
+        }
+
+        foreach (var file in selectedFiles)
+        {
+            if (MaxFiles.HasValue && Files.Count >= MaxFiles.Value) break;
+
+            var isTooLarge = file.Size > MaxFileSize;
+            string? thumbUrl = null;
+
+            // Generate thumbnail for images
+            if (IsImageFile(file.Name) && file.Size <= 5 * 1024 * 1024)
+            {
+                try
+                {
+                    var resized = await file.RequestImageFileAsync("image/png", 120, 120);
+                    using var stream = resized.OpenReadStream(5 * 1024 * 1024);
+                    using var ms = new MemoryStream();
+                    await stream.CopyToAsync(ms);
+                    thumbUrl = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
+                }
+                catch { }
+            }
+
+            var item = new UploadFileItem
+            {
+                Name = file.Name,
+                Size = file.Size,
+                ContentType = file.ContentType,
+                ThumbUrl = thumbUrl,
+                Status = isTooLarge ? UploadStatus.Error : UploadStatus.Done,
+                ErrorMessage = isTooLarge ? $"File exceeds the maximum limit of {FormatFileSize(MaxFileSize)}." : null
+            };
+
+            Files.Add(item);
+        }
+
+        if (FilesChanged.HasDelegate)
+        {
+            await FilesChanged.InvokeAsync(Files);
+        }
+        if (OnFileSelected.HasDelegate)
+        {
+            await OnFileSelected.InvokeAsync(e);
+        }
+    }
+
+    private async Task RemoveFileAsync(UploadFileItem file)
+    {
+        if (Disabled) return;
+        Files.Remove(file);
+        if (FilesChanged.HasDelegate)
+        {
+            await FilesChanged.InvokeAsync(Files);
+        }
+        if (OnRemove.HasDelegate)
+        {
+            await OnRemove.InvokeAsync(file);
+        }
+    }
+
+    private async Task ClearAllFilesAsync()
+    {
+        if (Disabled) return;
+        Files.Clear();
+        if (FilesChanged.HasDelegate)
+        {
+            await FilesChanged.InvokeAsync(Files);
+        }
+    }
+
+    private static bool IsImageFile(string filename)
+    {
+        var ext = Path.GetExtension(filename).ToLowerInvariant();
+        return ext is ".png" or ".jpg" or ".jpeg" or ".webp" or ".gif" or ".svg";
+    }
+
+    private static string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    private string ComputedWrapperClass => new CssBuilder("tento-file-dropzone w-full")
+        .AddClass(Class)
+        .Build();
+
+    private string ComputedDropAreaClass => new CssBuilder("block w-full rounded-xl border-2 border-dashed transition-all duration-200")
+        .AddClass("border-primary-500 bg-primary-50/60 dark:bg-primary-950/40 ring-4 ring-primary-500/10 scale-[1.01]", _isDraggingOver)
+        .AddClass("border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 hover:border-primary-400 hover:bg-slate-50 dark:hover:bg-slate-900/80", !_isDraggingOver && !Disabled)
+        .AddClass("opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900", Disabled)
+        .AddClass("cursor-pointer", !Disabled)
+        .Build();
+
+    private string ComputedIconWrapperClass => new CssBuilder("w-12 h-12 rounded-full mb-3 flex items-center justify-center transition-colors")
+        .AddClass("bg-primary-100 dark:bg-primary-950/80 text-primary-600", _isDraggingOver)
+        .AddClass("bg-slate-100 dark:bg-slate-800 text-slate-500", !_isDraggingOver)
+        .Build();
+}

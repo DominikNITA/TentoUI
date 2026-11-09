@@ -17,4 +17,5 @@ public class UploadFileItem
     public UploadStatus Status { get; set; } = UploadStatus.Done;
     public int Percent { get; set; } = 100;
     public string? ErrorMessage { get; set; }
+    public string? ThumbUrl { get; set; }
 }

@@ -11,7 +11,7 @@
         
         @if (Mask)
         {
-            <div class="tento-drawer-mask fixed inset-0 bg-slate-900/50 backdrop-blur-[1px] transition-opacity"
+            <div class="tento-drawer-mask fixed inset-0 bg-slate-900/50 backdrop-blur-[1px] tento-animate-fade-in"
                  @onclick="HandleMaskClickAsync"></div>
         }
 
@@ -102,10 +102,10 @@
         {
             var posClass = Placement switch
             {
-                DrawerPlacement.Left => "inset-y-0 left-0 h-full",
-                DrawerPlacement.Top => "inset-x-0 top-0 w-full",
-                DrawerPlacement.Bottom => "inset-x-0 bottom-0 w-full",
-                _ => "inset-y-0 right-0 h-full"
+                DrawerPlacement.Left => "inset-y-0 left-0 h-full border-r tento-animate-slide-right",
+                DrawerPlacement.Top => "inset-x-0 top-0 w-full border-b tento-animate-slide-down",
+                DrawerPlacement.Bottom => "inset-x-0 bottom-0 w-full border-t tento-animate-slide-up",
+                _ => "inset-y-0 right-0 h-full border-l tento-animate-slide-left"
             };
 
             return new CssBuilder($"tento-drawer-content fixed z-10 flex flex-col bg-white dark:bg-slate-900 shadow-2xl border-slate-200 dark:border-slate-800 {posClass}")

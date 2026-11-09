@@ -55,6 +55,20 @@
         </div>
     </DemoCard>
 
+    @* Example 4: Advanced FileDropzone with Image Thumbnails & Progress *@
+    <DemoCard Title="Advanced FileDropzone with Thumbnails"
+              Description="Full-featured dropzone with client-side image thumbnail previews, file size formatting, and upload progress visualization."
+              Code="@_fileDropzoneCode">
+        <div class="max-w-xl p-2">
+            <FileDropzone Multiple="true"
+                          Files="@_dropzoneFiles"
+                          MaxFiles="5"
+                          Hint="Drag images or documents here (PNG, JPG, PDF up to 15 MB)"
+                          OnRemove="@(f => MessageService.Info($"Removed {f.Name}"))" />
+        </div>
+    </DemoCard>
+
+    <ApiTable Title="FileDropzone Properties" ComponentType="@typeof(FileDropzone)" />
     <ApiTable Title="Upload Properties" ComponentType="@typeof(Upload)" />
     <ApiTable Title="UploadFileItem Properties" ComponentType="@typeof(UploadFileItem)" />
 </div>
@@ -84,6 +98,19 @@
     [
         new() { Name = "company-logo.png", Size = 124000, ContentType = "image/png", Status = UploadStatus.Done }
     ];
+
+    private readonly List<UploadFileItem> _dropzoneFiles =
+    [
+        new() { Name = "dashboard-mockup.png", Size = 1850000, ContentType = "image/png", Status = UploadStatus.Done },
+        new() { Name = "project-requirements.pdf", Size = 3200000, ContentType = "application/pdf", Status = UploadStatus.Done }
+    ];
+
+    private const string _fileDropzoneCode = """
+        <FileDropzone Multiple="true"
+                      Files="@attachedFiles"
+                      MaxFiles="5"
+                      Hint="PNG, JPG, PDF up to 15 MB" />
+        """;
 
     private const string _buttonCode = """
         <Upload ButtonText="Select Documentation Files"

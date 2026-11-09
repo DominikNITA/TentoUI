@@ -1,13 +1,23 @@
 [
   {
-    "version": "1.0.3",
-    "label": "v1.0.3",
+    "version": "1.0.4",
+    "label": "v1.0.4",
     "path": "/",
     "isLatest": true,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",
-    "notes": "Current release (FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop)"
+    "notes": "Current release (Wider responsive layout, On-this-page Table of Contents, Quick Search Ctrl+K fix, FileDropzone, Async AutoComplete, Micro-animations & Focus Rings)"
+  },
+  {
+    "version": "1.0.3",
+    "label": "v1.0.3",
+    "path": "/v1.0.3/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Patch release (FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop)"
   },
   {
     "version": "1.0.2",

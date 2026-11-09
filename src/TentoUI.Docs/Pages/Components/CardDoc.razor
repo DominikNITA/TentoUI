@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Card Interactive Playground"
+                     ComponentTag="Card"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Card *@
     <DemoCard Title="Basic Card" Description="Card with title header, right-aligned extra action, and body content." Code="@_basicCode">
         <div class="max-w-md">
@@ -158,6 +163,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Project Roadmap 2026", DefaultValue = "" },
+        new() { Name = "Bordered", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Hoverable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<p class=\"text-xs text-slate-500\">Enterprise cloud infrastructure migration completed on schedule with 99.99% availability.</p>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Card Title="Project Overview">
             <Extra>

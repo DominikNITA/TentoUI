@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Alert Interactive Playground"
+                     ComponentTag="Alert"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: 4 Alert Types *@
     <DemoCard Title="Alert Types" Description="Four semantic types: Success, Info, Warning, and Error with clean vertical separation." Code="@_typesCode">
         <div class="flex flex-col gap-4 w-full">
@@ -56,6 +61,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Message", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "System update scheduled for 02:00 UTC", DefaultValue = "" },
+        new() { Name = "Description", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "All cloud services will undergo a brief planned maintenance window.", DefaultValue = "" },
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "AlertType.Info", DefaultValue = "AlertType.Info", Options = ["AlertType.Info", "AlertType.Success", "AlertType.Warning", "AlertType.Error"] },
+        new() { Name = "ShowIcon", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Closable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Banner", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private const string _typesCode = """
         <div class="flex flex-col gap-4 w-full">
             <Alert Type="AlertType.Success" Message="Success Text" ShowIcon="true" />

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Switch Interactive Playground"
+                     ComponentTag="Switch"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Switch *@
     <DemoCard Title="Basic Switch" Description="Standard toggle switch with two-way boolean binding." Code="@_basicCode">
         <div class="flex items-center gap-4 p-2">
@@ -48,6 +53,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Checked", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Loading", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private bool _basicSwitch = true;
     private bool _wifi = true;
     private bool _notifications;

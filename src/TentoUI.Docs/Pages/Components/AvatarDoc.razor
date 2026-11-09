@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Avatar Interactive Playground"
+                     ComponentTag="Avatar"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Types *@
     <DemoCard Title="Avatar Types" Description="Initials, icon glyphs, and image avatars." Code="@_typesCode">
         <div class="flex items-center gap-4">
@@ -51,6 +56,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Text", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "DN", DefaultValue = "" },
+        new() { Name = "Shape", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "AvatarShape.Circle", DefaultValue = "AvatarShape.Circle", Options = ["AvatarShape.Circle", "AvatarShape.Square"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Large", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Icon", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "", DefaultValue = "", Options = ["", "user", "shield", "settings", "star", "heart", "smile"] },
+        new() { Name = "Src", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=128&auto=format&fit=crop&q=80", DefaultValue = "" }
+    ];
+
     private const string _typesCode = """
         <Avatar Text="JD" />
         <Avatar Icon="@IconNames.User" />

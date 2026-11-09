@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Empty Interactive Playground"
+                     ComponentTag="Empty"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Empty *@
     <DemoCard Title="Basic Empty State" Description="Default placeholder icon and message." Code="@_basicCode">
         <div class="p-4">
@@ -40,6 +45,12 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Description", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "No records found in this view", DefaultValue = "No Data" },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button Type=\"ButtonType.Primary\" Size=\"ComponentSize.Small\">Create Project</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Empty Description="No Data" />
         """;

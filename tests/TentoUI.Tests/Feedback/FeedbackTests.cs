@@ -96,6 +96,24 @@ public class FeedbackTests : TestContext
     }
 
     [Fact]
+    public void Alert_ShowIcon_ControlsIconVisibilityEvenWithDescription()
+    {
+        var withoutIcon = RenderComponent<Alert>(parameters => parameters
+            .Add(p => p.Message, "Title")
+            .Add(p => p.Description, "Some description")
+            .Add(p => p.ShowIcon, false));
+
+        withoutIcon.FindAll("svg").Should().BeEmpty();
+
+        var withIcon = RenderComponent<Alert>(parameters => parameters
+            .Add(p => p.Message, "Title")
+            .Add(p => p.Description, "Some description")
+            .Add(p => p.ShowIcon, true));
+
+        withIcon.FindAll("svg").Should().NotBeEmpty();
+    }
+
+    [Fact]
     public void Spin_RendersRoleStatusAndAriaLivePolite()
     {
         var cut = RenderComponent<Spin>(parameters => parameters

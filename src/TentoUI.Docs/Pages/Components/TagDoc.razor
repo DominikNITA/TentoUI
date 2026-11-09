@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Tag Interactive Playground"
+                     ComponentTag="Tag"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Tags & Closable *@
     <DemoCard Title="Basic &amp; Closable Tags" Description="Standard tags with optional dismiss button." Code="@_basicCode">
         <div class="flex flex-wrap items-center gap-3 p-2">
@@ -49,6 +54,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Label", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Feature Preview", IsChildContent = true },
+        new() { Name = "Color", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "blue", DefaultValue = "", Options = ["", "blue", "green", "gold", "red", "purple", "cyan", "magenta", "orange", "#108ee9", "#87d068", "#f50"] },
+        new() { Name = "Closable", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" }
+    ];
+
     private const string _basicCode = """
         <Tag>Default Tag</Tag>
         <Tag Closable="true">Closable Tag</Tag>

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Badge Interactive Playground"
+                     ComponentTag="Badge"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Count Badges *@
     <DemoCard Title="Basic Count Badges" Description="Badges wrapping avatar or card elements to display unread item counts." Code="@_basicCode">
         <div class="flex items-center gap-6 p-4">
@@ -67,6 +72,16 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Count", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "5", DefaultValue = "" },
+        new() { Name = "OverflowCount", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "99", DefaultValue = "99" },
+        new() { Name = "Dot", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ShowZero", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "Default", DefaultValue = "Default", Options = ["Default", "Success", "Processing", "Warning", "Error"] },
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<Button>Notifications</Button>", DefaultValue = "", IsChildContent = true }
+    ];
+
     private const string _basicCode = """
         <Badge Count="5">
             <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">

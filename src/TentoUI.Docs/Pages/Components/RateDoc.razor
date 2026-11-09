@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Rate Interactive Playground"
+                     ComponentTag="Rate"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Rate *@
     <DemoCard Title="Basic Star Rating" Description="Interactive star rating with two-way integer binding." Code="@_basicCode">
         <div class="flex items-center gap-4 p-2">
@@ -39,6 +44,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "4", DefaultValue = "" },
+        new() { Name = "Count", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "5", DefaultValue = "5" },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "ReadOnly", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private int _score = 4;
     private int _npsScore = 8;
 

@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Skeleton Interactive Playground"
+                     ComponentTag="Skeleton"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Skeleton *@
     <DemoCard Title="Basic Skeleton" Description="Simple placeholder with title and paragraph rows." Code="@_basicCode">
         <div class="max-w-md">
@@ -53,6 +58,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Active", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Avatar", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Paragraph", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" },
+        new() { Name = "Rows", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "3", DefaultValue = "3" }
+    ];
+
     private bool _isLoading = true;
 
     private const string _basicCode = """

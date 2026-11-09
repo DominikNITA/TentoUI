@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Spin Interactive Playground"
+                     ComponentTag="Spin"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Spinners *@
     <DemoCard Title="Spinner Sizes" Description="Standalone spinners with Small, Middle, and Large scales." Code="@_sizesCode">
         <div class="flex items-center gap-8 p-4">
@@ -48,6 +53,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Tip", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Synchronizing telemetry...", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Spinning", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private bool _spinning = true;
 
     private const string _sizesCode = """

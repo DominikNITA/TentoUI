@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Checkbox Interactive Playground"
+                     ComponentTag="Checkbox"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Checkbox *@
     <DemoCard Title="Basic Checkbox" Description="Two-way boolean binding with interactive toggle." Code="@_basicCode">
         <div class="flex items-center gap-4 p-2">
@@ -49,6 +54,14 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Label", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Accept Terms & Conditions", DefaultValue = "" },
+        new() { Name = "Checked", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "" },
+        new() { Name = "Indeterminate", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private bool _checked = true;
     private bool _opt1 = true;
     private bool _opt2 = true;

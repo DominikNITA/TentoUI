@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Progress Interactive Playground"
+                     ComponentTag="Progress"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Linear Bars *@
     <DemoCard Title="Linear Progress Bars" Description="Standard linear bars with percentage text and status colors." Code="@_linearCode">
         <div class="space-y-4 w-full max-w-md">
@@ -66,6 +71,15 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Percent", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "65", DefaultValue = "" },
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ProgressType.Line", DefaultValue = "ProgressType.Line", Options = ["ProgressType.Line", "ProgressType.Circle"] },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ProgressStatus.Normal", DefaultValue = "ProgressStatus.Normal", Options = ["ProgressStatus.Normal", "ProgressStatus.Active", "ProgressStatus.Success", "ProgressStatus.Exception"] },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle"] },
+        new() { Name = "ShowInfo", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "true" }
+    ];
+
     private int _dynamicPercent = 40;
 
     private void IncreaseProgress()

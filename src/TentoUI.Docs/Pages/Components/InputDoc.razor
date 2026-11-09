@@ -12,6 +12,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Input Interactive Playground"
+                     ComponentTag="Input"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Input *@
     <DemoCard Title="Basic Input with AllowClear" Description="Standard text input with two-way binding and 1-click clear button." Code="@_basicCode">
         <div class="max-w-sm space-y-2 p-2">
@@ -50,6 +55,17 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Hello TentoUI", DefaultValue = "" },
+        new() { Name = "Placeholder", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Type your username...", DefaultValue = "" },
+        new() { Name = "Size", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentSize.Middle", DefaultValue = "ComponentSize.Middle", Options = ["ComponentSize.Small", "ComponentSize.Middle", "ComponentSize.Large"] },
+        new() { Name = "Status", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "ComponentStatus.None", DefaultValue = "ComponentStatus.None", Options = ["ComponentStatus.None", "ComponentStatus.Warning", "ComponentStatus.Error"] },
+        new() { Name = "Type", Kind = PropsPlayground.PlaygroundControlKind.Select, CurrentValue = "InputType.Text", DefaultValue = "InputType.Text", Options = ["InputType.Text", "InputType.Password", "InputType.Email", "InputType.Number"] },
+        new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
+    ];
+
     private string _value = "Hello TentoUI";
 
     private const string _basicCode = """

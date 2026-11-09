@@ -11,6 +11,11 @@
         </p>
     </div>
 
+    @* Interactive Props Playground *@
+    <PropsPlayground Title="Statistic Interactive Playground"
+                     ComponentTag="Statistic"
+                     Controls="@_playgroundControls" />
+
     @* Example 1: Basic Statistics *@
     <DemoCard Title="Basic Statistics" Description="Clean numeric metrics for dashboards and reports." Code="@_basicCode">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
@@ -56,6 +61,13 @@
 </div>
 
 @code {
+    private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
+    [
+        new() { Name = "Title", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "Monthly Recurring Revenue", DefaultValue = "" },
+        new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "128450", DefaultValue = "" },
+        new() { Name = "Precision", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "2", DefaultValue = "" }
+    ];
+
     private const string _basicCode = """
         <Statistic Title="Active Users" Value="112893" />
         <Statistic Title="Account Balance" Value="93245" Precision="2">

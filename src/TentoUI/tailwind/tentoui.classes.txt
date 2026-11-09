@@ -222,6 +222,7 @@
 !string.IsNullOrEmpty(Value)
 !string.IsNullOrEmpty(Width))
 !string.IsNullOrEmpty(WrapperColClass))
+!string.IsNullOrWhiteSpace(_primaryHoverColor)
 !string.IsNullOrWhiteSpace(_searchTerm)
 !string.IsNullOrWhiteSpace(Author))
 !string.IsNullOrWhiteSpace(BorderRadius))
@@ -6820,9 +6821,11 @@ Primary
 primary,
 Primary,
 Primary.
+primaryColor
 PrimaryColor
 PrimaryColor:
 primaryHover
+primaryHoverColor
 PrimaryHoverColor
 printer
 Printer

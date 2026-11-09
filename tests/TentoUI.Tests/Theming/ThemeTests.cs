@@ -58,6 +58,34 @@ public class ThemeTests : TestContext
     }
 
     [Fact]
+    public void TentoTheme_PrimaryColor_AutoDerivesPrimaryHoverColor_WhenHoverNotExplicitlySet()
+    {
+        var theme = new TentoTheme
+        {
+            PrimaryColor = "#58cc02"
+        };
+        var style = theme.ToStyleString();
+
+        style.Should().Contain("--tento-primary-500: #58cc02;");
+        style.Should().Contain("--tento-primary-600: color-mix(in srgb, #58cc02 88%, black);");
+        style.Should().NotContain("--tento-primary-600: #2563eb;");
+    }
+
+    [Fact]
+    public void TentoTheme_PrimaryHoverColor_HonorsExplicitOverride()
+    {
+        var theme = new TentoTheme
+        {
+            PrimaryColor = "#58cc02",
+            PrimaryHoverColor = "#46a302"
+        };
+        var style = theme.ToStyleString();
+
+        style.Should().Contain("--tento-primary-500: #58cc02;");
+        style.Should().Contain("--tento-primary-600: #46a302;");
+    }
+
+    [Fact]
     public void TentoConfigProvider_EmitsRootContainerWithThemeAttributes()
     {
         var cut = RenderComponent<TentoConfigProvider>(parameters => parameters

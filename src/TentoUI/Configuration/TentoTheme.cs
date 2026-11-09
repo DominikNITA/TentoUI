@@ -24,6 +24,9 @@ public class DarkThemeOptions
 
 public class TentoTheme
 {
+    private string _primaryColor = "#3b82f6";
+    private string? _primaryHoverColor;
+
     // Light / Default Colors
     public string AppBgColor { get; set; } = "#f8fafc";
     public string SurfaceBgColor { get; set; } = "#ffffff";
@@ -32,9 +35,15 @@ public class TentoTheme
     public string MutedTextColor { get; set; } = "#64748b";
     public string BaseBorderColor { get; set; } = "#e2e8f0";
 
-    public string PrimaryColor { get; set; } = "#3b82f6";
+    public string PrimaryColor { get => _primaryColor; set => _primaryColor = value; }
     public string ColorPrimary { get => PrimaryColor; set => PrimaryColor = value; }
-    public string PrimaryHoverColor { get; set; } = "#2563eb";
+
+    public string PrimaryHoverColor
+    {
+        get => _primaryHoverColor ?? (PrimaryColor == "#3b82f6" ? "#2563eb" : $"color-mix(in srgb, {PrimaryColor} 88%, black)");
+        set => _primaryHoverColor = value;
+    }
+
     public string SuccessColor { get; set; } = "#10b981";
     public string WarningColor { get; set; } = "#f59e0b";
     public string ErrorColor { get; set; } = "#ef4444";
@@ -81,7 +90,10 @@ public class TentoTheme
             sb.Append($"--tento-border-base: {Dark.BaseBorderColor ?? "#1f2937"}; ");
 
             var primary = Dark.PrimaryColor ?? PrimaryColor;
-            var primaryHover = Dark.PrimaryHoverColor ?? PrimaryHoverColor;
+            var primaryHover = Dark.PrimaryHoverColor
+                ?? (!string.IsNullOrWhiteSpace(_primaryHoverColor)
+                    ? _primaryHoverColor
+                    : (primary == "#3b82f6" ? "#2563eb" : $"color-mix(in srgb, {primary} 88%, black)"));
             var success = Dark.SuccessColor ?? SuccessColor;
             var warning = Dark.WarningColor ?? WarningColor;
             var error = Dark.ErrorColor ?? ErrorColor;

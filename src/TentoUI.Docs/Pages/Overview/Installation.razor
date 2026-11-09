@@ -9,7 +9,7 @@
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Installation &amp; Setup</h1>
         <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Complete guide for integrating TentoUI with Tailwind CSS v4 in your .NET 10 Blazor application.
+            Complete production guide for integrating TentoUI with Tailwind CSS v4 and MSBuild automation in your .NET 10 Blazor application.
         </p>
     </div>
 
@@ -17,9 +17,9 @@
     <div class="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 text-xs flex gap-3">
         <Icon Name="@IconNames.AlertTriangle" Size="18" Class="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
         <div class="space-y-1">
-            <span class="font-bold">Important: Tailwind CSS v4 Required</span>
+            <span class="font-bold">Important: Tailwind CSS v4 Engine Architecture</span>
             <p class="text-amber-800 dark:text-amber-300">
-                TentoUI ships pre-compiled Blazor components using Tailwind CSS utility classes. Because compiled .NET DLLs cannot be scanned by Tailwind, TentoUI automatically syncs its CSS theme bridge and class manifest into your project via MSBuild targets on build. Your project compiles Tailwind directly.
+                TentoUI ships pre-compiled Blazor components using Tailwind CSS utility classes. Because compiled .NET assemblies cannot be scanned by Tailwind directly, TentoUI automatically syncs its CSS theme bridge (<code class="font-mono">tentoui.theme.css</code>) and class manifest (<code class="font-mono">tentoui.classes.txt</code>) into your project under <code class="font-mono">tailwind/tentoui/</code> during <code class="font-mono">dotnet build</code>. Your application compiles the final Tailwind stylesheet.
             </p>
         </div>
     </div>
@@ -32,12 +32,12 @@
                     <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">1</span>
                     <span>Install NuGet Package</span>
                 </h3>
-                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
                         @onclick='() => CopyTextAsync("dotnet add package TentoUI")'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
             </div>
-            <p class="text-xs text-slate-500">Run the following command in your Blazor project directory:</p>
+            <p class="text-xs text-slate-500">Run the following command in your Blazor web project directory:</p>
             <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
                 <code>dotnet add package TentoUI</code>
             </div>
@@ -50,12 +50,12 @@
                     <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">2</span>
                     <span>Register Services in Program.cs</span>
                 </h3>
-                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
                         @onclick='() => CopyTextAsync("builder.Services.AddTentoUI();")'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
             </div>
-            <p class="text-xs text-slate-500">Registers Modal, Notification, and Message services:</p>
+            <p class="text-xs text-slate-500">Registers Modal, Notification, and Message services, as well as component runtime configurations:</p>
             <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
                 <code>builder.Services.AddTentoUI();</code>
             </div>
@@ -68,7 +68,7 @@
                     <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">3</span>
                     <span>Add Global Imports in _Imports.razor</span>
                 </h3>
-                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
                         @onclick="() => CopyTextAsync(_importsCode)">
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
@@ -91,19 +91,20 @@
                 </span>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">
-                Install the Tailwind CSS v4 CLI in your project root:
+                Initialize npm and install the Tailwind CSS v4 CLI in your project root:
             </p>
             <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs space-y-1">
                 <div><code>npm init -y</code></div>
                 <div><code>npm install -D tailwindcss @@tailwindcss/cli</code></div>
                 <div><code>npm pkg set scripts.css:build="tailwindcss -i Styles/app.tailwind.css -o wwwroot/css/tailwind.min.css --minify"</code></div>
+                <div><code>npm pkg set scripts.css:watch="tailwindcss -i Styles/app.tailwind.css -o wwwroot/css/tailwind.min.css --watch"</code></div>
             </div>
 
             <p class="text-xs text-slate-500 dark:text-slate-400 pt-2">
-                Create <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">Styles/app.tailwind.css</code>:
+                Create entry file <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono">Styles/app.tailwind.css</code>:
             </p>
             <div class="relative">
-                <button type="button" class="absolute top-2 right-2 text-xs text-primary-400 hover:text-white font-semibold inline-flex items-center gap-1 z-10"
+                <button type="button" class="absolute top-2 right-2 text-xs text-primary-400 hover:text-white font-semibold inline-flex items-center gap-1 z-10 cursor-pointer"
                         @onclick='() => CopyTextAsync(_tailwindCssCode)'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy CSS
                 </button>
@@ -116,14 +117,55 @@
             </p>
         </div>
 
-        @* Step 5: Static Assets *@
+        @* Step 5: Wire into MSBuild *@
+        <div class="p-6 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-white dark:bg-slate-900 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">5</span>
+                    <span>Wire Tailwind Compilation into MSBuild (.csproj)</span>
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                    Automated Build &amp; CI
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                Add this target into your web project's <code class="font-mono">.csproj</code>. It automatically runs <code class="font-mono">npm ci</code> (if node_modules is missing) and compiles the Tailwind stylesheet during <code class="font-mono">dotnet build</code> and <code class="font-mono">dotnet publish</code>:
+            </p>
+            <div class="relative">
+                <button type="button" class="absolute top-2 right-2 text-xs text-indigo-400 hover:text-white font-semibold inline-flex items-center gap-1 z-10 cursor-pointer"
+                        @onclick='() => CopyTextAsync(_msbuildHookCode)'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy MSBuild Target
+                </button>
+                <div class="p-3.5 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto leading-relaxed">
+                    <pre><code>@_msbuildHookCode</code></pre>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Icon Name="@IconNames.Zap" Size="14" Class="text-amber-500" />
+                    <span>Fast Inner Development Loop (Hot Reload)</span>
+                </h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    When using <code class="font-mono">dotnet watch</code>, bypass the full MSBuild compilation and run the Tailwind watcher in a parallel terminal:
+                </p>
+                <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs space-y-1">
+                    <div class="text-slate-400"># Terminal 1: Blazor hot reload</div>
+                    <div><code>dotnet watch -p:SkipTailwind=true</code></div>
+                    <div class="text-slate-400 pt-1"># Terminal 2: Tailwind hot reload</div>
+                    <div><code>npm run css:watch</code></div>
+                </div>
+            </div>
+        </div>
+
+        @* Step 6: Static Assets *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">5</span>
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">6</span>
                     <span>Include Assets in App.razor or index.html</span>
                 </h3>
-                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
                         @onclick='() => CopyTextAsync(_headAssetsCode)'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
@@ -139,25 +181,43 @@
             </p>
         </div>
 
-        @* Step 6: Feedback Providers *@
+        @* Step 7: Feedback Providers & Layout *@
         <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
             <div class="flex items-center justify-between">
                 <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">6</span>
-                    <span>Add Feedback Hosts to MainLayout.razor</span>
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">7</span>
+                    <span>Wrap Layout in TentoConfigProvider &amp; Add Hosts</span>
                 </h3>
-                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1"
-                        @onclick='() => CopyTextAsync("<ModalHost />\n<NotificationHost />\n<MessageHost />")'>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        @onclick='() => CopyTextAsync(_layoutHostsCode)'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
             </div>
             <p class="text-xs text-slate-500">
-                To enable modals, notifications, and toast messages anywhere via dependency injection, place these hosts at the bottom of your <code class="font-mono">MainLayout.razor</code>:
+                Wrap your layout in <code class="font-mono">MainLayout.razor</code> to enable theme tokens, dark mode, and injection of modals, notifications, and toasts:
             </p>
             <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
-                <pre><code>&lt;ModalHost /&gt;
-&lt;NotificationHost /&gt;
-&lt;MessageHost /&gt;</code></pre>
+                <pre><code>@_layoutHostsCode</code></pre>
+            </div>
+        </div>
+
+        @* Step 8: AI Agent Skills *@
+        <div class="p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-950 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-bold">8</span>
+                    <span>Install AI Agent Skills (Optional)</span>
+                </h3>
+                <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        @onclick='() => CopyTextAsync("dotnet msbuild -t:TentoUIInstallSkills")'>
+                    <Icon Name="@IconNames.Copy" Size="12" /> Copy
+                </button>
+            </div>
+            <p class="text-xs text-slate-500">
+                Extract the built-in AI agent skills (<code class="font-mono">tentoui-components</code> and <code class="font-mono">tentoui-tailwind-setup</code>) into your workspace for Claude, Gemini CLI, Cursor, or Copilot:
+            </p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
+                <code>dotnet msbuild -t:TentoUIInstallSkills</code>
             </div>
         </div>
     </div>
@@ -177,6 +237,14 @@
         @source "../**/*.cs";
         """;
 
+    private const string _msbuildHookCode = """
+        <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwind)' != 'true'">
+          <Exec Command="npm ci" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules')"
+                WorkingDirectory="$(MSBuildProjectDirectory)" />
+          <Exec Command="npm run css:build" WorkingDirectory="$(MSBuildProjectDirectory)" />
+        </Target>
+        """;
+
     private const string _importsCode = "@using TentoUI\n@using TentoUI.Configuration";
 
     private const string _headAssetsCode = """
@@ -186,8 +254,18 @@
         <!-- Compiled Tailwind CSS -->
         <link rel="stylesheet" href="css/tailwind.min.css" />
 
-        <!-- TentoUI JavaScript Helpers (Modal & Clipboard) -->
+        <!-- TentoUI JavaScript Helpers (Modal, Audio, Tour & Focus Trap) -->
         <script src="_content/TentoUI/tentoui.js"></script>
+        """;
+
+    private const string _layoutHostsCode = """
+        <TentoConfigProvider>
+            @Body
+
+            <ModalHost />
+            <NotificationHost />
+            <MessageHost />
+        </TentoConfigProvider>
         """;
 
     private async Task CopyTextAsync(string text)

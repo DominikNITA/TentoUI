@@ -238,7 +238,7 @@
         """;
 
     private const string _msbuildHookCode = """
-        <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwind)' != 'true'">
+        <Target Name="TailwindBuild" BeforeTargets="BeforeBuild" DependsOnTargets="TentoUISyncTailwindAssets" Condition="'$(SkipTailwind)' != 'true'">
           <Exec Command="npm ci" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules')"
                 WorkingDirectory="$(MSBuildProjectDirectory)" />
           <Exec Command="npm run css:build" WorkingDirectory="$(MSBuildProjectDirectory)" />

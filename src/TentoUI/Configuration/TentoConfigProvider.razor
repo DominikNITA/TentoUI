@@ -1,6 +1,7 @@
 @namespace TentoUI
 @using TentoUI.Configuration
 @using TentoUI.Extensibility
+@using Microsoft.Extensions.DependencyInjection
 
 <CascadingValue Value="@ConfigContext" IsFixed="false">
     <div class="@ComputedClass"
@@ -13,7 +14,9 @@
 </CascadingValue>
 
 @code {
-    [Parameter] public TentoTheme Theme { get; set; } = new();
+    [Inject] private IServiceProvider? ServiceProvider { get; set; }
+
+    [Parameter] public TentoTheme? Theme { get; set; }
     [Parameter] public bool DarkMode { get; set; }
     [Parameter] public ComponentSize ComponentSize { get; set; } = ComponentSize.Middle;
     [Parameter] public Direction Direction { get; set; } = Direction.Ltr;
@@ -22,16 +25,17 @@
     [Parameter] public string? Style { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private bool EffectiveDarkMode => DarkMode || (Theme?.DarkMode ?? false);
+    private TentoTheme? _injectedTheme;
+    private static readonly TentoTheme _defaultTheme = new();
 
-    public TentoConfigContext ConfigContext => new(Theme, EffectiveDarkMode, ComponentSize, Direction);
+    private TentoTheme ActiveTheme => Theme ?? _injectedTheme ?? _defaultTheme;
+    private bool EffectiveDarkMode => DarkMode || (ActiveTheme?.DarkMode ?? false);
 
-    protected override void OnParametersSet()
+    public TentoConfigContext ConfigContext => new(ActiveTheme, EffectiveDarkMode, ComponentSize, Direction);
+
+    protected override void OnInitialized()
     {
-        if (Theme != null)
-        {
-            Theme.DarkMode = EffectiveDarkMode;
-        }
+        _injectedTheme = ServiceProvider?.GetService<TentoTheme>();
     }
 
     private string ComputedClass => new CssBuilder("tento-config-provider font-sans")
@@ -40,7 +44,7 @@
         .Build();
 
     private string ComputedStyle => new StyleBuilder()
-        .AddStyle(Theme.ToCssStyle())
+        .AddStyle(ActiveTheme.ToCssStyle(EffectiveDarkMode))
         .AddStyle(Style)
         .Build();
 }

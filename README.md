@@ -55,7 +55,7 @@ Create `Styles/app.tailwind.css`:
 Add the following MSBuild target to your web project's `.csproj` to automatically build Tailwind CSS during `dotnet build` and `dotnet publish` (including CI/CD pipelines):
 
 ```xml
-<Target Name="TailwindBuild" BeforeTargets="BeforeBuild" Condition="'$(SkipTailwind)' != 'true'">
+<Target Name="TailwindBuild" BeforeTargets="BeforeBuild" DependsOnTargets="TentoUISyncTailwindAssets" Condition="'$(SkipTailwind)' != 'true'">
   <Exec Command="npm ci" Condition="!Exists('$(MSBuildProjectDirectory)/node_modules')"
         WorkingDirectory="$(MSBuildProjectDirectory)" />
   <Exec Command="npm run css:build" WorkingDirectory="$(MSBuildProjectDirectory)" />

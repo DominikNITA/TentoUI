@@ -65,11 +65,12 @@ public class TentoTheme
 
     public string ToStyleString() => ToCssStyle();
 
-    public string ToCssStyle()
+    public string ToCssStyle(bool? darkMode = null)
     {
+        var isDark = darkMode ?? DarkMode;
         var sb = new System.Text.StringBuilder();
 
-        if (DarkMode)
+        if (isDark)
         {
             sb.Append($"--tento-bg-app: {Dark.AppBgColor ?? "#090d16"}; ");
             sb.Append($"--tento-bg-surface: {Dark.SurfaceBgColor ?? "#111827"}; ");
@@ -149,7 +150,7 @@ public class TentoTheme
         if (!string.IsNullOrWhiteSpace(FontFamily))
             sb.Append($"--tento-font-family: {FontFamily}; ");
 
-        var tokens = DarkMode && Dark.CustomTokens.Count > 0
+        var tokens = isDark && Dark.CustomTokens.Count > 0
             ? MergeTokens(CustomTokens, Dark.CustomTokens)
             : CustomTokens;
 

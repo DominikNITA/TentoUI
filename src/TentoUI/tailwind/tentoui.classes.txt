@@ -1271,6 +1271,7 @@ activePanel
 activePrefix
 activeStep
 activeStroke
+ActiveTheme
 activeVal
 activity
 Activity
@@ -1343,10 +1344,10 @@ AddRaw(string
 AddRuleAsync
 AddRuleAsync()
 AddStyle(
+AddStyle(ActiveTheme.ToCssStyle(EffectiveDarkMode))
 AddStyle(rawStyle,
 AddStyle(string
 AddStyle(Style)
-AddStyle(Theme.ToCssStyle())
 AddTabAsync
 AddTabAsync()
 AddTentoUI(this
@@ -2929,8 +2930,8 @@ darkItems
 darkItems)
 darkItems.Add(
 darkItems.Count
+darkMode
 DarkMode
-DarkMode)
 DarkMode,
 DarkMutedTextColor
 darkPrimary
@@ -3090,6 +3091,7 @@ defaultField,
 defaults
 defaultSortApplied
 DefaultSortOrder
+defaultTheme
 defaultWaveform
 define
 Defines
@@ -4063,6 +4065,7 @@ GetPriority(item)
 GetPriority(TItem
 GetPriorityColor(item)
 GetPriorityColor(TItem
+GetService
 GetSortValue(TItem
 GetSpinnerPixelSize()
 GetStatusBorderClass()
@@ -4806,6 +4809,8 @@ initialized
 InitializeFocusTrapAsync()
 initials
 initialStyle)
+Inject]
+injectedTheme
 Ink
 Inline
 inline-block
@@ -4949,6 +4954,7 @@ isEndpoint
 isEndpoint)
 isEndpoint,
 IServiceCollection
+IServiceProvider
 isExp
 isExpanded
 IsExpanded(node.Key)
@@ -5941,10 +5947,10 @@ never
 new
 new(
 new()
+new(ActiveTheme,
 new(StringComparer.Ordinal)
 new(StringComparer.OrdinalIgnoreCase)
 new(TaskCreationOptions.RunContinuationsAsynchronously)
-new(Theme,
 new[]
 NewContent)
 NewLineNumber,
@@ -7531,6 +7537,7 @@ service.NotifyChange()
 service.Remove(Id)
 service.Remove(Key)
 ServiceCollectionExtensions
+ServiceProvider
 services
 services,
 services.TryAddScoped
@@ -8749,6 +8756,7 @@ tento-textarea-wrapper
 TentoTheme
 TentoTheme()
 TentoTheme>
+TentoTheme>()
 tento-timeline
 tento-timeline-content
 tento-timeline-dot
@@ -8911,7 +8919,6 @@ theme.Dark.PrimaryColor
 theme.Dark.SuccessColor
 theme.Dark.SurfaceBgColor
 theme.Dark.WarningColor
-Theme.DarkMode
 theme.ErrorColor
 theme.FontFamily
 theme.InfoColor
@@ -9003,6 +9010,7 @@ To
 to.
 ToCSharpCode(this
 ToCssStyle()
+ToCssStyle(bool
 ToCssVariables(this
 today
 Today

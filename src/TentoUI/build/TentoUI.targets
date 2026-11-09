@@ -10,7 +10,7 @@
     <TentoUITailwindTarget Condition="'$(TentoUITailwindTarget)' == ''">$(MSBuildProjectDirectory)\tailwind\tentoui\</TentoUITailwindTarget>
   </PropertyGroup>
 
-  <Target Name="TentoUISyncTailwindAssets" BeforeTargets="BeforeBuild;BeforeRebuild" Condition="'$(TentoUISyncTailwind)' == 'true' And Exists('$(TentoUITailwindSource)')">
+  <Target Name="TentoUISyncTailwindAssets" BeforeTargets="BeforeBuild;BeforeRebuild;TailwindBuild" Condition="'$(TentoUISyncTailwind)' == 'true' And Exists('$(TentoUITailwindSource)')">
     <ItemGroup>
       <_TentoUITailwindFiles Include="$(TentoUITailwindSource)*.css;$(TentoUITailwindSource)*.txt" />
     </ItemGroup>

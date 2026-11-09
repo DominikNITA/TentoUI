@@ -73,6 +73,50 @@ public class ThemeTests : TestContext
     }
 
     [Fact]
+    public void TentoConfigProvider_UsesInjectedThemeFromDI_WhenThemeParameterNotProvided()
+    {
+        Services.AddTentoUI(theme =>
+        {
+            theme.PrimaryColor = "#58cc02";
+            theme.AppBgColor = "#ddf4ff";
+            theme.BaseTextColor = "#3c3c3c";
+            theme.BorderRadius = "16px";
+            theme.FontFamily = "duolingo-sans, sans-serif";
+        });
+
+        var cut = RenderComponent<TentoConfigProvider>(parameters => parameters
+            .AddChildContent("<span>Content</span>"));
+
+        var root = cut.Find("div");
+        var style = root.GetAttribute("style");
+
+        style.Should().Contain("--tento-primary-500: #58cc02;");
+        style.Should().Contain("--tento-bg-app: #ddf4ff;");
+        style.Should().Contain("--tento-text-base: #3c3c3c;");
+        style.Should().Contain("--tento-radius-md: 16px;");
+        style.Should().Contain("--tento-font-family: duolingo-sans, sans-serif;");
+    }
+
+    [Fact]
+    public void TentoConfigProvider_ExplicitThemeParameter_OverridesInjectedThemeFromDI()
+    {
+        Services.AddTentoUI(theme =>
+        {
+            theme.PrimaryColor = "#58cc02";
+        });
+
+        var cut = RenderComponent<TentoConfigProvider>(parameters => parameters
+            .Add(p => p.Theme, new TentoTheme { PrimaryColor = "#ff0000" })
+            .AddChildContent("<span>Overridden</span>"));
+
+        var root = cut.Find("div");
+        var style = root.GetAttribute("style");
+
+        style.Should().Contain("--tento-primary-500: #ff0000;");
+        style.Should().NotContain("--tento-primary-500: #58cc02;");
+    }
+
+    [Fact]
     public void CssBuilder_MergesAndConditionsClassesAccurately()
     {
         var builder = new CssBuilder("base-class")

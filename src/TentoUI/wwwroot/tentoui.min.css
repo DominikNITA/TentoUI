@@ -14,19 +14,19 @@
 
   --tento-border-base: #e2e8f0;
   --tento-border-subtle: #cbd5e1;
-  --tento-border-focus: #3b82f6;
+  --tento-border-focus: #a855f7;
 
-  --tento-primary-50: #eff6ff;
-  --tento-primary-100: #dbeafe;
-  --tento-primary-200: #bfdbfe;
-  --tento-primary-300: #93c5fd;
-  --tento-primary-400: #60a5fa;
-  --tento-primary-500: #3b82f6;
-  --tento-primary-600: #2563eb;
-  --tento-primary-700: #1d4ed8;
-  --tento-primary-800: #1e40af;
-  --tento-primary-900: #1e3a8a;
-  --tento-primary-950: #172554;
+  --tento-primary-50: #faf5ff;
+  --tento-primary-100: #f3e8ff;
+  --tento-primary-200: #e9d5ff;
+  --tento-primary-300: #d8b4fe;
+  --tento-primary-400: #c084fc;
+  --tento-primary-500: #a855f7;
+  --tento-primary-600: #9333ea;
+  --tento-primary-700: #7e22ce;
+  --tento-primary-800: #6b21a8;
+  --tento-primary-900: #581c87;
+  --tento-primary-950: #3b0764;
 
   --tento-success: #10b981;
   --tento-success-bg: #ecfdf5;
@@ -72,19 +72,19 @@
 
   --tento-border-base: #1f2937;
   --tento-border-subtle: #374151;
-  --tento-border-focus: #60a5fa;
+  --tento-border-focus: #c084fc;
 
-  --tento-primary-50: #172554;
-  --tento-primary-100: #1e3a8a;
-  --tento-primary-200: #1e40af;
-  --tento-primary-300: #1d4ed8;
-  --tento-primary-400: #2563eb;
-  --tento-primary-500: #3b82f6;
-  --tento-primary-600: #60a5fa;
-  --tento-primary-700: #93c5fd;
-  --tento-primary-800: #bfdbfe;
-  --tento-primary-900: #dbeafe;
-  --tento-primary-950: #eff6ff;
+  --tento-primary-50: #3b0764;
+  --tento-primary-100: #581c87;
+  --tento-primary-200: #6b21a8;
+  --tento-primary-300: #7e22ce;
+  --tento-primary-400: #9333ea;
+  --tento-primary-500: #a855f7;
+  --tento-primary-600: #c084fc;
+  --tento-primary-700: #d8b4fe;
+  --tento-primary-800: #e9d5ff;
+  --tento-primary-900: #f3e8ff;
+  --tento-primary-950: #faf5ff;
 
   --tento-success-bg: #064e3b;
   --tento-success-border: #047857;

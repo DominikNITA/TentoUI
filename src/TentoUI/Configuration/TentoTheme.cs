@@ -24,7 +24,7 @@ public class DarkThemeOptions
 
 public class TentoTheme
 {
-    private string _primaryColor = "#3b82f6";
+    private string _primaryColor = "#a855f7";
     private string? _primaryHoverColor;
 
     // Light / Default Colors
@@ -40,7 +40,7 @@ public class TentoTheme
 
     public string PrimaryHoverColor
     {
-        get => _primaryHoverColor ?? (PrimaryColor == "#3b82f6" ? "#2563eb" : $"color-mix(in srgb, {PrimaryColor} 88%, black)");
+        get => _primaryHoverColor ?? (PrimaryColor == "#a855f7" ? "#9333ea" : $"color-mix(in srgb, {PrimaryColor} 88%, black)");
         set => _primaryHoverColor = value;
     }
 
@@ -93,7 +93,7 @@ public class TentoTheme
             var primaryHover = Dark.PrimaryHoverColor
                 ?? (!string.IsNullOrWhiteSpace(_primaryHoverColor)
                     ? _primaryHoverColor
-                    : (primary == "#3b82f6" ? "#2563eb" : $"color-mix(in srgb, {primary} 88%, black)"));
+                    : (primary == "#a855f7" ? "#9333ea" : $"color-mix(in srgb, {primary} 88%, black)"));
             var success = Dark.SuccessColor ?? SuccessColor;
             var warning = Dark.WarningColor ?? WarningColor;
             var error = Dark.ErrorColor ?? ErrorColor;

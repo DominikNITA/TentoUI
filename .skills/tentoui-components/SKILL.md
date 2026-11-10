@@ -1,16 +1,16 @@
 ---
 name: tentoui-components
-description: TentoUI Blazor components based on Tailwind CSS and AntDesign patterns. Authoritative guide for building, styling, and wrapping TentoUI Blazor components in .NET 10.
+description: TentoUI Blazor components styled with Tailwind CSS, focused on clean design, themes, full WCAG 2.1 AA accessibility, and component extendability in .NET 10.
 framework: net10.0
 metadata:
   version: 1.0.0
   author: TentoTemplate
-  tags: [blazor, tentoui, tailwindcss, wcag, ui]
+  tags: [blazor, tentoui, tailwindcss, wcag, ui, theming, accessibility]
 ---
 
 # TentoUI Components Skill
 
-Authoritative guide for building, styling, and wrapping TentoUI Blazor components based on Tailwind CSS and AntDesign patterns.
+Authoritative guide for building, styling, extending, and theme-customizing TentoUI Blazor components in .NET 10.
 
 ## Use this skill when
 

@@ -3,7 +3,7 @@ using TentoUI.Extensibility;
 namespace TentoUI;
 
 /// <summary>
-/// Alias for <see cref="OTPInput"/> matching Ant Design v5's Input.OTP naming convention.
+/// Convenient alias for <see cref="OTPInput"/> provided for flexible naming conventions.
 /// </summary>
 [Since("1.0.0")]
 public class InputOTP : OTPInput

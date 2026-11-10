@@ -1,6 +1,6 @@
 # TentoUI
 
-**AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS v4 for .NET 10.**
+**Modern Blazor UI Component Library styled with Tailwind CSS v4 for .NET 10, focused on clean design, runtime theming, full accessibility, and component extendability.**
 
 - 🌐 **Documentation & Live Demos**: [https://dominiknita.github.io/TentoUI/](https://dominiknita.github.io/TentoUI/)
 - 💻 **GitHub Repository**: [https://github.com/DominikNITA/TentoUI](https://github.com/DominikNITA/TentoUI)

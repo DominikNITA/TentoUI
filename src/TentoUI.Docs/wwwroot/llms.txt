@@ -1,6 +1,6 @@
 # TentoUI
 
-> AntDesign-patterned Blazor UI Component Library styled with Tailwind CSS v4 for .NET 10.
+> Modern Blazor UI Component Library styled with Tailwind CSS v4 for .NET 10, focused on clean design, themes, full accessibility, and component extendability.
 
 ## Overview
 - Framework: .NET 10 Blazor (InteractiveServer, InteractiveWebAssembly, InteractiveAuto)

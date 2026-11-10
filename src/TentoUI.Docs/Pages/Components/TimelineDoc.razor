@@ -21,7 +21,7 @@
         <div class="p-4">
             <Timeline>
                 <TimelineItem Color="green" Label="2026-10-28">Released TentoUI v1.0.0 on NuGet</TimelineItem>
-                <TimelineItem Color="blue" Label="2026-10-20">Completed 40+ AntDesign Tailwind components</TimelineItem>
+                <TimelineItem Color="purple" Label="2026-10-20">Completed 40+ accessible UI components</TimelineItem>
                 <TimelineItem Color="gray" Label="2026-10-01">Extracted standalone git repository</TimelineItem>
             </Timeline>
         </div>
@@ -47,13 +47,13 @@
 @code {
     private readonly List<PropsPlayground.PlaygroundControl> _playgroundControls =
     [
-        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<TimelineItem Color=\"green\" Label=\"2026-10-28\">Released TentoUI v1.0.0 on NuGet</TimelineItem>\n<TimelineItem Color=\"blue\" Label=\"2026-10-20\">Completed 40+ AntDesign Tailwind components</TimelineItem>\n<TimelineItem Color=\"gray\" Label=\"2026-10-01\">Extracted standalone repository</TimelineItem>", DefaultValue = "", IsChildContent = true }
+        new() { Name = "Content", Kind = PropsPlayground.PlaygroundControlKind.Text, CurrentValue = "<TimelineItem Color=\"green\" Label=\"2026-10-28\">Released TentoUI v1.0.0 on NuGet</TimelineItem>\n<TimelineItem Color=\"purple\" Label=\"2026-10-20\">Completed 40+ accessible UI components</TimelineItem>\n<TimelineItem Color=\"gray\" Label=\"2026-10-01\">Extracted standalone repository</TimelineItem>", DefaultValue = "", IsChildContent = true }
     ];
 
     private const string _basicCode = """
         <Timeline>
             <TimelineItem Color="green" Label="2026-10-28">Released TentoUI v1.0.0 on NuGet</TimelineItem>
-            <TimelineItem Color="blue" Label="2026-10-20">Completed 40+ AntDesign Tailwind components</TimelineItem>
+            <TimelineItem Color="purple" Label="2026-10-20">Completed 40+ accessible UI components</TimelineItem>
             <TimelineItem Color="gray" Label="2026-10-01">Extracted standalone git repository</TimelineItem>
         </Timeline>
         """;

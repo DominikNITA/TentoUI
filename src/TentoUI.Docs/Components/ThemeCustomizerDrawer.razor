@@ -96,8 +96,9 @@
 
     private readonly ColorPreset[] _colorPresets =
     [
-        new("Blue", "#3b82f6", "#2563eb"),
+        new("Purple", "#a855f7", "#9333ea"),
         new("Violet", "#8b5cf6", "#7c3aed"),
+        new("Blue", "#3b82f6", "#2563eb"),
         new("Emerald", "#10b981", "#059669"),
         new("Rose", "#f43f5e", "#e11d48"),
         new("Amber", "#f59e0b", "#d97706"),
@@ -147,8 +148,8 @@
 
     private async Task ResetDefaultsAsync()
     {
-        Theme.PrimaryColor = "#3b82f6";
-        Theme.PrimaryHoverColor = "#2563eb";
+        Theme.PrimaryColor = "#a855f7";
+        Theme.PrimaryHoverColor = "#9333ea";
         Theme.BorderRadius = "0.375rem";
         ComponentSize = ComponentSize.Middle;
         if (ComponentSizeChanged.HasDelegate)

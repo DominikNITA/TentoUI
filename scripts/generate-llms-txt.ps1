@@ -7,6 +7,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $llmsShort = Join-Path $root 'src/TentoUI.Docs/wwwroot/llms.txt'
 $skillComponents = Join-Path $root '.skills/tentoui-components/SKILL.md'
 $skillTailwind = Join-Path $root '.skills/tentoui-tailwind-setup/SKILL.md'
+$skillDesignSystem = Join-Path $root '.skills/tentoui-design-system/SKILL.md'
 $outFull = Join-Path $root 'src/TentoUI.Docs/wwwroot/llms-full.txt'
 
 $sections = @(
@@ -20,7 +21,11 @@ $sections = @(
     "",
     "---",
     "",
-    (Get-Content $skillTailwind -Raw).Trim()
+    (Get-Content $skillTailwind -Raw).Trim(),
+    "",
+    "---",
+    "",
+    (Get-Content $skillDesignSystem -Raw).Trim()
 )
 
 Set-Content -Path $outFull -Value ($sections -join "`n") -Encoding utf8

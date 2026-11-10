@@ -1073,7 +1073,7 @@ public class TentoMarkupRenderer : ComponentBase
             if (!node.Children.Any(c => c.TagName.Equals("TimelineItem", StringComparison.OrdinalIgnoreCase)))
             {
                 node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "green", ["Label"] = "2026-10-28" }, TextContent = "Released TentoUI v1.0.0 on NuGet" });
-                node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "blue", ["Label"] = "2026-10-20" }, TextContent = "Completed 40+ AntDesign Tailwind components" });
+                node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "purple", ["Label"] = "2026-10-20" }, TextContent = "Completed 40+ accessible UI components" });
                 node.Children.Add(new MarkupNode { TagName = "TimelineItem", Attributes = new() { ["Color"] = "gray", ["Label"] = "2026-10-01" }, TextContent = "Extracted standalone git repository" });
             }
         }
@@ -1309,7 +1309,7 @@ public class TentoMarkupRenderer : ComponentBase
                 node.Children.Add(new MarkupNode
                 {
                     TagName = "CarouselPanel",
-                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "h-48 bg-emerald-600 text-white flex items-center justify-center font-bold text-xl rounded-lg" }, TextContent = "Slide 2: AntDesign Design Language" }]
+                    Children = [new MarkupNode { TagName = "div", Attributes = new() { ["Class"] = "h-48 bg-emerald-600 text-white flex items-center justify-center font-bold text-xl rounded-lg" }, TextContent = "Slide 2: Clean Design & Theming" }]
                 });
                 node.Children.Add(new MarkupNode
                 {

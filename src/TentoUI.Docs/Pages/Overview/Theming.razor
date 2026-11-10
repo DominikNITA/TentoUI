@@ -134,8 +134,8 @@
 
 @code {
     private bool _isDark = false;
-    private string _lightPrimary = "#2563eb";
-    private string _darkPrimary = "#38bdf8";
+    private string _lightPrimary = "#9333ea";
+    private string _darkPrimary = "#c084fc";
     private string _lightAppBg = "#f8fafc";
     private string _darkAppBg = "#0b0f19";
 
@@ -162,8 +162,8 @@
 
     private readonly ApiTable.ApiProp[] _themeProps =
     [
-        new("PrimaryColor / ColorPrimary", "Primary brand color in Light Mode (maps to --tento-primary-500 and generates shades 50..950).", "string", "\"#3b82f6\""),
-        new("PrimaryHoverColor", "Primary hover/active brand color in Light Mode (maps to --tento-primary-600).", "string", "\"#2563eb\""),
+        new("PrimaryColor / ColorPrimary", "Primary brand color in Light Mode (maps to --tento-primary-500 and generates shades 50..950).", "string", "\"#a855f7\""),
+        new("PrimaryHoverColor", "Primary hover/active brand color in Light Mode (maps to --tento-primary-600).", "string", "\"#9333ea\""),
         new("AppBgColor", "Application page background in Light Mode (--tento-bg-app).", "string", "\"#f8fafc\""),
         new("SurfaceBgColor", "Card, modal, and surface container background (--tento-bg-surface).", "string", "\"#ffffff\""),
         new("SubtleBgColor", "Subtle secondary background for headers and striped rows (--tento-bg-subtle).", "string", "\"#f1f5f9\""),
@@ -185,8 +185,8 @@
         var theme = new TentoTheme
         {
             // Light / Default Theme
-            PrimaryColor = "#2563eb",
-            PrimaryHoverColor = "#1d4ed8",
+            PrimaryColor = "#9333ea",
+            PrimaryHoverColor = "#7e22ce",
             AppBgColor = "#f8fafc",
             SurfaceBgColor = "#ffffff",
             BaseTextColor = "#0f172a",
@@ -194,8 +194,8 @@
             // Dark Theme Variants
             Dark =
             {
-                PrimaryColor = "#38bdf8",     // Lighter, high-contrast tint in dark mode
-                PrimaryHoverColor = "#0ea5e9",
+                PrimaryColor = "#c084fc",     // Lighter, high-contrast tint in dark mode
+                PrimaryHoverColor = "#a855f7",
                 AppBgColor = "#0b0f19",       // Custom dark background
                 SurfaceBgColor = "#111827",   // Custom dark card/surface background
                 BaseTextColor = "#f9fafb",    // High-readability light text

@@ -1,4 +1,4 @@
-@page "/components/transfer"
+﻿@page "/components/transfer"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Transfer - TentoUI</PageTitle>
@@ -23,7 +23,7 @@
                       @bind-TargetKeys="_targetKeys"
                       Titles="@(new[] { "Available Roles", "Assigned Roles" })"
                       ShowSearch="true" />
-            <p class="text-xs text-slate-400 font-mono mt-3">Assigned keys: @string.Join(", ", _targetKeys)</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 font-mono mt-3">Assigned keys: @string.Join(", ", _targetKeys)</p>
         </div>
     </DemoCard>
 

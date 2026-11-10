@@ -1,4 +1,4 @@
-@page "/components/autocomplete"
+﻿@page "/components/autocomplete"
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
@@ -27,7 +27,7 @@
                           Placeholder="Enter email address..."
                           Options="@EmailOptions"
                           AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Current Value: @_emailValue</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Current Value: @_emailValue</div>
         </div>
     </DemoCard>
 
@@ -51,7 +51,7 @@
                             </div>
                             <div>
                                 <div class="font-medium text-slate-800 dark:text-slate-200">@opt.Label</div>
-                                <div class="text-[10px] text-slate-400">@opt.Value</div>
+                                <div class="text-[10px] text-slate-600 dark:text-slate-400">@opt.Value</div>
                             </div>
                         </div>
                         @if (user != null)
@@ -63,7 +63,7 @@
                     </div>
                 </OptionTemplate>
             </AutoComplete>
-            <div class="text-xs text-slate-400 font-mono">Selected: @_selectedUser</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected: @_selectedUser</div>
         </div>
     </DemoCard>
 
@@ -78,7 +78,7 @@
                           DebounceMs="300"
                           OnSearch="HandleRemoteSearch"
                           AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">
                 @if (_isSearching)
                 {
                     <span class="text-primary-500 font-semibold animate-pulse">Querying remote server...</span>
@@ -102,7 +102,7 @@
                           DebounceMs="250"
                           NotFoundContent="No matching technologies found."
                           AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Value: @(_asyncRepoValue ?? "none")</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Value: @(_asyncRepoValue ?? "none")</div>
         </div>
     </DemoCard>
 
@@ -238,7 +238,7 @@
             <OptionTemplate Context="opt">
                 <div class="flex items-center justify-between py-0.5 w-full">
                     <span class="font-medium">@opt.Label</span>
-                    <span class="text-xs text-slate-400">@opt.Value</span>
+                    <span class="text-xs text-slate-600 dark:text-slate-400">@opt.Value</span>
                 </div>
             </OptionTemplate>
         </AutoComplete>

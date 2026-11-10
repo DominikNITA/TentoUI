@@ -1,4 +1,4 @@
-@page "/components/tree"
+﻿@page "/components/tree"
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
@@ -25,7 +25,7 @@
             <Tree Data="@_treeData"
                   @bind-SelectedKey="_selectedKey"
                   OnSelect="@(key => MessageService.Info($"Selected node: {key}"))" />
-            <div class="text-xs text-slate-400 font-mono pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono pt-2 border-t border-slate-100 dark:border-slate-800">
                 Active Selection: <strong class="text-primary-600 font-semibold">@(_selectedKey ?? "None")</strong>
             </div>
         </div>
@@ -41,7 +41,7 @@
                   @bind-CheckedKeys="_checkedKeys" />
             <div class="text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
                 Checked permissions: <strong class="text-primary-600 font-mono">@_checkedKeys.Count</strong> item(s) selected
-                <div class="text-[11px] text-slate-400 font-mono mt-1 truncate">@string.Join(", ", _checkedKeys)</div>
+                <div class="text-[11px] text-slate-600 dark:text-slate-400 font-mono mt-1 truncate">@string.Join(", ", _checkedKeys)</div>
             </div>
         </div>
     </DemoCard>

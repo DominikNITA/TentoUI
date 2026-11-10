@@ -182,8 +182,16 @@
     {
         try
         {
-            _module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/TentoUI/tentoui.js");
-            await _module.InvokeVoidAsync("tentoModal.open", _modalContainerRef);
+            await JSRuntime.InvokeVoidAsync("tentoModal.open", _modalContainerRef);
+        }
+        catch (JSException)
+        {
+            try
+            {
+                _module ??= await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/TentoUI/tentoui.js");
+                await JSRuntime.InvokeVoidAsync("tentoModal.open", _modalContainerRef);
+            }
+            catch (Exception) { /* Graceful SSR / test fallback */ }
         }
         catch (Exception) { /* Graceful SSR / test fallback */ }
     }
@@ -192,10 +200,7 @@
     {
         try
         {
-            if (_module != null)
-            {
-                await _module.InvokeVoidAsync("tentoModal.close", _modalContainerRef);
-            }
+            await JSRuntime.InvokeVoidAsync("tentoModal.close", _modalContainerRef);
         }
         catch (Exception) { }
     }

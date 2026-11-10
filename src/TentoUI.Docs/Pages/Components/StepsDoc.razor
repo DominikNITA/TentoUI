@@ -1,4 +1,4 @@
-@page "/components/steps"
+﻿@page "/components/steps"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Steps - TentoUI</PageTitle>
@@ -42,7 +42,7 @@
                 <Button Type="ButtonType.Primary" Disabled="@(_currentStep == 2)" OnClick="@(() => _currentStep = Math.Min(2, _currentStep + 1))">
                     Next
                 </Button>
-                <span class="text-xs text-slate-400">Step @(_currentStep + 1) of 3</span>
+                <span class="text-xs text-slate-600 dark:text-slate-400">Step @(_currentStep + 1) of 3</span>
             </div>
         </div>
     </DemoCard>

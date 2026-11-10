@@ -1,4 +1,4 @@
-@page "/components/affix"
+﻿@page "/components/affix"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Affix - TentoUI</PageTitle>
@@ -21,7 +21,7 @@
               Description="Scroll down inside the viewport below — the Affix toolbar stays pinned 12px from the top edge."
               Code="@_topAffixCode">
         <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-4">
-            <div class="text-xs text-slate-400">Scroll down to see the toolbar stick to the top...</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">Scroll down to see the toolbar stick to the top...</div>
 
             <Affix OffsetTop="8">
                 <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-primary-200 dark:border-primary-800 shadow-md">
@@ -108,7 +108,7 @@
 
     private const string _topAffixCode = """
         <div class="h-72 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-4 space-y-4">
-            <div class="text-xs text-slate-400">Scroll down to see the toolbar stick to the top...</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400">Scroll down to see the toolbar stick to the top...</div>
 
             <Affix OffsetTop="8">
                 <div class="flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur border border-primary-200 dark:border-primary-800 shadow-md">

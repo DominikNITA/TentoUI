@@ -1,4 +1,4 @@
-@page "/components/pagination"
+﻿@page "/components/pagination"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Pagination - TentoUI</PageTitle>
@@ -20,7 +20,7 @@
     <DemoCard Title="Basic Pagination" Description="Standard page numbering with previous and next arrow buttons." Code="@_basicCode">
         <div class="flex flex-col items-center gap-3 p-4">
             <Pagination Total="50" @bind-Current="_basicPage" />
-            <span class="text-xs text-slate-400">Current page: @_basicPage</span>
+            <span class="text-xs text-slate-600 dark:text-slate-400">Current page: @_basicPage</span>
         </div>
     </DemoCard>
 
@@ -32,7 +32,7 @@
                         @bind-PageSize="_pageSize"
                         ShowSizeChanger="true"
                         ShowQuickJumper="true" />
-            <span class="text-xs text-slate-400">Viewing page @_page with @_pageSize items per page</span>
+            <span class="text-xs text-slate-600 dark:text-slate-400">Viewing page @_page with @_pageSize items per page</span>
         </div>
     </DemoCard>
 

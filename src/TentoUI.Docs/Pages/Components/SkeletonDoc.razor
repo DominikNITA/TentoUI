@@ -1,4 +1,4 @@
-@page "/components/skeleton"
+﻿@page "/components/skeleton"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Skeleton - TentoUI</PageTitle>
@@ -37,7 +37,7 @@
                 <Button Type="ButtonType.Default" OnClick="() => _isLoading = !_isLoading">
                     @(_isLoading ? "Simulate Content Loaded" : "Reset to Skeleton")
                 </Button>
-                <span class="text-xs text-slate-400">Current status: @(_isLoading ? "Loading..." : "Loaded")</span>
+                <span class="text-xs text-slate-600 dark:text-slate-400">Current status: @(_isLoading ? "Loading..." : "Loaded")</span>
             </div>
 
             <div class="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm">

@@ -74,8 +74,8 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Buttons &amp; Rating</h4>
-                        <span class="text-[10px] text-slate-400 font-mono">General</span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Buttons &amp; Rating</h4>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">General</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <Button Type="ButtonType.Primary" Size="ComponentSize.Small" OnClick="@(() => MessageService.Success("Primary action triggered!"))">Primary</Button>
@@ -94,8 +94,8 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Navigation &amp; Switch</h4>
-                        <span class="text-[10px] text-slate-400 font-mono">Controls</span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Navigation &amp; Switch</h4>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Controls</span>
                     </div>
                     <Segmented TValue="string"
                                @bind-Value="_activePill"
@@ -121,7 +121,7 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Voice Note &amp; Audio</h4>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Voice Note &amp; Audio</h4>
                         <Tag Color="purple">v1.0.3</Tag>
                     </div>
                     <Voiceform Author="Dominik (Lead)"
@@ -130,7 +130,7 @@
                                @bind-CurrentTime="_voiceTime"
                                @bind-IsPlaying="_voicePlaying" />
                 </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center justify-between">
                     <span>Click bars to seek timestamp</span>
                     <span class="font-mono">@Voiceform.FormatTime(_voiceTime) / 0:05</span>
                 </div>
@@ -140,8 +140,8 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Animated Gauge</h4>
-                        <span class="text-[10px] text-slate-400 font-mono">Analytics</span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Animated Gauge</h4>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Analytics</span>
                     </div>
                     <div class="flex justify-center">
                         <Gauge Value="_gaugeValue" Label="Cluster Health" Unit="%" Size="130" />
@@ -158,8 +158,8 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">AI Prompt Input</h4>
-                        <span class="text-[10px] text-slate-400 font-mono">Copilot</span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">AI Prompt Input</h4>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Copilot</span>
                     </div>
                     <PromptInput @bind-Value="_promptText"
                                  Placeholder="Ask TentoUI Copilot..."
@@ -168,7 +168,7 @@
                                  Rows="2"
                                  OnSubmit="HandlePromptSubmit" />
                 </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center justify-between">
                     <span>Press Enter to simulate AI response</span>
                     <Icon Name="@IconNames.Sparkles" Size="14" Class="text-amber-500" />
                 </div>
@@ -178,14 +178,14 @@
             <div class="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-3 shadow-xs flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Vector Signature Pad</h4>
-                        <span class="text-[10px] text-slate-400 font-mono">Canvas</span>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Vector Signature Pad</h4>
+                        <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Canvas</span>
                     </div>
                     <SignaturePad @bind-Value="_signatureSvg"
                                   Height="105"
                                   Placeholder="Draw a signature or doodle here..." />
                 </div>
-                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                <div class="pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center justify-between">
                     <span>Touch &amp; mouse vector capture</span>
                     <Icon Name="@IconNames.Edit" Size="13" />
                 </div>

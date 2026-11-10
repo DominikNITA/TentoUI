@@ -1,4 +1,4 @@
-@page "/components/icon"
+﻿@page "/components/icon"
 @namespace TentoUI.Docs.Pages.Components
 @using System.Reflection
 @inject IJSRuntime JSRuntime
@@ -45,7 +45,7 @@
                     <Icon Name="@item.Value" Size="22" Class="group-hover:scale-110 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-transform" />
                     <div class="text-center w-full truncate">
                         <div class="text-[11px] font-semibold truncate">@item.ConstName</div>
-                        <div class="text-[9px] font-mono text-slate-400 truncate">"@item.Value"</div>
+                        <div class="text-[9px] font-mono text-slate-600 dark:text-slate-400 truncate">"@item.Value"</div>
                     </div>
                 </button>
             }
@@ -77,7 +77,7 @@
     @* Example: Sizing and Colors *@
     <DemoCard Title="Sizing and Custom Colors" Description="Control icon scale via Size parameter and color using standard Tailwind text classes." Code="@_sizingCode">
         <div class="flex items-center gap-6 text-slate-800 dark:text-slate-100">
-            <Icon Name="@IconNames.Bell" Size="16" Class="text-slate-400" />
+            <Icon Name="@IconNames.Bell" Size="16" Class="text-slate-600 dark:text-slate-400" />
             <Icon Name="@IconNames.Bell" Size="20" Class="text-primary-500" />
             <Icon Name="@IconNames.Bell" Size="28" Class="text-amber-500" />
             <Icon Name="@IconNames.Bell" Size="36" Class="text-rose-500" />
@@ -135,7 +135,7 @@
         """;
 
     private const string _sizingCode = """
-        <Icon Name="@IconNames.Bell" Size="16" Class="text-slate-400" />
+        <Icon Name="@IconNames.Bell" Size="16" Class="text-slate-600 dark:text-slate-400" />
         <Icon Name="@IconNames.Bell" Size="20" Class="text-primary-500" />
         <Icon Name="@IconNames.Bell" Size="28" Class="text-amber-500" />
         <Icon Name="@IconNames.Bell" Size="36" Class="text-rose-500" />

@@ -9,7 +9,7 @@
                    placeholder="Search 75+ components..."
                    class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-primary-500"
                    @oninput="@(e => _searchTerm = e.Value?.ToString() ?? string.Empty)" />
-            <Icon Name="@IconNames.Search" Size="14" Class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Icon Name="@IconNames.Search" Size="14" Class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
         </div>
     </div>
 
@@ -18,7 +18,7 @@
         @foreach (var section in FilteredSections)
         {
             <div>
-                <span class="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <span class="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     @section.Title
                 </span>
                 <ul class="mt-1 space-y-0.5">
@@ -27,7 +27,7 @@
                         <li>
                             <NavLink href="@item.Href"
                                      Match="@(item.Href == "" ? NavLinkMatch.All : NavLinkMatch.Prefix)"
-                                     class="flex items-center justify-between px-2.5 py-1.5 rounded-md font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors [&.active]:bg-primary-50 dark:[&.active]:bg-primary-950/40 [&.active]:text-primary-600 dark:[&.active]:text-primary-400 [&.active]:font-semibold">
+                                     class="flex items-center justify-between px-2.5 py-1.5 rounded-md font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors [&.active]:bg-primary-50 dark:[&.active]:bg-primary-950/40 [&.active]:text-primary-600 dark:[&.active]:text-primary-400 [&.active]:font-semibold">
                                 <span>@item.Label</span>
                                 @if (!string.IsNullOrEmpty(item.Tag))
                                 {

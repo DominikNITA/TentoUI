@@ -237,5 +237,24 @@ public class AuditRemediationTests : TestContext
         root.ClassList.Should().NotContain("font-sans");
         root.ClassList.Should().Contain("dark");
     }
+
+    [Fact]
+    public void Modal_FocusTrap_InvokesDirectJSInterop()
+    {
+        var plannedOpen = JSInterop.SetupVoid("tentoModal.open", _ => true);
+        var plannedClose = JSInterop.SetupVoid("tentoModal.close", _ => true);
+
+        var cut = RenderComponent<Modal>(p => p
+            .Add(x => x.Visible, true)
+            .Add(x => x.Title, "Accessible Modal")
+            .AddChildContent("<p>Modal content</p>"));
+
+        // Open should be invoked directly on JSRuntime
+        plannedOpen.Invocations.Should().HaveCount(1);
+
+        // Hide modal
+        cut.SetParametersAndRender(p => p.Add(x => x.Visible, false));
+        plannedClose.Invocations.Should().HaveCount(1);
+    }
 }
 

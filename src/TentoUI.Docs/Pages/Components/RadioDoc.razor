@@ -1,4 +1,4 @@
-@page "/components/radio"
+﻿@page "/components/radio"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Radio - TentoUI</PageTitle>
@@ -24,7 +24,7 @@
                 <Radio Value="@("pro")">Pro Team ($29/mo)</Radio>
                 <Radio Value="@("enterprise")">Enterprise (Custom)</Radio>
             </RadioGroup>
-            <div class="text-xs text-slate-400 font-mono">Selected Plan: @_selectedPlan</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected Plan: @_selectedPlan</div>
         </div>
     </DemoCard>
 
@@ -36,7 +36,7 @@
                 <Radio Value="@("quarterly")">Quarterly</Radio>
                 <Radio Value="@("yearly")">Yearly (Save 20%)</Radio>
             </RadioGroup>
-            <div class="text-xs text-slate-400 font-mono">Billing Interval: @_selectedPeriod</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Billing Interval: @_selectedPeriod</div>
         </div>
     </DemoCard>
 
@@ -48,7 +48,7 @@
                 <Radio Value="@("mentions")">Direct @@mentions and replies only</Radio>
                 <Radio Value="@("mute")">Mute all email and push notifications</Radio>
             </RadioGroup>
-            <div class="text-xs text-slate-400 font-mono mt-2">Notification preference: @_selectedNotification</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono mt-2">Notification preference: @_selectedNotification</div>
         </div>
     </DemoCard>
 

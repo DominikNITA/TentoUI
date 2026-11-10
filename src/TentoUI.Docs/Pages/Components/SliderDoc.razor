@@ -1,4 +1,4 @@
-@page "/components/slider"
+﻿@page "/components/slider"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Slider - TentoUI</PageTitle>
@@ -20,7 +20,7 @@
     <DemoCard Title="Basic Slider" Description="Continuous range slider with two-way double binding." Code="@_basicCode">
         <div class="max-w-md p-4 space-y-2">
             <Slider @bind-Value="_val" Min="0" Max="100" />
-            <div class="text-xs text-slate-400 font-mono">Current Value: @_val%</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Current Value: @_val%</div>
         </div>
     </DemoCard>
 
@@ -35,7 +35,7 @@
     <DemoCard Title="Discrete Step Increments" Description="Steps only by increments of 10." Code="@_stepsCode">
         <div class="max-w-md p-4 space-y-2">
             <Slider @bind-Value="_stepVal" Min="0" Max="100" Step="10" ShowValue="true" />
-            <div class="text-xs text-slate-400 font-mono">Stepped Value: @_stepVal</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Stepped Value: @_stepVal</div>
         </div>
     </DemoCard>
 

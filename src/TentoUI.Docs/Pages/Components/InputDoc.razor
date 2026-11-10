@@ -1,4 +1,4 @@
-@page "/components/input"
+﻿@page "/components/input"
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
@@ -24,7 +24,7 @@
                    Placeholder="Type your username..."
                    AllowClear="true"
                    OnPressEnter="@(() => MessageService.Info($"Pressed Enter: {_value}"))" />
-            <div class="text-xs text-slate-400 font-mono">Bound Value: @_value</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Bound Value: @_value</div>
         </div>
     </DemoCard>
 
@@ -32,11 +32,11 @@
     <DemoCard Title="Prefix &amp; Suffix Icons" Description="Include helpful iconography or domain prefixes inside the input border." Code="@_iconsCode">
         <div class="space-y-3 max-w-sm p-2">
             <Input Placeholder="Search documentation...">
-                <Prefix><TentoUI.Icon Name="@IconNames.Search" Size="14" Class="text-slate-400" /></Prefix>
+                <Prefix><TentoUI.Icon Name="@IconNames.Search" Size="14" Class="text-slate-600 dark:text-slate-400" /></Prefix>
             </Input>
             <Input Placeholder="my-company">
-                <Prefix><span class="text-xs text-slate-400">https://</span></Prefix>
-                <Suffix><span class="text-xs text-slate-400">.tento.io</span></Suffix>
+                <Prefix><span class="text-xs text-slate-600 dark:text-slate-400">https://</span></Prefix>
+                <Suffix><span class="text-xs text-slate-600 dark:text-slate-400">.tento.io</span></Suffix>
             </Input>
         </div>
     </DemoCard>
@@ -79,8 +79,8 @@
             <Prefix><Icon Name="@IconNames.Search" Size="14" /></Prefix>
         </Input>
         <Input Placeholder="my-company">
-            <Prefix><span class="text-xs text-slate-400">https://</span></Prefix>
-            <Suffix><span class="text-xs text-slate-400">.tento.io</span></Suffix>
+            <Prefix><span class="text-xs text-slate-600 dark:text-slate-400">https://</span></Prefix>
+            <Suffix><span class="text-xs text-slate-600 dark:text-slate-400">.tento.io</span></Suffix>
         </Input>
         """;
 

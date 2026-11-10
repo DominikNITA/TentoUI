@@ -1,4 +1,4 @@
-@page "/components/datagrid-virtual"
+﻿@page "/components/datagrid-virtual"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>DataGridVirtual - TentoUI</PageTitle>
@@ -27,7 +27,7 @@
                     <span class="text-emerald-600 dark:text-emerald-400 font-medium">Healthy: @_rows.Count(r => r.Status == "Healthy")</span>
                     <span class="text-rose-500 font-medium">Degraded: @_rows.Count(r => r.Status == "Degraded")</span>
                 </div>
-                <span class="text-slate-400 font-mono text-[11px]">ScrollHeight: 360px (ItemSize: 44px)</span>
+                <span class="text-slate-600 dark:text-slate-400 font-mono text-[11px]">ScrollHeight: 360px (ItemSize: 44px)</span>
             </div>
 
             <DataGridVirtual TItem="TelemetryRow" DataSource="@_rows" Bordered="true" Striped="true" ScrollHeight="360px">

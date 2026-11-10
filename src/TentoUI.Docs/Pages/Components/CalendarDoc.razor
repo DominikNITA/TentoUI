@@ -1,4 +1,4 @@
-@page "/components/calendar"
+﻿@page "/components/calendar"
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
@@ -22,7 +22,7 @@
         <div class="max-w-xl mx-auto space-y-3">
             <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
                 <span>Selected Date: <strong class="text-primary-600 dark:text-primary-400 font-mono">@_selectedDate.ToString("yyyy-MM-dd")</strong></span>
-                <span class="text-[11px] text-slate-400">Click any day to select</span>
+                <span class="text-[11px] text-slate-600 dark:text-slate-400">Click any day to select</span>
             </div>
             <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
                 <Calendar @bind-Value="_selectedDate"
@@ -68,7 +68,7 @@
                     <Calendar @bind-Value="_contextDate" />
                 </div>
             </ContextMenu>
-            <div class="text-xs text-slate-400 font-mono">Focused Date for Actions: @_contextDate.ToString("yyyy-MM-dd")</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Focused Date for Actions: @_contextDate.ToString("yyyy-MM-dd")</div>
         </div>
     </DemoCard>
 

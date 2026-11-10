@@ -13,14 +13,14 @@
             @onclick="ToggleDropdown">
         <span class="w-1.5 h-1.5 rounded-full @(VersionService.CurrentVersion.IsLatest ? "bg-emerald-500" : VersionService.CurrentVersion.IsPreview ? "bg-amber-500" : "bg-slate-400")"></span>
         <span>@VersionService.CurrentVersion.Label</span>
-        <Icon Name="@IconNames.ChevronDown" Size="12" Class="text-slate-400 transition-transform duration-150" />
+        <Icon Name="@IconNames.ChevronDown" Size="12" Class="text-slate-500 dark:text-slate-400 transition-transform duration-150" />
     </button>
 
     @if (_isOpen)
     {
         <div class="absolute left-0 mt-2 w-68 origin-top-left rounded-xl bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-slate-200 dark:border-slate-800 py-2 z-50 focus:outline-none divide-y divide-slate-100 dark:divide-slate-800">
             <div class="px-3 py-1.5 flex items-center justify-between">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     Documentation Versions
                 </span>
             </div>

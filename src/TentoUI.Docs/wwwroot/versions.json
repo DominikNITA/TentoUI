@@ -1,9 +1,19 @@
 [
   {
-    "version": "1.0.7",
-    "label": "v1.0.7",
+    "version": "1.0.8",
+    "label": "v1.0.8",
     "path": "/",
     "isLatest": true,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Modal focus trap & Escape direct JSInterop, full WCAG 2.1 AA docs contrast remediation, BadgeStatus tokens, Rate half-stars, Statistic affixes"
+  },
+  {
+    "version": "1.0.7",
+    "label": "v1.0.7",
+    "path": "/v1.0.7/",
+    "isLatest": false,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",

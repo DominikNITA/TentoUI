@@ -1,4 +1,4 @@
-@page "/components/cascader"
+﻿@page "/components/cascader"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>Cascader - TentoUI</PageTitle>
@@ -23,7 +23,7 @@
                       @bind-Values="_selectedValues"
                       Placeholder="Select location..."
                       AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected Path: @string.Join(" / ", _selectedValues)</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected Path: @string.Join(" / ", _selectedValues)</div>
         </div>
     </DemoCard>
 
@@ -34,7 +34,7 @@
                       @bind-Values="_selectedCategory"
                       Placeholder="Select department..."
                       AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Department Path: @string.Join(" / ", _selectedCategory)</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Department Path: @string.Join(" / ", _selectedCategory)</div>
         </div>
     </DemoCard>
 

@@ -1,4 +1,4 @@
-@page "/components/tree-select"
+﻿@page "/components/tree-select"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>TreeSelect - TentoUI</PageTitle>
@@ -23,7 +23,7 @@
                         @bind-Value="_selectedKey"
                         Placeholder="Select file or directory..."
                         AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected Key: @_selectedKey</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected Key: @_selectedKey</div>
         </div>
     </DemoCard>
 
@@ -35,7 +35,7 @@
                         Placeholder="Search codebase files..."
                         ShowSearch="true"
                         AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected Key: @_searchKey</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected Key: @_searchKey</div>
         </div>
     </DemoCard>
 

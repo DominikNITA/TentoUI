@@ -5129,6 +5129,7 @@ jpeg
 jpg
 JPG,
 JS
+JSException)
 JSInvokable]
 JSRuntime
 JSRuntime.InvokeAsync
@@ -5871,7 +5872,6 @@ Model=
 Modified
 module
 module.DisposeAsync()
-module.InvokeVoidAsync(
 modules
 mon
 Mon

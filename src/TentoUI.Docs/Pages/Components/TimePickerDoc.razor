@@ -1,4 +1,4 @@
-@page "/components/time-picker"
+﻿@page "/components/time-picker"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>TimePicker - TentoUI</PageTitle>
@@ -22,7 +22,7 @@
             <TimePicker @bind-Value="_time"
                         Format="HH:mm"
                         AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected Time: @(_time?.ToString("HH:mm") ?? "None")</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected Time: @(_time?.ToString("HH:mm") ?? "None")</div>
         </div>
     </DemoCard>
 

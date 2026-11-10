@@ -1,4 +1,4 @@
-@page "/components/table"
+﻿@page "/components/table"
 @namespace TentoUI.Docs.Pages.Components
 @inject IMessageService MessageService
 
@@ -42,7 +42,7 @@
                         <Avatar Text="@emp.Name[..1]" Size="ComponentSize.Small" />
                         <div>
                             <span class="font-semibold text-slate-900 dark:text-white block">@emp.Name</span>
-                            <span class="text-[11px] text-slate-400">ID: #@emp.Id</span>
+                            <span class="text-[11px] text-slate-600 dark:text-slate-400">ID: #@emp.Id</span>
                         </div>
                     </div>
                 </TableColumn>
@@ -106,7 +106,7 @@
                         }
                     </span>
                 </div>
-                <span class="text-xs text-slate-400 font-mono">Last updated: @_lastFetched.ToString("HH:mm:ss")</span>
+                <span class="text-xs text-slate-600 dark:text-slate-400 font-mono">Last updated: @_lastFetched.ToString("HH:mm:ss")</span>
             </div>
 
             <Table TItem="ServerOrder"

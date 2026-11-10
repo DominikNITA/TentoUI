@@ -45,7 +45,7 @@
                        Precision="0">
                 <Prefix>$</Prefix>
             </Statistic>
-            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+            <div class="mt-2 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <span>Across</span>
                 <span class="font-semibold text-slate-700 dark:text-slate-300">@_deals.Count active opportunities</span>
             </div>
@@ -57,7 +57,7 @@
                        Precision="0">
                 <Prefix>$</Prefix>
             </Statistic>
-            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+            <div class="mt-2 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <span>Probability-adjusted revenue</span>
             </div>
         </Card>
@@ -78,7 +78,7 @@
                        Precision="0">
                 <Prefix>$</Prefix>
             </Statistic>
-            <div class="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
+            <div class="mt-2 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1">
                 <span>Enterprise ACV contract metric</span>
             </div>
         </Card>
@@ -115,7 +115,7 @@
                 <div class="space-y-2">
                     <div class="flex items-start justify-between gap-2">
                         <div>
-                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">@deal.Company</span>
+                            <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">@deal.Company</span>
                             <h3 class="text-base font-bold text-slate-900 dark:text-white leading-snug">@deal.Title</h3>
                         </div>
                         @switch (deal.Stage)
@@ -148,7 +148,7 @@
 
                 <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-400">Health Score:</span>
+                        <span class="text-slate-600 dark:text-slate-400">Health Score:</span>
                         <Rate Value="@deal.HealthScore" ReadOnly="true" />
                     </div>
 
@@ -157,7 +157,7 @@
                             <Avatar Text="@deal.Owner[..1]" Size="ComponentSize.Small" />
                             <span class="text-slate-600 dark:text-slate-300 font-medium">@deal.Owner</span>
                         </div>
-                        <span class="text-slate-400 text-[11px]">Est. @deal.CloseDate</span>
+                        <span class="text-slate-600 dark:text-slate-400 text-[11px]">Est. @deal.CloseDate</span>
                     </div>
 
                     <Button Size="ComponentSize.Small" Class="w-full mt-2" OnClick="@(() => OpenDealDrawer(deal))">
@@ -178,7 +178,7 @@
                 @* Deal Summary Banner *@
                 <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
-                        <span class="text-xs text-slate-400 uppercase tracking-wider block">Contract Value</span>
+                        <span class="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Contract Value</span>
                         <span class="text-2xl font-black text-slate-900 dark:text-white">$@_selectedDeal.Amount.ToString("N0")</span>
                     </div>
                     <Tag Color="blue" Class="text-xs px-2.5 py-1">@_selectedDeal.Stage</Tag>
@@ -200,19 +200,19 @@
 
                 @* Activity Timeline *@
                 <div class="space-y-2">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Opportunity Timeline</h4>
+                    <h4 class="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Opportunity Timeline</h4>
                     <Timeline>
                         <TimelineItem Color="green" Label="Yesterday">
                             <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Security Architecture Review Passed</span>
-                            <span class="text-[11px] text-slate-400">Infosec compliance checklist signed by VP Engineering.</span>
+                            <span class="text-[11px] text-slate-600 dark:text-slate-400">Infosec compliance checklist signed by VP Engineering.</span>
                         </TimelineItem>
                         <TimelineItem Color="blue" Label="Oct 24">
                             <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Executive Demo Completed</span>
-                            <span class="text-[11px] text-slate-400">Presented BentoUI component architecture to lead frontend team.</span>
+                            <span class="text-[11px] text-slate-600 dark:text-slate-400">Presented BentoUI component architecture to lead frontend team.</span>
                         </TimelineItem>
                         <TimelineItem Color="gray" Label="Oct 12">
                             <span class="font-medium text-xs block text-slate-800 dark:text-slate-200">Inbound Lead Qualified</span>
-                            <span class="text-[11px] text-slate-400">Initial discovery call confirmed $80k+ enterprise budget.</span>
+                            <span class="text-[11px] text-slate-600 dark:text-slate-400">Initial discovery call confirmed $80k+ enterprise budget.</span>
                         </TimelineItem>
                     </Timeline>
                 </div>

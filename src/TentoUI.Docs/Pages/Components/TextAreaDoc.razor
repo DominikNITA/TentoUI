@@ -1,4 +1,4 @@
-@page "/components/textarea"
+﻿@page "/components/textarea"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>TextArea - TentoUI</PageTitle>
@@ -20,7 +20,7 @@
     <DemoCard Title="Basic TextArea" Description="Multi-line text editor with placeholder and row sizing." Code="@_basicCode">
         <div class="max-w-lg p-2 space-y-2">
             <TextArea @bind-Value="_text" Rows="3" Placeholder="Enter notes or feedback..." />
-            <div class="text-xs text-slate-400 font-mono">Bound Value: @_text</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Bound Value: @_text</div>
         </div>
     </DemoCard>
 

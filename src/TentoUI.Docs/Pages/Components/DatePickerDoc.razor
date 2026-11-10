@@ -1,4 +1,4 @@
-@page "/components/date-picker"
+﻿@page "/components/date-picker"
 @namespace TentoUI.Docs.Pages.Components
 
 <PageTitle>DatePicker - TentoUI</PageTitle>
@@ -23,7 +23,7 @@
                         Format="yyyy-MM-dd"
                         Placeholder="Select target date"
                         AllowClear="true" />
-            <div class="text-xs text-slate-400 font-mono">Selected: @(_date?.ToString("yyyy-MM-dd") ?? "None")</div>
+            <div class="text-xs text-slate-600 dark:text-slate-400 font-mono">Selected: @(_date?.ToString("yyyy-MM-dd") ?? "None")</div>
         </div>
     </DemoCard>
 

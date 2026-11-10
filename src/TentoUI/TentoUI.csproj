@@ -42,6 +42,7 @@
     <!-- AI agent skills shipped with the package; installed on demand by the TentoUIInstallSkills target -->
     <None Include="..\..\.skills\tentoui-components\SKILL.md" Link="skills\tentoui-components\SKILL.md" Pack="true" PackagePath="skills\tentoui-components\" />
     <None Include="..\..\.skills\tentoui-tailwind-setup\SKILL.md" Link="skills\tentoui-tailwind-setup\SKILL.md" Pack="true" PackagePath="skills\tentoui-tailwind-setup\" />
+    <None Include="..\..\.skills\tentoui-design-system\SKILL.md" Link="skills\tentoui-design-system\SKILL.md" Pack="true" PackagePath="skills\tentoui-design-system\" />
   </ItemGroup>
 
 </Project>

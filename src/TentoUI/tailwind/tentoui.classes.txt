@@ -38,11 +38,13 @@
 !candidateQuery.Any(char.IsWhiteSpace))
 !canProceed
 !Centered)
+!Closable)
 !col.Filterable)
 !col.Sortable)
 !Collapsed
 !Color.StartsWith(
 !ConfirmLoading)
+!Count.HasValue))
 !CurrentPageItems.Any())
 !CurrentValue
 !CurrentValue)
@@ -62,6 +64,7 @@
 !HideOnSinglePage
 !i.Disabled).Select(i
 !i.Disabled).ToList()
+!InheritFontFamily
 !initialStyle.TrimEnd().EndsWith(
 !isActive)
 !isBeingDragged)
@@ -80,6 +83,7 @@
 !isEndpoint
 !isEndpoint)
 !isFirst)
+!isFull
 !isHighlighted
 !isHighlighted)
 !isHorizontal)
@@ -125,6 +129,7 @@
 !string.IsNullOrEmpty(_searchQuery))
 !string.IsNullOrEmpty(ActiveKey)
 !string.IsNullOrEmpty(ActiveKey))
+!string.IsNullOrEmpty(AriaLabel))
 !string.IsNullOrEmpty(Artist))
 !string.IsNullOrEmpty(assignee))
 !string.IsNullOrEmpty(Author))
@@ -144,6 +149,7 @@
 !string.IsNullOrEmpty(desc))
 !string.IsNullOrEmpty(Description)
 !string.IsNullOrEmpty(Description))
+!string.IsNullOrEmpty(DisplayName))
 !string.IsNullOrEmpty(EditText))
 !string.IsNullOrEmpty(Error))
 !string.IsNullOrEmpty(Extra))
@@ -154,6 +160,7 @@
 !string.IsNullOrEmpty(FooterText))
 !string.IsNullOrEmpty(Format)
 !string.IsNullOrEmpty(FormItemContext.Id))
+!string.IsNullOrEmpty(FormItemContext.Label))
 !string.IsNullOrEmpty(HeaderText))
 !string.IsNullOrEmpty(Height))
 !string.IsNullOrEmpty(Help))
@@ -179,6 +186,7 @@
 !string.IsNullOrEmpty(opt.Label))
 !string.IsNullOrEmpty(options.Key)
 !string.IsNullOrEmpty(options.Key))
+!string.IsNullOrEmpty(PrefixText))
 !string.IsNullOrEmpty(priority)
 !string.IsNullOrEmpty(priority))
 !string.IsNullOrEmpty(ResolvedSpinDuration))
@@ -188,6 +196,7 @@
 !string.IsNullOrEmpty(step.Icon))
 !string.IsNullOrEmpty(step.SubTitle))
 !string.IsNullOrEmpty(SubTitle))
+!string.IsNullOrEmpty(SuffixText))
 !string.IsNullOrEmpty(tag))
 !string.IsNullOrEmpty(Target)
 !string.IsNullOrEmpty(Text))
@@ -305,6 +314,7 @@
 @(!CanPrevMonth)
 @(!CanPrevYear)
 @(!SplitView
+@(!string.IsNullOrEmpty(Color)
 @(()
 @((ChangeEventArgs
 @((int)Math.Round(EffectiveSplit))
@@ -341,7 +351,6 @@
 @(Direction
 @(Disabled
 @(e
-@(EditContext
 @(EffectiveCurrent
 @(EffectiveDarkMode
 @(EffectiveStatus
@@ -522,6 +531,7 @@
 @Color
 @Columns
 @Compact
+@ComputeAriaLabel()
 @ComputeBadgeWrapperClass()
 @ComputeBarClass()
 @ComputeBodyClass()
@@ -661,6 +671,7 @@
 @EffectiveImages[_currentIndex]
 @EffectiveImages[idx]
 @EffectiveLength
+@EffectiveModel
 @EffectivePageIndex
 @EffectivePageSize
 @EffectiveRules.Count
@@ -775,6 +786,7 @@
 @IconNames.Search
 @IconNames.Sparkles
 @IconNames.Star
+@IconNames.StarHalf
 @IconNames.Trash2
 @IconNames.Upload
 @IconNames.User
@@ -834,7 +846,6 @@
 @Min.ToString(CultureInfo.InvariantCulture)
 @minVal.ToString(
 @mode
-@Model
 @msg.Content
 @msg.ContentTemplate
 @Multiple
@@ -919,6 +930,7 @@
 @PolylinePoints
 @prefix
 @Prefix
+@PrefixText
 @preset.Label
 @PreviousText
 @PrevMonth
@@ -998,6 +1010,7 @@
 @Style
 @SubTitle
 @Suffix
+@SuffixText
 @sum
 @sum.ToString(
 @switch
@@ -1274,6 +1287,7 @@ activeStep
 activeStroke
 ActiveTheme
 activeVal
+activeVal)
 activity
 Activity
 actual
@@ -1312,6 +1326,7 @@ AddClass(modeClass)
 AddClass(offset)
 AddClass(Orientation
 AddClass(padding)
+AddClass(pos)
 AddClass(posClass)
 AddClass(selectedClass)
 AddClass(shapeClass)
@@ -1337,6 +1352,7 @@ additional
 additional)
 additional[
 AdditionalAttributes
+AdditionalAttributes.ContainsKey(
 AdditionalTokens
 AdditionalTokens:
 AddMonths(1)
@@ -1409,6 +1425,7 @@ AllowClear
 AllowClear)
 AllowClear=
 allowed
+AllowHalf
 allowing
 AllowModeSwitch
 AllowModeSwitch)
@@ -1471,6 +1488,7 @@ args
 args)
 args.Cancel
 args.Cancel)
+ArgumentNullException.ThrowIfNull(theme)
 arguments
 aria-atomic=
 aria-autocomplete=
@@ -1485,8 +1503,10 @@ aria-haspopup=
 aria-hidden=
 aria-invalid=
 aria-keyshortcuts=
+aria-label
 AriaLabel
 aria-label=
+aria-labelledby
 aria-labelledby=
 aria-live=
 aria-modal=
@@ -1629,6 +1649,14 @@ badge
 badge.
 BadgeColor
 badges
+BadgeStatus
+BadgeStatus.
+BadgeStatus.Default
+BadgeStatus.Error
+BadgeStatus.Processing
+BadgeStatus.Success
+BadgeStatus.Warning
+BadgeStatus>(cleaned,
 Banner
 Banner)
 bar
@@ -2196,6 +2224,7 @@ clean.ToLowerInvariant()
 clean[1..]
 clean[10..]
 clean[11..]
+cleaned
 cleanKey
 cleanKey)
 clear
@@ -2429,6 +2458,7 @@ ComponentStatus.Success
 ComponentStatus.Warning
 ComponentStatus.Warning)
 Compute
+ComputeAriaLabel()
 ComputeBadgeWrapperClass()
 ComputeBarClass()
 ComputeBodyClass()
@@ -2559,6 +2589,7 @@ context
 Context
 context)
 context.Id
+context.Label
 context.ValidateStatus
 Context=
 contexts
@@ -3125,6 +3156,7 @@ DescriptionSelector(item)
 DescriptionsItem>
 DescriptionTemplate
 descriptive
+descriptor.
 design
 Design
 Design)
@@ -3361,6 +3393,7 @@ EditableCard
 editBuffer
 editContext
 EditContext
+EditContext(_fallbackModel)
 EditContext(Model)
 editContext)
 EditContext.GetValidationMessages(FieldIdentifier)
@@ -3414,6 +3447,7 @@ EffectiveLabel
 EffectiveLength
 EffectiveLoading
 EffectiveLoading)
+EffectiveModel
 EffectiveOptions
 EffectiveOptions)
 EffectivePageIndex
@@ -3942,6 +3976,7 @@ formCtx
 formCtx))
 FormItemContext
 FormItemContext.Id
+FormItemContext.Label
 FormItemContext>(nameof(FormItemContext),
 formItemCtx
 formItemCtx))
@@ -4139,6 +4174,7 @@ h.01
 h-.09a1.65
 h-0.5
 h1
+h-1
 h-1.5
 h1>
 h-10
@@ -4274,7 +4310,7 @@ HandleFocusIn
 HandleFocusIn()
 HandleFocusOut
 HandleFocusOut()
-HandleHover(int
+HandleHover(double
 HandleHover(starIndex))
 HandleInput
 HandleInput(ChangeEventArgs
@@ -4689,6 +4725,7 @@ IconNames.Smile]
 IconNames.Sparkles]
 IconNames.Square]
 IconNames.Star]
+IconNames.StarHalf]
 IconNames.Sun]
 IconNames.Tablet]
 IconNames.Tag]
@@ -4805,6 +4842,7 @@ Info,
 InfoAsync(string
 InfoColor
 Inherited
+InheritFontFamily
 initialClass)
 initialized
 InitializeFocusTrapAsync()
@@ -4860,6 +4898,7 @@ int)firstDay.DayOfWeek
 int)firstDayOfMonth.DayOfWeek
 int)Math.Ceiling((double)Math.Max(0,
 int)Math.Ceiling((double)TotalItems
+int)Math.Ceiling(Value)
 int)Math.Round(((EffectiveCurrent
 int)Math.Round((double)IconSize
 int)Math.Round(amp
@@ -4942,7 +4981,6 @@ IsDisabled
 isDisabled)
 IsDisabled)
 IsDot
-IsDot)
 isDraggingOver
 isDraggingOver)
 isDragTarget
@@ -4963,6 +5001,9 @@ IsExpanded(string
 isExpanded)
 isFirst
 IsFixed=
+isFull
+isHalf
+isHalf)
 isHighlighted
 isHighlighted)
 isHighlighted,
@@ -5164,6 +5205,7 @@ l5.813
 l-5.813-1.912a2
 L6
 l6.58-6.58c.94-.94.94-2.48
+l6.91-1.01L12
 l7
 l-7
 L7
@@ -5207,6 +5249,7 @@ lastMeasuredStep
 lastMeasuredStep)
 lastProperty
 lastProperty))
+lastSyncedDark
 lastTriggeredTime
 lastValue
 lastX
@@ -5475,6 +5518,7 @@ MatchingOptions.Count)
 MatchingOptions[index]
 Math.Abs(Duration
 Math.Abs(next
+Math.Abs(Value
 Math.Clamp(_preCollapseSplit
 Math.Clamp(_targetRect.Left,
 Math.Clamp(Column,
@@ -6114,6 +6158,8 @@ o.Value
 o.Value).Contains(text,
 o.Value.Contains(_query,
 object
+object()
+object())
 object(),
 object>
 object-contain
@@ -6503,6 +6549,7 @@ PageSizeChanged.InvokeAsync(PageSize)
 PageSizeOptions
 PageSizeOptions)
 PageSizeOptions.Length
+pagination
 Pagination
 PaginationEndItem
 PaginationPosition
@@ -6761,6 +6808,7 @@ Prefix]
 prefixed,
 prefixes
 Prefixes
+PrefixText
 preload=
 presentation
 preserveAspectRatio=
@@ -6838,7 +6886,7 @@ PrioritySelector(item)
 private
 process
 Process,
-Processing
+Processing,
 Productivity
 Program.cs.
 progress
@@ -7116,6 +7164,7 @@ ResolvedSize(ComponentSize
 ResolvedSize(Size)
 ResolvedSpinDuration
 resolvedStatus
+ResolvedStatus
 ResolvedStep
 ResolvedStroke
 ResolvedTheme
@@ -7543,6 +7592,7 @@ ServiceCollectionExtensions
 ServiceProvider
 services
 services,
+services.AddTentoUI(theme)
 services.TryAddScoped
 services.TryAddSingleton(theme)
 set
@@ -7975,6 +8025,8 @@ Standalone
 Standard
 star
 Star
+star-half
+StarHalf
 starIndex
 start
 Start
@@ -8087,6 +8139,7 @@ Storage
 str
 str)
 str))
+str.Replace(
 str.ToLowerInvariant()
 stream
 stream.CopyToAsync(ms)
@@ -8116,6 +8169,7 @@ string.IsNullOrEmpty(_activeStroke))
 string.IsNullOrEmpty(_searchQuery)
 string.IsNullOrEmpty(ActiveKey)
 string.IsNullOrEmpty(ActiveKey))
+string.IsNullOrEmpty(ActiveTheme.FontFamily))
 string.IsNullOrEmpty(Code))
 string.IsNullOrEmpty(Color))
 string.IsNullOrEmpty(CurrentValue)
@@ -8191,6 +8245,7 @@ StringComparison.OrdinalIgnoreCase))
 StringComparison.OrdinalIgnoreCase)))
 StringComparison.OrdinalIgnoreCase)).ToList()
 StringComparison.OrdinalIgnoreCase),
+StringComparison.OrdinalIgnoreCase).Trim()
 StringSplitEmptyOptions
 StringSplitEmptyOptions)
 StringSplitOptions
@@ -8268,7 +8323,6 @@ SubTitle
 subtitle.
 SubtleBgColor
 success
-Success
 Success(string
 success,
 Success,
@@ -8279,6 +8333,7 @@ suffix
 Suffix
 suffix,
 Suffix>
+SuffixText
 suggestion
 Suggestion
 suggestion)
@@ -8314,6 +8369,7 @@ SvgPaths
 SvgPaths)
 SvgPaths.TryGetValue(constValue,
 switch
+SyncBodyTheme
 SyncElementId()
 system
 System
@@ -8401,6 +8457,7 @@ TagSelector
 TagSelector(item)
 target
 Target
+target)
 target=
 targetBottom
 targetChecked
@@ -8635,6 +8692,7 @@ tentoModal.close
 tentoModal.open
 tento-modal-backdrop
 tento-modal-body-
+tento-modal-cancel
 tento-modal-close
 tento-modal-title-
 tento-msg-
@@ -8758,6 +8816,7 @@ tento-textarea-wrapper
 --tento-text-muted:
 TentoTheme
 TentoTheme()
+tentoTheme.sync
 TentoTheme>
 TentoTheme>()
 tento-timeline
@@ -8907,6 +8966,7 @@ thead
 thead>
 theme
 Theme
+theme)
 Theme,
 theme.AppBgColor
 theme.BaseTextColor
@@ -9634,6 +9694,7 @@ vw
 w)
 w-[calc(100%*
 w-0.5
+w-1
 w-1.5
 w-1/2
 w-1/3
@@ -9669,7 +9730,6 @@ Waiting
 wallet
 Wallet
 warning
-Warning
 Warning(string
 warning,
 Warning,

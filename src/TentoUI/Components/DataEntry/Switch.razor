@@ -2,8 +2,10 @@
 @inherits TentoInputBase<bool>
 
 <button type="button"
+        id="@ElementId"
         role="switch"
         aria-checked="@(CurrentValue ? "true" : "false")"
+        aria-label="@ComputeAriaLabel()"
         disabled="@(IsDisabled || Loading)"
         class="@ComputeSwitchClass()"
         style="@Style"
@@ -46,10 +48,21 @@
     }
     [Parameter] public EventCallback<bool> CheckedChanged { get; set; }
     [Parameter] public bool Loading { get; set; }
+    [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public RenderFragment? CheckedChildren { get; set; }
     [Parameter] public RenderFragment? UnCheckedChildren { get; set; }
 
     private bool HasChildren => CheckedChildren != null || UnCheckedChildren != null;
+
+    private string? ComputeAriaLabel()
+    {
+        if (!string.IsNullOrEmpty(AriaLabel)) return AriaLabel;
+        if (AdditionalAttributes != null && (AdditionalAttributes.ContainsKey("aria-label") || AdditionalAttributes.ContainsKey("aria-labelledby")))
+            return null;
+        if (!string.IsNullOrEmpty(DisplayName)) return DisplayName;
+        if (FormItemContext != null && !string.IsNullOrEmpty(FormItemContext.Label)) return FormItemContext.Label;
+        return "Toggle switch";
+    }
 
     private async Task Toggle()
     {

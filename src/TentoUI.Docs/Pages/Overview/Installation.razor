@@ -8,7 +8,7 @@
 <div class="max-w-4xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Installation &amp; Setup</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
             Complete production guide for integrating TentoUI with Tailwind CSS v4 and MSBuild automation in your .NET 10 Blazor application.
         </p>
     </div>
@@ -51,13 +51,14 @@
                     <span>Register Services in Program.cs</span>
                 </h3>
                 <button type="button" class="text-xs text-primary-600 dark:text-primary-400 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer"
-                        @onclick='() => CopyTextAsync("builder.Services.AddTentoUI();")'>
+                        @onclick='() => CopyTextAsync("using TentoUI;\n\nbuilder.Services.AddTentoUI();")'>
                     <Icon Name="@IconNames.Copy" Size="12" /> Copy
                 </button>
             </div>
-            <p class="text-xs text-slate-500">Registers Modal, Notification, and Message services, as well as component runtime configurations:</p>
-            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto">
-                <code>builder.Services.AddTentoUI();</code>
+            <p class="text-xs text-slate-600 dark:text-slate-400">Registers Modal, Notification, and Message services, as well as component runtime configurations:</p>
+            <div class="p-3 rounded-lg bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto space-y-1">
+                <div><span class="text-purple-400">using</span> <span class="text-emerald-300">TentoUI</span>;</div>
+                <div>builder.Services.<span class="text-sky-300">AddTentoUI</span>();</div>
             </div>
         </div>
 

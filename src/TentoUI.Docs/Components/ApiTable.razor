@@ -9,7 +9,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>@Title</span>
-                <span class="text-xs font-normal text-slate-400">API Reference</span>
+                <span class="text-xs font-normal text-slate-600 dark:text-slate-400">API Reference</span>
                 @if (!string.IsNullOrEmpty(EffectiveComponentSince) && EffectiveComponentSince != "1.0.0" && EffectiveComponentSince != "1.1.0")
                 {
                     <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
@@ -19,7 +19,7 @@
             </h3>
             @if (ResolvedComponentType != null)
             {
-                <span class="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+                <span class="text-[11px] font-mono text-slate-600 dark:text-slate-400">
                     Source-verified: @ComponentApiRegistry.FormatTypeName(ResolvedComponentType)
                 </span>
             }
@@ -28,7 +28,7 @@
 
     <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider font-semibold text-[11px]">
+            <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 uppercase tracking-wider font-semibold text-[11px]">
                 <tr>
                     <th class="py-3 px-4">Property</th>
                     <th class="py-3 px-4">Description</th>
@@ -65,7 +65,7 @@
                                 @prop.Type
                             </span>
                         </td>
-                        <td class="py-3 px-4 font-mono text-slate-500 dark:text-slate-400">
+                        <td class="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
                             @if (!string.IsNullOrEmpty(prop.Default))
                             {
                                 <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px]">
@@ -74,7 +74,7 @@
                             }
                             else
                             {
-                                <span class="text-slate-300 dark:text-slate-600">-</span>
+                                <span class="text-slate-400 dark:text-slate-500">-</span>
                             }
                         </td>
                     </tr>

@@ -11,7 +11,7 @@
 </CascadingValue>
 
 <div class="@ComputedRootClass" style="@Style" @attributes="AdditionalAttributes">
-    <EditForm Model="@Model" OnValidSubmit="HandleSubmitAsync" OnInvalidSubmit="HandleInvalidSubmitAsync" class="w-full">
+    <EditForm Model="@EffectiveModel" OnValidSubmit="HandleSubmitAsync" OnInvalidSubmit="HandleInvalidSubmitAsync" class="w-full">
         <DataAnnotationsValidator />
 
         @if (Layout == StepperFormLayout.Vertical)
@@ -173,6 +173,9 @@
 </div>
 
 @code {
+    private object? _fallbackModel;
+    private object EffectiveModel => (object?)Model ?? (_fallbackModel ??= new object());
+
     /// <summary>
     /// The form model instance containing the data bound to inputs.
     /// </summary>

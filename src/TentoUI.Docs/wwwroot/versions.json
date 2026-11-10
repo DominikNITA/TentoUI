@@ -1,9 +1,39 @@
 [
   {
-    "version": "1.0.4",
-    "label": "v1.0.4",
+    "version": "1.0.7",
+    "label": "v1.0.7",
     "path": "/",
     "isLatest": true,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Quality hardening & WCAG 2.1 AA release (Accessible Switch, Progress, Gauge, Modal Escape dismissal & focus restoration, Carousel & Splitter ARIA fixes, BadgeStatus enum & tokens, Rate decimal & half-star evaluations, Statistic PrefixText/SuffixText, AddTentoUI theme overload, NumberInput collision alias, and contrast enhancements)"
+  },
+  {
+    "version": "1.0.6",
+    "label": "v1.0.6",
+    "path": "/v1.0.6/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Maintenance release"
+  },
+  {
+    "version": "1.0.5",
+    "label": "v1.0.5",
+    "path": "/v1.0.5/",
+    "isLatest": false,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Maintenance release"
+  },
+  {
+    "version": "1.0.4",
+    "label": "v1.0.4",
+    "path": "/v1.0.4/",
+    "isLatest": false,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",

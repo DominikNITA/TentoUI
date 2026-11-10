@@ -6,8 +6,8 @@
 <div class="max-w-5xl space-y-8">
     <div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Rate</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
-            Rate component for star evaluations and customer score collection with dynamic hover and clear interactions.
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
+            Rate component for star evaluations and customer score collection with dynamic hover, decimal ratings, and clear interactions.
         </p>
     </div>
 
@@ -17,26 +17,34 @@
                      Controls="@_playgroundControls" />
 
     @* Example 1: Basic Rate *@
-    <DemoCard Title="Basic Star Rating" Description="Interactive star rating with two-way integer binding." Code="@_basicCode">
+    <DemoCard Title="Basic Star Rating" Description="Interactive star rating with two-way binding." Code="@_basicCode">
         <div class="flex items-center gap-4 p-2">
             <Rate @bind-Value="_score" Count="5" AllowClear="true" />
             <span class="text-xs text-amber-500 font-bold font-mono">@_score / 5 Stars</span>
         </div>
     </DemoCard>
 
-    @* Example 2: Read-only Score *@
-    <DemoCard Title="Read-only Score Display" Description="Display fixed customer evaluation scores without click modifications." Code="@_readOnlyCode">
+    @* Example 2: Half Stars & Decimals *@
+    <DemoCard Title="Decimal Ratings &amp; Half Stars" Description="Support for floating-point rating scores and half-star selections." Code="@_halfCode">
         <div class="flex items-center gap-4 p-2">
-            <Rate Value="4" ReadOnly="true" />
-            <span class="text-xs text-slate-500">(4.0 / 5.0 from 1,248 reviews)</span>
+            <Rate @bind-Value="_halfScore" AllowHalf="true" Count="5" />
+            <span class="text-xs text-amber-500 font-bold font-mono">@_halfScore / 5.0 Stars</span>
         </div>
     </DemoCard>
 
-    @* Example 3: 10 Stars Scale *@
+    @* Example 3: Read-only Score *@
+    <DemoCard Title="Read-only Score Display" Description="Display fixed customer evaluation scores without click modifications." Code="@_readOnlyCode">
+        <div class="flex items-center gap-4 p-2">
+            <Rate Value="4.5" AllowHalf="true" ReadOnly="true" />
+            <span class="text-xs text-slate-600 dark:text-slate-400">(4.5 / 5.0 from 1,248 reviews)</span>
+        </div>
+    </DemoCard>
+
+    @* Example 4: 10 Stars Scale *@
     <DemoCard Title="10 Star Scale" Description="Expanded 10-star evaluation scale for granular Net Promoter Scores." Code="@_tenStarsCode">
         <div class="p-2 space-y-2">
             <Rate @bind-Value="_npsScore" Count="10" />
-            <span class="text-xs text-slate-400 font-mono">NPS Rating: @_npsScore / 10</span>
+            <span class="text-xs text-slate-500 font-mono">NPS Rating: @_npsScore / 10</span>
         </div>
     </DemoCard>
 
@@ -49,19 +57,25 @@
         new() { Name = "Value", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "4", DefaultValue = "" },
         new() { Name = "Count", Kind = PropsPlayground.PlaygroundControlKind.Number, CurrentValue = "5", DefaultValue = "5" },
         new() { Name = "AllowClear", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "true", DefaultValue = "false" },
+        new() { Name = "AllowHalf", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
         new() { Name = "Disabled", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" },
         new() { Name = "ReadOnly", Kind = PropsPlayground.PlaygroundControlKind.Boolean, CurrentValue = "false", DefaultValue = "false" }
     ];
 
-    private int _score = 4;
-    private int _npsScore = 8;
+    private double _score = 4;
+    private double _halfScore = 3.5;
+    private double _npsScore = 8;
 
     private const string _basicCode = """
         <Rate @bind-Value="score" Count="5" AllowClear="true" />
         """;
 
+    private const string _halfCode = """
+        <Rate @bind-Value="score" AllowHalf="true" Count="5" />
+        """;
+
     private const string _readOnlyCode = """
-        <Rate Value="4" ReadOnly="true" />
+        <Rate Value="4.5" AllowHalf="true" ReadOnly="true" />
         """;
 
     private const string _tenStarsCode = """
@@ -70,9 +84,10 @@
 
     private readonly ApiTable.ApiProp[] _props =
     [
-        new("Value", "Current rating score (bindable via @bind-Value).", "int", "0"),
+        new("Value", "Current rating score (supports double/decimal values).", "double", "0"),
         new("Count", "Star count total.", "int", "5"),
         new("AllowClear", "Whether to allow clear when clicking again.", "bool", "true"),
+        new("AllowHalf", "Whether to allow semi-star selections.", "bool", "false"),
         new("ReadOnly", "Read only, unable to interact.", "bool", "false"),
         new("Disabled", "Disabled, unable to interact.", "bool", "false"),
         new("Tooltips", "Tooltip text for each star.", "IReadOnlyList<string>?", "null")

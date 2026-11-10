@@ -1,14 +1,31 @@
 @page "/components/input-number"
+@page "/components/number-input"
 @namespace TentoUI.Docs.Pages.Components
 
-<PageTitle>InputNumber - TentoUI</PageTitle>
+<PageTitle>InputNumber / NumberInput - TentoUI</PageTitle>
 
 <div class="max-w-5xl space-y-8">
     <div>
-        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">InputNumber</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mt-2">
+        <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">InputNumber / NumberInput</h1>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300">
+                Alias: &lt;NumberInput&gt;
+            </span>
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2">
             Enter a number within a certain range using mouse or keyboard, complete with up/down stepper handlers.
         </p>
+    </div>
+
+    @* Naming Collision Alert *@
+    <div class="p-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 text-xs text-sky-900 dark:text-sky-200 flex items-start gap-3">
+        <Icon Name="@IconNames.Info" Size="18" Class="shrink-0 mt-0.5 text-sky-600 dark:text-sky-400" />
+        <div class="space-y-1">
+            <span class="font-bold text-sm">Recommended: Use &lt;NumberInput&gt; to Avoid ASP.NET Collisions</span>
+            <p class="leading-relaxed">
+                Standard Blazor templates import <code>Microsoft.AspNetCore.Components.Forms</code> in <code>_Imports.razor</code>, which declares a built-in <code>InputNumber&lt;TValue&gt;</code> without <code>Min</code>, <code>Max</code>, or <code>Step</code> properties. To avoid compiler ambiguity error <code>CS0117</code>, use TentoUI's alias <code>&lt;NumberInput&gt;</code> or prefix the namespace as <code>&lt;TentoUI.InputNumber&gt;</code>.
+            </p>
+        </div>
     </div>
 
     @* Interactive Props Playground *@
@@ -17,27 +34,27 @@
                      Controls="@_playgroundControls" />
 
     @* Example 1: Basic InputNumber *@
-    <DemoCard Title="Basic InputNumber" Description="Numeric input with mouse-clickable stepper arrows." Code="@_basicCode">
+    <DemoCard Title="Basic NumberInput" Description="Numeric input with mouse-clickable stepper arrows." Code="@_basicCode">
         <div class="flex items-center gap-4 max-w-xs p-2">
-            <TentoUI.InputNumber TValue="double" @bind-Value="_number" Step="1" />
-            <span class="text-xs text-slate-400 font-mono">Value: @_number</span>
+            <NumberInput TValue="double" @bind-Value="_number" Step="1" />
+            <span class="text-xs text-slate-500 font-mono">Value: @_number</span>
         </div>
     </DemoCard>
 
     @* Example 2: Min, Max, Step *@
     <DemoCard Title="Min, Max &amp; Custom Step" Description="Bound between 0 and 100 with steps of 5." Code="@_rangeCode">
         <div class="flex items-center gap-4 max-w-xs p-2">
-            <TentoUI.InputNumber TValue="double" @bind-Value="_ranged" Min="0" Max="100" Step="5" />
-            <span class="text-xs text-slate-400 font-mono">Value: @_ranged</span>
+            <NumberInput TValue="double" @bind-Value="_ranged" Min="0" Max="100" Step="5" />
+            <span class="text-xs text-slate-500 font-mono">Value: @_ranged</span>
         </div>
     </DemoCard>
 
     @* Example 3: Sizes & Hidden Steppers *@
     <DemoCard Title="Sizes &amp; Hidden Steppers" Description="Different sizes and optional removal of the stepper buttons." Code="@_sizesCode">
         <div class="flex flex-col gap-4 max-w-xs p-2">
-            <TentoUI.InputNumber TValue="double" Value="10" Size="ComponentSize.Small" />
-            <TentoUI.InputNumber TValue="double" Value="20" Size="ComponentSize.Middle" />
-            <TentoUI.InputNumber TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
+            <NumberInput TValue="double" Value="10" Size="ComponentSize.Small" />
+            <NumberInput TValue="double" Value="20" Size="ComponentSize.Middle" />
+            <NumberInput TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
         </div>
     </DemoCard>
 
@@ -60,18 +77,18 @@
     private double _ranged = 25;
 
     private const string _basicCode = """
-        <TentoUI.InputNumber TValue="double" @bind-Value="number" Step="1" />
+        <NumberInput TValue="double" @bind-Value="number" Step="1" />
         """;
 
     private const string _rangeCode = """
-        <TentoUI.InputNumber TValue="double" @bind-Value="ranged" Min="0" Max="100" Step="5" />
+        <NumberInput TValue="double" @bind-Value="ranged" Min="0" Max="100" Step="5" />
         """;
 
     private const string _sizesCode = """
         <div class="flex flex-col gap-4 max-w-xs">
-            <InputNumber TValue="double" Value="10" Size="ComponentSize.Small" />
-            <InputNumber TValue="double" Value="20" Size="ComponentSize.Middle" />
-            <InputNumber TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
+            <NumberInput TValue="double" Value="10" Size="ComponentSize.Small" />
+            <NumberInput TValue="double" Value="20" Size="ComponentSize.Middle" />
+            <NumberInput TValue="double" Value="30" Size="ComponentSize.Large" Controls="false" />
         </div>
         """;
 

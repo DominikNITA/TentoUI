@@ -11,12 +11,14 @@
     {
         var starIndex = i;
         var activeVal = _hoverValue ?? Value;
-        var isActive = starIndex <= activeVal;
+        var isFull = starIndex <= activeVal;
+        var isHalf = AllowHalf && !isFull && (starIndex - 0.5 <= activeVal);
+        var isActive = isFull || isHalf;
         var tooltipText = Tooltips != null && starIndex - 1 < Tooltips.Count ? Tooltips[starIndex - 1] : $"Rate {starIndex}";
 
         <button type="button"
                 role="radio"
-                aria-checked="@(starIndex == Value ? "true" : "false")"
+                aria-checked="@(starIndex == (int)Math.Ceiling(Value) ? "true" : "false")"
                 aria-label="@tooltipText"
                 title="@tooltipText"
                 disabled="@(Disabled || ReadOnly)"
@@ -28,6 +30,10 @@
             {
                 @Character
             }
+            else if (isHalf)
+            {
+                <Icon Name="@IconNames.StarHalf" Size="20" />
+            }
             else
             {
                 <Icon Name="@IconNames.Star" Size="20" />
@@ -37,20 +43,21 @@
 </div>
 
 @code {
-    [Parameter] public int Value { get; set; }
-    [Parameter] public EventCallback<int> ValueChanged { get; set; }
-    [Parameter] public EventCallback<int> OnChange { get; set; }
+    [Parameter] public double Value { get; set; }
+    [Parameter] public EventCallback<double> ValueChanged { get; set; }
+    [Parameter] public EventCallback<double> OnChange { get; set; }
     [Parameter] public int Count { get; set; } = 5;
     [Parameter] public bool AllowClear { get; set; } = true;
+    [Parameter] public bool AllowHalf { get; set; }
     [Parameter] public bool Disabled { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public string? AriaLabel { get; set; }
     [Parameter] public IReadOnlyList<string>? Tooltips { get; set; }
     [Parameter] public RenderFragment? Character { get; set; }
 
-    private int? _hoverValue;
+    private double? _hoverValue;
 
-    private void HandleHover(int index)
+    private void HandleHover(double index)
     {
         if (Disabled || ReadOnly) return;
         _hoverValue = index;
@@ -59,8 +66,17 @@
     private async Task SelectStarAsync(int index)
     {
         if (Disabled || ReadOnly) return;
-        var next = (AllowClear && Value == index) ? 0 : index;
-        Value = next;
+        double target = index;
+        if (AllowHalf && Math.Abs(Value - index) < 0.001)
+        {
+            target = index - 0.5;
+        }
+        else if (AllowClear && Math.Abs(Value - target) < 0.001)
+        {
+            target = 0;
+        }
+
+        Value = target;
 
         if (ValueChanged.HasDelegate)
         {

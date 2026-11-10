@@ -4,13 +4,17 @@
 <span class="@ComputeBadgeWrapperClass()" style="@Style" @attributes="AdditionalAttributes">
     @ChildContent
 
-    @if (Dot || IsDot)
+    @if (Dot || IsDot || (Status != null && !Count.HasValue))
     {
-        <span class="@ComputeDotClass()" aria-label="Status indicator"></span>
+        <span class="@ComputeDotClass()" style="@(!string.IsNullOrEmpty(Color) ? $"background-color: {Color};" : null)" aria-label="Status indicator"></span>
+        @if (!string.IsNullOrEmpty(Text))
+        {
+            <span class="ml-2 text-xs text-slate-700 dark:text-slate-300">@Text</span>
+        }
     }
     else if (Count.HasValue && (Count.Value > 0 || ShowZero))
     {
-        <sup class="@ComputeCountClass()" aria-label="@($"{Count.Value} notifications")">
+        <sup class="@ComputeCountClass()" style="@(!string.IsNullOrEmpty(Color) ? $"background-color: {Color};" : null)" aria-label="@($"{Count.Value} notifications")">
             @(Count.Value > OverflowCount ? $"{OverflowCount}+" : Count.Value.ToString())
         </sup>
     }
@@ -22,8 +26,25 @@
     [Parameter] public bool Dot { get; set; }
     [Parameter] public bool IsDot { get; set; }
     [Parameter] public bool ShowZero { get; set; }
-    [Parameter] public string Status { get; set; } = "Default";
+    [Parameter] public object? Status { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Color { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private BadgeStatus ResolvedStatus
+    {
+        get
+        {
+            if (Status is BadgeStatus s) return s;
+            if (Status is string str)
+            {
+                var cleaned = str.Replace("BadgeStatus.", "", StringComparison.OrdinalIgnoreCase).Trim();
+                if (Enum.TryParse<BadgeStatus>(cleaned, true, out var parsed))
+                    return parsed;
+            }
+            return BadgeStatus.Default;
+        }
+    }
 
     private string ComputeBadgeWrapperClass()
     {
@@ -35,12 +56,20 @@
 
     private string ComputeDotClass()
     {
-        var dotColor = Status switch
+        if (!string.IsNullOrEmpty(Color))
         {
-            "Success" => "bg-emerald-500",
-            "Error" => "bg-red-500",
-            "Warning" => "bg-amber-500",
-            "Processing" => "bg-blue-500",
+            var pos = ChildContent != null ? "absolute top-0 right-0 -mt-1 -mr-1" : "";
+            return new CssBuilder("tento-badge-dot h-2 w-2 rounded-full")
+                .AddClass(pos)
+                .Build();
+        }
+
+        var dotColor = ResolvedStatus switch
+        {
+            BadgeStatus.Success => "bg-emerald-500",
+            BadgeStatus.Error => "bg-red-500",
+            BadgeStatus.Warning => "bg-amber-500",
+            BadgeStatus.Processing => "bg-blue-500",
             _ => "bg-slate-400"
         };
 

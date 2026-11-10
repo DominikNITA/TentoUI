@@ -2,6 +2,8 @@
 @using TentoUI.Configuration
 @using TentoUI.Extensibility
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.JSInterop
+@inject IJSRuntime JSRuntime
 
 <CascadingValue Value="@ConfigContext" IsFixed="false">
     <div class="@ComputedClass"
@@ -18,6 +20,8 @@
 
     [Parameter] public TentoTheme? Theme { get; set; }
     [Parameter] public bool DarkMode { get; set; }
+    [Parameter] public bool SyncBodyTheme { get; set; }
+    [Parameter] public bool InheritFontFamily { get; set; }
     [Parameter] public ComponentSize ComponentSize { get; set; } = ComponentSize.Middle;
     [Parameter] public Direction Direction { get; set; } = Direction.Ltr;
     [Parameter] public RenderFragment? ChildContent { get; set; }
@@ -27,6 +31,7 @@
 
     private TentoTheme? _injectedTheme;
     private static readonly TentoTheme _defaultTheme = new();
+    private bool? _lastSyncedDark;
 
     private TentoTheme ActiveTheme => Theme ?? _injectedTheme ?? _defaultTheme;
     private bool EffectiveDarkMode => DarkMode || (ActiveTheme?.DarkMode ?? false);
@@ -38,7 +43,21 @@
         _injectedTheme = ServiceProvider?.GetService<TentoTheme>();
     }
 
-    private string ComputedClass => new CssBuilder("tento-config-provider font-sans")
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (SyncBodyTheme && _lastSyncedDark != EffectiveDarkMode)
+        {
+            _lastSyncedDark = EffectiveDarkMode;
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("tentoTheme.sync", EffectiveDarkMode);
+            }
+            catch { }
+        }
+    }
+
+    private string ComputedClass => new CssBuilder("tento-config-provider")
+        .AddClass("font-sans", !InheritFontFamily && string.IsNullOrEmpty(ActiveTheme.FontFamily))
         .AddClass("dark", EffectiveDarkMode)
         .AddClass(Class)
         .Build();

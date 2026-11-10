@@ -29,6 +29,10 @@
                  @onclick:stopPropagation="true">
 
                 @* Header *@
+                @if (Keyboard && !Closable)
+                {
+                    <button type="button" class="hidden" data-dismiss-key="Escape" @onclick="HandleCancel" aria-hidden="true" tabindex="-1"></button>
+                }
                 @if (Title != null || TitleTemplate != null || Closable)
                 {
                     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -72,7 +76,7 @@
                     <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2 bg-slate-50/50 dark:bg-slate-900/50 rounded-b-lg">
                         @if (!string.IsNullOrEmpty(CancelText))
                         {
-                            <Button Type="ButtonType.Default" OnClick="HandleCancel" Disabled="@ConfirmLoading">
+                            <Button Type="ButtonType.Default" Class="tento-modal-cancel" OnClick="HandleCancel" Disabled="@ConfirmLoading">
                                 @CancelText
                             </Button>
                         }

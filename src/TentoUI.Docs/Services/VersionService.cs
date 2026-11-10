@@ -16,9 +16,13 @@ public class VersionService
 {
     private List<DocVersion> _versions =
     [
-        new("1.0.3", "v1.0.3", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop)"),
-        new("1.0.2", "v1.0.2", "/v1.0.2/", ReleaseDate: "November 2026", Notes: "Patch release (Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling)"),
-        new("1.0.1", "v1.0.1", "/v1.0.1/", ReleaseDate: "November 2026", Notes: "Patch release (Icon spin speed, ContextMenu & docs enhancements)"),
+        new("1.0.7", "v1.0.7", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (Quality Hardening & WCAG 2.1 AA: Switch/Progress/Gauge a11y, Modal Escape dismiss & focus restore, Carousel/Splitter ARIA fixes, BadgeStatus enum, Rate decimal/half-stars, Statistic PrefixText/SuffixText, AddTentoUI theme overload, NumberInput collision alias)"),
+        new("1.0.6", "v1.0.6", "/v1.0.6/", ReleaseDate: "November 2026", Notes: "Maintenance release"),
+        new("1.0.5", "v1.0.5", "/v1.0.5/", ReleaseDate: "November 2026", Notes: "Maintenance release"),
+        new("1.0.4", "v1.0.4", "/v1.0.4/", ReleaseDate: "November 2026", Notes: "Responsive layout & Quick Search enhancements"),
+        new("1.0.3", "v1.0.3", "/v1.0.3/", ReleaseDate: "November 2026", Notes: "FormWizard, StepperForm, AudioPlayer, Voiceform, and Kanban Drag & Drop"),
+        new("1.0.2", "v1.0.2", "/v1.0.2/", ReleaseDate: "November 2026", Notes: "Tour target tracking & spotlight mask, Modal numeric width fixes, Tooltip styling"),
+        new("1.0.1", "v1.0.1", "/v1.0.1/", ReleaseDate: "November 2026", Notes: "Icon spin speed, ContextMenu & docs enhancements"),
         new("1.0.0", "v1.0.0", "/v1.0/", ReleaseDate: "October 2026", Notes: "Production General Availability"),
         new("1.1.0-preview", "v1.1.0 (Next)", "/next/", IsPreview: true, ReleaseDate: "November 2026", Notes: "Upcoming feature preview"),
         new("0.9.0", "v0.9.0", "/v0.9/", ReleaseDate: "September 2026", Notes: "Initial release (Legacy)", IsLegacy: true)

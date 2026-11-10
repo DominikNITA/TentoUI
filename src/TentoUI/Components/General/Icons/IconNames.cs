@@ -53,6 +53,7 @@ public static class IconNames
     public const string RefreshCw = "refresh-cw";
     public const string HelpCircle = "help-circle";
     public const string Star = "star";
+    public const string StarHalf = "star-half";
     public const string Sparkles = "sparkles";
     public const string Upload = "upload";
     public const string Download = "download";

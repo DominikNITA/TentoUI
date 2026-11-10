@@ -1467,6 +1467,10 @@ public class TentoMarkupRenderer : ComponentBase
         // 47. Form sample fallback
         else if (compType == typeof(Form))
         {
+            if (!node.Attributes.ContainsKey("Model"))
+            {
+                builder.AddAttribute(seq++, "Model", new object());
+            }
             if (!node.Children.Any(c => c.TagName.Equals("FormItem", StringComparison.OrdinalIgnoreCase)))
             {
                 node.Children.Add(new MarkupNode
@@ -1486,6 +1490,35 @@ public class TentoMarkupRenderer : ComponentBase
                     TagName = "Button",
                     Attributes = new() { ["Type"] = "ButtonType.Primary" },
                     TextContent = "Submit Form"
+                });
+            }
+        }
+        // 47b. StepperForm sample fallback
+        else if (compType == typeof(StepperForm<object>))
+        {
+            if (!node.Attributes.ContainsKey("Model"))
+            {
+                builder.AddAttribute(seq++, "Model", new object());
+            }
+            if (!node.Children.Any(c => c.TagName.Equals("StepperFormStep", StringComparison.OrdinalIgnoreCase)))
+            {
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "StepperFormStep",
+                    Attributes = new() { ["Title"] = "Account", ["SubTitle"] = "Personal Info", ["Icon"] = IconNames.User },
+                    Children = [new MarkupNode { TagName = "FormItem", Attributes = new() { ["Label"] = "Full Name" }, Children = [new MarkupNode { TagName = "Input", Attributes = new() { ["Placeholder"] = "Enter name..." } }] }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "StepperFormStep",
+                    Attributes = new() { ["Title"] = "Company", ["SubTitle"] = "Business profile", ["Icon"] = IconNames.Building },
+                    Children = [new MarkupNode { TagName = "FormItem", Attributes = new() { ["Label"] = "Company Name" }, Children = [new MarkupNode { TagName = "Input", Attributes = new() { ["Placeholder"] = "Organization..." } }] }]
+                });
+                node.Children.Add(new MarkupNode
+                {
+                    TagName = "StepperFormStep",
+                    Attributes = new() { ["Title"] = "Confirmation", ["SubTitle"] = "Finish setup", ["Icon"] = IconNames.CheckCircle },
+                    Children = [new MarkupNode { TagName = "Text", TextContent = "Setup complete! Ready to submit." }]
                 });
             }
         }

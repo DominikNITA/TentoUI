@@ -11,7 +11,7 @@
                     <h3 class="text-base font-semibold text-slate-900 dark:text-white">@Title</h3>
                     @if (!string.IsNullOrEmpty(Description))
                     {
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@Description</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">@Description</p>
                     }
                 </div>
                 @if (_isModified)
@@ -44,7 +44,7 @@
     @* Action Toolbar *@
     <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 px-4 py-2 flex items-center justify-between text-xs">
         <div class="flex items-center gap-2">
-            <span class="text-slate-400 font-mono text-[11px]">Razor</span>
+            <span class="text-slate-600 dark:text-slate-400 font-mono text-[11px]">Razor</span>
             @if (_isModified)
             {
                 <button type="button"
@@ -76,9 +76,9 @@
     @if (_showEditor)
     {
         <div class="border-t border-slate-800 bg-slate-950 p-3 space-y-2">
-            <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <div class="flex items-center justify-between text-[11px] text-slate-300 px-1">
                 <span>Edit markup below — preview updates in real time:</span>
-                <span class="font-mono text-[10px] text-slate-500">instant live sync</span>
+                <span class="font-mono text-[10px] text-slate-400">instant live sync</span>
             </div>
             <textarea rows="@ComputeRows()"
                       class="w-full rounded-lg bg-slate-900 text-slate-100 font-mono text-xs p-3 leading-relaxed border border-slate-800 focus:outline-none focus:border-primary-500 selection:bg-primary-600 resize-y"

@@ -205,10 +205,10 @@ public class NewComponentsTests : TestContext
         sliderCut.Find("input[type='range']").Change("60");
         sliderVal.Should().Be(60);
 
-        int rating = 3;
+        double rating = 3;
         var rateCut = RenderComponent<Rate>(p => p
             .Add(x => x.Value, rating)
-            .Add(x => x.ValueChanged, EventCallback.Factory.Create<int>(this, v => rating = v)));
+            .Add(x => x.ValueChanged, EventCallback.Factory.Create<double>(this, v => rating = v)));
         rateCut.Find("button[data-star-index='5']").Click();
         rating.Should().Be(5);
 

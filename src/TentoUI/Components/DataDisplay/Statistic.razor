@@ -20,10 +20,18 @@
         {
             <span class="tento-statistic-prefix text-base">@Prefix</span>
         }
+        else if (!string.IsNullOrEmpty(PrefixText))
+        {
+            <span class="tento-statistic-prefix text-base">@PrefixText</span>
+        }
         <span class="tento-statistic-value">@FormattedValue</span>
         @if (Suffix != null)
         {
             <span class="tento-statistic-suffix text-sm font-normal text-slate-500 dark:text-slate-400">@Suffix</span>
+        }
+        else if (!string.IsNullOrEmpty(SuffixText))
+        {
+            <span class="tento-statistic-suffix text-sm font-normal text-slate-500 dark:text-slate-400">@SuffixText</span>
         }
     </div>
 </div>
@@ -35,6 +43,8 @@
     [Parameter] public int? Precision { get; set; }
     [Parameter] public RenderFragment? Prefix { get; set; }
     [Parameter] public RenderFragment? Suffix { get; set; }
+    [Parameter] public string? PrefixText { get; set; }
+    [Parameter] public string? SuffixText { get; set; }
     [Parameter] public string? ValueStyle { get; set; }
 
     private string FormattedValue

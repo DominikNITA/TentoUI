@@ -28,6 +28,16 @@ const tentoModal = {
     }
 
     const keyHandler = (e) => {
+      if (e.key === 'Escape') {
+        const closeBtn = container.querySelector('[data-dismiss-key="Escape"], .tento-modal-close, .tento-modal-cancel');
+        if (closeBtn && !closeBtn.disabled) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeBtn.click();
+          return;
+        }
+      }
+
       if (e.key !== 'Tab') return;
 
       const currentFocusables = container.querySelectorAll(FOCUSABLE_SELECTOR);
@@ -50,14 +60,14 @@ const tentoModal = {
     };
 
     container._keyHandler = keyHandler;
-    container.addEventListener('keydown', keyHandler);
+    container.addEventListener('keydown', keyHandler, true);
   },
 
   close(container) {
     if (!container) return;
 
     if (container._keyHandler) {
-      container.removeEventListener('keydown', container._keyHandler);
+      container.removeEventListener('keydown', container._keyHandler, true);
       delete container._keyHandler;
     }
 
@@ -433,8 +443,20 @@ const tentoToc = {
   }
 };
 
+const tentoTheme = {
+  sync(isDark) {
+    if (typeof document === 'undefined') return;
+    document.documentElement.classList.toggle('dark', isDark);
+    if (document.body) {
+      document.body.classList.toggle('dark', isDark);
+    }
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  }
+};
+
 // Expose to window for standard script tag usage
 if (typeof window !== 'undefined') {
+  window.tentoTheme = tentoTheme;
   window.tentoModal = tentoModal;
   window.tentoClipboard = tentoClipboard;
   window.tentoTour = tentoTour;
@@ -448,5 +470,5 @@ if (typeof window !== 'undefined') {
 
 // Export for module bundlers / CommonJS if supported
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { tentoModal, tentoClipboard, tentoTour, tentoAudio, tentoCommandPalette, tentoToc };
+  module.exports = { tentoTheme, tentoModal, tentoClipboard, tentoTour, tentoAudio, tentoCommandPalette, tentoToc };
 }

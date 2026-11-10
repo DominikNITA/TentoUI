@@ -1,8 +1,7 @@
 @namespace TentoUI
 @inherits TentoComponentBase
 
-<EditForm Model="@(EditContext == null && _effectiveEditContext == null ? Model : null)"
-          EditContext="@_effectiveEditContext"
+<EditForm EditContext="@_effectiveEditContext"
           OnValidSubmit="@HandleValidSubmit"
           OnInvalidSubmit="@HandleInvalidSubmit"
           OnSubmit="@OnSubmit"
@@ -45,6 +44,7 @@
 
     private readonly FormContext _formContext = new();
     private EditContext? _effectiveEditContext;
+    private object? _fallbackModel;
 
     protected override void OnParametersSet()
     {
@@ -58,7 +58,8 @@
         }
         else if (Model == null && EditContext == null)
         {
-            _effectiveEditContext = null;
+            _fallbackModel ??= new object();
+            _effectiveEditContext = new EditContext(_fallbackModel);
         }
 
         _formContext.EditContext = _effectiveEditContext;

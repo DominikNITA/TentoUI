@@ -41,7 +41,7 @@
 
         @if (Dots && _panels.Count > 1)
         {
-            <div class="@ComputeDotsClass()">
+            <div role="tablist" aria-label="Carousel pagination" class="@ComputeDotsClass()">
                 @for (int i = 0; i < _panels.Count; i++)
                 {
                     var dotIndex = i;

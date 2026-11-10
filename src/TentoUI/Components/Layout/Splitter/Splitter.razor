@@ -18,27 +18,32 @@
         </div>
 
         @* Accessible Resize Handle / Separator *@
-        <div role="separator"
-             tabindex="@(Disabled ? -1 : 0)"
-             aria-orientation="@(Orientation == SplitterOrientation.Horizontal ? "vertical" : "horizontal")"
-             aria-valuenow="@((int)Math.Round(EffectiveSplit))"
-             aria-valuemin="@((int)Math.Round(Min))"
-             aria-valuemax="@((int)Math.Round(Max))"
-             aria-label="Resize panels"
-             class="@ComputedBarClass"
-             @onkeydown="HandleKeyDownAsync">
-            <div class="@ComputedGripClass">
-                @if (Collapsible)
-                {
+        <div class="relative flex items-center justify-center">
+            <div role="separator"
+                 tabindex="@(Disabled ? -1 : 0)"
+                 aria-orientation="@(Orientation == SplitterOrientation.Horizontal ? "vertical" : "horizontal")"
+                 aria-valuenow="@((int)Math.Round(EffectiveSplit))"
+                 aria-valuemin="@((int)Math.Round(Min))"
+                 aria-valuemax="@((int)Math.Round(Max))"
+                 aria-label="Resize panels"
+                 class="@ComputedBarClass"
+                 @onkeydown="HandleKeyDownAsync">
+                <div class="@ComputedGripClass">
+                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
+                    <span class="w-1 h-1 rounded-full bg-slate-400"></span>
+                </div>
+            </div>
+            @if (Collapsible)
+            {
+                <div class="absolute z-20 pointer-events-auto">
                     <button type="button"
                             aria-label="@(_isCollapsed ? "Expand panel" : "Collapse panel")"
                             class="tento-splitter-collapse-btn p-0.5 rounded bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-primary-500 shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
-                            @onclick="ToggleCollapseAsync"
-                            @onclick:stopPropagation="true">
+                            @onclick="ToggleCollapseAsync">
                         <Icon Name="@GetCollapseIcon()" Size="12" />
                     </button>
-                }
-            </div>
+                </div>
+            }
         </div>
 
         @* Second Panel *@

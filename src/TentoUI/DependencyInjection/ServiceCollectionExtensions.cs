@@ -9,6 +9,12 @@ public static class ServiceCollectionExtensions
     {
         var theme = new TentoTheme();
         configureTheme?.Invoke(theme);
+        return services.AddTentoUI(theme);
+    }
+
+    public static IServiceCollection AddTentoUI(this IServiceCollection services, TentoTheme theme)
+    {
+        ArgumentNullException.ThrowIfNull(theme);
         services.TryAddSingleton(theme);
 
         services.TryAddScoped<IModalService, ModalService>();

@@ -21,5 +21,6 @@ public class FormContext
 public class FormItemContext
 {
     public string Id { get; set; } = string.Empty;
+    public string? Label { get; set; }
     public ComponentStatus ValidateStatus { get; set; } = ComponentStatus.None;
 }

@@ -16,7 +16,8 @@ public class VersionService
 {
     private List<DocVersion> _versions =
     [
-        new("1.0.8", "v1.0.8", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (Modal focus trap & Escape direct JSInterop, full WCAG 2.1 AA docs contrast remediation, BadgeStatus tokens, Rate half-stars, Statistic affixes)"),
+        new("1.0.9", "v1.0.9", "/", IsLatest: true, ReleaseDate: "November 2026", Notes: "Current release (Default Purple brand theme, tentoui-design-system AI skill, clean design and component extendability refocus)"),
+        new("1.0.8", "v1.0.8", "/v1.0.8/", ReleaseDate: "November 2026", Notes: "Modal focus trap & Escape direct JSInterop, full WCAG 2.1 AA docs contrast remediation, BadgeStatus tokens, Rate half-stars, Statistic affixes"),
         new("1.0.7", "v1.0.7", "/v1.0.7/", ReleaseDate: "November 2026", Notes: "Quality Hardening & WCAG 2.1 AA: Switch/Progress/Gauge a11y, Carousel/Splitter ARIA fixes, BadgeStatus enum, Rate decimal/half-stars, Statistic PrefixText/SuffixText, AddTentoUI theme overload, NumberInput collision alias"),
         new("1.0.6", "v1.0.6", "/v1.0.6/", ReleaseDate: "November 2026", Notes: "Maintenance release"),
         new("1.0.5", "v1.0.5", "/v1.0.5/", ReleaseDate: "November 2026", Notes: "Maintenance release"),

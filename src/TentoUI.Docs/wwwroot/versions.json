@@ -1,9 +1,19 @@
 [
   {
-    "version": "1.0.8",
-    "label": "v1.0.8",
+    "version": "1.0.9",
+    "label": "v1.0.9",
     "path": "/",
     "isLatest": true,
+    "isPreview": false,
+    "isLegacy": false,
+    "releaseDate": "November 2026",
+    "notes": "Default Purple brand theme, tentoui-design-system AI skill, clean design, themes, full WCAG 2.1 AA accessibility, and component extendability refocus"
+  },
+  {
+    "version": "1.0.8",
+    "label": "v1.0.8",
+    "path": "/v1.0.8/",
+    "isLatest": false,
     "isPreview": false,
     "isLegacy": false,
     "releaseDate": "November 2026",

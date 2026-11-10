@@ -14,7 +14,7 @@
     
     <!-- Package Metadata -->
     <PackageId>TentoUI</PackageId>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <Authors>Tento Team</Authors>
     <Description>Modern Blazor UI Component Library styled with Tailwind CSS for .NET 10, focused on clean design, themes, accessibility, and extendability.</Description>
     <PackageTags>blazor;tailwind;components;ui;theming;accessibility;extendability;net10</PackageTags>
